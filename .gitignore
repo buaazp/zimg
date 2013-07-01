@@ -15,6 +15,7 @@
 *.exe
 *.out
 *.app
+*.c.swp
 .gitignore
 img/.DS_Store
 .DS_Store

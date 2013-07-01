@@ -273,7 +273,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         DEBUG_ERROR("Get Type of File Failed!");
         goto err;
     }
-    if(strstr(fileType, "jpg") != fileType)
+    if(isImg(fileType) != 1)
     {
         DEBUG_ERROR("fileType[%s] is Not Supported!", fileType);
         goto err;
