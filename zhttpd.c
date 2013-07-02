@@ -562,8 +562,8 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
         printf("tv.usec: %d\n", tv.tv_usec);
         */
 
-        DIR *d;
-        if (!(d = opendir(whole_path)))
+        DIR *dir;
+        if (!(dir = opendir(whole_path)))
         {
             DEBUG_ERROR("Dir[%s] open failed.", whole_path);
             goto err;
@@ -575,7 +575,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
         char *imgType;
         int find = 0;
 
-        while(ent = readdir(d))
+        while(ent = readdir(dir))
         {
             const char *tmpName = ent->d_name;
             if(strstr(tmpName, "0rig") == tmpName) // name "0rig" to find it first
@@ -593,6 +593,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
                 break;
             }
         }
+        closedir(dir);
         if(find == 0)
         {
             DEBUG_ERROR("Get 0rig Image Failed.");
@@ -816,14 +817,14 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	if (S_ISDIR(st.st_mode)) {
 		/* If it's a directory, read the comments and make a little
 		 * index page */
-		DIR *d;
+		DIR *dir;
 		struct dirent *ent;
 		const char *trailing_slash = "";
 
 		if (!strlen(path) || path[strlen(path)-1] != '/')
 			trailing_slash = "/";
 
-		if (!(d = opendir(whole_path)))
+		if (!(dir = opendir(whole_path)))
 			goto err;
 
 		evbuffer_add_printf(evb, "<html>\n <head>\n"
@@ -837,14 +838,14 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 		    uri_root, path, /* XXX html-escape this? */
 		    trailing_slash,
 		    decoded_path /* XXX html-escape this */);
-		while ((ent = readdir(d))) {
+		while ((ent = readdir(dir))) {
 			const char *name = ent->d_name;
 			evbuffer_add_printf(evb,
 			    "    <li><a href=\"%s\">%s</a>\n",
 			    name, name);/* XXX escape this */
 		}
 		evbuffer_add_printf(evb, "</ul></body></html>\n");
-		closedir(d);
+		closedir(dir);
 		evhttp_add_header(evhttp_request_get_output_headers(req),
 		    "Content-Type", "text/html");
 	} else {

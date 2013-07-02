@@ -89,14 +89,12 @@ int _log;
 
 #define ThrowWandException(wand) \
 { \
-    char \
-    *description; \
-    \
-    ExceptionType \
-    severity; \
-    \
+    char *description; \
+    ExceptionType severity; \
     description=MagickGetException(wand,&severity); \
-    (void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description); \
+    DEBUG_ERROR("%s %s %lu %s",GetMagickModule(),description); \
     description=(char *) MagickRelinquishMemory(description); \
-    exit(-1); \
+}
+    //(void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description); 
+    //exit(-1); \
 }
