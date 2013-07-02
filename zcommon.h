@@ -41,24 +41,48 @@ int _log;
     do{ \
         time_t t; \
         struct tm *p; \
+        struct timeval tv; \
+        struct timezone tz; \
+        gettimeofday (&tv , &tz); \
         time(&t); \
         p = localtime(&t); \
-        fprintf(stdout, "[DEBUG] %d/%d/%d %d:%d:%d %s:%d %s() "fmt"\n", \
+        fprintf(stdout, "\033[40;32;m[DEBUG] %.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d %s:%d %s() "fmt"\n\033[5m", \
                 (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-                p->tm_hour, p->tm_min, p->tm_sec, \
+                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
                 __FILE__, __LINE__, __FUNCTION__, \
                 ##args ); \
     }while(0)
+
+#define DEBUG_WARNING(fmt, args...) \
+    do{ \
+        time_t t; \
+        struct tm *p; \
+        struct timeval tv; \
+        struct timezone tz; \
+        gettimeofday (&tv , &tz); \
+        time(&t); \
+        p = localtime(&t); \
+        fprintf(stdout, "\033[40;33;m[WARNING] %.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d %s:%d %s() "fmt"\n\033[5m", \
+                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
+                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
+                __FILE__, __LINE__, __FUNCTION__, \
+                ##args ); \
+    }while(0)
+
+
 
 #define DEBUG_ERROR(fmt, args...) \
     do{ \
         time_t t; \
         struct tm *p; \
+        struct timeval tv; \
+        struct timezone tz; \
+        gettimeofday (&tv , &tz); \
         time(&t); \
         p = localtime(&t); \
-        fprintf(stderr, "[ERROR] %d/%d/%d %d:%d:%d %s:%d %s() "fmt"\n", \
+        fprintf(stderr, "\033[40;31;m[ERROR] %.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d %s:%d %s() "fmt"\n\033[5m", \
                 (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-                p->tm_hour, p->tm_min, p->tm_sec, \
+                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
                 __FILE__, __LINE__, __FUNCTION__, \
                 ##args ); \
     }while(0)

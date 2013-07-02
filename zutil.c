@@ -39,3 +39,41 @@ int isImg(const char *filename)
     }
     return isimg;
 }
+
+int isDir(const char *path)
+{
+    struct stat st;
+    if(stat(path, &st)<0)
+    {
+        DEBUG_ERROR("Path[%s] is Not Existed!", path);
+        return -1;
+    }
+    if(S_ISDIR(st.st_mode))
+    {
+        DEBUG_PRINT("Path[%s] is A Dir.", path);
+        return 1;
+    }
+    else
+        return -1;
+}
+
+int mkDir(const char *path)
+{
+    if(access(path, 0) == -1)
+    {
+        DEBUG_PRINT("Begin to mkDir()...");
+        int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if(status == -1)
+        {
+            DEBUG_ERROR("mkDir Failed!");
+            return -1;
+        }
+        DEBUG_PRINT("mkDir sucessfully!");
+        return 1;
+    }
+    else
+    {
+        DEBUG_ERROR("Path[%s] is Existed!", path);
+        return -1;
+    }
+}

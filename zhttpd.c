@@ -221,7 +221,6 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char *fileName;
     char buffline[128];
     int rmblen, evblen;
-    size_t filenameSize = 0;
     int imgSize = 0, wlen = 0;
     int fd = -1;
 
@@ -246,10 +245,17 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     }
     //puts(">>>");
 
+    /*
+    DEBUG_PRINT("input data>>>");
+    (void) fwrite(buff, 1, 2048, stdout);
+    printf("\n");
+    DEBUG_PRINT(">>>");
+    */
+
     int start = -1, end = -1;
-    //char filenamePattern[] = {'f', 'i', 'l', 'e', 'n', 'a', 'm', 'e', '='};
+    //char fileNamePattern[] = {'f', 'i', 'l', 'e', 'n', 'a', 'm', 'e', '='};
     //char typePattern[] = {'C', 'o', 'n', 't', 'e', 'n', 't', '-', 'T', 'y', 'p', 'e'};
-    char *filenamePattern = "filename=";
+    char *fileNamePattern = "filename=";
     char *typePattern = "Content-Type";
     char *quotePattern = "\"";
     char *blankPattern = "\r\n";
@@ -265,9 +271,9 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         DEBUG_PRINT("boundaryPattern[%d] = %c", boundary_len + 4, boundaryPattern[boundary_len+4]);
     */
     DEBUG_PRINT("boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
-    if((start = kmp(buff, postSize, filenamePattern, strlen(filenamePattern))) == -1)
+    if((start = kmp(buff, postSize, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
-        DEBUG_ERROR("Content-Type Not Found!");
+        DEBUG_ERROR("Content-Disposition Not Found!");
         goto err;
     }
     start += 9;
@@ -291,12 +297,12 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     fileName = (char *)malloc(end + 1);
     memcpy(fileName, buff+start, end);
     fileName[end] = '\0';
-    DEBUG_PRINT("filename = %s", fileName);
+    DEBUG_PRINT("fileName = %s", fileName);
 
     char fileType[64];
     if(getType(fileName, fileType) == -1)
     {
-        DEBUG_ERROR("Get Type of File Failed!");
+        DEBUG_ERROR("Get Type of File[%s] Failed!", fileName);
         goto err;
     }
     if(isImg(fileType) != 1)
@@ -332,12 +338,6 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     DEBUG_PRINT("end = %d", end);
     imgSize = end - start;
 
-    /*
-    DEBUG_PRINT("input data>>>");
-    (void) fwrite(buff, 1, imgSize, stdout);
-    printf("\n");
-    DEBUG_PRINT(">>>");
-    */
 
     DEBUG_PRINT("postSize = %d", postSize);
     DEBUG_PRINT("imgSize = %d", imgSize);
@@ -359,6 +359,15 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char *origName = (char *)malloc(512);
     sprintf(savePath, "%s/%s", _img_path, md5sum);
     DEBUG_PRINT("savePath: %s", savePath);
+    if(isDir(savePath) == -1)
+    {
+        if(mkDir(savePath) == -1)
+        {
+            DEBUG_ERROR("savePath[%s] Create Failed!", savePath);
+            goto err;
+        }
+    }
+    /*
     if(access(savePath, 0) == -1)
     {
         DEBUG_PRINT("Begin to mkdir...");
@@ -370,6 +379,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         }
         DEBUG_PRINT("Mkdir sucessfully!");
     }
+    */
     sprintf(origName, "0rig.%s", fileType);
     sprintf(saveName, "%s/%s", savePath, origName);
     DEBUG_PRINT("saveName-->: %s", saveName);
@@ -500,12 +510,12 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     if (strstr(decoded_path, ".."))
         goto err;
 
-    len = strlen(decoded_path)+strlen(docroot)+2;
+    len = strlen(decoded_path)+strlen(docroot)+1;
     if (!(whole_path = malloc(len))) {
         DEBUG_ERROR("malloc failed!");
         goto err;
     }
-    evutil_snprintf(whole_path, len, "%s/%s", docroot, decoded_path);
+    evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
 
     if (stat(whole_path, &st)<0) {
         DEBUG_ERROR("stat whole_path[%s] failed!", whole_path);
@@ -558,7 +568,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
             DEBUG_ERROR("Dir[%s] open failed.", whole_path);
             goto err;
         }
-        char name[MAX_LINE];
+        char name[32];
         sprintf(name, "%d*%d", width, height);
         struct dirent *ent;
         char *origName;
@@ -657,17 +667,18 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
             size_t imgSizet = imgSize;
             char *imgBuff = MagickGetImageBlob(magick_wand, &imgSizet);
             evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
+            //Designed for High Performance: Reply Customer First, Storage Image Then.
             evbuffer_add(evb, imgBuff, imgSizet);
             evhttp_send_reply(req, 200, "OK", evb);
             status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
             if (status == MagickFalse)
             {
                 ThrowWandException(magick_wand);
-                DEBUG_ERROR("New img write failed!");
+                DEBUG_WARNING("New img[%s] Write Failed!", rspPath);
             }
             else
             {
-                DEBUG_PRINT("New img storaged.");
+                DEBUG_PRINT("New img[%s] storaged.", rspPath);
             }
             magick_wand=DestroyMagickWand(magick_wand);
             MagickWandTerminus();
@@ -691,7 +702,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     }
     else 
     {
-        DEBUG_ERROR("MD5 not find.");
+        DEBUG_ERROR("MD5[%s] not find.", decoded_path);
         goto err;
     }
 
@@ -709,6 +720,8 @@ done:
         free(whole_path);
     if (evb)
         evbuffer_free(evb);
+
+    return;
 }
 
 /* This callback gets invoked when we get any http request that doesn't match
@@ -778,15 +791,15 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	if (strstr(decoded_path, ".."))
 		goto err;
 
-	len = strlen(decoded_path)+strlen(docroot)+2;
+	len = strlen(decoded_path)+strlen(docroot)+1;
 	if (!(whole_path = malloc(len))) {
 		DEBUG_ERROR("malloc");
 		goto err;
 	}
-	evutil_snprintf(whole_path, len, "%s/%s", docroot, decoded_path);
+	evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
 
 	if (stat(whole_path, &st)<0) {
-        DEBUG_PRINT("Stat whole_path[%s] Failed! Goto zimg_cb for Searching.", whole_path);
+        DEBUG_WARNING("Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
         zimg_cb(req, _img_path);
         /*
         if(zimg_cb(req, _img_path) == -1)
@@ -794,7 +807,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
             DEBUG_ERROR("zimg_cb call failed!");
         }
         */
-        return;
+        goto done;
 	}
 
 	/* This holds the content we're sending. */
