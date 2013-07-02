@@ -134,7 +134,16 @@ int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, in
         }
     }
     if(j == plen) // found a match!!
+    {
+        /*
+        DEBUG_PRINT("i = %d, j = %d", i, j);
+        if(matcher[i] == '\r')
+            DEBUG_PRINT("buff[%d] = \\R", i);
+        if(matcher[i+1] == '\n')
+            DEBUG_PRINT("buff[%d] = \\N", i + 1);
+            */
         return i;
+    }
     else          // if no match was found
         return -1;
 }
@@ -211,16 +220,19 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char *buff = (char *)malloc(postSize);
     char *fileName;
     char buffline[128];
-    int n, ren;
-    size_t imgSizet = 0, filenameSize = 0, blen = 0, wlen = 0;
+    int rmblen, evblen;
+    size_t filenameSize = 0;
+    int imgSize = 0, wlen = 0;
     int fd = -1;
 
     //************* print the binary data of img
     //puts("Input data: <<<");
-    while((ren = evbuffer_get_length(buf)) > 0)
+    while((evblen = evbuffer_get_length(buf)) > 0)
     {
-        n = evbuffer_remove(buf, buff, ren);
-        if(n < 0)
+        DEBUG_PRINT("evblen = %d", evblen);
+        rmblen = evbuffer_remove(buf, buff, evblen);
+        DEBUG_PRINT("rmblen = %d", rmblen);
+        if(rmblen < 0)
         {
             DEBUG_ERROR("evbuffer_remove failed!");
             goto err;
@@ -228,18 +240,32 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         /*
         else
         {
-            (void) fwrite(buff, 1, n, stdout);
+            (void) fwrite(buff, 1, rmblen, stdout);
         }
         */
     }
     //puts(">>>");
 
     int start = -1, end = -1;
-    char filenamePattern[] = {'f', 'i', 'l', 'e', 'n', 'a', 'm', 'e', '='};
-    char typePattern[] = {'C', 'o', 'n', 't', 'e', 'n', 't', '-', 'T', 'y', 'p', 'e'};
-    char quotePattern[] = {'\"'};
-    char blankPattern[] = {'\r', '\n'};
-    if((start = kmp(buff, postSize, filenamePattern, 9)) == -1)
+    //char filenamePattern[] = {'f', 'i', 'l', 'e', 'n', 'a', 'm', 'e', '='};
+    //char typePattern[] = {'C', 'o', 'n', 't', 'e', 'n', 't', '-', 'T', 'y', 'p', 'e'};
+    char *filenamePattern = "filename=";
+    char *typePattern = "Content-Type";
+    char *quotePattern = "\"";
+    char *blankPattern = "\r\n";
+    //char quotePattern[] = {'\"'};
+    //char blankPattern[] = {'\r', '\n'};
+    char *boundaryPattern = (char *)malloc(boundary_len + 4);
+    sprintf(boundaryPattern, "\r\n--%s", boundary);
+    /*
+    DEBUG_PRINT("boundaryPattern[%d] = %c", boundary_len + 3, boundaryPattern[boundary_len+3]);
+    if(boundaryPattern[boundary_len+4] == '\0')
+        DEBUG_PRINT("boundaryPattern[%d] = %s", boundary_len + 4, "\\0");
+    else
+        DEBUG_PRINT("boundaryPattern[%d] = %c", boundary_len + 4, boundaryPattern[boundary_len+4]);
+    */
+    DEBUG_PRINT("boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
+    if((start = kmp(buff, postSize, filenamePattern, strlen(filenamePattern))) == -1)
     {
         DEBUG_ERROR("Content-Type Not Found!");
         goto err;
@@ -248,7 +274,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     if(buff[start] == '\"')
     {
         start++;
-        if((end = kmp(buff+start, postSize-start, quotePattern, 1)) == -1)
+        if((end = kmp(buff+start, postSize-start, quotePattern, strlen(quotePattern))) == -1)
         {
             DEBUG_ERROR("quote \" Not Found!");
             goto err;
@@ -256,7 +282,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     }
     else
     {
-        if((end = kmp(buff+start, postSize-start, blankPattern, 2)) == -1)
+        if((end = kmp(buff+start, postSize-start, blankPattern, strlen(blankPattern))) == -1)
         {
             DEBUG_ERROR("quote \" Not Found!");
             goto err;
@@ -281,14 +307,14 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
 
     end += start;
 
-    if((start = kmp(buff+end, postSize-end, typePattern, 12)) == -1)
+    if((start = kmp(buff+end, postSize-end, typePattern, strlen(typePattern))) == -1)
     {
         DEBUG_ERROR("Content-Type Not Found!");
         goto err;
     }
     start += end;
     DEBUG_PRINT("start = %d", start);
-    if((end =  kmp(buff+start, postSize-start, blankPattern, 2)) == -1)
+    if((end =  kmp(buff+start, postSize-start, blankPattern, strlen(blankPattern))) == -1)
     {
         DEBUG_ERROR("Image Not complete!");
         goto err;
@@ -297,66 +323,41 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     DEBUG_PRINT("end = %d", end);
     start = end + 4;
     DEBUG_PRINT("start = %d", start);
-    if((end = kmp(buff+start, postSize-start, blankPattern, 2)) == -1)
+    if((end = kmp(buff+start, postSize-start, boundaryPattern, strlen(boundaryPattern))) == -1)
     {
         DEBUG_ERROR("Image Not complete!");
         goto err;
     }
     end += start;
     DEBUG_PRINT("end = %d", end);
-    imgSizet = end - start;
+    imgSize = end - start;
+
+    /*
+    DEBUG_PRINT("input data>>>");
+    (void) fwrite(buff, 1, imgSize, stdout);
+    printf("\n");
+    DEBUG_PRINT(">>>");
+    */
+
     DEBUG_PRINT("postSize = %d", postSize);
-    DEBUG_PRINT("imgSize = %d", (int)imgSizet);
+    DEBUG_PRINT("imgSize = %d", imgSize);
 
-    char *savePath = (char *)malloc(512);
-    char *saveName = (char *)malloc(512);
-    strcpy(savePath, _img_path);
-    int svplen = strlen(savePath);
-    if(savePath[svplen - 1] != '/')
-    {
-        savePath[svplen] = '/';
-        savePath[svplen + 1] != '\0';
-    }
-    sprintf(saveName, "%s%s", savePath, fileName);
-    DEBUG_PRINT("saveName: %s", saveName);
-    blen = imgSizet;
-    if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
-    {
-        DEBUG_ERROR("fd open failed!");
-        goto err;
-    }
-    wlen = write(fd, buff+start, blen);
-    if(wlen == -1)
-    {
-        DEBUG_ERROR("write() failed!");
-        goto err;
-    }
-    else if(wlen < blen)
-    {
-        DEBUG_ERROR("only part of data is been writed.");
-        goto err;
-    }
-    if(fd != -1)
-    {
-        close(fd);
-    }
-    DEBUG_PRINT("Image [%s] Write Successfully!", saveName);
-
-
-    DEBUG_PRINT("Begin to calculate MD5...");
-
+    DEBUG_PRINT("Begin to Caculate MD5...");
     unsigned char md[16];
     int i;
     char tmp[3]={'\0'}, md5sum[33]={'\0'};
-    MD5(buff+start, blen, md);
+    MD5(buff+start, imgSize, md);
     for (i = 0; i < 16; i++)
     {
         sprintf(tmp, "%2.2x", md[i]);
         strcat(md5sum, tmp);
     }
-    DEBUG_PRINT("[%s] md5: %s", saveName, md5sum);
+    DEBUG_PRINT("[%s] md5: %s", fileName, md5sum);
 
-    sprintf(savePath, "%s%s", savePath, md5sum);
+    char *savePath = (char *)malloc(512);
+    char *saveName= (char *)malloc(512);
+    char *origName = (char *)malloc(512);
+    sprintf(savePath, "%s/%s", _img_path, md5sum);
     DEBUG_PRINT("savePath: %s", savePath);
     if(access(savePath, 0) == -1)
     {
@@ -369,17 +370,55 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         }
         DEBUG_PRINT("Mkdir sucessfully!");
     }
-    char *newName = (char *)malloc(512);
-    char *origName = (char *)malloc(512);
     sprintf(origName, "0rig.%s", fileType);
-    sprintf(newName, "%s/%s", savePath, origName);
-    DEBUG_PRINT("saveName-->: %s",saveName);
-    DEBUG_PRINT("-->newName: %s", newName);
+    sprintf(saveName, "%s/%s", savePath, origName);
+    DEBUG_PRINT("saveName-->: %s", saveName);
+
+    /*
+    char *savePath = (char *)malloc(512);
+    char *saveName = (char *)malloc(512);
+    strcpy(savePath, _img_path);
+    int svplen = strlen(savePath);
+    if(savePath[svplen - 1] != '/')
+    {
+        savePath[svplen] = '/';
+        savePath[svplen + 1] != '\0';
+    }
+    sprintf(saveName, "%s%s", savePath, fileName);
+    DEBUG_PRINT("saveName: %s", saveName);
+    */
+
+    if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
+    {
+        DEBUG_ERROR("fd open failed!");
+        goto err;
+    }
+    wlen = write(fd, buff+start, imgSize);
+    if(wlen == -1)
+    {
+        DEBUG_ERROR("write() failed!");
+        close(fd);
+        goto err;
+    }
+    else if(wlen < imgSize)
+    {
+        DEBUG_ERROR("Only part of data is been writed.");
+        close(fd);
+        goto err;
+    }
+    if(fd != -1)
+    {
+        close(fd);
+    }
+    DEBUG_PRINT("Image [%s] Write Successfully!", saveName);
+
+    /*
     if(rename(saveName, newName) < 0)
     {
         DEBUG_ERROR("Rename Failed!");
         goto err;
     }
+    */
 
     evb = evbuffer_new();
     evbuffer_add_printf(evb, "<html>\n <head>\n"

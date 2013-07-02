@@ -22,3 +22,5 @@ img/.DS_Store
 .gitignore
 img/.DS_Store
 .DS_Store
+
+*.swp
