@@ -6,7 +6,7 @@ It's entirely written by C. <br />
 It's designed for high concurrency image server. <br />
 Contact me: zp@buaa.us <br />
 
-### dependence
+### dependence:
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO. <br />
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images. <br />
 [openssl](http://www.openssl.org/): Open Source toolkit for SSL/TLS. <br>
