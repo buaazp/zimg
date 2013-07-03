@@ -28,6 +28,7 @@
 #include <time.h>
 #include <wand/MagickWand.h>
 #include <openssl/md5.h>
+#include <libmemcached/memcached.h>
 
 #define MAX_LINE 1024 
 
@@ -36,6 +37,8 @@ char _img_path[256];
 char _log_path[256];
 int _port;
 int _log;
+
+memcached_st *_memc;
 
 #define DEBUG_PRINT(fmt, args...) \
     do{ \
@@ -95,6 +98,4 @@ int _log;
     DEBUG_ERROR("%s %s %lu %s",GetMagickModule(),description); \
     description=(char *) MagickRelinquishMemory(description); \
 }
-    //(void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description); 
-    //exit(-1); \
-}
+

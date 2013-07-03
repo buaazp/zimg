@@ -3,7 +3,6 @@
 // this data is for KMP searching 
 int pi[128];
 char uri_root[512];
-extern char _img_path[];
 
 static const struct table_entry {
 	const char *extension;
@@ -148,6 +147,78 @@ int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, in
         return -1;
 }
 
+int find_cache(const char *key, char *value)
+{
+    int rst = -1;
+
+    size_t valueLen;
+    uint32_t  flags;
+    memcached_return rc;
+
+    char *pvalue = memcached_get(_memc, key, strlen(key), &valueLen, &flags, &rc);
+
+    if (rc == MEMCACHED_SUCCESS) 
+    {
+        DEBUG_PRINT("Cache Find Key[%s]: %s", key, pvalue);
+        strcpy(value, pvalue);
+        free(pvalue);
+        rst = 1;
+    }
+    else if (rc == MEMCACHED_NOTFOUND)
+    {
+        DEBUG_WARNING("Cache Key[%s] Not Find!", key);
+        rst = -1;
+    }
+
+    return rst;
+}
+
+int set_cache(const char *key, const char *value)
+{
+    int rst = -1;
+
+    uint32_t  flags;
+    memcached_return rc;
+
+    rc = memcached_set(_memc, key, strlen(key), value, strlen(value), 0, flags);
+
+    if (rc == MEMCACHED_SUCCESS) 
+    {
+        DEBUG_PRINT("Cache Set Successfully. Key[%s]: %s", key, value);
+        rst = 1;
+    }
+    else
+    {
+        DEBUG_WARNING("Cache Set(Key: %s Value: %s) Failed!", key, value);
+        rst = -1;
+    }
+
+    return rst;
+}
+
+int del_cache(const char *key)
+{
+    int rst = -1;
+
+    memcached_return rc;
+
+    rc = memcached_delete(_memc, key, strlen(key), 0);
+
+    if (rc == MEMCACHED_SUCCESS) 
+    {
+        DEBUG_PRINT("Cache Key[%s] Delete Successfully.", key);
+        rst = 1;
+    }
+    else
+    {
+        DEBUG_WARNING("Cache Key[%s] Delete Failed!", key);
+        rst = -1;
+    }
+
+    return rst;
+}
+
+
 /* Callback used for the POST requset:
  * storage image data and gives back a trivial 200 ok */
 static void post_request_cb(struct evhttp_request *req, void *arg)
@@ -247,7 +318,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
 
     /*
     DEBUG_PRINT("input data>>>");
-    (void) fwrite(buff, 1, 2048, stdout);
+    (void) fwrite(buff, 1, rmblen, stdout);
     printf("\n");
     DEBUG_PRINT(">>>");
     */
@@ -299,7 +370,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     fileName[end] = '\0';
     DEBUG_PRINT("fileName = %s", fileName);
 
-    char fileType[64];
+    char fileType[32];
     if(getType(fileName, fileType) == -1)
     {
         DEBUG_ERROR("Get Type of File[%s] Failed!", fileName);
@@ -421,6 +492,10 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         close(fd);
     }
     DEBUG_PRINT("Image [%s] Write Successfully!", saveName);
+    // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+    char *cacheKey = (char *)malloc(strlen(md5sum) + 10);
+    sprintf(cacheKey, "rspPath-/%s", md5sum);
+    set_cache(cacheKey, saveName);
 
     /*
     if(rename(saveName, newName) < 0)
@@ -441,8 +516,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     evbuffer_add_printf(evb, "</body></html>\n");
     evhttp_add_header(evhttp_request_get_output_headers(req),"Content-Type", "text/html");
     evhttp_send_reply(req, 200, "OK", evb);
-    if (evb)
-        evbuffer_free(evb);
+    evbuffer_free(evb);
     DEBUG_PRINT("============post_request_cb() DONE!===============");
     return;
 
@@ -458,6 +532,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     struct evbuffer *evb = NULL;
     const char *docroot = arg;
     const char *uri = evhttp_request_get_uri(req);
+    char rspPath[512];
     struct evhttp_uri *decoded = NULL;
     struct evkeyvalq params;
     const char *path;
@@ -467,18 +542,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     int fd = -1;
     struct stat st;
     int width, height, scaled;
-
-    /*
-    if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
-    {
-        post_request_cb(req, arg);
-        return;
-    }
-    else if(evhttp_request_get_command(req) != EVHTTP_REQ_GET){
-        dump_request_cb(req, arg);
-        return;
-    }
-    */
+    int isGenRsp = -1;
 
     /* Decode the URI */
     decoded = evhttp_uri_parse(uri);
@@ -491,25 +555,33 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     /* Let's see what path the user asked for. */
     path = evhttp_uri_get_path(decoded);
     if (!path) path = "/";
+    DEBUG_PRINT("path: %s", path);
 
-    if(strstr(path, "favicon.ico"))
-    {
-        DEBUG_PRINT("favicon.ico Request, Denied.");
-        return;
-    }
     DEBUG_PRINT("Got a zimg request for <%s>",  uri);
 
     /* We need to decode it, to see what path the user really wanted. */
     decoded_path = evhttp_uridecode(path, 0, NULL);
     if (decoded_path == NULL)
         goto err;
+    DEBUG_PRINT("decoded_path: %s", decoded_path);
     /* Don't allow any ".."s in the path, to avoid exposing stuff outside
      * of the docroot.  This test is both overzealous and underzealous:
      * it forbids aceptable paths like "/this/one..here", but it doesn't
      * do anything to prevent symlink following." */
     if (strstr(decoded_path, ".."))
         goto err;
+    /* This holds the content we're sending. */
+    evb = evbuffer_new();
 
+    char *cacheKey = (char *)malloc(strlen(uri) + 32);
+    sprintf(cacheKey, "rspPath-%s", uri);
+    if(find_cache(cacheKey, rspPath) == 1)
+    {
+        DEBUG_PRINT("Hit Cache. rspPath: %s", rspPath);
+        goto openFile;
+    }
+
+genRspPath:
     len = strlen(decoded_path)+strlen(docroot)+1;
     if (!(whole_path = malloc(len))) {
         DEBUG_ERROR("malloc failed!");
@@ -522,190 +594,195 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
         goto err;
     }
 
-    /* This holds the content we're sending. */
-    evb = evbuffer_new();
-
-    if (S_ISDIR(st.st_mode)) 
+    if (!S_ISDIR(st.st_mode)) 
     {
-        /* If it's a directory, read the comments and make a little
-         * index page */
-        char *rspPath;
-        char *origPath;
+        DEBUG_ERROR("MD5[%s] not find.", decoded_path);
+        goto err;
+    }
+    /* If it's a directory, read the comments and make a little
+     * index page */
+    char origPath[512];
 
-        if(strchr(uri, '?') == 0)
-        {
+    if(strchr(uri, '?') == 0)
+    {
+        width = 0;
+        height = 0;
+        scaled = 1;
+    }
+    else
+    {
+        evhttp_parse_query(uri, &params);
+        if(evhttp_find_header(&params, "w"))
+            width = atoi(evhttp_find_header(&params, "w"));
+        else
             width = 0;
+        if(evhttp_find_header(&params, "h"))
+            height = atoi(evhttp_find_header(&params, "h"));
+        else
             height = 0;
+        if(evhttp_find_header(&params, "scaled"))
+            scaled = atoi(evhttp_find_header(&params, "scaled"));
+        else
             scaled = 1;
-        }
-        else
-        {
-            evhttp_parse_query(uri, &params);
-            if(evhttp_find_header(&params, "w"))
-                width = atoi(evhttp_find_header(&params, "w"));
-            else
-                width = 0;
-            if(evhttp_find_header(&params, "h"))
-                height = atoi(evhttp_find_header(&params, "h"));
-            else
-                height = 0;
-            if(evhttp_find_header(&params, "scaled"))
-                scaled = atoi(evhttp_find_header(&params, "scaled"));
-            else
-                scaled = 1;
-        }
+    }
+    char name[32];
+    sprintf(name, "%d*%d", width, height);
 
-        /* test time used
-        struct timeval tv;
-        gettimeofday(&tv);
-        printf("tv.sec: %d\n", tv.tv_sec);
-        printf("tv.usec: %d\n", tv.tv_usec);
-        */
+    sprintf(cacheKey, "origPath-%s", uri);
+    if(find_cache(cacheKey, origPath) == 1)
+    {
+        DEBUG_PRINT("Hit Cache. origPath: %s", origPath);
+        goto getOrigPath;
+    }
+    DIR *dir;
+    if (!(dir = opendir(whole_path)))
+    {
+        DEBUG_ERROR("Dir[%s] open failed.", whole_path);
+        goto err;
+    }
+    struct dirent *ent;
+    char *origName;
+    int find = 0;
 
-        DIR *dir;
-        if (!(dir = opendir(whole_path)))
+    while(ent = readdir(dir))
+    {
+        const char *tmpName = ent->d_name;
+        if(strstr(tmpName, "0rig") == tmpName) // name "0rig" to find it first
         {
-            DEBUG_ERROR("Dir[%s] open failed.", whole_path);
-            goto err;
-        }
-        char name[32];
-        sprintf(name, "%d*%d", width, height);
-        struct dirent *ent;
-        char *origName;
-        char *imgType;
-        int find = 0;
-
-        while(ent = readdir(dir))
-        {
-            const char *tmpName = ent->d_name;
-            if(strstr(tmpName, "0rig") == tmpName) // name "0rig" to find it first
-            {
-                len = strlen(tmpName) + 1;
-                if(!(origName = malloc(len)))
-                {
-                    DEBUG_ERROR("malloc");
-                    goto err;
-                }
-                strcpy(origName, tmpName);
-                imgType = strchr(origName, '.');
-                imgType++;
-                find = 1;
-                break;
-            }
-        }
-        closedir(dir);
-        if(find == 0)
-        {
-            DEBUG_ERROR("Get 0rig Image Failed.");
-            goto err;
-        }
-        else
-        {
-            len = strlen(whole_path) + strlen(origName) + 2;
-            if(!(origPath = malloc(len)))
+            len = strlen(tmpName) + 1;
+            if(!(origName = malloc(len)))
             {
                 DEBUG_ERROR("malloc");
                 goto err;
             }
-            sprintf(origPath, "%s/%s", whole_path, origName);
-            DEBUG_PRINT("0rig File Path: %s", origPath);
-            if(width == 0)
-            {
-                DEBUG_PRINT("Return original image.");
-                if(!(rspPath = malloc(len)))
-                {
-                    DEBUG_ERROR("malloc");
-                    goto err;
-                }
-                strcpy(rspPath, origPath);
-            }
-            else
-            {
-                // rspPath = whole_path / 1024*768 . jpeg \0
-                len = strlen(whole_path) + strlen(name) + strlen(imgType) + 3; 
-                if(!(rspPath = malloc(len)))
-                {
-                    DEBUG_ERROR("malloc");
-                    goto err;
-                }
-                sprintf(rspPath, "%s/%s.%s", whole_path, name, imgType);
-            }
-            DEBUG_PRINT("File Path: %s", rspPath);
+            strcpy(origName, tmpName);
+            find = 1;
+            break;
         }
-        /* Otherwise it's a file; add it to the buffer to get
-         * sent via sendfile */
-        const char *type = guess_content_type(origName);
-        if ((fd = open(rspPath, O_RDONLY)) < 0) 
+    }
+    closedir(dir);
+    if(find == 0)
+    {
+        DEBUG_ERROR("Get 0rig Image Failed.");
+        goto err;
+    }
+
+    sprintf(origPath, "%s/%s", whole_path, origName);
+    DEBUG_PRINT("0rig File Path: %s", origPath);
+
+    sprintf(cacheKey, "origPath-%s", uri);
+    set_cache(cacheKey, origPath);
+
+getOrigPath:
+    DEBUG_PRINT("Goto getOrigPath...");
+    if(width == 0 && height == 0)
+    {
+        DEBUG_PRINT("Return original image.");
+        strcpy(rspPath, origPath);
+    }
+    else
+    {
+        // rspPath = whole_path / 1024*768 . jpeg \0
+        char imgType[32];
+        getType(origPath, imgType);
+        len = strlen(whole_path) + strlen(name) + strlen(imgType) + 3; 
+        if(strlen(imgType) == 0)
+            sprintf(rspPath, "%s/%s", whole_path, name);
+        else
+            sprintf(rspPath, "%s/%s.%s", whole_path, name, imgType);
+    }
+    DEBUG_PRINT("File Path: %s", rspPath);
+
+    isGenRsp = 1;
+    DEBUG_PRINT("Section genRspPath has steped in. isGenRsp = %d", isGenRsp);
+    sprintf(cacheKey, "rspPath-%s", uri);
+    set_cache(cacheKey, rspPath);
+
+openFile:
+    DEBUG_PRINT("Goto Section openFile.");
+    const char *type = guess_content_type(rspPath);
+    DEBUG_PRINT("content_type: %s", type);
+    if ((fd = open(rspPath, O_RDONLY)) < 0) 
+    {
+        if(isGenRsp == -1)
         {
-            DEBUG_PRINT("Not find the file, begin to resize...");
-            MagickBooleanType status;
-            MagickWand *magick_wand;
-            MagickWandGenesis();
-            magick_wand=NewMagickWand();
-            status=MagickReadImage(magick_wand, origPath);
-            if (status == MagickFalse)
-            {
-                ThrowWandException(magick_wand);
-                goto err;
-            }
-            if(scaled == 1)
+            DEBUG_PRINT("Section genRspPath haven't step in. isGenRsp = %d. Goto genRspPath...", isGenRsp);
+            goto genRspPath;
+        }
+        DEBUG_PRINT("Not find the file, begin to resize...");
+        MagickBooleanType status;
+        MagickWand *magick_wand;
+        MagickWandGenesis();
+        magick_wand=NewMagickWand();
+        status=MagickReadImage(magick_wand, origPath);
+        if (status == MagickFalse)
+        {
+            ThrowWandException(magick_wand);
+            goto err;
+        }
+        if(scaled == 1)
+        {
+            if(width != 0 && height == 0)
             {
                 int owidth = MagickGetImageWidth(magick_wand);
                 float oheight = MagickGetImageHeight(magick_wand);
                 height = width * oheight / owidth;
             }
-            MagickResetIterator(magick_wand);
-            while (MagickNextImage(magick_wand) != MagickFalse)
-                MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
-            DEBUG_PRINT("Resize img succ.");
-            MagickSizeType imgSize;
-            status = MagickGetImageLength(magick_wand, &imgSize);
-            if (status == MagickFalse)
+            else if(height != 0 && width == 0)
             {
-                ThrowWandException(magick_wand);
-                goto err;
+                int oheight = MagickGetImageHeight(magick_wand);
+                float owidth = MagickGetImageWidth(magick_wand);
+                width = height * owidth / oheight;
             }
-            size_t imgSizet = imgSize;
-            char *imgBuff = MagickGetImageBlob(magick_wand, &imgSizet);
-            evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
-            //Designed for High Performance: Reply Customer First, Storage Image Then.
-            evbuffer_add(evb, imgBuff, imgSizet);
-            evhttp_send_reply(req, 200, "OK", evb);
-            status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
-            if (status == MagickFalse)
-            {
-                ThrowWandException(magick_wand);
-                DEBUG_WARNING("New img[%s] Write Failed!", rspPath);
-            }
-            else
-            {
-                DEBUG_PRINT("New img[%s] storaged.", rspPath);
-            }
-            magick_wand=DestroyMagickWand(magick_wand);
-            MagickWandTerminus();
-            goto done;
         }
-        else if (fstat(fd, &st)<0) 
+        MagickResetIterator(magick_wand);
+        while (MagickNextImage(magick_wand) != MagickFalse)
+            MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
+        DEBUG_PRINT("Resize img succ.");
+        MagickSizeType imgSize;
+        status = MagickGetImageLength(magick_wand, &imgSize);
+        if (status == MagickFalse)
         {
-            /* Make sure the length still matches, now that we
-             * opened the file :/ */
-            DEBUG_ERROR("fstat failed.");
+            ThrowWandException(magick_wand);
             goto err;
+        }
+        size_t imgSizet = imgSize;
+        char *imgBuff = MagickGetImageBlob(magick_wand, &imgSizet);
+        evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
+        //Designed for High Performance: Reply Customer First, Storage Image Second.
+        evbuffer_add(evb, imgBuff, imgSizet);
+        evhttp_send_reply(req, 200, "OK", evb);
+        status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
+        if (status == MagickFalse)
+        {
+            ThrowWandException(magick_wand);
+            sprintf(cacheKey, "rspPath-%s", uri);
+            del_cache(cacheKey);
+            DEBUG_WARNING("New img[%s] Write Failed!", rspPath);
         }
         else
         {
-            DEBUG_PRINT("Got the file!");
-            evbuffer_add_file(evb, fd, 0, st.st_size);
+            DEBUG_PRINT("New img[%s] storaged.", rspPath);
         }
-        evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
-        evhttp_send_reply(req, 200, "OK", evb);
+        magick_wand=DestroyMagickWand(magick_wand);
+        MagickWandTerminus();
         goto done;
     }
-    else 
+    else if (fstat(fd, &st)<0) 
     {
-        DEBUG_ERROR("MD5[%s] not find.", decoded_path);
+        /* Make sure the length still matches, now that we
+         * opened the file :/ */
+        DEBUG_ERROR("fstat failed.");
         goto err;
     }
+    else
+    {
+        DEBUG_PRINT("Got the file!");
+        evbuffer_add_file(evb, fd, 0, st.st_size);
+    }
+    evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
+    evhttp_send_reply(req, 200, "OK", evb);
+    goto done;
 
 err:
     evhttp_send_error(req, 404, "Image was not found");
@@ -713,16 +790,14 @@ err:
         close(fd);
 
 done:
+    if (evb)
+        evbuffer_free(evb);
     if (decoded)
         evhttp_uri_free(decoded);
     if (decoded_path)
         free(decoded_path);
     if (whole_path)
         free(whole_path);
-    if (evb)
-        evbuffer_free(evb);
-
-    return;
 }
 
 /* This callback gets invoked when we get any http request that doesn't match
@@ -802,12 +877,6 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	if (stat(whole_path, &st)<0) {
         DEBUG_WARNING("Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
         zimg_cb(req, _img_path);
-        /*
-        if(zimg_cb(req, _img_path) == -1)
-        {
-            DEBUG_ERROR("zimg_cb call failed!");
-        }
-        */
         goto done;
 	}
 
