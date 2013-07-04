@@ -1,0 +1,321 @@
+05/07/2013 01:04:19 [Debug] main.c:114 main() 现在a的值是7
+05/07/2013 01:04:19 [Info] main.c:115 main() 现在a的值是6
+05/07/2013 01:04:19 [Notice] main.c:116 main() 现在a的值是5
+05/07/2013 01:04:19 [Warning] main.c:117 main() 现在a的值是4
+05/07/2013 01:04:19 [Error] main.c:118 main() 现在a的值是3
+05/07/2013 01:04:19 [Critical] main.c:119 main() bb测试2
+05/07/2013 01:04:19 [Alert] main.c:120 main() bb测试1
+05/07/2013 01:04:19 [Fatal] main.c:121 main() bb测试0
+05/07/2013 01:07:32 [Debug] main.c:114 main() 现在a的值是7
+05/07/2013 01:07:32 [Info] main.c:115 main() 现在a的值是6
+05/07/2013 01:07:32 [Notice] main.c:116 main() 现在a的值是5
+05/07/2013 01:07:32 [Warning] main.c:117 main() 现在a的值是4
+05/07/2013 01:07:32 [Error] main.c:118 main() 现在a的值是3
+05/07/2013 01:07:32 [Critical] main.c:119 main() bb测试2
+05/07/2013 01:07:32 [Alert] main.c:120 main() bb测试1
+05/07/2013 01:07:32 [Fatal] main.c:121 main() bb测试0
+05/07/2013 01:07:37 [Debug] main.c:114 main() 现在a的值是7
+05/07/2013 01:07:37 [Info] main.c:115 main() 现在a的值是6
+05/07/2013 01:07:37 [Notice] main.c:116 main() 现在a的值是5
+05/07/2013 01:07:37 [Warning] main.c:117 main() 现在a的值是4
+05/07/2013 01:07:37 [Error] main.c:118 main() 现在a的值是3
+05/07/2013 01:07:37 [Critical] main.c:119 main() bb测试2
+05/07/2013 01:07:37 [Alert] main.c:120 main() bb测试1
+05/07/2013 01:07:37 [Fatal] main.c:121 main() bb测试0
+05/07/2013 01:12:27 [Debug] main.c:115 main() 现在a的值是7
+2013/07/05 01:14:34 [Debug] main.c:115 main() 现在a的值是7
+2013/07/05 01:21:48 [Debug] main.c:38 main() 这是DEBUG LOG测试，LEVEL=7.
+2013/07/05 01:26:00 [Debug] main.c:38 main() 这是DEBUG LOG测试，LEVEL=7.
+2013/07/05 01:26:00 [Debug] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:26:00 [Debug] main.c:50 main() Get port: 4869
+2013/07/05 01:26:00 [Debug] main.c:61 main() Get mport: 11211
+2013/07/05 01:26:00 [Debug] main.c:71 main() Get root_path: ./www
+2013/07/05 01:26:00 [Debug] main.c:81 main() Get img-path: ./img
+2013/07/05 01:26:00 [Debug] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:26:00 [Debug] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:26:00 [Debug] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:26:00 [Debug] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:26:00 [Debug] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:26:00 [Debug] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:26:00 [Debug] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:28:32 [Debug] main.c:38 main() 这是DEBUG LOG测试，LEVEL=7.
+2013/07/05 01:28:32 [Debug] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:28:32 [Debug] main.c:50 main() Get port: 4869
+2013/07/05 01:28:32 [Debug] main.c:61 main() Get mport: 11211
+2013/07/05 01:28:32 [Debug] main.c:71 main() Get root_path: ./www
+2013/07/05 01:28:32 [Debug] main.c:81 main() Get img-path: ./img
+2013/07/05 01:28:32 [Debug] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:28:32 [Debug] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:28:32 [Debug] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:28:32 [Debug] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:28:32 [Debug] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:28:32 [Debug] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:28:32 [Debug] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:36:29 [Info] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:36:29 [Info] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:36:29 [Info] main.c:50 main() Get port: 4869
+2013/07/05 01:36:29 [Info] main.c:61 main() Get mport: 11211
+2013/07/05 01:36:29 [Info] main.c:71 main() Get root_path: ./www
+2013/07/05 01:36:29 [Info] main.c:81 main() Get img-path: ./img
+2013/07/05 01:36:29 [Info] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:36:29 [Info] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:36:29 [Info] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:36:29 [Info] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:36:29 [Info] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:36:29 [Info] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:36:29 [Info] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:38:52 [Info] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:38:52 [Info] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:38:52 [Info] main.c:50 main() Get port: 4869
+2013/07/05 01:38:52 [Info] main.c:61 main() Get mport: 11211
+2013/07/05 01:38:52 [Info] main.c:71 main() Get root_path: ./www
+2013/07/05 01:38:52 [Info] main.c:81 main() Get img-path: ./img
+2013/07/05 01:38:52 [Info] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:38:52 [Info] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:38:52 [Info] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:38:52 [Info] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:38:52 [Info] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:38:52 [Info] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:38:52 [Info] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:38:52 [Info] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:39:01 [Info] zhttpd.c:856 send_document_cb() Got a GET request for </5f189d8ec57f5a5a0d3dcba47fa797e2>
+2013/07/05 01:39:01 [Info] zhttpd.c:558 zimg_cb() path: /5f189d8ec57f5a5a0d3dcba47fa797e2
+2013/07/05 01:39:01 [Info] zhttpd.c:560 zimg_cb() Got a zimg request for </5f189d8ec57f5a5a0d3dcba47fa797e2>
+2013/07/05 01:39:01 [Info] zhttpd.c:566 zimg_cb() decoded_path: /5f189d8ec57f5a5a0d3dcba47fa797e2
+2013/07/05 01:39:01 [Info] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/5f189d8ec57f5a5a0d3dcba47fa797e2]: ./img/5f189d8ec57f5a5a0d3dcba47fa797e2/0rig.jpeg
+2013/07/05 01:39:01 [Info] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/5f189d8ec57f5a5a0d3dcba47fa797e2/0rig.jpeg
+2013/07/05 01:39:01 [Info] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:39:01 [Info] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:39:01 [Info] zhttpd.c:780 zimg_cb() Got the file!
+2013/07/05 01:39:02 [Info] zhttpd.c:853 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 01:40:39 [Info] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:40:39 [Info] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:40:39 [Info] main.c:50 main() Get port: 4869
+2013/07/05 01:40:39 [Info] main.c:61 main() Get mport: 11211
+2013/07/05 01:40:39 [Info] main.c:71 main() Get root_path: ./www
+2013/07/05 01:40:39 [Info] main.c:81 main() Get img-path: ./img
+2013/07/05 01:40:39 [Info] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:40:39 [Info] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:40:39 [Info] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:40:39 [Info] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:40:39 [Info] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:40:39 [Info] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:40:39 [Info] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:40:39 [Info] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:40:49 [Info] zhttpd.c:856 send_document_cb() Got a GET request for </c6c4949e54afdb0972d323028657a1ef>
+2013/07/05 01:40:49 [Warning] zhttpd.c:878 send_document_cb() Stat whole_path[./www/c6c4949e54afdb0972d323028657a1ef] Failed! Goto zimg_cb() for Searching.
+2013/07/05 01:40:49 [Info] zhttpd.c:558 zimg_cb() path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:40:49 [Info] zhttpd.c:560 zimg_cb() Got a zimg request for </c6c4949e54afdb0972d323028657a1ef>
+2013/07/05 01:40:49 [Info] zhttpd.c:566 zimg_cb() decoded_path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:40:49 [Info] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/c6c4949e54afdb0972d323028657a1ef]: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 01:40:49 [Info] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 01:40:49 [Info] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:40:49 [Info] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:40:49 [Info] zhttpd.c:709 zimg_cb() Section genRspPath haven't step in. isGenRsp = -1. Goto genRspPath...
+2013/07/05 01:40:49 [Error] zhttpd.c:593 zimg_cb() stat whole_path[./img/c6c4949e54afdb0972d323028657a1ef] failed!
+2013/07/05 01:40:49 [Info] zhttpd.c:853 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 01:41:05 [Info] zhttpd.c:856 send_document_cb() Got a GET request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:41:05 [Warning] zhttpd.c:878 send_document_cb() Stat whole_path[./www/c6c4949e54afdb0972d323028657a1ef] Failed! Goto zimg_cb() for Searching.
+2013/07/05 01:41:05 [Info] zhttpd.c:558 zimg_cb() path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:41:05 [Info] zhttpd.c:560 zimg_cb() Got a zimg request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:41:05 [Info] zhttpd.c:566 zimg_cb() decoded_path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:41:05 [Info] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/c6c4949e54afdb0972d323028657a1ef?w=200]: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:41:05 [Info] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:41:05 [Info] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:41:05 [Info] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:41:05 [Info] zhttpd.c:709 zimg_cb() Section genRspPath haven't step in. isGenRsp = -1. Goto genRspPath...
+2013/07/05 01:41:05 [Error] zhttpd.c:593 zimg_cb() stat whole_path[./img/c6c4949e54afdb0972d323028657a1ef] failed!
+2013/07/05 01:45:26:491971 [Info] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:45:26:492004 [Info] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:45:26:492052 [Info] main.c:50 main() Get port: 4869
+2013/07/05 01:45:26:492095 [Info] main.c:61 main() Get mport: 11211
+2013/07/05 01:45:26:492136 [Info] main.c:71 main() Get root_path: ./www
+2013/07/05 01:45:26:492179 [Info] main.c:81 main() Get img-path: ./img
+2013/07/05 01:45:26:492219 [Info] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:45:26:492233 [Info] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:45:26:492245 [Info] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:45:26:492280 [Info] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:45:26:492360 [Info] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:45:26:492374 [Info] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:45:26:492388 [Info] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:45:26:492891 [Info] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:45:33:366257 [Info] zhttpd.c:856 send_document_cb() Got a GET request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:45:33:366328 [Warning] zhttpd.c:878 send_document_cb() Stat whole_path[./www/c6c4949e54afdb0972d323028657a1ef] Failed! Goto zimg_cb() for Searching.
+2013/07/05 01:45:33:366353 [Info] zhttpd.c:558 zimg_cb() path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:45:33:366365 [Info] zhttpd.c:560 zimg_cb() Got a zimg request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:45:33:366376 [Info] zhttpd.c:566 zimg_cb() decoded_path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:45:33:366933 [Info] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/c6c4949e54afdb0972d323028657a1ef?w=200]: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:45:33:366962 [Info] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:45:33:367011 [Info] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:45:33:367032 [Info] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:45:33:367056 [Info] zhttpd.c:709 zimg_cb() Section genRspPath haven't step in. isGenRsp = -1. Goto genRspPath...
+2013/07/05 01:45:33:367074 [Error] zhttpd.c:593 zimg_cb() stat whole_path[./img/c6c4949e54afdb0972d323028657a1ef] failed!
+2013/07/05 01:45:33:457482 [Info] zhttpd.c:853 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 01:46:06:860356 [Info] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:46:06:860383 [Info] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:46:06:860432 [Info] main.c:50 main() Get port: 4869
+2013/07/05 01:46:06:860466 [Info] main.c:61 main() Get mport: 11211
+2013/07/05 01:46:06:860491 [Info] main.c:71 main() Get root_path: ./www
+2013/07/05 01:46:06:860524 [Info] main.c:81 main() Get img-path: ./img
+2013/07/05 01:46:06:860562 [Info] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:46:06:860575 [Info] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:46:06:860587 [Info] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:46:06:860618 [Info] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:46:06:860677 [Info] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:46:06:860688 [Info] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:46:06:860701 [Info] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:46:06:861200 [Info] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:47:00:616996 [Info] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:47:00:617030 [Info] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:47:00:617072 [Info] main.c:50 main() Get port: 4869
+2013/07/05 01:47:00:617103 [Info] main.c:61 main() Get mport: 11211
+2013/07/05 01:47:00:617128 [Info] main.c:71 main() Get root_path: ./www
+2013/07/05 01:47:00:617152 [Info] main.c:81 main() Get img-path: ./img
+2013/07/05 01:47:00:617192 [Info] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:47:00:617205 [Info] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:47:00:617217 [Info] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:47:00:617252 [Info] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:47:00:617333 [Info] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:47:00:617350 [Info] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:47:00:617364 [Info] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:47:00:617872 [Info] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:47:12:728739 [Info] zhttpd.c:856 send_document_cb() Got a GET request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:47:12:728788 [Warning] zhttpd.c:878 send_document_cb() Stat whole_path[./www/c6c4949e54afdb0972d323028657a1ef] Failed! Goto zimg_cb() for Searching.
+2013/07/05 01:47:12:728810 [Info] zhttpd.c:558 zimg_cb() path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:47:12:728823 [Info] zhttpd.c:560 zimg_cb() Got a zimg request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:47:12:728833 [Info] zhttpd.c:566 zimg_cb() decoded_path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:47:12:729145 [Info] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/c6c4949e54afdb0972d323028657a1ef?w=200]: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:47:12:729172 [Info] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:47:12:729187 [Info] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:47:12:729204 [Info] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:47:12:729229 [Info] zhttpd.c:709 zimg_cb() Section genRspPath haven't step in. isGenRsp = -1. Goto genRspPath...
+2013/07/05 01:47:12:729259 [Error] zhttpd.c:593 zimg_cb() stat whole_path[./img/c6c4949e54afdb0972d323028657a1ef] failed!
+2013/07/05 01:47:12:817370 [Info] zhttpd.c:853 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 01:48:45:483132 [INFO] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:48:45:483165 [INFO] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:48:45:483207 [INFO] main.c:50 main() Get port: 4869
+2013/07/05 01:48:45:483249 [INFO] main.c:61 main() Get mport: 11211
+2013/07/05 01:48:45:483288 [INFO] main.c:71 main() Get root_path: ./www
+2013/07/05 01:48:45:483330 [INFO] main.c:81 main() Get img-path: ./img
+2013/07/05 01:48:45:483373 [INFO] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:48:45:483385 [INFO] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:48:45:483397 [INFO] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:48:45:483431 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:48:45:483502 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:48:45:483513 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:48:45:483521 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:48:45:484024 [INFO] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:53:49:882382 [INFO] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:53:49:882415 [INFO] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:53:49:882457 [INFO] main.c:50 main() Get port: 4869
+2013/07/05 01:53:49:882499 [INFO] main.c:61 main() Get mport: 11211
+2013/07/05 01:53:49:882540 [INFO] main.c:71 main() Get root_path: ./www
+2013/07/05 01:53:49:882582 [INFO] main.c:81 main() Get img-path: ./img
+2013/07/05 01:53:49:882625 [INFO] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:53:49:882638 [INFO] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:53:49:882650 [INFO] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:53:49:882684 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:53:49:882752 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:53:49:882763 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:53:49:882772 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:53:49:883258 [INFO] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:55:00:783152 [INFO] main.c:38 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:55:00:783187 [INFO] main.c:41 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:55:00:783231 [INFO] main.c:50 main() Get port: 4869
+2013/07/05 01:55:00:783262 [INFO] main.c:61 main() Get mport: 11211
+2013/07/05 01:55:00:783286 [INFO] main.c:71 main() Get root_path: ./www
+2013/07/05 01:55:00:783309 [INFO] main.c:81 main() Get img-path: ./img
+2013/07/05 01:55:00:783347 [INFO] main.c:91 main() Get mip: 127.0.0.1
+2013/07/05 01:55:00:783362 [INFO] main.c:95 main() conf/config.ini Read Finished.
+2013/07/05 01:55:00:783373 [INFO] main.c:98 main() Begin to Init the Path zimg Using...
+2013/07/05 01:55:00:783408 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:55:00:783489 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:55:00:783507 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:55:00:783520 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:55:00:784007 [INFO] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:56:41:106090 [INFO] zhttpd.c:856 send_document_cb() Got a GET request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:56:41:106146 [WARNING] zhttpd.c:878 send_document_cb() Stat whole_path[./www/c6c4949e54afdb0972d323028657a1ef] Failed! Goto zimg_cb() for Searching.
+2013/07/05 01:56:41:106169 [INFO] zhttpd.c:558 zimg_cb() path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:56:41:106186 [INFO] zhttpd.c:560 zimg_cb() Got a zimg request for </c6c4949e54afdb0972d323028657a1ef?w=200>
+2013/07/05 01:56:41:106197 [INFO] zhttpd.c:566 zimg_cb() decoded_path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:56:41:106722 [INFO] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/c6c4949e54afdb0972d323028657a1ef?w=200]: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:56:41:106751 [INFO] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/c6c4949e54afdb0972d323028657a1ef/200*0.jpg
+2013/07/05 01:56:41:106771 [INFO] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:56:41:106884 [INFO] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:56:41:106912 [INFO] zhttpd.c:709 zimg_cb() Section genRspPath haven't step in. isGenRsp = -1. Goto genRspPath...
+2013/07/05 01:56:41:106930 [ERROR] zhttpd.c:593 zimg_cb() stat whole_path[./img/c6c4949e54afdb0972d323028657a1ef] failed!
+2013/07/05 01:56:41:184905 [INFO] zhttpd.c:853 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 01:56:57:453030 [INFO] zhttpd.c:856 send_document_cb() Got a GET request for </upload.html>
+2013/07/05 01:58:35:985086 [INFO] main.c:37 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 01:58:35:985117 [INFO] main.c:40 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 01:58:35:985160 [INFO] main.c:49 main() Get port: 4869
+2013/07/05 01:58:35:985189 [INFO] main.c:60 main() Get mport: 11211
+2013/07/05 01:58:35:985215 [INFO] main.c:70 main() Get root_path: ./www
+2013/07/05 01:58:35:985253 [INFO] main.c:80 main() Get img-path: ./img
+2013/07/05 01:58:35:985292 [INFO] main.c:90 main() Get mip: 127.0.0.1
+2013/07/05 01:58:35:985305 [INFO] main.c:94 main() conf/config.ini Read Finished.
+2013/07/05 01:58:35:985315 [INFO] main.c:97 main() Begin to Init the Path zimg Using...
+2013/07/05 01:58:35:985339 [INFO] main.c:115 main() Paths Init Finished.
+2013/07/05 01:58:35:985349 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 01:58:35:985426 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 01:58:35:985439 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 01:58:35:985448 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 01:58:35:985894 [INFO] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 01:58:53:771526 [INFO] zhttpd.c:234 post_request_cb() Received a POST request for /upload
+2013/07/05 01:58:53:771566 [INFO] zhttpd.c:235 post_request_cb() Headers:
+2013/07/05 01:58:53:771585 [INFO] zhttpd.c:240 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/05 01:58:53:771597 [INFO] zhttpd.c:240 post_request_cb()   Connection: keep-alive
+2013/07/05 01:58:53:771608 [INFO] zhttpd.c:240 post_request_cb()   Content-Length: 50696
+2013/07/05 01:58:53:771631 [INFO] zhttpd.c:240 post_request_cb()   Cache-Control: max-age=0
+2013/07/05 01:58:53:771645 [INFO] zhttpd.c:240 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/05 01:58:53:771659 [INFO] zhttpd.c:240 post_request_cb()   Origin: http://127.0.0.1:4869
+2013/07/05 01:58:53:771670 [INFO] zhttpd.c:240 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/05 01:58:53:771681 [INFO] zhttpd.c:240 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAMOQvtdYvdVh9FMA
+2013/07/05 01:58:53:771695 [INFO] zhttpd.c:284 post_request_cb() boundary Find. boundary = ----WebKitFormBoundaryAMOQvtdYvdVh9FMA
+2013/07/05 01:58:53:771709 [INFO] zhttpd.c:240 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
+2013/07/05 01:58:53:771720 [INFO] zhttpd.c:240 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/05 01:58:53:771731 [INFO] zhttpd.c:240 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/05 01:58:53:771745 [INFO] zhttpd.c:302 post_request_cb() evblen = 50696
+2013/07/05 01:58:53:771808 [INFO] zhttpd.c:304 post_request_cb() rmblen = 50696
+2013/07/05 01:58:53:771826 [INFO] zhttpd.c:344 post_request_cb() boundaryPattern = 
+------WebKitFormBoundaryAMOQvtdYvdVh9FMA, strlen = 42
+2013/07/05 01:58:53:771846 [INFO] zhttpd.c:371 post_request_cb() fileName = hayz.jpg
+2013/07/05 01:58:53:771894 [INFO] zhttpd.c:393 post_request_cb() start = 112
+2013/07/05 01:58:53:771905 [INFO] zhttpd.c:400 post_request_cb() end = 136
+2013/07/05 01:58:53:771912 [INFO] zhttpd.c:402 post_request_cb() start = 140
+2013/07/05 01:58:53:772126 [INFO] zhttpd.c:409 post_request_cb() end = 50650
+2013/07/05 01:58:53:772145 [INFO] zhttpd.c:413 post_request_cb() postSize = 50696
+2013/07/05 01:58:53:772158 [INFO] zhttpd.c:414 post_request_cb() imgSize = 50510
+2013/07/05 01:58:53:772170 [INFO] zhttpd.c:416 post_request_cb() Begin to Caculate MD5...
+2013/07/05 01:58:53:772357 [INFO] zhttpd.c:426 post_request_cb() [hayz.jpg] md5: c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:58:53:772375 [INFO] zhttpd.c:432 post_request_cb() savePath: ./img/c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:58:53:772532 [INFO] zhttpd.c:456 post_request_cb() saveName-->: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 01:58:53:772713 [INFO] zhttpd.c:494 post_request_cb() Image [./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg] Write Successfully!
+2013/07/05 01:58:53:773033 [INFO] zhttpd.c:187 set_cache() Cache Set Successfully. Key[rspPath-/c6c4949e54afdb0972d323028657a1ef]: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 01:58:53:773212 [INFO] zhttpd.c:520 post_request_cb() ============post_request_cb() DONE!===============
+2013/07/05 01:58:53:868221 [INFO] zhttpd.c:853 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 01:59:27:287859 [INFO] zhttpd.c:856 send_document_cb() Got a GET request for </c6c4949e54afdb0972d323028657a1ef>
+2013/07/05 01:59:27:287915 [WARNING] zhttpd.c:878 send_document_cb() Stat whole_path[./www/c6c4949e54afdb0972d323028657a1ef] Failed! Goto zimg_cb() for Searching.
+2013/07/05 01:59:27:287932 [INFO] zhttpd.c:558 zimg_cb() path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:59:27:287946 [INFO] zhttpd.c:560 zimg_cb() Got a zimg request for </c6c4949e54afdb0972d323028657a1ef>
+2013/07/05 01:59:27:287959 [INFO] zhttpd.c:566 zimg_cb() decoded_path: /c6c4949e54afdb0972d323028657a1ef
+2013/07/05 01:59:27:288117 [INFO] zhttpd.c:162 find_cache() Cache Find Key[rspPath-/c6c4949e54afdb0972d323028657a1ef]: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 01:59:27:288135 [INFO] zhttpd.c:580 zimg_cb() Hit Cache. rspPath: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 01:59:27:288154 [INFO] zhttpd.c:702 zimg_cb() Goto Section openFile.
+2013/07/05 01:59:27:288173 [INFO] zhttpd.c:704 zimg_cb() content_type: image/jpeg
+2013/07/05 01:59:27:288209 [INFO] zhttpd.c:780 zimg_cb() Got the file!
+2013/07/05 02:01:32:107526 [INFO] main.c:37 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 02:01:32:107560 [INFO] main.c:40 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 02:01:32:107609 [INFO] main.c:49 main() Get port: 4869
+2013/07/05 02:01:32:107655 [INFO] main.c:60 main() Get mport: 11211
+2013/07/05 02:01:32:107693 [INFO] main.c:70 main() Get root_path: ./www
+2013/07/05 02:01:32:107732 [INFO] main.c:80 main() Get img-path: ./img
+2013/07/05 02:01:32:107776 [INFO] main.c:90 main() Get mip: 127.0.0.1
+2013/07/05 02:01:32:107789 [INFO] main.c:94 main() conf/config.ini Read Finished.
+2013/07/05 02:01:32:107800 [INFO] main.c:97 main() Begin to Init the Path zimg Using...
+2013/07/05 02:01:32:107831 [INFO] main.c:115 main() Paths Init Finished.
+2013/07/05 02:01:32:107844 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 02:01:32:107925 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 02:01:32:107939 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 02:01:32:107948 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 02:01:32:108487 [INFO] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869

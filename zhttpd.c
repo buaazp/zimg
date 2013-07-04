@@ -63,14 +63,14 @@ static void dump_request_cb(struct evhttp_request *req, void *arg)
 	default: cmdtype = "unknown"; break;
 	}
 
-	DEBUG_PRINT("Received a %s request for %s",
+	LOG_PRINT(LOG_INFO, "Received a %s request for %s",
 	    cmdtype, evhttp_request_get_uri(req));
-    DEBUG_PRINT("Headers:");
+    LOG_PRINT(LOG_INFO, "Headers:");
 
 	headers = evhttp_request_get_input_headers(req);
 	for (header = headers->tqh_first; header;
 	    header = header->next.tqe_next) {
-		DEBUG_PRINT("  %s: %s", header->key, header->value);
+		LOG_PRINT(LOG_INFO, "  %s: %s", header->key, header->value);
 	}
 
 	buf = evhttp_request_get_input_buffer(req);
@@ -135,11 +135,11 @@ int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, in
     if(j == plen) // found a match!!
     {
         /*
-        DEBUG_PRINT("i = %d, j = %d", i, j);
+        LOG_PRINT(LOG_INFO, "i = %d, j = %d", i, j);
         if(matcher[i] == '\r')
-            DEBUG_PRINT("buff[%d] = \\R", i);
+            LOG_PRINT(LOG_INFO, "buff[%d] = \\R", i);
         if(matcher[i+1] == '\n')
-            DEBUG_PRINT("buff[%d] = \\N", i + 1);
+            LOG_PRINT(LOG_INFO, "buff[%d] = \\N", i + 1);
             */
         return i;
     }
@@ -159,14 +159,14 @@ int find_cache(const char *key, char *value)
 
     if (rc == MEMCACHED_SUCCESS) 
     {
-        DEBUG_PRINT("Cache Find Key[%s]: %s", key, pvalue);
+        LOG_PRINT(LOG_INFO, "Cache Find Key[%s]: %s", key, pvalue);
         strcpy(value, pvalue);
         free(pvalue);
         rst = 1;
     }
     else if (rc == MEMCACHED_NOTFOUND)
     {
-        DEBUG_WARNING("Cache Key[%s] Not Find!", key);
+        LOG_PRINT(LOG_WARNING, "Cache Key[%s] Not Find!", key);
         rst = -1;
     }
 
@@ -184,12 +184,12 @@ int set_cache(const char *key, const char *value)
 
     if (rc == MEMCACHED_SUCCESS) 
     {
-        DEBUG_PRINT("Cache Set Successfully. Key[%s]: %s", key, value);
+        LOG_PRINT(LOG_INFO, "Cache Set Successfully. Key[%s]: %s", key, value);
         rst = 1;
     }
     else
     {
-        DEBUG_WARNING("Cache Set(Key: %s Value: %s) Failed!", key, value);
+        LOG_PRINT(LOG_WARNING, "Cache Set(Key: %s Value: %s) Failed!", key, value);
         rst = -1;
     }
 
@@ -206,12 +206,12 @@ int del_cache(const char *key)
 
     if (rc == MEMCACHED_SUCCESS) 
     {
-        DEBUG_PRINT("Cache Key[%s] Delete Successfully.", key);
+        LOG_PRINT(LOG_INFO, "Cache Key[%s] Delete Successfully.", key);
         rst = 1;
     }
     else
     {
-        DEBUG_WARNING("Cache Key[%s] Delete Failed!", key);
+        LOG_PRINT(LOG_WARNING, "Cache Key[%s] Delete Failed!", key);
         rst = -1;
     }
 
@@ -231,13 +231,13 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char *boundary, *boundary_end = NULL;
     int boundary_len = 0;
     
-	DEBUG_PRINT("Received a POST request for %s", evhttp_request_get_uri(req));
-    DEBUG_PRINT("Headers:");
+	LOG_PRINT(LOG_INFO, "Received a POST request for %s", evhttp_request_get_uri(req));
+    LOG_PRINT(LOG_INFO, "Headers:");
 
 	headers = evhttp_request_get_input_headers(req);
 	for (header = headers->tqh_first; header; header = header->next.tqe_next) 
     {
-		DEBUG_PRINT("  %s: %s", header->key, header->value);
+		LOG_PRINT(LOG_INFO, "  %s: %s", header->key, header->value);
         if(strstr(header->key, "Content-Length") == header->key)
         {
             postSize = atoi(header->value);
@@ -246,12 +246,12 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         {
             if(strstr(header->value, "multipart/form-data") == 0)
             {
-                DEBUG_ERROR("POST form error!");
+                LOG_PRINT(LOG_ERROR, "POST form error!");
                 goto err;
             }
             else if(strstr(header->value, "boundary") == 0)
             {
-                DEBUG_ERROR("boundary NOT found!");
+                LOG_PRINT(LOG_ERROR, "boundary NOT found!");
                 goto err;
             }
             else
@@ -266,7 +266,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
                     boundary_end = strchr(boundary, '"');
                     if (!boundary_end) 
                     {
-                        DEBUG_ERROR("Invalid boundary in multipart/form-data POST data");
+                        LOG_PRINT(LOG_ERROR, "Invalid boundary in multipart/form-data POST data");
                         goto err;
                     }
                 } 
@@ -281,7 +281,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
                     boundary_len = boundary_end-boundary;
                 }
 
-                DEBUG_PRINT("boundary Find. boundary = %s", boundary);
+                LOG_PRINT(LOG_INFO, "boundary Find. boundary = %s", boundary);
             }
         }
 	}
@@ -299,12 +299,12 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     //puts("Input data: <<<");
     while((evblen = evbuffer_get_length(buf)) > 0)
     {
-        DEBUG_PRINT("evblen = %d", evblen);
+        LOG_PRINT(LOG_INFO, "evblen = %d", evblen);
         rmblen = evbuffer_remove(buf, buff, evblen);
-        DEBUG_PRINT("rmblen = %d", rmblen);
+        LOG_PRINT(LOG_INFO, "rmblen = %d", rmblen);
         if(rmblen < 0)
         {
-            DEBUG_ERROR("evbuffer_remove failed!");
+            LOG_PRINT(LOG_ERROR, "evbuffer_remove failed!");
             goto err;
         }
         /*
@@ -317,10 +317,10 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     //puts(">>>");
 
     /*
-    DEBUG_PRINT("input data>>>");
+    LOG_PRINT(LOG_INFO, "input data>>>");
     (void) fwrite(buff, 1, rmblen, stdout);
     printf("\n");
-    DEBUG_PRINT(">>>");
+    LOG_PRINT(LOG_INFO, ">>>");
     */
 
     int start = -1, end = -1;
@@ -335,16 +335,16 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char *boundaryPattern = (char *)malloc(boundary_len + 4);
     sprintf(boundaryPattern, "\r\n--%s", boundary);
     /*
-    DEBUG_PRINT("boundaryPattern[%d] = %c", boundary_len + 3, boundaryPattern[boundary_len+3]);
+    LOG_PRINT(LOG_INFO, "boundaryPattern[%d] = %c", boundary_len + 3, boundaryPattern[boundary_len+3]);
     if(boundaryPattern[boundary_len+4] == '\0')
-        DEBUG_PRINT("boundaryPattern[%d] = %s", boundary_len + 4, "\\0");
+        LOG_PRINT(LOG_INFO, "boundaryPattern[%d] = %s", boundary_len + 4, "\\0");
     else
-        DEBUG_PRINT("boundaryPattern[%d] = %c", boundary_len + 4, boundaryPattern[boundary_len+4]);
+        LOG_PRINT(LOG_INFO, "boundaryPattern[%d] = %c", boundary_len + 4, boundaryPattern[boundary_len+4]);
     */
-    DEBUG_PRINT("boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
+    LOG_PRINT(LOG_INFO, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, postSize, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
-        DEBUG_ERROR("Content-Disposition Not Found!");
+        LOG_PRINT(LOG_ERROR, "Content-Disposition Not Found!");
         goto err;
     }
     start += 9;
@@ -353,7 +353,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         start++;
         if((end = kmp(buff+start, postSize-start, quotePattern, strlen(quotePattern))) == -1)
         {
-            DEBUG_ERROR("quote \" Not Found!");
+            LOG_PRINT(LOG_ERROR, "quote \" Not Found!");
             goto err;
         }
     }
@@ -361,24 +361,24 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     {
         if((end = kmp(buff+start, postSize-start, blankPattern, strlen(blankPattern))) == -1)
         {
-            DEBUG_ERROR("quote \" Not Found!");
+            LOG_PRINT(LOG_ERROR, "quote \" Not Found!");
             goto err;
         }
     }
     fileName = (char *)malloc(end + 1);
     memcpy(fileName, buff+start, end);
     fileName[end] = '\0';
-    DEBUG_PRINT("fileName = %s", fileName);
+    LOG_PRINT(LOG_INFO, "fileName = %s", fileName);
 
     char fileType[32];
     if(getType(fileName, fileType) == -1)
     {
-        DEBUG_ERROR("Get Type of File[%s] Failed!", fileName);
+        LOG_PRINT(LOG_ERROR, "Get Type of File[%s] Failed!", fileName);
         goto err;
     }
     if(isImg(fileType) != 1)
     {
-        DEBUG_ERROR("fileType[%s] is Not Supported!", fileType);
+        LOG_PRINT(LOG_ERROR, "fileType[%s] is Not Supported!", fileType);
         goto err;
     }
 
@@ -386,34 +386,34 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
 
     if((start = kmp(buff+end, postSize-end, typePattern, strlen(typePattern))) == -1)
     {
-        DEBUG_ERROR("Content-Type Not Found!");
+        LOG_PRINT(LOG_ERROR, "Content-Type Not Found!");
         goto err;
     }
     start += end;
-    DEBUG_PRINT("start = %d", start);
+    LOG_PRINT(LOG_INFO, "start = %d", start);
     if((end =  kmp(buff+start, postSize-start, blankPattern, strlen(blankPattern))) == -1)
     {
-        DEBUG_ERROR("Image Not complete!");
+        LOG_PRINT(LOG_ERROR, "Image Not complete!");
         goto err;
     }
     end += start;
-    DEBUG_PRINT("end = %d", end);
+    LOG_PRINT(LOG_INFO, "end = %d", end);
     start = end + 4;
-    DEBUG_PRINT("start = %d", start);
+    LOG_PRINT(LOG_INFO, "start = %d", start);
     if((end = kmp(buff+start, postSize-start, boundaryPattern, strlen(boundaryPattern))) == -1)
     {
-        DEBUG_ERROR("Image Not complete!");
+        LOG_PRINT(LOG_ERROR, "Image Not complete!");
         goto err;
     }
     end += start;
-    DEBUG_PRINT("end = %d", end);
+    LOG_PRINT(LOG_INFO, "end = %d", end);
     imgSize = end - start;
 
 
-    DEBUG_PRINT("postSize = %d", postSize);
-    DEBUG_PRINT("imgSize = %d", imgSize);
+    LOG_PRINT(LOG_INFO, "postSize = %d", postSize);
+    LOG_PRINT(LOG_INFO, "imgSize = %d", imgSize);
 
-    DEBUG_PRINT("Begin to Caculate MD5...");
+    LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
     unsigned char md[16];
     int i;
     char tmp[3]={'\0'}, md5sum[33]={'\0'};
@@ -423,37 +423,37 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         sprintf(tmp, "%2.2x", md[i]);
         strcat(md5sum, tmp);
     }
-    DEBUG_PRINT("[%s] md5: %s", fileName, md5sum);
+    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
 
     char *savePath = (char *)malloc(512);
     char *saveName= (char *)malloc(512);
     char *origName = (char *)malloc(512);
     sprintf(savePath, "%s/%s", _img_path, md5sum);
-    DEBUG_PRINT("savePath: %s", savePath);
+    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
     if(isDir(savePath) == -1)
     {
         if(mkDir(savePath) == -1)
         {
-            DEBUG_ERROR("savePath[%s] Create Failed!", savePath);
+            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
             goto err;
         }
     }
     /*
     if(access(savePath, 0) == -1)
     {
-        DEBUG_PRINT("Begin to mkdir...");
+        LOG_PRINT(LOG_INFO, "Begin to mkdir...");
         int status = mkdir(savePath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(status == -1)
         {
-            DEBUG_ERROR("MKDIR Failed!");
+            LOG_PRINT(LOG_ERROR, "MKDIR Failed!");
             goto err;
         }
-        DEBUG_PRINT("Mkdir sucessfully!");
+        LOG_PRINT(LOG_INFO, "Mkdir sucessfully!");
     }
     */
     sprintf(origName, "0rig.%s", fileType);
     sprintf(saveName, "%s/%s", savePath, origName);
-    DEBUG_PRINT("saveName-->: %s", saveName);
+    LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
 
     /*
     char *savePath = (char *)malloc(512);
@@ -466,24 +466,24 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         savePath[svplen + 1] != '\0';
     }
     sprintf(saveName, "%s%s", savePath, fileName);
-    DEBUG_PRINT("saveName: %s", saveName);
+    LOG_PRINT(LOG_INFO, "saveName: %s", saveName);
     */
 
     if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
     {
-        DEBUG_ERROR("fd open failed!");
+        LOG_PRINT(LOG_ERROR, "fd open failed!");
         goto err;
     }
     wlen = write(fd, buff+start, imgSize);
     if(wlen == -1)
     {
-        DEBUG_ERROR("write() failed!");
+        LOG_PRINT(LOG_ERROR, "write() failed!");
         close(fd);
         goto err;
     }
     else if(wlen < imgSize)
     {
-        DEBUG_ERROR("Only part of data is been writed.");
+        LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
         close(fd);
         goto err;
     }
@@ -491,7 +491,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     {
         close(fd);
     }
-    DEBUG_PRINT("Image [%s] Write Successfully!", saveName);
+    LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
     // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
     char *cacheKey = (char *)malloc(strlen(md5sum) + 10);
     sprintf(cacheKey, "rspPath-/%s", md5sum);
@@ -500,7 +500,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     /*
     if(rename(saveName, newName) < 0)
     {
-        DEBUG_ERROR("Rename Failed!");
+        LOG_PRINT(LOG_ERROR, "Rename Failed!");
         goto err;
     }
     */
@@ -517,12 +517,12 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     evhttp_add_header(evhttp_request_get_output_headers(req),"Content-Type", "text/html");
     evhttp_send_reply(req, 200, "OK", evb);
     evbuffer_free(evb);
-    DEBUG_PRINT("============post_request_cb() DONE!===============");
+    LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
     return;
 
 err:
     evhttp_send_error(req, 500, "Image Upload Failed!");
-    DEBUG_PRINT("============post_request_cb() ERROR!===============");
+    LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
 }
 
 /* Callback used for zimg servise, such as:
@@ -547,7 +547,7 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     /* Decode the URI */
     decoded = evhttp_uri_parse(uri);
     if (!decoded) {
-        DEBUG_PRINT("It's not a good URI. Sending BADREQUEST");
+        LOG_PRINT(LOG_INFO, "It's not a good URI. Sending BADREQUEST");
         evhttp_send_error(req, HTTP_BADREQUEST, 0);
         return;
     }
@@ -555,15 +555,15 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     /* Let's see what path the user asked for. */
     path = evhttp_uri_get_path(decoded);
     if (!path) path = "/";
-    DEBUG_PRINT("path: %s", path);
+    LOG_PRINT(LOG_INFO, "path: %s", path);
 
-    DEBUG_PRINT("Got a zimg request for <%s>",  uri);
+    LOG_PRINT(LOG_INFO, "Got a zimg request for <%s>",  uri);
 
     /* We need to decode it, to see what path the user really wanted. */
     decoded_path = evhttp_uridecode(path, 0, NULL);
     if (decoded_path == NULL)
         goto err;
-    DEBUG_PRINT("decoded_path: %s", decoded_path);
+    LOG_PRINT(LOG_INFO, "decoded_path: %s", decoded_path);
     /* Don't allow any ".."s in the path, to avoid exposing stuff outside
      * of the docroot.  This test is both overzealous and underzealous:
      * it forbids aceptable paths like "/this/one..here", but it doesn't
@@ -577,26 +577,26 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     sprintf(cacheKey, "rspPath-%s", uri);
     if(find_cache(cacheKey, rspPath) == 1)
     {
-        DEBUG_PRINT("Hit Cache. rspPath: %s", rspPath);
+        LOG_PRINT(LOG_INFO, "Hit Cache. rspPath: %s", rspPath);
         goto openFile;
     }
 
 genRspPath:
     len = strlen(decoded_path)+strlen(docroot)+1;
     if (!(whole_path = malloc(len))) {
-        DEBUG_ERROR("malloc failed!");
+        LOG_PRINT(LOG_ERROR, "malloc failed!");
         goto err;
     }
     evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
 
     if (stat(whole_path, &st)<0) {
-        DEBUG_ERROR("stat whole_path[%s] failed!", whole_path);
+        LOG_PRINT(LOG_ERROR, "stat whole_path[%s] failed!", whole_path);
         goto err;
     }
 
     if (!S_ISDIR(st.st_mode)) 
     {
-        DEBUG_ERROR("MD5[%s] not find.", decoded_path);
+        LOG_PRINT(LOG_ERROR, "MD5[%s] not find.", decoded_path);
         goto err;
     }
     /* If it's a directory, read the comments and make a little
@@ -631,13 +631,13 @@ genRspPath:
     sprintf(cacheKey, "origPath-%s", uri);
     if(find_cache(cacheKey, origPath) == 1)
     {
-        DEBUG_PRINT("Hit Cache. origPath: %s", origPath);
+        LOG_PRINT(LOG_INFO, "Hit Cache. origPath: %s", origPath);
         goto getOrigPath;
     }
     DIR *dir;
     if (!(dir = opendir(whole_path)))
     {
-        DEBUG_ERROR("Dir[%s] open failed.", whole_path);
+        LOG_PRINT(LOG_ERROR, "Dir[%s] open failed.", whole_path);
         goto err;
     }
     struct dirent *ent;
@@ -652,7 +652,7 @@ genRspPath:
             len = strlen(tmpName) + 1;
             if(!(origName = malloc(len)))
             {
-                DEBUG_ERROR("malloc");
+                LOG_PRINT(LOG_ERROR, "malloc");
                 goto err;
             }
             strcpy(origName, tmpName);
@@ -663,21 +663,21 @@ genRspPath:
     closedir(dir);
     if(find == 0)
     {
-        DEBUG_ERROR("Get 0rig Image Failed.");
+        LOG_PRINT(LOG_ERROR, "Get 0rig Image Failed.");
         goto err;
     }
 
     sprintf(origPath, "%s/%s", whole_path, origName);
-    DEBUG_PRINT("0rig File Path: %s", origPath);
+    LOG_PRINT(LOG_INFO, "0rig File Path: %s", origPath);
 
     sprintf(cacheKey, "origPath-%s", uri);
     set_cache(cacheKey, origPath);
 
 getOrigPath:
-    DEBUG_PRINT("Goto getOrigPath...");
+    LOG_PRINT(LOG_INFO, "Goto getOrigPath...");
     if(width == 0 && height == 0)
     {
-        DEBUG_PRINT("Return original image.");
+        LOG_PRINT(LOG_INFO, "Return original image.");
         strcpy(rspPath, origPath);
     }
     else
@@ -691,25 +691,25 @@ getOrigPath:
         else
             sprintf(rspPath, "%s/%s.%s", whole_path, name, imgType);
     }
-    DEBUG_PRINT("File Path: %s", rspPath);
+    LOG_PRINT(LOG_INFO, "File Path: %s", rspPath);
 
     isGenRsp = 1;
-    DEBUG_PRINT("Section genRspPath has steped in. isGenRsp = %d", isGenRsp);
+    LOG_PRINT(LOG_INFO, "Section genRspPath has steped in. isGenRsp = %d", isGenRsp);
     sprintf(cacheKey, "rspPath-%s", uri);
     set_cache(cacheKey, rspPath);
 
 openFile:
-    DEBUG_PRINT("Goto Section openFile.");
+    LOG_PRINT(LOG_INFO, "Goto Section openFile.");
     const char *type = guess_content_type(rspPath);
-    DEBUG_PRINT("content_type: %s", type);
+    LOG_PRINT(LOG_INFO, "content_type: %s", type);
     if ((fd = open(rspPath, O_RDONLY)) < 0) 
     {
         if(isGenRsp == -1)
         {
-            DEBUG_PRINT("Section genRspPath haven't step in. isGenRsp = %d. Goto genRspPath...", isGenRsp);
+            LOG_PRINT(LOG_INFO, "Section genRspPath haven't step in. isGenRsp = %d. Goto genRspPath...", isGenRsp);
             goto genRspPath;
         }
-        DEBUG_PRINT("Not find the file, begin to resize...");
+        LOG_PRINT(LOG_INFO, "Not find the file, begin to resize...");
         MagickBooleanType status;
         MagickWand *magick_wand;
         MagickWandGenesis();
@@ -738,7 +738,7 @@ openFile:
         MagickResetIterator(magick_wand);
         while (MagickNextImage(magick_wand) != MagickFalse)
             MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
-        DEBUG_PRINT("Resize img succ.");
+        LOG_PRINT(LOG_INFO, "Resize img succ.");
         MagickSizeType imgSize;
         status = MagickGetImageLength(magick_wand, &imgSize);
         if (status == MagickFalse)
@@ -758,11 +758,11 @@ openFile:
             ThrowWandException(magick_wand);
             sprintf(cacheKey, "rspPath-%s", uri);
             del_cache(cacheKey);
-            DEBUG_WARNING("New img[%s] Write Failed!", rspPath);
+            LOG_PRINT(LOG_WARNING, "New img[%s] Write Failed!", rspPath);
         }
         else
         {
-            DEBUG_PRINT("New img[%s] storaged.", rspPath);
+            LOG_PRINT(LOG_INFO, "New img[%s] storaged.", rspPath);
         }
         magick_wand=DestroyMagickWand(magick_wand);
         MagickWandTerminus();
@@ -772,12 +772,12 @@ openFile:
     {
         /* Make sure the length still matches, now that we
          * opened the file :/ */
-        DEBUG_ERROR("fstat failed.");
+        LOG_PRINT(LOG_ERROR, "fstat failed.");
         goto err;
     }
     else
     {
-        DEBUG_PRINT("Got the file!");
+        LOG_PRINT(LOG_INFO, "Got the file!");
         evbuffer_add_file(evb, fd, 0, st.st_size);
     }
     evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
@@ -819,16 +819,16 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 
     if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
     {
-        DEBUG_PRINT("POST --> post_request_cb(req, %s)", _img_path);
+        LOG_PRINT(LOG_INFO, "POST --> post_request_cb(req, %s)", _img_path);
         post_request_cb(req, _img_path);
         /*
         if(post_request_cb(req, _img_path) == -1)
         {
-            DEBUG_ERROR("post_request_cb() call failed!");
+            LOG_PRINT(LOG_ERROR, "post_request_cb() call failed!");
             return;
         }
         */
-        DEBUG_PRINT("post_request_cb(req, %s) --> POST", _img_path);
+        LOG_PRINT(LOG_INFO, "post_request_cb(req, %s) --> POST", _img_path);
         return;
     }
     else if(evhttp_request_get_command(req) != EVHTTP_REQ_GET){
@@ -839,7 +839,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	/* Decode the URI */
 	decoded = evhttp_uri_parse(uri);
 	if (!decoded) {
-		DEBUG_PRINT("It's not a good URI. Sending BADREQUEST");
+		LOG_PRINT(LOG_INFO, "It's not a good URI. Sending BADREQUEST");
 		evhttp_send_error(req, HTTP_BADREQUEST, 0);
 		return;
 	}
@@ -850,10 +850,10 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 
     if(strstr(path, "favicon.ico"))
     {
-        DEBUG_PRINT("favicon.ico Request, Denied.");
+        LOG_PRINT(LOG_INFO, "favicon.ico Request, Denied.");
         return;
     }
-	DEBUG_PRINT("Got a GET request for <%s>",  uri);
+	LOG_PRINT(LOG_INFO, "Got a GET request for <%s>",  uri);
 
 
 	/* We need to decode it, to see what path the user really wanted. */
@@ -869,13 +869,13 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 
 	len = strlen(decoded_path)+strlen(docroot)+1;
 	if (!(whole_path = malloc(len))) {
-		DEBUG_ERROR("malloc");
+		LOG_PRINT(LOG_ERROR, "malloc");
 		goto err;
 	}
 	evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
 
 	if (stat(whole_path, &st)<0) {
-        DEBUG_WARNING("Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
+        LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
         zimg_cb(req, _img_path);
         goto done;
 	}
@@ -923,14 +923,14 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 		const char *type = guess_content_type(decoded_path);
 		if ((fd = open(whole_path, O_RDONLY)) < 0) 
         {
-            DEBUG_ERROR("Open File[%s] Failed!", whole_path);
+            LOG_PRINT(LOG_ERROR, "Open File[%s] Failed!", whole_path);
             goto err;
         }
 
 		if (fstat(fd, &st)<0) {
 			/* Make sure the length still matches, now that we
 			 * opened the file :/ */
-			DEBUG_ERROR("Fstat File[%s] Failed!", whole_path);
+			LOG_PRINT(LOG_ERROR, "Fstat File[%s] Failed!", whole_path);
 			goto err;
 		}
 		evhttp_add_header(evhttp_request_get_output_headers(req),
@@ -968,7 +968,7 @@ static int displayAddress(struct evhttp_bound_socket *handle)
     fd = evhttp_bound_socket_get_fd(handle);
     memset(&ss, 0, sizeof(ss));
     if (getsockname(fd, (struct sockaddr *)&ss, &socklen)) {
-        DEBUG_ERROR("getsockname() failed");
+        LOG_PRINT(LOG_ERROR, "getsockname() failed");
         return -1;
     }
     if (ss.ss_family == AF_INET) {
@@ -985,7 +985,7 @@ static int displayAddress(struct evhttp_bound_socket *handle)
     addr = evutil_inet_ntop(ss.ss_family, inaddr, addrbuf,
         sizeof(addrbuf));
     if (addr) {
-        DEBUG_PRINT("Listening on %s:%d", addr, got_port);
+        LOG_PRINT(LOG_INFO, "Listening on %s:%d", addr, got_port);
         evutil_snprintf(uri_root, sizeof(uri_root),
             "http://%s:%d",addr,got_port);
     } else {
@@ -1008,7 +1008,7 @@ int startHttpd(int port, char *root_path)
     base = event_base_new();
     if (!base) 
     {
-        DEBUG_ERROR("Couldn't create an event_base: exiting");
+        LOG_PRINT(LOG_ERROR, "Couldn't create an event_base: exiting");
         return -1;
     }
 
@@ -1016,7 +1016,7 @@ int startHttpd(int port, char *root_path)
     http = evhttp_new(base);
     if (!http) 
     {
-        DEBUG_ERROR("couldn't create evhttp. Exiting.");
+        LOG_PRINT(LOG_ERROR, "couldn't create evhttp. Exiting.");
         return -1;
     }
 
@@ -1034,7 +1034,7 @@ int startHttpd(int port, char *root_path)
     handle = evhttp_bind_socket_with_handle(http, ip, port);
     if (!handle) 
     {
-        DEBUG_ERROR("couldn't bind to port %d. Exiting.", port);
+        LOG_PRINT(LOG_ERROR, "couldn't bind to port %d. Exiting.", port);
         return -1;
     }
 

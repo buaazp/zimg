@@ -30,72 +30,96 @@
 #include <openssl/md5.h>
 #include <libmemcached/memcached.h>
 
+#define _DEBUG 1
+
 #define MAX_LINE 1024 
 
-char _root_path[256];
-char _img_path[256];
-char _log_path[256];
+char _root_path[512];
+char _img_path[512];
 int _port;
-int _log;
+int _log_id;
 
 memcached_st *_memc;
 
-#define DEBUG_PRINT(fmt, args...) \
+#define LOG_FATAL 0                        /* System is unusable */
+#define LOG_ALERT 1                        /* Action must be taken immediately */
+#define LOG_CRIT 2                       /* Critical conditions */
+#define LOG_ERROR 3                        /* Error conditions */
+#define LOG_WARNING 4                      /* Warning conditions */
+#define LOG_NOTICE 5                      /* Normal, but significant */
+#define LOG_INFO 6                      /* Information */
+#define LOG_DEBUG 7                       /* DEBUG message */
+
+
+#ifdef _DEBUG 
+  #define LOG_PRINT(level, fmt, ...)            \
+        log_printf0(_log_id, level, "%s:%d %s() "fmt,   \
+        __FILE__, __LINE__, __FUNCTION__, \
+        ##__VA_ARGS__)
+#else
+  #define LOG_PRINT(level, fmt, ...)            \
+        log_printf0(_log_id, level, fmt, ##__VA_ARGS__)
+#endif
+ 
+
+
+#ifdef _DEBUG
+  #define DEBUG_PRINT(fmt, args...) \
     do{ \
         time_t t; \
         struct tm *p; \
         struct timeval tv; \
-        struct timezone tz; \
-        gettimeofday (&tv , &tz); \
+        gettimeofday (&tv , NULL); \
         time(&t); \
         p = localtime(&t); \
-        fprintf(stdout, "\033[40;32;m[DEBUG] %.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d %s:%d %s() "fmt"\n\033[5m", \
+        fprintf(stdout, "\033[40;32;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [DEBUG] %s:%d %s() "fmt"\n\033[5m", \
                 (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
                 p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
                 __FILE__, __LINE__, __FUNCTION__, \
                 ##args ); \
     }while(0)
 
-#define DEBUG_WARNING(fmt, args...) \
+  #define DEBUG_WARNING(fmt, args...) \
     do{ \
         time_t t; \
         struct tm *p; \
         struct timeval tv; \
-        struct timezone tz; \
-        gettimeofday (&tv , &tz); \
+        gettimeofday (&tv , NULL); \
         time(&t); \
         p = localtime(&t); \
-        fprintf(stdout, "\033[40;33;m[WARNING] %.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d %s:%d %s() "fmt"\n\033[5m", \
+        fprintf(stdout, "\033[40;33;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [WARNING] %s:%d %s() "fmt"\n\033[5m", \
                 (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
                 p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
                 __FILE__, __LINE__, __FUNCTION__, \
                 ##args ); \
     }while(0)
 
-
-
-#define DEBUG_ERROR(fmt, args...) \
+  #define DEBUG_ERROR(fmt, args...) \
     do{ \
         time_t t; \
         struct tm *p; \
         struct timeval tv; \
-        struct timezone tz; \
-        gettimeofday (&tv , &tz); \
+        gettimeofday (&tv , NULL); \
         time(&t); \
         p = localtime(&t); \
-        fprintf(stderr, "\033[40;31;m[ERROR] %.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d %s:%d %s() "fmt"\n\033[5m", \
+        fprintf(stderr, "\033[40;31;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [ERROR] %s:%d %s() "fmt"\n\033[5m", \
                 (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
                 p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
                 __FILE__, __LINE__, __FUNCTION__, \
                 ##args ); \
     }while(0)
+#else
+  #define DEBUG_PRINT(fmt, args...) 
+  #define DEBUG_WARNING(fmt, args...) 
+  #define DEBUG_ERROR(fmt, args...)
+#endif
 
 #define ThrowWandException(wand) \
 { \
     char *description; \
     ExceptionType severity; \
     description=MagickGetException(wand,&severity); \
-    DEBUG_ERROR("%s %s %lu %s",GetMagickModule(),description); \
+    LOG_PRINT(LOG_ERROR, "%s %s %lu %s",GetMagickModule(),description); \
     description=(char *) MagickRelinquishMemory(description); \
 }
 
