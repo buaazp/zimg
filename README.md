@@ -1,8 +1,9 @@
 zimg
 ==========
 
-A light image storage system. <br />
+A light image storage and processing system. <br />
 It's entirely written by C. <br />
+zimg has high performance in image field. More infomation: [Benchmark](http://zimg.buaa.us/benchmark.html) <br />
 It's designed for high concurrency image server. <br />
 Contact me: zp@buaa.us <br />
 
@@ -12,7 +13,7 @@ Contact me: zp@buaa.us <br />
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system. <br />
 
 ### supplying:
-storage users' upload image. <br />
+storage users' upload images. <br />
 get image through HTTP protocol. <br />
 return resized image by request parameter. <br />
 use memcached to improve performance. <br />
