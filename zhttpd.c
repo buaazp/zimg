@@ -1,4 +1,5 @@
 #include "zhttpd.h"
+#include "zmd5.h"
 
 // this data is for KMP searching 
 int pi[128];
@@ -414,6 +415,27 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     LOG_PRINT(LOG_INFO, "imgSize = %d", imgSize);
 
     LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
+    md5_state_t mdctx;
+    md5_byte_t md_value[16];
+    char md5sum[33];
+    unsigned int md_len, i;
+    int h, l;
+    md5_init(&mdctx);
+    md5_append(&mdctx, (const unsigned char*)(buff+start), imgSize);
+    md5_finish(&mdctx, md_value);
+
+    for(i=0; i<16; ++i)
+    {
+        h = md_value[i] & 0xf0;
+        h >>= 4;
+        l = md_value[i] & 0x0f;
+        md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
+        md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
+    }
+    md5sum[32] = '\0';
+    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
+
+    /* MD% use openssl/md5.h
     unsigned char md[16];
     int i;
     char tmp[3]={'\0'}, md5sum[33]={'\0'};
@@ -424,6 +446,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         strcat(md5sum, tmp);
     }
     LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
+    */
 
     char *savePath = (char *)malloc(512);
     char *saveName= (char *)malloc(512);

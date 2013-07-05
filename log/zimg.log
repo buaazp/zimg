@@ -319,3 +319,209 @@
 2013/07/05 02:01:32:107939 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
 2013/07/05 02:01:32:107948 [INFO] main.c:133 main() Begin to Start Httpd Server...
 2013/07/05 02:01:32:108487 [INFO] zhttpd.c:988 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 11:07:42:686545 [INFO] main.c:37 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 11:07:42:686578 [INFO] main.c:40 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 11:07:42:686640 [INFO] main.c:49 main() Get port: 4869
+2013/07/05 11:07:42:686703 [INFO] main.c:60 main() Get mport: 11211
+2013/07/05 11:07:42:686779 [INFO] main.c:70 main() Get root_path: ./www
+2013/07/05 11:07:42:686835 [INFO] main.c:80 main() Get img-path: ./img
+2013/07/05 11:07:42:686887 [INFO] main.c:90 main() Get mip: 127.0.0.1
+2013/07/05 11:07:42:686902 [INFO] main.c:94 main() conf/config.ini Read Finished.
+2013/07/05 11:07:42:686918 [INFO] main.c:97 main() Begin to Init the Path zimg Using...
+2013/07/05 11:07:42:686963 [INFO] main.c:115 main() Paths Init Finished.
+2013/07/05 11:07:42:686978 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 11:07:42:695585 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 11:07:42:695617 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 11:07:42:695627 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 11:07:42:696342 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 11:08:49:175939 [INFO] zhttpd.c:879 send_document_cb() Got a GET request for </upload.html>
+2013/07/05 11:08:49:299747 [INFO] zhttpd.c:876 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 11:08:54:801293 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
+2013/07/05 11:08:54:801325 [INFO] zhttpd.c:236 post_request_cb() Headers:
+2013/07/05 11:08:54:801344 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/05 11:08:54:801357 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
+2013/07/05 11:08:54:801370 [INFO] zhttpd.c:241 post_request_cb()   Content-Length: 50696
+2013/07/05 11:08:54:801382 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
+2013/07/05 11:08:54:801392 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/05 11:08:54:801402 [INFO] zhttpd.c:241 post_request_cb()   Origin: http://127.0.0.1:4869
+2013/07/05 11:08:54:801411 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/05 11:08:54:801422 [INFO] zhttpd.c:241 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundary9mQ43NXM3Jl4KCR6
+2013/07/05 11:08:54:801439 [INFO] zhttpd.c:285 post_request_cb() boundary Find. boundary = ----WebKitFormBoundary9mQ43NXM3Jl4KCR6
+2013/07/05 11:08:54:801452 [INFO] zhttpd.c:241 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
+2013/07/05 11:08:54:801461 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/05 11:08:54:801472 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/05 11:08:54:801492 [INFO] zhttpd.c:303 post_request_cb() evblen = 50696
+2013/07/05 11:08:54:801545 [INFO] zhttpd.c:305 post_request_cb() rmblen = 50696
+2013/07/05 11:08:54:801561 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
+------WebKitFormBoundary9mQ43NXM3Jl4KCR6, strlen = 42
+2013/07/05 11:08:54:801582 [INFO] zhttpd.c:372 post_request_cb() fileName = hayz.jpg
+2013/07/05 11:08:54:801610 [INFO] zhttpd.c:394 post_request_cb() start = 112
+2013/07/05 11:08:54:801623 [INFO] zhttpd.c:401 post_request_cb() end = 136
+2013/07/05 11:08:54:801635 [INFO] zhttpd.c:403 post_request_cb() start = 140
+2013/07/05 11:08:54:801859 [INFO] zhttpd.c:410 post_request_cb() end = 50650
+2013/07/05 11:08:54:801874 [INFO] zhttpd.c:414 post_request_cb() postSize = 50696
+2013/07/05 11:08:54:801886 [INFO] zhttpd.c:415 post_request_cb() imgSize = 50510
+2013/07/05 11:08:54:801899 [INFO] zhttpd.c:417 post_request_cb() Begin to Caculate MD5...
+2013/07/05 11:08:54:802315 [INFO] zhttpd.c:436 post_request_cb() [hayz.jpg] md5(Use zmd5): c6c4949e54afdb0972d323028657a1ef
+2013/07/05 11:08:54:802332 [INFO] zhttpd.c:455 post_request_cb() savePath: ./img/c6c4949e54afdb0972d323028657a1ef
+2013/07/05 11:08:54:802472 [INFO] zhttpd.c:479 post_request_cb() saveName-->: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 11:08:54:802661 [INFO] zhttpd.c:517 post_request_cb() Image [./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg] Write Successfully!
+2013/07/05 11:08:54:802997 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[rspPath-/c6c4949e54afdb0972d323028657a1ef]: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 11:08:54:803048 [INFO] zhttpd.c:543 post_request_cb() ============post_request_cb() DONE!===============
+2013/07/05 11:14:03:761428 [INFO] main.c:37 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 11:14:03:761462 [INFO] main.c:40 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 11:14:03:761509 [INFO] main.c:49 main() Get port: 4869
+2013/07/05 11:14:03:761555 [INFO] main.c:60 main() Get mport: 11211
+2013/07/05 11:14:03:761592 [INFO] main.c:70 main() Get root_path: ./www
+2013/07/05 11:14:03:761632 [INFO] main.c:80 main() Get img-path: ./img
+2013/07/05 11:14:03:761671 [INFO] main.c:90 main() Get mip: 127.0.0.1
+2013/07/05 11:14:03:761685 [INFO] main.c:94 main() conf/config.ini Read Finished.
+2013/07/05 11:14:03:761696 [INFO] main.c:97 main() Begin to Init the Path zimg Using...
+2013/07/05 11:14:03:761730 [INFO] main.c:115 main() Paths Init Finished.
+2013/07/05 11:14:03:761742 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 11:14:03:761820 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 11:14:03:761838 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 11:14:03:761856 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 11:14:03:762365 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 11:14:12:416537 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
+2013/07/05 11:14:12:416570 [INFO] zhttpd.c:236 post_request_cb() Headers:
+2013/07/05 11:14:12:416579 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/05 11:14:12:416586 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
+2013/07/05 11:14:12:416593 [INFO] zhttpd.c:241 post_request_cb()   Content-Length: 50696
+2013/07/05 11:14:12:416600 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
+2013/07/05 11:14:12:416606 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/05 11:14:12:416613 [INFO] zhttpd.c:241 post_request_cb()   Origin: http://127.0.0.1:4869
+2013/07/05 11:14:12:416619 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/05 11:14:12:416626 [INFO] zhttpd.c:241 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundary9mQ43NXM3Jl4KCR6
+2013/07/05 11:14:12:416635 [INFO] zhttpd.c:285 post_request_cb() boundary Find. boundary = ----WebKitFormBoundary9mQ43NXM3Jl4KCR6
+2013/07/05 11:14:12:416645 [INFO] zhttpd.c:241 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
+2013/07/05 11:14:12:416655 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/05 11:14:12:416666 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/05 11:14:12:416686 [INFO] zhttpd.c:303 post_request_cb() evblen = 50696
+2013/07/05 11:14:12:416738 [INFO] zhttpd.c:305 post_request_cb() rmblen = 50696
+2013/07/05 11:14:12:416755 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
+------WebKitFormBoundary9mQ43NXM3Jl4KCR6, strlen = 42
+2013/07/05 11:14:12:416775 [INFO] zhttpd.c:372 post_request_cb() fileName = hayz.jpg
+2013/07/05 11:14:12:416802 [INFO] zhttpd.c:394 post_request_cb() start = 112
+2013/07/05 11:14:12:416814 [INFO] zhttpd.c:401 post_request_cb() end = 136
+2013/07/05 11:14:12:416825 [INFO] zhttpd.c:403 post_request_cb() start = 140
+2013/07/05 11:14:12:417085 [INFO] zhttpd.c:410 post_request_cb() end = 50650
+2013/07/05 11:14:12:417102 [INFO] zhttpd.c:414 post_request_cb() postSize = 50696
+2013/07/05 11:14:12:417113 [INFO] zhttpd.c:415 post_request_cb() imgSize = 50510
+2013/07/05 11:14:12:417125 [INFO] zhttpd.c:417 post_request_cb() Begin to Caculate MD5...
+2013/07/05 11:14:12:417545 [INFO] zhttpd.c:436 post_request_cb() [hayz.jpg] md5(Use zmd5): c6c4949e54afdb0972d323028657a1ef
+2013/07/05 11:14:12:417578 [INFO] zhttpd.c:455 post_request_cb() savePath: ./img/c6c4949e54afdb0972d323028657a1ef
+2013/07/05 11:14:12:417610 [INFO] zhttpd.c:479 post_request_cb() saveName-->: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 11:14:12:417753 [INFO] zhttpd.c:517 post_request_cb() Image [./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg] Write Successfully!
+2013/07/05 11:14:12:418064 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[rspPath-/c6c4949e54afdb0972d323028657a1ef]: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 11:14:12:418266 [INFO] zhttpd.c:543 post_request_cb() ============post_request_cb() DONE!===============
+2013/07/05 11:14:12:687447 [INFO] zhttpd.c:876 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 11:15:29:068130 [INFO] main.c:37 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 11:15:29:068163 [INFO] main.c:40 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 11:15:29:068215 [INFO] main.c:49 main() Get port: 4869
+2013/07/05 11:15:29:068263 [INFO] main.c:60 main() Get mport: 11211
+2013/07/05 11:15:29:068304 [INFO] main.c:70 main() Get root_path: ./www
+2013/07/05 11:15:29:068347 [INFO] main.c:80 main() Get img-path: ./img
+2013/07/05 11:15:29:068388 [INFO] main.c:90 main() Get mip: 127.0.0.1
+2013/07/05 11:15:29:068401 [INFO] main.c:94 main() conf/config.ini Read Finished.
+2013/07/05 11:15:29:068412 [INFO] main.c:97 main() Begin to Init the Path zimg Using...
+2013/07/05 11:15:29:068444 [INFO] main.c:115 main() Paths Init Finished.
+2013/07/05 11:15:29:068457 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 11:15:29:068528 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 11:15:29:068542 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 11:15:29:068554 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 11:15:29:069093 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 11:15:33:280555 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
+2013/07/05 11:15:33:280586 [INFO] zhttpd.c:236 post_request_cb() Headers:
+2013/07/05 11:15:33:280597 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/05 11:15:33:280605 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
+2013/07/05 11:15:33:280616 [INFO] zhttpd.c:241 post_request_cb()   Content-Length: 50696
+2013/07/05 11:15:33:280627 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
+2013/07/05 11:15:33:280640 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/05 11:15:33:280651 [INFO] zhttpd.c:241 post_request_cb()   Origin: http://127.0.0.1:4869
+2013/07/05 11:15:33:280662 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/05 11:15:33:280674 [INFO] zhttpd.c:241 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundary9mQ43NXM3Jl4KCR6
+2013/07/05 11:15:33:280687 [INFO] zhttpd.c:285 post_request_cb() boundary Find. boundary = ----WebKitFormBoundary9mQ43NXM3Jl4KCR6
+2013/07/05 11:15:33:280698 [INFO] zhttpd.c:241 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
+2013/07/05 11:15:33:280709 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/05 11:15:33:280720 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/05 11:15:33:280740 [INFO] zhttpd.c:303 post_request_cb() evblen = 50696
+2013/07/05 11:15:33:280797 [INFO] zhttpd.c:305 post_request_cb() rmblen = 50696
+2013/07/05 11:15:33:280814 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
+------WebKitFormBoundary9mQ43NXM3Jl4KCR6, strlen = 42
+2013/07/05 11:15:33:280834 [INFO] zhttpd.c:372 post_request_cb() fileName = hayz.jpg
+2013/07/05 11:15:33:280862 [INFO] zhttpd.c:394 post_request_cb() start = 112
+2013/07/05 11:15:33:280873 [INFO] zhttpd.c:401 post_request_cb() end = 136
+2013/07/05 11:15:33:280909 [INFO] zhttpd.c:403 post_request_cb() start = 140
+2013/07/05 11:15:33:281169 [INFO] zhttpd.c:410 post_request_cb() end = 50650
+2013/07/05 11:15:33:281188 [INFO] zhttpd.c:414 post_request_cb() postSize = 50696
+2013/07/05 11:15:33:281199 [INFO] zhttpd.c:415 post_request_cb() imgSize = 50510
+2013/07/05 11:15:33:281211 [INFO] zhttpd.c:417 post_request_cb() Begin to Caculate MD5...
+2013/07/05 11:15:33:281629 [INFO] zhttpd.c:436 post_request_cb() [hayz.jpg] md5(Use zmd5): c6c4949e54afdb0972d323028657a1ef
+2013/07/05 11:15:33:281648 [INFO] zhttpd.c:455 post_request_cb() savePath: ./img/c6c4949e54afdb0972d323028657a1ef
+2013/07/05 11:15:33:281687 [INFO] zhttpd.c:479 post_request_cb() saveName-->: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 11:15:33:281867 [INFO] zhttpd.c:517 post_request_cb() Image [./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg] Write Successfully!
+2013/07/05 11:15:33:282245 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[rspPath-/c6c4949e54afdb0972d323028657a1ef]: ./img/c6c4949e54afdb0972d323028657a1ef/0rig.jpg
+2013/07/05 11:15:33:282442 [INFO] zhttpd.c:543 post_request_cb() ============post_request_cb() DONE!===============
+2013/07/05 11:15:33:590748 [INFO] zhttpd.c:876 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 11:20:21:508564 [INFO] main.c:37 main() 这是INFO LOG测试，LEVEL=6.
+2013/07/05 11:20:21:508598 [INFO] main.c:40 main() Begin to Read Config File[conf/config.ini]
+2013/07/05 11:20:21:508649 [INFO] main.c:49 main() Get port: 4869
+2013/07/05 11:20:21:508691 [INFO] main.c:60 main() Get mport: 11211
+2013/07/05 11:20:21:508726 [INFO] main.c:70 main() Get root_path: ./www
+2013/07/05 11:20:21:508764 [INFO] main.c:80 main() Get img-path: ./img
+2013/07/05 11:20:21:508800 [INFO] main.c:90 main() Get mip: 127.0.0.1
+2013/07/05 11:20:21:508812 [INFO] main.c:94 main() conf/config.ini Read Finished.
+2013/07/05 11:20:21:508823 [INFO] main.c:97 main() Begin to Init the Path zimg Using...
+2013/07/05 11:20:21:508854 [INFO] main.c:115 main() Paths Init Finished.
+2013/07/05 11:20:21:508865 [INFO] main.c:118 main() Begin to Init Memcached Connection...
+2013/07/05 11:20:21:508932 [INFO] main.c:128 main() Memcached Connection Init Finished.
+2013/07/05 11:20:21:508944 [INFO] main.c:129 main() memcached connection to: 127.0.0.1:11211
+2013/07/05 11:20:21:508957 [INFO] main.c:133 main() Begin to Start Httpd Server...
+2013/07/05 11:20:21:509453 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
+2013/07/05 11:20:24:335182 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
+2013/07/05 11:20:24:335217 [INFO] zhttpd.c:236 post_request_cb() Headers:
+2013/07/05 11:20:24:335226 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/05 11:20:24:335233 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
+2013/07/05 11:20:24:335240 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
+2013/07/05 11:20:24:335253 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/05 11:20:24:335264 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/05 11:20:24:335275 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/05 11:20:24:335286 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/05 11:20:24:335307 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
+--, strlen = 4
+2013/07/05 11:20:24:335320 [ERROR] zhttpd.c:348 post_request_cb() Content-Disposition Not Found!
+2013/07/05 11:20:24:335522 [INFO] zhttpd.c:548 post_request_cb() ============post_request_cb() ERROR!===============
+2013/07/05 11:20:24:461832 [INFO] zhttpd.c:876 send_document_cb() favicon.ico Request, Denied.
+2013/07/05 11:20:34:910897 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
+2013/07/05 11:20:34:910930 [INFO] zhttpd.c:236 post_request_cb() Headers:
+2013/07/05 11:20:34:910965 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/05 11:20:34:910978 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
+2013/07/05 11:20:34:910990 [INFO] zhttpd.c:241 post_request_cb()   Content-Length: 49759
+2013/07/05 11:20:34:911003 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
+2013/07/05 11:20:34:911015 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/05 11:20:34:911025 [INFO] zhttpd.c:241 post_request_cb()   Origin: http://127.0.0.1:4869
+2013/07/05 11:20:34:911036 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/05 11:20:34:911047 [INFO] zhttpd.c:241 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundary9P0AZzTcAzoStc4b
+2013/07/05 11:20:34:911066 [INFO] zhttpd.c:285 post_request_cb() boundary Find. boundary = ----WebKitFormBoundary9P0AZzTcAzoStc4b
+2013/07/05 11:20:34:911079 [INFO] zhttpd.c:241 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
+2013/07/05 11:20:34:911089 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/05 11:20:34:911103 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/05 11:20:34:911113 [INFO] zhttpd.c:303 post_request_cb() evblen = 49759
+2013/07/05 11:20:34:911170 [INFO] zhttpd.c:305 post_request_cb() rmblen = 49759
+2013/07/05 11:20:34:911188 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
+------WebKitFormBoundary9P0AZzTcAzoStc4b, strlen = 42
+2013/07/05 11:20:34:911204 [INFO] zhttpd.c:372 post_request_cb() fileName = gray.jpg
+2013/07/05 11:20:34:911233 [INFO] zhttpd.c:394 post_request_cb() start = 112
+2013/07/05 11:20:34:911246 [INFO] zhttpd.c:401 post_request_cb() end = 136
+2013/07/05 11:20:34:911257 [INFO] zhttpd.c:403 post_request_cb() start = 140
+2013/07/05 11:20:34:911514 [INFO] zhttpd.c:410 post_request_cb() end = 49713
+2013/07/05 11:20:34:911532 [INFO] zhttpd.c:414 post_request_cb() postSize = 49759
+2013/07/05 11:20:34:911544 [INFO] zhttpd.c:415 post_request_cb() imgSize = 49573
+2013/07/05 11:20:34:911557 [INFO] zhttpd.c:417 post_request_cb() Begin to Caculate MD5...
+2013/07/05 11:20:34:911975 [INFO] zhttpd.c:436 post_request_cb() [gray.jpg] md5: 926ee2f570dc50b2575e35a6712b08ce
+2013/07/05 11:20:34:911993 [INFO] zhttpd.c:455 post_request_cb() savePath: ./img/926ee2f570dc50b2575e35a6712b08ce
+2013/07/05 11:20:34:912167 [INFO] zhttpd.c:479 post_request_cb() saveName-->: ./img/926ee2f570dc50b2575e35a6712b08ce/0rig.jpg
+2013/07/05 11:20:34:912347 [INFO] zhttpd.c:517 post_request_cb() Image [./img/926ee2f570dc50b2575e35a6712b08ce/0rig.jpg] Write Successfully!
+2013/07/05 11:20:34:912867 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[rspPath-/926ee2f570dc50b2575e35a6712b08ce]: ./img/926ee2f570dc50b2575e35a6712b08ce/0rig.jpg
+2013/07/05 11:20:34:912991 [INFO] zhttpd.c:543 post_request_cb() ============post_request_cb() DONE!===============
