@@ -107,6 +107,14 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     memset(tmbuf, 0, sizeof(tmbuf));
     strftime(tmbuf, sizeof(tmbuf), "%Y/%m/%d %H:%M:%S", localtime(&t));
     fprintf (fp, "%s:%.6d ", tmbuf, tv.tv_usec);
+
+    /*
+    int i;
+    for(i = 0; i < 8; i++)
+    {
+        DEBUG_PRINT("log_level_descs[%d].endesc = %s.", i, log_level_descs[i].endesc);
+    }
+    */
  
     //等级信息
     fprintf(fp, "[%s] ", log_level_descs[level].endesc);

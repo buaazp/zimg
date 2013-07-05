@@ -2,7 +2,7 @@
 #include "zmd5.h"
 
 // this data is for KMP searching 
-int pi[128];
+//int pi[128];
 char uri_root[512];
 
 static const struct table_entry {
@@ -88,65 +88,65 @@ static void dump_request_cb(struct evhttp_request *req, void *arg)
 	evhttp_send_reply(req, 200, "OK", NULL);
 }
 
-/* KMP for searching */
-void kmp_init(const unsigned char *pattern, int pattern_size)  // prefix-function
-{
-    pi[0] = 0;  // pi[0] always equals to 0 by defination
-    int k = 0;  // an important pointer
-    int q;
-    for(q = 1; q < pattern_size; q++)  // find each pi[q] for pattern[q]
-    {
-        while(k>0 && pattern[k+1]!=pattern[q])
-            k = pi[k];  // use previous prefixes to match pattern[0..q]
-
-        if(pattern[k+1] == pattern[q]) // if pattern[0..(k+1)] is a prefix
-            k++;             // let k = k + 1
-
-        pi[q] = k;   // be ware, (0 <= k <= q), and (pi[k] < k)
-    }
-    // The worst-case time complexity of this procedure is O(pattern_size)
-}
-
-int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen)
-{
-    // this function does string matching using the KMP algothm.
-    // matcher and pattern are pointers to BINARY sequencies, while mlen
-    // and plen are their lengths respectively.
-    // if a match is found, return its position immediately.
-    // return -1 if no match can be found.
-
-    if(!mlen || !plen || mlen < plen) // take care of illegal parameters
-        return -1;
-
-    kmp_init(pattern, plen);  // prefix-function
-
-    int i=0, j=0;
-    while(i < mlen && j < plen)  // don't increase i and j at this level
-    {
-        if(matcher[i+j] == pattern[j])
-            j++;
-        else if(j == 0)  // dismatch: matcher[i] vs pattern[0]
-            i++;
-        else      // dismatch: matcher[i+j] vs pattern[j], and j>0
-        {
-            i = i + j - pi[j-1];  // i: jump forward by (j - pi[j-1])
-            j = pi[j-1];          // j: reset to the proper position
-        }
-    }
-    if(j == plen) // found a match!!
-    {
-        /*
-        LOG_PRINT(LOG_INFO, "i = %d, j = %d", i, j);
-        if(matcher[i] == '\r')
-            LOG_PRINT(LOG_INFO, "buff[%d] = \\R", i);
-        if(matcher[i+1] == '\n')
-            LOG_PRINT(LOG_INFO, "buff[%d] = \\N", i + 1);
-            */
-        return i;
-    }
-    else          // if no match was found
-        return -1;
-}
+///* KMP for searching */
+//void kmp_init(const unsigned char *pattern, int pattern_size)  // prefix-function
+//{
+//    pi[0] = 0;  // pi[0] always equals to 0 by defination
+//    int k = 0;  // an important pointer
+//    int q;
+//    for(q = 1; q < pattern_size; q++)  // find each pi[q] for pattern[q]
+//    {
+//        while(k>0 && pattern[k+1]!=pattern[q])
+//            k = pi[k];  // use previous prefixes to match pattern[0..q]
+//
+//        if(pattern[k+1] == pattern[q]) // if pattern[0..(k+1)] is a prefix
+//            k++;             // let k = k + 1
+//
+//        pi[q] = k;   // be ware, (0 <= k <= q), and (pi[k] < k)
+//    }
+//    // The worst-case time complexity of this procedure is O(pattern_size)
+//}
+//
+//int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen)
+//{
+//    // this function does string matching using the KMP algothm.
+//    // matcher and pattern are pointers to BINARY sequencies, while mlen
+//    // and plen are their lengths respectively.
+//    // if a match is found, return its position immediately.
+//    // return -1 if no match can be found.
+//
+//    if(!mlen || !plen || mlen < plen) // take care of illegal parameters
+//        return -1;
+//
+//    kmp_init(pattern, plen);  // prefix-function
+//
+//    int i=0, j=0;
+//    while(i < mlen && j < plen)  // don't increase i and j at this level
+//    {
+//        if(matcher[i+j] == pattern[j])
+//            j++;
+//        else if(j == 0)  // dismatch: matcher[i] vs pattern[0]
+//            i++;
+//        else      // dismatch: matcher[i+j] vs pattern[j], and j>0
+//        {
+//            i = i + j - pi[j-1];  // i: jump forward by (j - pi[j-1])
+//            j = pi[j-1];          // j: reset to the proper position
+//        }
+//    }
+//    if(j == plen) // found a match!!
+//    {
+//        /*
+//        LOG_PRINT(LOG_INFO, "i = %d, j = %d", i, j);
+//        if(matcher[i] == '\r')
+//            LOG_PRINT(LOG_INFO, "buff[%d] = \\R", i);
+//        if(matcher[i+1] == '\n')
+//            LOG_PRINT(LOG_INFO, "buff[%d] = \\N", i + 1);
+//            */
+//        return i;
+//    }
+//    else          // if no match was found
+//        return -1;
+//}
 
 int find_cache(const char *key, char *value)
 {

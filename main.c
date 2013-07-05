@@ -9,6 +9,8 @@ int main(int argc, char **argv)
     char strport[10];
     char strmport[10];
     char _mip[128];
+    extern int _log_id;
+    _log_id = -1;
 
     if(getConfKey(conf, "zlog", "log-path", log_path) == -1)
     {
@@ -34,7 +36,14 @@ int main(int argc, char **argv)
     char *logFile = (char *)malloc(strlen(log_path) + 10);
     sprintf(logFile, "%s/zimg.log", log_path);
     _log_id = log_open(logFile, "a");
-    LOG_PRINT(LOG_INFO, "这是INFO LOG测试，LEVEL=%d.", LOG_INFO);
+    /*
+    int i;
+    for(i = 0; i < 8; i++)
+    {
+        DEBUG_PRINT("这是DEBUG测试，LEVEL=%d.", i);
+        LOG_PRINT(i, "这是LOG测试，LEVEL=%d.", i);
+    }
+    */
 
 
     LOG_PRINT(LOG_INFO, "Begin to Read Config File[%s]", conf);
