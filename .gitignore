@@ -26,3 +26,5 @@ img/.DS_Store
 *.swp
 
 *.log
+
+old/
