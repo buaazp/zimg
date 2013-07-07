@@ -14,19 +14,19 @@ int main(int argc, char **argv)
 
     if(getConfKey(conf, "zlog", "log-path", log_path) == -1)
     {
-        DEBUG_WARNING("Key log-path read failed. Use ./log as default.");
+        LOG_PRINT(LOG_WARNING, "Key log-path read failed. Use ./log as default.");
         strcpy(log_path, "./log");
     }
     else
     {
-        DEBUG_PRINT("Get log-path: %s", log_path);
+        LOG_PRINT(LOG_INFO, "Get log-path: %s", log_path);
     }
 
     if(isDir(log_path) != 1)
     {
         if(mkDir(log_path) != 1)
         {
-            DEBUG_ERROR("log_path[%s] Create Failed!", log_path);
+            LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", log_path);
             return -1;
         }
     }

@@ -77,20 +77,27 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     va_list args;
     int level;
  
+    /*
     if (!log_valid(log_id))
         return;
+        */
  
 #ifndef _DEBUG
     if (log_level == LOG_LEVEL_DEBUG)
         return;
 #endif
  
-    spin_lock(&log_locks[log_id]);
- 
-    if (!(fp = log_files[log_id]))
+
+    if (!log_valid(log_id))
+        fp = stdout;
+    else
     {
-        spin_unlock(&log_locks[log_id]);
-        return;
+        spin_lock(&log_locks[log_id]);
+        if (!(fp = log_files[log_id]))
+        {
+            spin_unlock(&log_locks[log_id]);
+            return;
+        }
     }
  
     if (log_level > LOG_LEVEL_DEBUG)
@@ -129,9 +136,15 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     if (*p != '\n')
         fputc('\n', fp);
  
-    fflush(log_files[log_id]);
- 
-    spin_unlock(&log_locks[log_id]);
+    //缓冲区数据写入文件流
+    fflush(fp);
+
+    if (log_valid(log_id))
+    {
+        //fflush(log_files[log_id]);
+
+        spin_unlock(&log_locks[log_id]);
+    }
 }
  
 /* 将缓冲区数据写入文件 */

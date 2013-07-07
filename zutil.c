@@ -101,18 +101,12 @@ int isDir(const char *path)
     struct stat st;
     if(stat(path, &st)<0)
     {
-        if(_log_id == -1)
-            DEBUG_ERROR("Path[%s] is Not Existed!", path);
-        else
-            LOG_PRINT(LOG_ERROR, "Path[%s] is Not Existed!", path);
+        LOG_PRINT(LOG_ERROR, "Path[%s] is Not Existed!", path);
         return -1;
     }
     if(S_ISDIR(st.st_mode))
     {
-        if(_log_id == -1)
-            DEBUG_PRINT("Path[%s] is A Dir.", path);
-        else
-            LOG_PRINT(LOG_INFO, "Path[%s] is A Dir.", path);
+        LOG_PRINT(LOG_INFO, "Path[%s] is A Dir.", path);
         return 1;
     }
     else
@@ -123,31 +117,19 @@ int mkDir(const char *path)
 {
     if(access(path, 0) == -1)
     {
-        if(_log_id == -1)
-            DEBUG_PRINT("Begin to mkDir()...");
-        else
-            LOG_PRINT(LOG_INFO, "Begin to mkDir()...");
+        LOG_PRINT(LOG_INFO, "Begin to mkDir()...");
         int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(status == -1)
         {
-            if(_log_id == -1)
-                DEBUG_ERROR("mkDir[%s] Failed!", path);
-            else
-                LOG_PRINT(LOG_ERROR, "mkDir[%s] Failed!", path);
+            LOG_PRINT(LOG_ERROR, "mkDir[%s] Failed!", path);
             return -1;
         }
-        if(_log_id == -1)
-            DEBUG_PRINT("mkDir[%s] sucessfully!", path);
-        else
-            LOG_PRINT(LOG_INFO, "mkDir[%s] sucessfully!", path);
+        LOG_PRINT(LOG_INFO, "mkDir[%s] sucessfully!", path);
         return 1;
     }
     else
     {
-        if(_log_id == -1)
-            DEBUG_ERROR("Path[%s] is Existed!", path);
-        else
-            LOG_PRINT(LOG_ERROR, "Path[%s] is Existed!", path);
+        LOG_PRINT(LOG_ERROR, "Path[%s] is Existed!", path);
         return -1;
     }
 }
