@@ -1,5 +1,4 @@
 #include "zhttpd.h"
-#include "zmd5.h"
 
 // this data is for KMP searching 
 //int pi[128];
@@ -293,8 +292,9 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char *fileName;
     char buffline[128];
     int rmblen, evblen;
-    int imgSize = 0, wlen = 0;
-    int fd = -1;
+    int imgSize = 0;
+//    int wlen = 0;
+//    int fd = -1;
 
     //************* print the binary data of img
     //puts("Input data: <<<");
@@ -413,112 +413,120 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
 
     LOG_PRINT(LOG_INFO, "postSize = %d", postSize);
     LOG_PRINT(LOG_INFO, "imgSize = %d", imgSize);
-
-    LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
-    md5_state_t mdctx;
-    md5_byte_t md_value[16];
     char md5sum[33];
-    unsigned int md_len, i;
-    int h, l;
-    md5_init(&mdctx);
-    md5_append(&mdctx, (const unsigned char*)(buff+start), imgSize);
-    md5_finish(&mdctx, md_value);
 
-    for(i=0; i<16; ++i)
+    LOG_PRINT(LOG_INFO, "Begin to Save Image...");
+    if(save_img(fileType, buff+start, imgSize, md5sum) == -1)
     {
-        h = md_value[i] & 0xf0;
-        h >>= 4;
-        l = md_value[i] & 0x0f;
-        md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
-        md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
-    }
-    md5sum[32] = '\0';
-    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
-
-    /* MD% use openssl/md5.h
-    unsigned char md[16];
-    int i;
-    char tmp[3]={'\0'}, md5sum[33]={'\0'};
-    MD5(buff+start, imgSize, md);
-    for (i = 0; i < 16; i++)
-    {
-        sprintf(tmp, "%2.2x", md[i]);
-        strcat(md5sum, tmp);
-    }
-    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
-    */
-
-    char *savePath = (char *)malloc(512);
-    char *saveName= (char *)malloc(512);
-    char *origName = (char *)malloc(512);
-    sprintf(savePath, "%s/%s", _img_path, md5sum);
-    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
-    if(isDir(savePath) == -1)
-    {
-        if(mkDir(savePath) == -1)
-        {
-            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
-            goto err;
-        }
-    }
-    /*
-    if(access(savePath, 0) == -1)
-    {
-        LOG_PRINT(LOG_INFO, "Begin to mkdir...");
-        int status = mkdir(savePath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        if(status == -1)
-        {
-            LOG_PRINT(LOG_ERROR, "MKDIR Failed!");
-            goto err;
-        }
-        LOG_PRINT(LOG_INFO, "Mkdir sucessfully!");
-    }
-    */
-    sprintf(origName, "0rig.%s", fileType);
-    sprintf(saveName, "%s/%s", savePath, origName);
-    LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
-
-    /*
-    char *savePath = (char *)malloc(512);
-    char *saveName = (char *)malloc(512);
-    strcpy(savePath, _img_path);
-    int svplen = strlen(savePath);
-    if(savePath[svplen - 1] != '/')
-    {
-        savePath[svplen] = '/';
-        savePath[svplen + 1] != '\0';
-    }
-    sprintf(saveName, "%s%s", savePath, fileName);
-    LOG_PRINT(LOG_INFO, "saveName: %s", saveName);
-    */
-
-    if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
-    {
-        LOG_PRINT(LOG_ERROR, "fd open failed!");
+        LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
     }
-    wlen = write(fd, buff+start, imgSize);
-    if(wlen == -1)
-    {
-        LOG_PRINT(LOG_ERROR, "write() failed!");
-        close(fd);
-        goto err;
-    }
-    else if(wlen < imgSize)
-    {
-        LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
-        close(fd);
-        goto err;
-    }
-    if(fd != -1)
-    {
-        close(fd);
-    }
-    LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
-    // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
-    char *cacheKey = (char *)malloc(strlen(md5sum) + 10);
-    sprintf(cacheKey, "rspPath-/%s", md5sum);
-    set_cache(cacheKey, saveName);
+
+//    LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
+//    md5_state_t mdctx;
+//    md5_byte_t md_value[16];
+//    char md5sum[33];
+//    unsigned int md_len, i;
+//    int h, l;
+//    md5_init(&mdctx);
+//    md5_append(&mdctx, (const unsigned char*)(buff+start), imgSize);
+//    md5_finish(&mdctx, md_value);
+//
+//    for(i=0; i<16; ++i)
+//    {
+//        h = md_value[i] & 0xf0;
+//        h >>= 4;
+//        l = md_value[i] & 0x0f;
+//        md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
+//        md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
+//    }
+//    md5sum[32] = '\0';
+//    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
+//
+//    /* MD% use openssl/md5.h
+//    unsigned char md[16];
+//    int i;
+//    char tmp[3]={'\0'}, md5sum[33]={'\0'};
+//    MD5(buff+start, imgSize, md);
+//    for (i = 0; i < 16; i++)
+//    {
+//        sprintf(tmp, "%2.2x", md[i]);
+//        strcat(md5sum, tmp);
+//    }
+//    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
+//    */
+//
+//    char *savePath = (char *)malloc(512);
+//    char *saveName= (char *)malloc(512);
+//    char *origName = (char *)malloc(512);
+//    sprintf(savePath, "%s/%s", _img_path, md5sum);
+//    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
+//    if(isDir(savePath) == -1)
+//    {
+//        if(mkDir(savePath) == -1)
+//        {
+//            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
+//            goto err;
+//        }
+//    }
+//    /*
+//    if(access(savePath, 0) == -1)
+//    {
+//        LOG_PRINT(LOG_INFO, "Begin to mkdir...");
+//        int status = mkdir(savePath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//        if(status == -1)
+//        {
+//            LOG_PRINT(LOG_ERROR, "MKDIR Failed!");
+//            goto err;
+//        }
+//        LOG_PRINT(LOG_INFO, "Mkdir sucessfully!");
+//    }
+//    */
+//    sprintf(origName, "0rig.%s", fileType);
+//    sprintf(saveName, "%s/%s", savePath, origName);
+//    LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
+//
+//    /*
+//    char *savePath = (char *)malloc(512);
+//    char *saveName = (char *)malloc(512);
+//    strcpy(savePath, _img_path);
+//    int svplen = strlen(savePath);
+//    if(savePath[svplen - 1] != '/')
+//    {
+//        savePath[svplen] = '/';
+//        savePath[svplen + 1] != '\0';
+//    }
+//    sprintf(saveName, "%s%s", savePath, fileName);
+//    LOG_PRINT(LOG_INFO, "saveName: %s", saveName);
+//    */
+//
+//    if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
+//    {
+//        LOG_PRINT(LOG_ERROR, "fd open failed!");
+//        goto err;
+//    }
+//    wlen = write(fd, buff+start, imgSize);
+//    if(wlen == -1)
+//    {
+//        LOG_PRINT(LOG_ERROR, "write() failed!");
+//        close(fd);
+//        goto err;
+//    }
+//    else if(wlen < imgSize)
+//    {
+//        LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
+//        close(fd);
+//        goto err;
+//    }
+//    if(fd != -1)
+//    {
+//        close(fd);
+//    }
+//    LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
+//    // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+//    char *cacheKey = (char *)malloc(strlen(md5sum) + 10);
+//    sprintf(cacheKey, "rspPath-/%s", md5sum);
+//    set_cache(cacheKey, saveName);
 
     /*
     if(rename(saveName, newName) < 0)
@@ -562,8 +570,8 @@ static void zimg_cb(struct evhttp_request *req, void *arg)
     char *decoded_path;
     char *whole_path = NULL;
     size_t len;
-    int fd = -1;
     struct stat st;
+    int fd = -1;
     int width, height, scaled;
     int isGenRsp = -1;
 

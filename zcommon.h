@@ -63,56 +63,56 @@ memcached_st *_memc;
  
 
 
-#ifdef _DEBUG
-  #define DEBUG_PRINT(fmt, args...) \
-    do{ \
-        time_t t; \
-        struct tm *p; \
-        struct timeval tv; \
-        gettimeofday (&tv , NULL); \
-        time(&t); \
-        p = localtime(&t); \
-        fprintf(stdout, "\033[40;32;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [DEBUG] %s:%d %s() "fmt"\n\033[5m", \
-                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
-                __FILE__, __LINE__, __FUNCTION__, \
-                ##args ); \
-    }while(0)
-
-  #define DEBUG_WARNING(fmt, args...) \
-    do{ \
-        time_t t; \
-        struct tm *p; \
-        struct timeval tv; \
-        gettimeofday (&tv , NULL); \
-        time(&t); \
-        p = localtime(&t); \
-        fprintf(stdout, "\033[40;33;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [WARNING] %s:%d %s() "fmt"\n\033[5m", \
-                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
-                __FILE__, __LINE__, __FUNCTION__, \
-                ##args ); \
-    }while(0)
-
-  #define DEBUG_ERROR(fmt, args...) \
-    do{ \
-        time_t t; \
-        struct tm *p; \
-        struct timeval tv; \
-        gettimeofday (&tv , NULL); \
-        time(&t); \
-        p = localtime(&t); \
-        fprintf(stderr, "\033[40;31;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [ERROR] %s:%d %s() "fmt"\n\033[5m", \
-                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
-                __FILE__, __LINE__, __FUNCTION__, \
-                ##args ); \
-    }while(0)
-#else
-  #define DEBUG_PRINT(fmt, args...) 
-  #define DEBUG_WARNING(fmt, args...) 
-  #define DEBUG_ERROR(fmt, args...)
-#endif
+//#ifdef _DEBUG
+//  #define DEBUG_PRINT(fmt, args...) \
+//    do{ \
+//        time_t t; \
+//        struct tm *p; \
+//        struct timeval tv; \
+//        gettimeofday (&tv , NULL); \
+//        time(&t); \
+//        p = localtime(&t); \
+//        fprintf(stdout, "\033[40;32;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [DEBUG] %s:%d %s() "fmt"\n\033[5m", \
+//                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
+//                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
+//                __FILE__, __LINE__, __FUNCTION__, \
+//                ##args ); \
+//    }while(0)
+//
+//  #define DEBUG_WARNING(fmt, args...) \
+//    do{ \
+//        time_t t; \
+//        struct tm *p; \
+//        struct timeval tv; \
+//        gettimeofday (&tv , NULL); \
+//        time(&t); \
+//        p = localtime(&t); \
+//        fprintf(stdout, "\033[40;33;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [WARNING] %s:%d %s() "fmt"\n\033[5m", \
+//                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
+//                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
+//                __FILE__, __LINE__, __FUNCTION__, \
+//                ##args ); \
+//    }while(0)
+//
+//  #define DEBUG_ERROR(fmt, args...) \
+//    do{ \
+//        time_t t; \
+//        struct tm *p; \
+//        struct timeval tv; \
+//        gettimeofday (&tv , NULL); \
+//        time(&t); \
+//        p = localtime(&t); \
+//        fprintf(stderr, "\033[40;31;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [ERROR] %s:%d %s() "fmt"\n\033[5m", \
+//                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
+//                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
+//                __FILE__, __LINE__, __FUNCTION__, \
+//                ##args ); \
+//    }while(0)
+//#else
+//  #define DEBUG_PRINT(fmt, args...) 
+//  #define DEBUG_WARNING(fmt, args...) 
+//  #define DEBUG_ERROR(fmt, args...)
+//#endif
 
 #define ThrowWandException(wand) \
 { \
