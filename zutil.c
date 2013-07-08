@@ -56,7 +56,7 @@ int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, in
         return -1;
 }
 
-int getType(const char *filename, char *type)
+int get_type(const char *filename, char *type)
 {
     char *flag, *tmp;
     if((flag = strchr(filename, '.')) == 0)
@@ -73,7 +73,7 @@ int getType(const char *filename, char *type)
     return 1;
 }
 
-int isImg(const char *filename)
+int is_img(const char *filename)
 {
     char *imgType[] = {"jpg", "jpeg", "png", "gif"};
     char *lower= (char *)malloc(strlen(filename) + 1);
@@ -96,7 +96,7 @@ int isImg(const char *filename)
     return isimg;
 }
 
-int isDir(const char *path)
+int is_dir(const char *path)
 {
     struct stat st;
     if(stat(path, &st)<0)
@@ -113,18 +113,18 @@ int isDir(const char *path)
         return -1;
 }
 
-int mkDir(const char *path)
+int mk_dir(const char *path)
 {
     if(access(path, 0) == -1)
     {
-        LOG_PRINT(LOG_INFO, "Begin to mkDir()...");
+        LOG_PRINT(LOG_INFO, "Begin to mk_dir()...");
         int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(status == -1)
         {
-            LOG_PRINT(LOG_ERROR, "mkDir[%s] Failed!", path);
+            LOG_PRINT(LOG_ERROR, "mkdir[%s] Failed!", path);
             return -1;
         }
-        LOG_PRINT(LOG_INFO, "mkDir[%s] sucessfully!", path);
+        LOG_PRINT(LOG_INFO, "mkdir[%s] sucessfully!", path);
         return 1;
     }
     else

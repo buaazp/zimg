@@ -27,8 +27,8 @@
 #include <dirent.h>
 #include <time.h>
 #include <wand/MagickWand.h>
-#include <openssl/md5.h>
 #include <libmemcached/memcached.h>
+#include <stdbool.h>
 
 #define _DEBUG 1
 

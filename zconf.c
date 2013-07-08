@@ -1,8 +1,8 @@
 #include "zconf.h"
 
-int getConfKey(char *conf, char *module, char *key, char *value)
+int get_conf_key(char *conf, char *module, char *key, char *value)
 {
-    if(checkConf(conf) == -1)
+    if(check_conf(conf) == -1)
     {
         return -1;
     }
@@ -79,7 +79,7 @@ int getConfKey(char *conf, char *module, char *key, char *value)
     return -1;
 }
 
-int checkConf(char *conf)
+int check_conf(char *conf)
 {
     if(access(conf, F_OK) == 0)
     {

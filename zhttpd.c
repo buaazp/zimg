@@ -1,4 +1,5 @@
 #include "zhttpd.h"
+#include "zimg.h"
 
 // this data is for KMP searching 
 //int pi[128];
@@ -87,136 +88,6 @@ static void dump_request_cb(struct evhttp_request *req, void *arg)
 	evhttp_send_reply(req, 200, "OK", NULL);
 }
 
-///* KMP for searching */
-//void kmp_init(const unsigned char *pattern, int pattern_size)  // prefix-function
-//{
-//    pi[0] = 0;  // pi[0] always equals to 0 by defination
-//    int k = 0;  // an important pointer
-//    int q;
-//    for(q = 1; q < pattern_size; q++)  // find each pi[q] for pattern[q]
-//    {
-//        while(k>0 && pattern[k+1]!=pattern[q])
-//            k = pi[k];  // use previous prefixes to match pattern[0..q]
-//
-//        if(pattern[k+1] == pattern[q]) // if pattern[0..(k+1)] is a prefix
-//            k++;             // let k = k + 1
-//
-//        pi[q] = k;   // be ware, (0 <= k <= q), and (pi[k] < k)
-//    }
-//    // The worst-case time complexity of this procedure is O(pattern_size)
-//}
-//
-//int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen)
-//{
-//    // this function does string matching using the KMP algothm.
-//    // matcher and pattern are pointers to BINARY sequencies, while mlen
-//    // and plen are their lengths respectively.
-//    // if a match is found, return its position immediately.
-//    // return -1 if no match can be found.
-//
-//    if(!mlen || !plen || mlen < plen) // take care of illegal parameters
-//        return -1;
-//
-//    kmp_init(pattern, plen);  // prefix-function
-//
-//    int i=0, j=0;
-//    while(i < mlen && j < plen)  // don't increase i and j at this level
-//    {
-//        if(matcher[i+j] == pattern[j])
-//            j++;
-//        else if(j == 0)  // dismatch: matcher[i] vs pattern[0]
-//            i++;
-//        else      // dismatch: matcher[i+j] vs pattern[j], and j>0
-//        {
-//            i = i + j - pi[j-1];  // i: jump forward by (j - pi[j-1])
-//            j = pi[j-1];          // j: reset to the proper position
-//        }
-//    }
-//    if(j == plen) // found a match!!
-//    {
-//        /*
-//        LOG_PRINT(LOG_INFO, "i = %d, j = %d", i, j);
-//        if(matcher[i] == '\r')
-//            LOG_PRINT(LOG_INFO, "buff[%d] = \\R", i);
-//        if(matcher[i+1] == '\n')
-//            LOG_PRINT(LOG_INFO, "buff[%d] = \\N", i + 1);
-//            */
-//        return i;
-//    }
-//    else          // if no match was found
-//        return -1;
-//}
-
-int find_cache(const char *key, char *value)
-{
-    int rst = -1;
-
-    size_t valueLen;
-    uint32_t  flags;
-    memcached_return rc;
-
-    char *pvalue = memcached_get(_memc, key, strlen(key), &valueLen, &flags, &rc);
-
-    if (rc == MEMCACHED_SUCCESS) 
-    {
-        LOG_PRINT(LOG_INFO, "Cache Find Key[%s]: %s", key, pvalue);
-        strcpy(value, pvalue);
-        free(pvalue);
-        rst = 1;
-    }
-    else if (rc == MEMCACHED_NOTFOUND)
-    {
-        LOG_PRINT(LOG_WARNING, "Cache Key[%s] Not Find!", key);
-        rst = -1;
-    }
-
-    return rst;
-}
-
-int set_cache(const char *key, const char *value)
-{
-    int rst = -1;
-
-    uint32_t  flags;
-    memcached_return rc;
-
-    rc = memcached_set(_memc, key, strlen(key), value, strlen(value), 0, flags);
-
-    if (rc == MEMCACHED_SUCCESS) 
-    {
-        LOG_PRINT(LOG_INFO, "Cache Set Successfully. Key[%s]: %s", key, value);
-        rst = 1;
-    }
-    else
-    {
-        LOG_PRINT(LOG_WARNING, "Cache Set(Key: %s Value: %s) Failed!", key, value);
-        rst = -1;
-    }
-
-    return rst;
-}
-
-int del_cache(const char *key)
-{
-    int rst = -1;
-
-    memcached_return rc;
-
-    rc = memcached_delete(_memc, key, strlen(key), 0);
-
-    if (rc == MEMCACHED_SUCCESS) 
-    {
-        LOG_PRINT(LOG_INFO, "Cache Key[%s] Delete Successfully.", key);
-        rst = 1;
-    }
-    else
-    {
-        LOG_PRINT(LOG_WARNING, "Cache Key[%s] Delete Failed!", key);
-        rst = -1;
-    }
-
-    return rst;
-}
 
 
 /* Callback used for the POST requset:
@@ -372,12 +243,12 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     LOG_PRINT(LOG_INFO, "fileName = %s", fileName);
 
     char fileType[32];
-    if(getType(fileName, fileType) == -1)
+    if(get_type(fileName, fileType) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Get Type of File[%s] Failed!", fileName);
         goto err;
     }
-    if(isImg(fileType) != 1)
+    if(is_img(fileType) != 1)
     {
         LOG_PRINT(LOG_ERROR, "fileType[%s] is Not Supported!", fileType);
         goto err;
@@ -422,120 +293,6 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
         goto err;
     }
 
-//    LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
-//    md5_state_t mdctx;
-//    md5_byte_t md_value[16];
-//    char md5sum[33];
-//    unsigned int md_len, i;
-//    int h, l;
-//    md5_init(&mdctx);
-//    md5_append(&mdctx, (const unsigned char*)(buff+start), imgSize);
-//    md5_finish(&mdctx, md_value);
-//
-//    for(i=0; i<16; ++i)
-//    {
-//        h = md_value[i] & 0xf0;
-//        h >>= 4;
-//        l = md_value[i] & 0x0f;
-//        md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
-//        md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
-//    }
-//    md5sum[32] = '\0';
-//    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
-//
-//    /* MD% use openssl/md5.h
-//    unsigned char md[16];
-//    int i;
-//    char tmp[3]={'\0'}, md5sum[33]={'\0'};
-//    MD5(buff+start, imgSize, md);
-//    for (i = 0; i < 16; i++)
-//    {
-//        sprintf(tmp, "%2.2x", md[i]);
-//        strcat(md5sum, tmp);
-//    }
-//    LOG_PRINT(LOG_INFO, "[%s] md5: %s", fileName, md5sum);
-//    */
-//
-//    char *savePath = (char *)malloc(512);
-//    char *saveName= (char *)malloc(512);
-//    char *origName = (char *)malloc(512);
-//    sprintf(savePath, "%s/%s", _img_path, md5sum);
-//    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
-//    if(isDir(savePath) == -1)
-//    {
-//        if(mkDir(savePath) == -1)
-//        {
-//            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
-//            goto err;
-//        }
-//    }
-//    /*
-//    if(access(savePath, 0) == -1)
-//    {
-//        LOG_PRINT(LOG_INFO, "Begin to mkdir...");
-//        int status = mkdir(savePath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-//        if(status == -1)
-//        {
-//            LOG_PRINT(LOG_ERROR, "MKDIR Failed!");
-//            goto err;
-//        }
-//        LOG_PRINT(LOG_INFO, "Mkdir sucessfully!");
-//    }
-//    */
-//    sprintf(origName, "0rig.%s", fileType);
-//    sprintf(saveName, "%s/%s", savePath, origName);
-//    LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
-//
-//    /*
-//    char *savePath = (char *)malloc(512);
-//    char *saveName = (char *)malloc(512);
-//    strcpy(savePath, _img_path);
-//    int svplen = strlen(savePath);
-//    if(savePath[svplen - 1] != '/')
-//    {
-//        savePath[svplen] = '/';
-//        savePath[svplen + 1] != '\0';
-//    }
-//    sprintf(saveName, "%s%s", savePath, fileName);
-//    LOG_PRINT(LOG_INFO, "saveName: %s", saveName);
-//    */
-//
-//    if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
-//    {
-//        LOG_PRINT(LOG_ERROR, "fd open failed!");
-//        goto err;
-//    }
-//    wlen = write(fd, buff+start, imgSize);
-//    if(wlen == -1)
-//    {
-//        LOG_PRINT(LOG_ERROR, "write() failed!");
-//        close(fd);
-//        goto err;
-//    }
-//    else if(wlen < imgSize)
-//    {
-//        LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
-//        close(fd);
-//        goto err;
-//    }
-//    if(fd != -1)
-//    {
-//        close(fd);
-//    }
-//    LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
-//    // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
-//    char *cacheKey = (char *)malloc(strlen(md5sum) + 10);
-//    sprintf(cacheKey, "rspPath-/%s", md5sum);
-//    set_cache(cacheKey, saveName);
-
-    /*
-    if(rename(saveName, newName) < 0)
-    {
-        LOG_PRINT(LOG_ERROR, "Rename Failed!");
-        goto err;
-    }
-    */
-
     evb = evbuffer_new();
     evbuffer_add_printf(evb, "<html>\n <head>\n"
         "  <title>%s</title>\n"
@@ -556,280 +313,6 @@ err:
     LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
 }
 
-/* Callback used for zimg servise, such as:
- * http://127.0.0.1:8080/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&scaled=1 */
-static void zimg_cb(struct evhttp_request *req, void *arg)
-{
-    struct evbuffer *evb = NULL;
-    const char *docroot = arg;
-    const char *uri = evhttp_request_get_uri(req);
-    char rspPath[512];
-    struct evhttp_uri *decoded = NULL;
-    struct evkeyvalq params;
-    const char *path;
-    char *decoded_path;
-    char *whole_path = NULL;
-    size_t len;
-    struct stat st;
-    int fd = -1;
-    int width, height, scaled;
-    int isGenRsp = -1;
-
-    /* Decode the URI */
-    decoded = evhttp_uri_parse(uri);
-    if (!decoded) {
-        LOG_PRINT(LOG_INFO, "It's not a good URI. Sending BADREQUEST");
-        evhttp_send_error(req, HTTP_BADREQUEST, 0);
-        return;
-    }
-
-    /* Let's see what path the user asked for. */
-    path = evhttp_uri_get_path(decoded);
-    if (!path) path = "/";
-    LOG_PRINT(LOG_INFO, "path: %s", path);
-
-    LOG_PRINT(LOG_INFO, "Got a zimg request for <%s>",  uri);
-
-    /* We need to decode it, to see what path the user really wanted. */
-    decoded_path = evhttp_uridecode(path, 0, NULL);
-    if (decoded_path == NULL)
-        goto err;
-    LOG_PRINT(LOG_INFO, "decoded_path: %s", decoded_path);
-    /* Don't allow any ".."s in the path, to avoid exposing stuff outside
-     * of the docroot.  This test is both overzealous and underzealous:
-     * it forbids aceptable paths like "/this/one..here", but it doesn't
-     * do anything to prevent symlink following." */
-    if (strstr(decoded_path, ".."))
-        goto err;
-    /* This holds the content we're sending. */
-    evb = evbuffer_new();
-
-    char *cacheKey = (char *)malloc(strlen(uri) + 32);
-    sprintf(cacheKey, "rspPath-%s", uri);
-    if(find_cache(cacheKey, rspPath) == 1)
-    {
-        LOG_PRINT(LOG_INFO, "Hit Cache. rspPath: %s", rspPath);
-        goto openFile;
-    }
-
-genRspPath:
-    len = strlen(decoded_path)+strlen(docroot)+1;
-    if (!(whole_path = malloc(len))) {
-        LOG_PRINT(LOG_ERROR, "malloc failed!");
-        goto err;
-    }
-    evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
-
-    if (stat(whole_path, &st)<0) {
-        LOG_PRINT(LOG_ERROR, "stat whole_path[%s] failed!", whole_path);
-        goto err;
-    }
-
-    if (!S_ISDIR(st.st_mode)) 
-    {
-        LOG_PRINT(LOG_ERROR, "MD5[%s] not find.", decoded_path);
-        goto err;
-    }
-    /* If it's a directory, read the comments and make a little
-     * index page */
-    char origPath[512];
-
-    if(strchr(uri, '?') == 0)
-    {
-        width = 0;
-        height = 0;
-        scaled = 1;
-    }
-    else
-    {
-        evhttp_parse_query(uri, &params);
-        if(evhttp_find_header(&params, "w"))
-            width = atoi(evhttp_find_header(&params, "w"));
-        else
-            width = 0;
-        if(evhttp_find_header(&params, "h"))
-            height = atoi(evhttp_find_header(&params, "h"));
-        else
-            height = 0;
-        if(evhttp_find_header(&params, "scaled"))
-            scaled = atoi(evhttp_find_header(&params, "scaled"));
-        else
-            scaled = 1;
-    }
-    char name[32];
-    sprintf(name, "%d*%d", width, height);
-
-    sprintf(cacheKey, "origPath-%s", uri);
-    if(find_cache(cacheKey, origPath) == 1)
-    {
-        LOG_PRINT(LOG_INFO, "Hit Cache. origPath: %s", origPath);
-        goto getOrigPath;
-    }
-    DIR *dir;
-    if (!(dir = opendir(whole_path)))
-    {
-        LOG_PRINT(LOG_ERROR, "Dir[%s] open failed.", whole_path);
-        goto err;
-    }
-    struct dirent *ent;
-    char *origName;
-    int find = 0;
-
-    while(ent = readdir(dir))
-    {
-        const char *tmpName = ent->d_name;
-        if(strstr(tmpName, "0rig") == tmpName) // name "0rig" to find it first
-        {
-            len = strlen(tmpName) + 1;
-            if(!(origName = malloc(len)))
-            {
-                LOG_PRINT(LOG_ERROR, "malloc");
-                goto err;
-            }
-            strcpy(origName, tmpName);
-            find = 1;
-            break;
-        }
-    }
-    closedir(dir);
-    if(find == 0)
-    {
-        LOG_PRINT(LOG_ERROR, "Get 0rig Image Failed.");
-        goto err;
-    }
-
-    sprintf(origPath, "%s/%s", whole_path, origName);
-    LOG_PRINT(LOG_INFO, "0rig File Path: %s", origPath);
-
-    sprintf(cacheKey, "origPath-%s", uri);
-    set_cache(cacheKey, origPath);
-
-getOrigPath:
-    LOG_PRINT(LOG_INFO, "Goto getOrigPath...");
-    if(width == 0 && height == 0)
-    {
-        LOG_PRINT(LOG_INFO, "Return original image.");
-        strcpy(rspPath, origPath);
-    }
-    else
-    {
-        // rspPath = whole_path / 1024*768 . jpeg \0
-        char imgType[32];
-        getType(origPath, imgType);
-        len = strlen(whole_path) + strlen(name) + strlen(imgType) + 3; 
-        if(strlen(imgType) == 0)
-            sprintf(rspPath, "%s/%s", whole_path, name);
-        else
-            sprintf(rspPath, "%s/%s.%s", whole_path, name, imgType);
-    }
-    LOG_PRINT(LOG_INFO, "File Path: %s", rspPath);
-
-    isGenRsp = 1;
-    LOG_PRINT(LOG_INFO, "Section genRspPath has steped in. isGenRsp = %d", isGenRsp);
-    sprintf(cacheKey, "rspPath-%s", uri);
-    set_cache(cacheKey, rspPath);
-
-openFile:
-    LOG_PRINT(LOG_INFO, "Goto Section openFile.");
-    const char *type = guess_content_type(rspPath);
-    LOG_PRINT(LOG_INFO, "content_type: %s", type);
-    if ((fd = open(rspPath, O_RDONLY)) < 0) 
-    {
-        if(isGenRsp == -1)
-        {
-            LOG_PRINT(LOG_INFO, "Section genRspPath haven't step in. isGenRsp = %d. Goto genRspPath...", isGenRsp);
-            goto genRspPath;
-        }
-        LOG_PRINT(LOG_INFO, "Not find the file, begin to resize...");
-        MagickBooleanType status;
-        MagickWand *magick_wand;
-        MagickWandGenesis();
-        magick_wand=NewMagickWand();
-        status=MagickReadImage(magick_wand, origPath);
-        if (status == MagickFalse)
-        {
-            ThrowWandException(magick_wand);
-            goto err;
-        }
-        if(scaled == 1)
-        {
-            if(width != 0 && height == 0)
-            {
-                int owidth = MagickGetImageWidth(magick_wand);
-                float oheight = MagickGetImageHeight(magick_wand);
-                height = width * oheight / owidth;
-            }
-            else if(height != 0 && width == 0)
-            {
-                int oheight = MagickGetImageHeight(magick_wand);
-                float owidth = MagickGetImageWidth(magick_wand);
-                width = height * owidth / oheight;
-            }
-        }
-        MagickResetIterator(magick_wand);
-        while (MagickNextImage(magick_wand) != MagickFalse)
-            MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
-        LOG_PRINT(LOG_INFO, "Resize img succ.");
-        MagickSizeType imgSize;
-        status = MagickGetImageLength(magick_wand, &imgSize);
-        if (status == MagickFalse)
-        {
-            ThrowWandException(magick_wand);
-            goto err;
-        }
-        size_t imgSizet = imgSize;
-        char *imgBuff = MagickGetImageBlob(magick_wand, &imgSizet);
-        evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
-        //Designed for High Performance: Reply Customer First, Storage Image Second.
-        evbuffer_add(evb, imgBuff, imgSizet);
-        evhttp_send_reply(req, 200, "OK", evb);
-        status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
-        if (status == MagickFalse)
-        {
-            ThrowWandException(magick_wand);
-            sprintf(cacheKey, "rspPath-%s", uri);
-            del_cache(cacheKey);
-            LOG_PRINT(LOG_WARNING, "New img[%s] Write Failed!", rspPath);
-        }
-        else
-        {
-            LOG_PRINT(LOG_INFO, "New img[%s] storaged.", rspPath);
-        }
-        magick_wand=DestroyMagickWand(magick_wand);
-        MagickWandTerminus();
-        goto done;
-    }
-    else if (fstat(fd, &st)<0) 
-    {
-        /* Make sure the length still matches, now that we
-         * opened the file :/ */
-        LOG_PRINT(LOG_ERROR, "fstat failed.");
-        goto err;
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Got the file!");
-        evbuffer_add_file(evb, fd, 0, st.st_size);
-    }
-    evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
-    evhttp_send_reply(req, 200, "OK", evb);
-    goto done;
-
-err:
-    evhttp_send_error(req, 404, "Image was not found");
-    if (fd>=0)
-        close(fd);
-
-done:
-    if (evb)
-        evbuffer_free(evb);
-    if (decoded)
-        evhttp_uri_free(decoded);
-    if (decoded_path)
-        free(decoded_path);
-    if (whole_path)
-        free(whole_path);
-}
 
 /* This callback gets invoked when we get any http request that doesn't match
  * any other callback.  Like any evhttp server callback, it has a simple job:
@@ -905,14 +388,73 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	}
 	evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
 
-	if (stat(whole_path, &st)<0) {
-        LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
-        zimg_cb(req, _img_path);
-        goto done;
-	}
-
 	/* This holds the content we're sending. */
 	evb = evbuffer_new();
+
+	if (stat(whole_path, &st)<0) {
+        LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
+        char md5[33];
+        if(decoded_path[0] == '/')
+            strcpy(md5, decoded_path+1);
+        char *path_end;
+        if((path_end = strchr(md5, '/')) != 0)
+            path_end[0] = '\0';
+        int width, height, proportion, gray;
+        struct evkeyvalq params;
+        if(strchr(uri, '?') == 0)
+        {
+            width = 0;
+            height = 0;
+            proportion = 1;
+            gray = 0;
+        }
+        else
+        {
+            evhttp_parse_query(uri, &params);
+            if(evhttp_find_header(&params, "w"))
+                width = atoi(evhttp_find_header(&params, "w"));
+            else
+                width = 0;
+            if(evhttp_find_header(&params, "h"))
+                height = atoi(evhttp_find_header(&params, "h"));
+            else
+                height = 0;
+            if(evhttp_find_header(&params, "p"))
+                proportion = atoi(evhttp_find_header(&params, "p"));
+            else
+                proportion = 1;
+            if(evhttp_find_header(&params, "g"))
+                gray = atoi(evhttp_find_header(&params, "g"));
+            else
+                gray = 0;
+        }
+
+        zimg_req_t *zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
+        zimg_req -> md5 = md5;
+        zimg_req -> width = width;
+        zimg_req -> height = height;
+        zimg_req -> proportion = proportion;
+        zimg_req -> gray = gray;
+        //zimg_proportion = (proportion == 1 ? true : false);
+        //zimg_gray = (gray == 1 ? true : false);
+
+        char type[16];
+        if(get_img(zimg_req, evb, type) == -1)
+        {
+            LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
+            goto err;
+        }
+        free(zimg_req);
+		evhttp_add_header(evhttp_request_get_output_headers(req),
+		    "Content-Type", type);
+        evhttp_send_reply(req, 200, "OK", evb);
+        goto done;
+        
+
+//        zimg_cb(req, NULL);
+//        goto done;
+	}
+
 
 	if (S_ISDIR(st.st_mode)) {
 		/* If it's a directory, read the comments and make a little
@@ -972,7 +514,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	evhttp_send_reply(req, 200, "OK", evb);
 	goto done;
 err:
-	evhttp_send_error(req, 404, "Page was not found!");
+	evhttp_send_error(req, 404, "404 Not Found!");
 	if (fd>=0)
 		close(fd);
 done:
@@ -986,7 +528,7 @@ done:
 		evbuffer_free(evb);
 }
 
-static int displayAddress(struct evhttp_bound_socket *handle)
+static int display_address(struct evhttp_bound_socket *handle)
 {
     /* Extract and display the address we're listening on. */
     struct sockaddr_storage ss;
@@ -1026,7 +568,7 @@ static int displayAddress(struct evhttp_bound_socket *handle)
     return 0;
 }
 
-int startHttpd(int port, char *root_path)
+int start_httpd(int port, char *root_path)
 {
     struct event_base *base;
     struct evhttp *http;
@@ -1069,7 +611,7 @@ int startHttpd(int port, char *root_path)
         return -1;
     }
 
-    displayAddress(handle);
+    display_address(handle);
     event_base_dispatch(base);
     return 0;
 }

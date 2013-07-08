@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     extern int _log_id;
     _log_id = -1;
 
-    if(getConfKey(conf, "zlog", "log-path", log_path) == -1)
+    if(get_conf_key(conf, "zlog", "log-path", log_path) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Key log-path read failed. Use ./log as default.");
         strcpy(log_path, "./log");
@@ -22,9 +22,9 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_INFO, "Get log-path: %s", log_path);
     }
 
-    if(isDir(log_path) != 1)
+    if(is_dir(log_path) != 1)
     {
-        if(mkDir(log_path) != 1)
+        if(mk_dir(log_path) != 1)
         {
             LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", log_path);
             return -1;
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 
     LOG_PRINT(LOG_INFO, "Begin to Read Config File[%s]", conf);
 
-    if(getConfKey(conf, "zhttpd", "port", strport) == -1)
+    if(get_conf_key(conf, "zhttpd", "port", strport) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Key port read failed. Use 4869 as default.");
         strcpy(strport, "4869");
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     }
     _port = atoi(strport);
 
-    if(getConfKey(conf, "memcached", "mport", strmport) == -1)
+    if(get_conf_key(conf, "memcached", "mport", strmport) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Key mport read failed. Use 11211 as default.");
         strcpy(strmport, "11211");
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_INFO, "Get mport: %s", strmport);
     }
 
-    if(getConfKey(conf, "zhttpd", "root-path", _root_path) == -1)
+    if(get_conf_key(conf, "zhttpd", "root-path", _root_path) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Key root-path read failed. Use ./www as default.");
         strcpy(_root_path, "./www");
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_INFO, "Get root_path: %s", _root_path);
     }
 
-    if(getConfKey(conf, "zimg", "img-path", _img_path) == -1)
+    if(get_conf_key(conf, "zimg", "img-path", _img_path) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Key img-path read failed. Use ./img as default.");
         strcpy(_img_path, "./img");
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_INFO, "Get img-path: %s", _img_path);
     }
 
-    if(getConfKey(conf, "memcached", "mip", _mip) == -1)
+    if(get_conf_key(conf, "memcached", "mip", _mip) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Key mip read failed. Use 127.0.0.1 as default.");
         strcpy(_mip, "127.0.0.1");
@@ -104,18 +104,18 @@ int main(int argc, char **argv)
 
     //init the Path zimg need to use.
     LOG_PRINT(LOG_INFO, "Begin to Init the Path zimg Using...");
-    if(isDir(_root_path) != 1)
+    if(is_dir(_root_path) != 1)
     {
-        if(mkDir(_root_path) != 1)
+        if(mk_dir(_root_path) != 1)
         {
             LOG_PRINT(LOG_ERROR, "_root_path[%s] Create Failed!", _root_path);
             return -1;
         }
     }
 
-    if(isDir(_img_path) != 1)
+    if(is_dir(_img_path) != 1)
     {
-        if(mkDir(_img_path) != 1)
+        if(mk_dir(_img_path) != 1)
         {
             LOG_PRINT(LOG_ERROR, "_img_path[%s] Create Failed!", _img_path);
             return -1;
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
-    if(startHttpd(_port, _root_path) == -1)
+    if(start_httpd(_port, _root_path) == -1)
     {
         LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
     }

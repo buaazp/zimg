@@ -1,4 +1,4 @@
 #include "zcommon.h"
 
-int getConfKey(char *conf, char *module, char *key, char *value);
-int checkConf(char *conf);
+int get_conf_key(char *conf, char *module, char *key, char *value);
+int check_conf(char *conf);

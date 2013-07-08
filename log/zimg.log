@@ -1,299 +1,122 @@
-2013/07/07 16:08:44:947492 [INFO] main.c:49 main() Begin to Read Config File[conf/config.ini]
-2013/07/07 16:08:44:947554 [INFO] zconf.c:45 getConfKey() Key [port] = 4869
-2013/07/07 16:08:44:947570 [INFO] main.c:58 main() Get port: 4869
-2013/07/07 16:08:44:947603 [INFO] zconf.c:45 getConfKey() Key [mport] = 11211
-2013/07/07 16:08:44:947617 [INFO] main.c:69 main() Get mport: 11211
-2013/07/07 16:08:44:947645 [INFO] zconf.c:45 getConfKey() Key [root-path] = ./www
-2013/07/07 16:08:44:947658 [INFO] main.c:79 main() Get root_path: ./www
-2013/07/07 16:08:44:947684 [INFO] zconf.c:45 getConfKey() Key [img-path] = ./img
-2013/07/07 16:08:44:947696 [INFO] main.c:89 main() Get img-path: ./img
-2013/07/07 16:08:44:947717 [INFO] zconf.c:45 getConfKey() Key [mip] = 127.0.0.1
-2013/07/07 16:08:44:947725 [INFO] main.c:99 main() Get mip: 127.0.0.1
-2013/07/07 16:08:44:947731 [INFO] main.c:103 main() conf/config.ini Read Finished.
-2013/07/07 16:08:44:947737 [INFO] main.c:106 main() Begin to Init the Path zimg Using...
-2013/07/07 16:08:44:947747 [INFO] zutil.c:109 isDir() Path[./www] is A Dir.
-2013/07/07 16:08:44:947755 [INFO] zutil.c:109 isDir() Path[./img] is A Dir.
-2013/07/07 16:08:44:947761 [INFO] main.c:124 main() Paths Init Finished.
-2013/07/07 16:08:44:947767 [INFO] main.c:127 main() Begin to Init Memcached Connection...
-2013/07/07 16:08:44:947822 [INFO] main.c:137 main() Memcached Connection Init Finished.
-2013/07/07 16:08:44:947830 [INFO] main.c:138 main() memcached connection to: 127.0.0.1:11211
-2013/07/07 16:08:44:947837 [INFO] main.c:142 main() Begin to Start Httpd Server...
-2013/07/07 16:08:44:948265 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
-2013/07/07 16:08:58:612134 [INFO] zhttpd.c:879 send_document_cb() Got a GET request for </5e320ba531546c488041be971525ff41?w=500>
-2013/07/07 16:08:58:612180 [WARNING] zhttpd.c:901 send_document_cb() Stat whole_path[./www/5e320ba531546c488041be971525ff41] Failed! Goto zimg_cb() for Searching.
-2013/07/07 16:08:58:612193 [INFO] zhttpd.c:581 zimg_cb() path: /5e320ba531546c488041be971525ff41
-2013/07/07 16:08:58:612201 [INFO] zhttpd.c:583 zimg_cb() Got a zimg request for </5e320ba531546c488041be971525ff41?w=500>
-2013/07/07 16:08:58:612207 [INFO] zhttpd.c:589 zimg_cb() decoded_path: /5e320ba531546c488041be971525ff41
-2013/07/07 16:08:58:612471 [INFO] zhttpd.c:163 find_cache() Cache Find Key[rspPath-/5e320ba531546c488041be971525ff41?w=500]: ./img/5e320ba531546c488041be971525ff41/500*0.JPG
-2013/07/07 16:08:58:612484 [INFO] zhttpd.c:603 zimg_cb() Hit Cache. rspPath: ./img/5e320ba531546c488041be971525ff41/500*0.JPG
-2013/07/07 16:08:58:612491 [INFO] zhttpd.c:725 zimg_cb() Goto Section openFile.
-2013/07/07 16:08:58:612501 [INFO] zhttpd.c:727 zimg_cb() content_type: image/jpeg
-2013/07/07 16:08:58:612526 [INFO] zhttpd.c:803 zimg_cb() Got the file!
-2013/07/07 16:08:58:687976 [INFO] zhttpd.c:876 send_document_cb() favicon.ico Request, Denied.
-2013/07/07 16:14:47:317801 [INFO] main.c:49 main() Begin to Read Config File[conf/config.ini]
-2013/07/07 16:14:47:317838 [INFO] zconf.c:45 getConfKey() Key [port] = 4869
-2013/07/07 16:14:47:317847 [INFO] main.c:58 main() Get port: 4869
-2013/07/07 16:14:47:317868 [INFO] zconf.c:45 getConfKey() Key [mport] = 11211
-2013/07/07 16:14:47:317876 [INFO] main.c:69 main() Get mport: 11211
-2013/07/07 16:14:47:317893 [INFO] zconf.c:45 getConfKey() Key [root-path] = ./www
-2013/07/07 16:14:47:317900 [INFO] main.c:79 main() Get root_path: ./www
-2013/07/07 16:14:47:317917 [INFO] zconf.c:45 getConfKey() Key [img-path] = ./img
-2013/07/07 16:14:47:317924 [INFO] main.c:89 main() Get img-path: ./img
-2013/07/07 16:14:47:317940 [INFO] zconf.c:45 getConfKey() Key [mip] = 127.0.0.1
-2013/07/07 16:14:47:317948 [INFO] main.c:99 main() Get mip: 127.0.0.1
-2013/07/07 16:14:47:317954 [INFO] main.c:103 main() conf/config.ini Read Finished.
-2013/07/07 16:14:47:317960 [INFO] main.c:106 main() Begin to Init the Path zimg Using...
-2013/07/07 16:14:47:317969 [INFO] zutil.c:109 isDir() Path[./www] is A Dir.
-2013/07/07 16:14:47:317978 [INFO] zutil.c:109 isDir() Path[./img] is A Dir.
-2013/07/07 16:14:47:317984 [INFO] main.c:124 main() Paths Init Finished.
-2013/07/07 16:14:47:318002 [INFO] main.c:127 main() Begin to Init Memcached Connection...
-2013/07/07 16:14:47:318057 [INFO] main.c:137 main() Memcached Connection Init Finished.
-2013/07/07 16:14:47:318065 [INFO] main.c:138 main() memcached connection to: 127.0.0.1:11211
-2013/07/07 16:14:47:318073 [INFO] main.c:142 main() Begin to Start Httpd Server...
-2013/07/07 16:14:47:318493 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
-2013/07/07 16:15:02:641494 [INFO] zhttpd.c:879 send_document_cb() Got a GET request for </5e320ba531546c488041be971525ff41?h=600>
-2013/07/07 16:15:02:641540 [WARNING] zhttpd.c:901 send_document_cb() Stat whole_path[./www/5e320ba531546c488041be971525ff41] Failed! Goto zimg_cb() for Searching.
-2013/07/07 16:15:02:641561 [INFO] zhttpd.c:581 zimg_cb() path: /5e320ba531546c488041be971525ff41
-2013/07/07 16:15:02:641573 [INFO] zhttpd.c:583 zimg_cb() Got a zimg request for </5e320ba531546c488041be971525ff41?h=600>
-2013/07/07 16:15:02:641585 [INFO] zhttpd.c:589 zimg_cb() decoded_path: /5e320ba531546c488041be971525ff41
-2013/07/07 16:15:02:677221 [WARNING] zhttpd.c:170 find_cache() Cache Key[rspPath-/5e320ba531546c488041be971525ff41?h=600] Not Find!
-2013/07/07 16:15:02:677445 [WARNING] zhttpd.c:170 find_cache() Cache Key[origPath-/5e320ba531546c488041be971525ff41?h=600] Not Find!
-2013/07/07 16:15:02:677539 [INFO] zhttpd.c:694 zimg_cb() 0rig File Path: ./img/5e320ba531546c488041be971525ff41/0rig.JPG
-2013/07/07 16:15:02:677646 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[origPath-/5e320ba531546c488041be971525ff41?h=600]: ./img/5e320ba531546c488041be971525ff41/0rig.JPG
-2013/07/07 16:15:02:677663 [INFO] zhttpd.c:700 zimg_cb() Goto getOrigPath...
-2013/07/07 16:15:02:677672 [INFO] zhttpd.c:717 zimg_cb() File Path: ./img/5e320ba531546c488041be971525ff41/0*600.JPG
-2013/07/07 16:15:02:677679 [INFO] zhttpd.c:720 zimg_cb() Section genRspPath has steped in. isGenRsp = 1
-2013/07/07 16:15:02:677751 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[rspPath-/5e320ba531546c488041be971525ff41?h=600]: ./img/5e320ba531546c488041be971525ff41/0*600.JPG
-2013/07/07 16:15:02:677763 [INFO] zhttpd.c:725 zimg_cb() Goto Section openFile.
-2013/07/07 16:15:02:677775 [INFO] zhttpd.c:727 zimg_cb() content_type: image/jpeg
-2013/07/07 16:15:02:677801 [INFO] zhttpd.c:735 zimg_cb() Not find the file, begin to resize...
-2013/07/07 16:15:03:262735 [INFO] zhttpd.c:764 zimg_cb() Resize img succ.
-2013/07/07 16:15:03:303171 [INFO] zhttpd.c:788 zimg_cb() New img[./img/5e320ba531546c488041be971525ff41/0*600.JPG] storaged.
-2013/07/07 16:15:03:424665 [INFO] zhttpd.c:876 send_document_cb() favicon.ico Request, Denied.
-2013/07/07 16:18:48:647441 [INFO] zhttpd.c:879 send_document_cb() Got a GET request for </upload.html>
-2013/07/07 16:18:49:786561 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
-2013/07/07 16:18:49:786602 [INFO] zhttpd.c:236 post_request_cb() Headers:
-2013/07/07 16:18:49:786613 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
-2013/07/07 16:18:49:786624 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
-2013/07/07 16:18:49:786630 [INFO] zhttpd.c:241 post_request_cb()   Content-Length: 192
-2013/07/07 16:18:49:786638 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
-2013/07/07 16:18:49:786649 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-2013/07/07 16:18:49:786656 [INFO] zhttpd.c:241 post_request_cb()   Origin: http://127.0.0.1:4869
-2013/07/07 16:18:49:786662 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
-2013/07/07 16:18:49:786671 [INFO] zhttpd.c:241 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundarymsKzhRY1G3b8fozR
-2013/07/07 16:18:49:786685 [INFO] zhttpd.c:285 post_request_cb() boundary Find. boundary = ----WebKitFormBoundarymsKzhRY1G3b8fozR
-2013/07/07 16:18:49:786696 [INFO] zhttpd.c:241 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
-2013/07/07 16:18:49:786736 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
-2013/07/07 16:18:49:786748 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
-2013/07/07 16:18:49:786762 [INFO] zhttpd.c:303 post_request_cb() evblen = 192
-2013/07/07 16:18:49:786774 [INFO] zhttpd.c:305 post_request_cb() rmblen = 192
-2013/07/07 16:18:49:786787 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
-------WebKitFormBoundarymsKzhRY1G3b8fozR, strlen = 42
-2013/07/07 16:18:49:786813 [INFO] zhttpd.c:372 post_request_cb() fileName = 
-2013/07/07 16:18:49:786828 [ERROR] zutil.c:64 getType() FileName [] Has No '.' in It.
-2013/07/07 16:18:49:786839 [ERROR] zhttpd.c:377 post_request_cb() Get Type of File[] Failed!
-2013/07/07 16:18:49:786872 [INFO] zhttpd.c:548 post_request_cb() ============post_request_cb() ERROR!===============
-2013/07/07 16:18:51:983456 [INFO] zhttpd.c:879 send_document_cb() Got a GET request for </upload.html>
-2013/07/07 16:20:45:385999 [INFO] zhttpd.c:235 post_request_cb() Received a POST request for /upload
-2013/07/07 16:20:45:386033 [INFO] zhttpd.c:236 post_request_cb() Headers:
-2013/07/07 16:20:45:386046 [INFO] zhttpd.c:241 post_request_cb()   Host: 127.0.0.1:4869
-2013/07/07 16:20:45:386057 [INFO] zhttpd.c:241 post_request_cb()   Connection: keep-alive
-2013/07/07 16:20:45:386067 [INFO] zhttpd.c:241 post_request_cb()   Content-Length: 29820
-2013/07/07 16:20:45:386080 [INFO] zhttpd.c:241 post_request_cb()   Cache-Control: max-age=0
-2013/07/07 16:20:45:386092 [INFO] zhttpd.c:241 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-2013/07/07 16:20:45:386105 [INFO] zhttpd.c:241 post_request_cb()   Origin: http://127.0.0.1:4869
-2013/07/07 16:20:45:386117 [INFO] zhttpd.c:241 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
-2013/07/07 16:20:45:386130 [INFO] zhttpd.c:241 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryfGiWFEjW3AfUWK50
-2013/07/07 16:20:45:386141 [INFO] zhttpd.c:285 post_request_cb() boundary Find. boundary = ----WebKitFormBoundaryfGiWFEjW3AfUWK50
-2013/07/07 16:20:45:386152 [INFO] zhttpd.c:241 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
-2013/07/07 16:20:45:386162 [INFO] zhttpd.c:241 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
-2013/07/07 16:20:45:386172 [INFO] zhttpd.c:241 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
-2013/07/07 16:20:45:386183 [INFO] zhttpd.c:303 post_request_cb() evblen = 29820
-2013/07/07 16:20:45:386201 [INFO] zhttpd.c:305 post_request_cb() rmblen = 29820
-2013/07/07 16:20:45:386213 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
-------WebKitFormBoundaryfGiWFEjW3AfUWK50, strlen = 42
-2013/07/07 16:20:45:386227 [INFO] zhttpd.c:372 post_request_cb() fileName = lina_tansingle10241226.jpeg
-2013/07/07 16:20:45:386247 [INFO] zutil.c:89 isImg() compare jpegoad - jpg.
-2013/07/07 16:20:45:386258 [INFO] zutil.c:89 isImg() compare jpegoad - jpeg.
-2013/07/07 16:20:45:386269 [INFO] zhttpd.c:394 post_request_cb() start = 131
-2013/07/07 16:20:45:386278 [INFO] zhttpd.c:401 post_request_cb() end = 155
-2013/07/07 16:20:45:386288 [INFO] zhttpd.c:403 post_request_cb() start = 159
-2013/07/07 16:20:45:386449 [INFO] zhttpd.c:410 post_request_cb() end = 29774
-2013/07/07 16:20:45:386467 [INFO] zhttpd.c:414 post_request_cb() postSize = 29820
-2013/07/07 16:20:45:386480 [INFO] zhttpd.c:415 post_request_cb() imgSize = 29615
-2013/07/07 16:20:45:386492 [INFO] zhttpd.c:417 post_request_cb() Begin to Caculate MD5...
-2013/07/07 16:20:45:386745 [INFO] zhttpd.c:436 post_request_cb() [lina_tansingle10241226.jpeg] md5: 5f189d8ec57f5a5a0d3dcba47fa797e2
-2013/07/07 16:20:45:386765 [INFO] zhttpd.c:455 post_request_cb() savePath: ./img/5f189d8ec57f5a5a0d3dcba47fa797e2
-2013/07/07 16:20:45:386795 [ERROR] zutil.c:104 isDir() Path[./img/5f189d8ec57f5a5a0d3dcba47fa797e2] is Not Existed!
-2013/07/07 16:20:45:386834 [INFO] zutil.c:120 mkDir() Begin to mkDir()...
-2013/07/07 16:20:45:386930 [INFO] zutil.c:127 mkDir() mkDir[./img/5f189d8ec57f5a5a0d3dcba47fa797e2] sucessfully!
-2013/07/07 16:20:45:386950 [INFO] zhttpd.c:479 post_request_cb() saveName-->: ./img/5f189d8ec57f5a5a0d3dcba47fa797e2/0rig.jpeg
-2013/07/07 16:20:45:387132 [INFO] zhttpd.c:517 post_request_cb() Image [./img/5f189d8ec57f5a5a0d3dcba47fa797e2/0rig.jpeg] Write Successfully!
-2013/07/07 16:20:45:387274 [INFO] zhttpd.c:188 set_cache() Cache Set Successfully. Key[rspPath-/5f189d8ec57f5a5a0d3dcba47fa797e2]: ./img/5f189d8ec57f5a5a0d3dcba47fa797e2/0rig.jpeg
-2013/07/07 16:20:45:387322 [INFO] zhttpd.c:543 post_request_cb() ============post_request_cb() DONE!===============
-2013/07/07 16:22:14:783175 [INFO] main.c:49 main() Begin to Read Config File[conf/config.ini]
-2013/07/07 16:22:14:783291 [INFO] zconf.c:45 getConfKey() Key [port] = 4869
-2013/07/07 16:22:14:783320 [INFO] main.c:58 main() Get port: 4869
-2013/07/07 16:22:14:783378 [INFO] zconf.c:45 getConfKey() Key [mport] = 11211
-2013/07/07 16:22:14:783400 [INFO] main.c:69 main() Get mport: 11211
-2013/07/07 16:22:14:783442 [INFO] zconf.c:45 getConfKey() Key [root-path] = ./www
-2013/07/07 16:22:14:783462 [INFO] main.c:79 main() Get root_path: ./www
-2013/07/07 16:22:14:783504 [INFO] zconf.c:45 getConfKey() Key [img-path] = ./img
-2013/07/07 16:22:14:783540 [INFO] main.c:89 main() Get img-path: ./img
-2013/07/07 16:22:14:783615 [INFO] zconf.c:45 getConfKey() Key [mip] = 127.0.0.1
-2013/07/07 16:22:14:783649 [INFO] main.c:99 main() Get mip: 127.0.0.1
-2013/07/07 16:22:14:783677 [INFO] main.c:103 main() conf/config.ini Read Finished.
-2013/07/07 16:22:14:783710 [INFO] main.c:106 main() Begin to Init the Path zimg Using...
-2013/07/07 16:22:14:783749 [INFO] zutil.c:109 isDir() Path[./www] is A Dir.
-2013/07/07 16:22:14:783792 [INFO] zutil.c:109 isDir() Path[./img] is A Dir.
-2013/07/07 16:22:14:783820 [INFO] main.c:124 main() Paths Init Finished.
-2013/07/07 16:22:14:783848 [INFO] main.c:127 main() Begin to Init Memcached Connection...
-2013/07/07 16:22:14:784022 [INFO] main.c:137 main() Memcached Connection Init Finished.
-2013/07/07 16:22:14:784064 [INFO] main.c:138 main() memcached connection to: 127.0.0.1:11211
-2013/07/07 16:22:14:784097 [INFO] main.c:142 main() Begin to Start Httpd Server...
-2013/07/07 16:22:14:785202 [INFO] zhttpd.c:1011 displayAddress() Listening on 127.0.0.1:4869
-2013/07/08 19:23:06:264993 [INFO] main.c:49 main() Begin to Read Config File[conf/config.ini]
-2013/07/08 19:23:06:284774 [INFO] zconf.c:45 getConfKey() Key [port] = 4869
-2013/07/08 19:23:06:284852 [INFO] main.c:58 main() Get port: 4869
-2013/07/08 19:23:06:284933 [INFO] zconf.c:45 getConfKey() Key [mport] = 11211
-2013/07/08 19:23:06:284953 [INFO] main.c:69 main() Get mport: 11211
-2013/07/08 19:23:06:284992 [INFO] zconf.c:45 getConfKey() Key [root-path] = ./www
-2013/07/08 19:23:06:285009 [INFO] main.c:79 main() Get root_path: ./www
-2013/07/08 19:23:06:285048 [INFO] zconf.c:45 getConfKey() Key [img-path] = ./img
-2013/07/08 19:23:06:285065 [INFO] main.c:89 main() Get img-path: ./img
-2013/07/08 19:23:06:285104 [INFO] zconf.c:45 getConfKey() Key [mip] = 127.0.0.1
-2013/07/08 19:23:06:285121 [INFO] main.c:99 main() Get mip: 127.0.0.1
-2013/07/08 19:23:06:285137 [INFO] main.c:103 main() conf/config.ini Read Finished.
-2013/07/08 19:23:06:285151 [INFO] main.c:106 main() Begin to Init the Path zimg Using...
-2013/07/08 19:23:06:285174 [INFO] zutil.c:109 isDir() Path[./www] is A Dir.
-2013/07/08 19:23:06:285195 [INFO] zutil.c:109 isDir() Path[./img] is A Dir.
-2013/07/08 19:23:06:285211 [INFO] main.c:124 main() Paths Init Finished.
-2013/07/08 19:23:06:285225 [INFO] main.c:127 main() Begin to Init Memcached Connection...
-2013/07/08 19:23:06:285353 [INFO] main.c:137 main() Memcached Connection Init Finished.
-2013/07/08 19:23:06:285371 [INFO] main.c:138 main() memcached connection to: 127.0.0.1:11211
-2013/07/08 19:23:06:285389 [INFO] main.c:142 main() Begin to Start Httpd Server...
-2013/07/08 19:23:06:286822 [INFO] zhttpd.c:1019 displayAddress() Listening on 127.0.0.1:4869
-2013/07/08 19:23:18:990353 [INFO] zhttpd.c:887 send_document_cb() Got a GET request for </upload.html>
-2013/07/08 19:23:19:110294 [INFO] zhttpd.c:884 send_document_cb() favicon.ico Request, Denied.
-2013/07/08 19:23:32:437203 [INFO] zhttpd.c:234 post_request_cb() Received a POST request for /upload
-2013/07/08 19:23:32:437259 [INFO] zhttpd.c:235 post_request_cb() Headers:
-2013/07/08 19:23:32:437283 [INFO] zhttpd.c:240 post_request_cb()   Host: 127.0.0.1:4869
-2013/07/08 19:23:32:437297 [INFO] zhttpd.c:240 post_request_cb()   Connection: keep-alive
-2013/07/08 19:23:32:437316 [INFO] zhttpd.c:240 post_request_cb()   Content-Length: 54104
-2013/07/08 19:23:32:437337 [INFO] zhttpd.c:240 post_request_cb()   Cache-Control: max-age=0
-2013/07/08 19:23:32:437356 [INFO] zhttpd.c:240 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-2013/07/08 19:23:32:437376 [INFO] zhttpd.c:240 post_request_cb()   Origin: http://127.0.0.1:4869
-2013/07/08 19:23:32:437397 [INFO] zhttpd.c:240 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
-2013/07/08 19:23:32:437418 [INFO] zhttpd.c:240 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundary4AulDyJFLKGcSp07
-2013/07/08 19:23:32:437449 [INFO] zhttpd.c:284 post_request_cb() boundary Find. boundary = ----WebKitFormBoundary4AulDyJFLKGcSp07
-2013/07/08 19:23:32:437471 [INFO] zhttpd.c:240 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
-2013/07/08 19:23:32:437488 [INFO] zhttpd.c:240 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
-2013/07/08 19:23:32:437502 [INFO] zhttpd.c:240 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
-2013/07/08 19:23:32:437520 [INFO] zhttpd.c:303 post_request_cb() evblen = 54104
-2013/07/08 19:23:32:437594 [INFO] zhttpd.c:305 post_request_cb() rmblen = 54104
-2013/07/08 19:23:32:437612 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
-------WebKitFormBoundary4AulDyJFLKGcSp07, strlen = 42
-2013/07/08 19:23:32:437640 [INFO] zhttpd.c:372 post_request_cb() fileName = h_large_DyZi_4762000024392f75.jpg
-2013/07/08 19:23:32:437658 [INFO] zutil.c:89 isImg() compare jpgload - jpg.
-2013/07/08 19:23:32:437672 [INFO] zhttpd.c:394 post_request_cb() start = 137
-2013/07/08 19:23:32:437684 [INFO] zhttpd.c:401 post_request_cb() end = 161
-2013/07/08 19:23:32:437695 [INFO] zhttpd.c:403 post_request_cb() start = 165
-2013/07/08 19:23:32:438134 [INFO] zhttpd.c:410 post_request_cb() end = 54058
-2013/07/08 19:23:32:438160 [INFO] zhttpd.c:414 post_request_cb() postSize = 54104
-2013/07/08 19:23:32:438181 [INFO] zhttpd.c:415 post_request_cb() imgSize = 53893
-2013/07/08 19:23:32:438201 [INFO] zhttpd.c:418 post_request_cb() Begin to Save Image...
-2013/07/08 19:23:32:438220 [INFO] zimg.c:6 save_img() Begin to Caculate MD5...
-2013/07/08 19:23:32:439008 [INFO] zimg.c:28 save_img() md5: 67e5aa8268ebded24d4eb1729cd357ac
-2013/07/08 19:23:32:439038 [INFO] zimg.c:34 save_img() savePath: ./img/67e5aa8268ebded24d4eb1729cd357ac
-2013/07/08 19:23:32:439093 [ERROR] zutil.c:104 isDir() Path[./img/67e5aa8268ebded24d4eb1729cd357ac] is Not Existed!
-2013/07/08 19:23:32:439123 [INFO] zutil.c:120 mkDir() Begin to mkDir()...
-2013/07/08 19:23:32:439302 [INFO] zutil.c:127 mkDir() mkDir[./img/67e5aa8268ebded24d4eb1729cd357ac] sucessfully!
-2013/07/08 19:23:32:439335 [INFO] zimg.c:46 save_img() saveName-->: ./img/67e5aa8268ebded24d4eb1729cd357ac/0*0.jpg
-2013/07/08 19:23:32:439665 [INFO] zimg.c:70 save_img() Image [./img/67e5aa8268ebded24d4eb1729cd357ac/0*0.jpg] Write Successfully!
-2013/07/08 19:23:32:463799 [INFO] zhttpd.c:187 set_cache() Cache Set Successfully. Key[rspPath-/67e5aa8268ebded24d4eb1729cd357ac]: ./img/67e5aa8268ebded24d4eb1729cd357ac/0*0.jpg
-2013/07/08 19:23:32:463881 [INFO] zhttpd.c:551 post_request_cb() ============post_request_cb() DONE!===============
-2013/07/08 19:43:53:272894 [INFO] zhttpd.c:887 send_document_cb() Got a GET request for </upload.html>
-2013/07/08 19:44:36:290280 [INFO] zhttpd.c:234 post_request_cb() Received a POST request for /upload
-2013/07/08 19:44:36:290336 [INFO] zhttpd.c:235 post_request_cb() Headers:
-2013/07/08 19:44:36:290350 [INFO] zhttpd.c:240 post_request_cb()   Host: 127.0.0.1:4869
-2013/07/08 19:44:36:290361 [INFO] zhttpd.c:240 post_request_cb()   Connection: keep-alive
-2013/07/08 19:44:36:290372 [INFO] zhttpd.c:240 post_request_cb()   Content-Length: 49759
-2013/07/08 19:44:36:290383 [INFO] zhttpd.c:240 post_request_cb()   Cache-Control: max-age=0
-2013/07/08 19:44:36:290393 [INFO] zhttpd.c:240 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-2013/07/08 19:44:36:290404 [INFO] zhttpd.c:240 post_request_cb()   Origin: http://127.0.0.1:4869
-2013/07/08 19:44:36:290415 [INFO] zhttpd.c:240 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
-2013/07/08 19:44:36:290427 [INFO] zhttpd.c:240 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryO2aAXqsy4pnCaPrJ
-2013/07/08 19:44:36:290438 [INFO] zhttpd.c:284 post_request_cb() boundary Find. boundary = ----WebKitFormBoundaryO2aAXqsy4pnCaPrJ
-2013/07/08 19:44:36:290449 [INFO] zhttpd.c:240 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
-2013/07/08 19:44:36:290459 [INFO] zhttpd.c:240 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
-2013/07/08 19:44:36:290471 [INFO] zhttpd.c:240 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
-2013/07/08 19:44:36:290482 [INFO] zhttpd.c:303 post_request_cb() evblen = 49759
-2013/07/08 19:44:36:290535 [INFO] zhttpd.c:305 post_request_cb() rmblen = 49759
-2013/07/08 19:44:36:290553 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
-------WebKitFormBoundaryO2aAXqsy4pnCaPrJ, strlen = 42
-2013/07/08 19:44:36:290567 [INFO] zhttpd.c:372 post_request_cb() fileName = gray.jpg
-2013/07/08 19:44:36:290580 [INFO] zutil.c:89 isImg() compare jpg - jpg.
-2013/07/08 19:44:36:290590 [INFO] zhttpd.c:394 post_request_cb() start = 112
-2013/07/08 19:44:36:290600 [INFO] zhttpd.c:401 post_request_cb() end = 136
-2013/07/08 19:44:36:290610 [INFO] zhttpd.c:403 post_request_cb() start = 140
-2013/07/08 19:44:36:290852 [INFO] zhttpd.c:410 post_request_cb() end = 49713
-2013/07/08 19:44:36:290870 [INFO] zhttpd.c:414 post_request_cb() postSize = 49759
-2013/07/08 19:44:36:290882 [INFO] zhttpd.c:415 post_request_cb() imgSize = 49573
-2013/07/08 19:44:36:290897 [INFO] zhttpd.c:418 post_request_cb() Begin to Save Image...
-2013/07/08 19:44:36:290908 [INFO] zimg.c:6 save_img() Begin to Caculate MD5...
-2013/07/08 19:44:36:291317 [INFO] zimg.c:28 save_img() md5: 926ee2f570dc50b2575e35a6712b08ce
-2013/07/08 19:44:36:291345 [INFO] zimg.c:34 save_img() savePath: ./img/926ee2f570dc50b2575e35a6712b08ce
-2013/07/08 19:44:36:291387 [ERROR] zutil.c:104 isDir() Path[./img/926ee2f570dc50b2575e35a6712b08ce] is Not Existed!
-2013/07/08 19:44:36:291401 [INFO] zutil.c:120 mkDir() Begin to mkDir()...
-2013/07/08 19:44:36:291462 [INFO] zutil.c:127 mkDir() mkDir[./img/926ee2f570dc50b2575e35a6712b08ce] sucessfully!
-2013/07/08 19:44:36:291473 [INFO] zimg.c:46 save_img() saveName-->: ./img/926ee2f570dc50b2575e35a6712b08ce/0*0.jpg
-2013/07/08 19:44:36:291647 [INFO] zimg.c:70 save_img() Image [./img/926ee2f570dc50b2575e35a6712b08ce/0*0.jpg] Write Successfully!
-2013/07/08 19:44:36:336133 [INFO] zhttpd.c:187 set_cache() Cache Set Successfully. Key[rspPath-/926ee2f570dc50b2575e35a6712b08ce]: ./img/926ee2f570dc50b2575e35a6712b08ce/0*0.jpg
-2013/07/08 19:44:36:336211 [INFO] zhttpd.c:551 post_request_cb() ============post_request_cb() DONE!===============
-2013/07/08 19:44:40:499788 [INFO] zhttpd.c:887 send_document_cb() Got a GET request for </upload.html>
-2013/07/08 19:44:55:800179 [INFO] zhttpd.c:234 post_request_cb() Received a POST request for /upload
-2013/07/08 19:44:55:800213 [INFO] zhttpd.c:235 post_request_cb() Headers:
-2013/07/08 19:44:55:800222 [INFO] zhttpd.c:240 post_request_cb()   Host: 127.0.0.1:4869
-2013/07/08 19:44:55:800230 [INFO] zhttpd.c:240 post_request_cb()   Connection: keep-alive
-2013/07/08 19:44:55:800256 [INFO] zhttpd.c:240 post_request_cb()   Content-Length: 198
-2013/07/08 19:44:55:800266 [INFO] zhttpd.c:240 post_request_cb()   Cache-Control: max-age=0
-2013/07/08 19:44:55:800273 [INFO] zhttpd.c:240 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-2013/07/08 19:44:55:800280 [INFO] zhttpd.c:240 post_request_cb()   Origin: http://127.0.0.1:4869
-2013/07/08 19:44:55:800289 [INFO] zhttpd.c:240 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
-2013/07/08 19:44:55:800298 [INFO] zhttpd.c:240 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryk9UGxdMhKurCobWa
-2013/07/08 19:44:55:800307 [INFO] zhttpd.c:284 post_request_cb() boundary Find. boundary = ----WebKitFormBoundaryk9UGxdMhKurCobWa
-2013/07/08 19:44:55:800314 [INFO] zhttpd.c:240 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
-2013/07/08 19:44:55:800320 [INFO] zhttpd.c:240 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
-2013/07/08 19:44:55:800327 [INFO] zhttpd.c:240 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
-2013/07/08 19:44:55:800334 [INFO] zhttpd.c:303 post_request_cb() evblen = 198
-2013/07/08 19:44:55:800341 [INFO] zhttpd.c:305 post_request_cb() rmblen = 198
-2013/07/08 19:44:55:800353 [INFO] zhttpd.c:345 post_request_cb() boundaryPattern = 
-------WebKitFormBoundaryk9UGxdMhKurCobWa, strlen = 42
-2013/07/08 19:44:55:800365 [INFO] zhttpd.c:372 post_request_cb() fileName = a.sh
-2013/07/08 19:44:55:800379 [INFO] zutil.c:89 isImg() compare sh - jpg.
-2013/07/08 19:44:55:800389 [INFO] zutil.c:89 isImg() compare sh - jpeg.
-2013/07/08 19:44:55:800398 [INFO] zutil.c:89 isImg() compare sh - png.
-2013/07/08 19:44:55:800406 [INFO] zutil.c:89 isImg() compare sh - gif.
-2013/07/08 19:44:55:800414 [ERROR] zhttpd.c:382 post_request_cb() fileType[sh] is Not Supported!
-2013/07/08 19:44:55:800445 [INFO] zhttpd.c:556 post_request_cb() ============post_request_cb() ERROR!===============
-2013/07/08 19:46:30:006048 [INFO] main.c:49 main() Begin to Read Config File[conf/config.ini]
-2013/07/08 19:46:30:006096 [INFO] zconf.c:45 getConfKey() Key [port] = 4869
-2013/07/08 19:46:30:006111 [INFO] main.c:58 main() Get port: 4869
-2013/07/08 19:46:30:006137 [INFO] zconf.c:45 getConfKey() Key [mport] = 11211
-2013/07/08 19:46:30:006146 [INFO] main.c:69 main() Get mport: 11211
-2013/07/08 19:46:30:006164 [INFO] zconf.c:45 getConfKey() Key [root-path] = ./www
-2013/07/08 19:46:30:006173 [INFO] main.c:79 main() Get root_path: ./www
-2013/07/08 19:46:30:006195 [INFO] zconf.c:45 getConfKey() Key [img-path] = ./img
-2013/07/08 19:46:30:006209 [INFO] main.c:89 main() Get img-path: ./img
-2013/07/08 19:46:30:006239 [INFO] zconf.c:45 getConfKey() Key [mip] = 127.0.0.1
-2013/07/08 19:46:30:006254 [INFO] main.c:99 main() Get mip: 127.0.0.1
-2013/07/08 19:46:30:006266 [INFO] main.c:103 main() conf/config.ini Read Finished.
-2013/07/08 19:46:30:006278 [INFO] main.c:106 main() Begin to Init the Path zimg Using...
-2013/07/08 19:46:30:006295 [INFO] zutil.c:109 isDir() Path[./www] is A Dir.
-2013/07/08 19:46:30:006310 [INFO] zutil.c:109 isDir() Path[./img] is A Dir.
-2013/07/08 19:46:30:006319 [INFO] main.c:124 main() Paths Init Finished.
-2013/07/08 19:46:30:006326 [INFO] main.c:127 main() Begin to Init Memcached Connection...
-2013/07/08 19:46:30:006380 [INFO] main.c:137 main() Memcached Connection Init Finished.
-2013/07/08 19:46:30:006392 [INFO] main.c:138 main() memcached connection to: 127.0.0.1:11211
-2013/07/08 19:46:30:006406 [INFO] main.c:142 main() Begin to Start Httpd Server...
-2013/07/08 19:46:30:006882 [INFO] zhttpd.c:1019 displayAddress() Listening on 127.0.0.1:4869
+2013/07/08 23:42:26:161697 [INFO] main.c:49 main() Begin to Read Config File[conf/config.ini]
+2013/07/08 23:42:26:161752 [INFO] zconf.c:45 get_conf_key() Key [port] = 4869
+2013/07/08 23:42:26:161767 [INFO] main.c:58 main() Get port: 4869
+2013/07/08 23:42:26:161801 [INFO] zconf.c:45 get_conf_key() Key [mport] = 11211
+2013/07/08 23:42:26:161812 [INFO] main.c:69 main() Get mport: 11211
+2013/07/08 23:42:26:161831 [INFO] zconf.c:45 get_conf_key() Key [root-path] = ./www
+2013/07/08 23:42:26:161838 [INFO] main.c:79 main() Get root_path: ./www
+2013/07/08 23:42:26:161854 [INFO] zconf.c:45 get_conf_key() Key [img-path] = ./img
+2013/07/08 23:42:26:161861 [INFO] main.c:89 main() Get img-path: ./img
+2013/07/08 23:42:26:161877 [INFO] zconf.c:45 get_conf_key() Key [mip] = 127.0.0.1
+2013/07/08 23:42:26:161884 [INFO] main.c:99 main() Get mip: 127.0.0.1
+2013/07/08 23:42:26:161890 [INFO] main.c:103 main() conf/config.ini Read Finished.
+2013/07/08 23:42:26:161896 [INFO] main.c:106 main() Begin to Init the Path zimg Using...
+2013/07/08 23:42:26:161905 [INFO] zutil.c:109 is_dir() Path[./www] is A Dir.
+2013/07/08 23:42:26:161913 [INFO] zutil.c:109 is_dir() Path[./img] is A Dir.
+2013/07/08 23:42:26:161919 [INFO] main.c:124 main() Paths Init Finished.
+2013/07/08 23:42:26:161925 [INFO] main.c:127 main() Begin to Init Memcached Connection...
+2013/07/08 23:42:26:161977 [INFO] main.c:137 main() Memcached Connection Init Finished.
+2013/07/08 23:42:26:161985 [INFO] main.c:138 main() memcached connection to: 127.0.0.1:11211
+2013/07/08 23:42:26:161992 [INFO] main.c:142 main() Begin to Start Httpd Server...
+2013/07/08 23:42:26:162422 [INFO] zhttpd.c:561 display_address() Listening on 127.0.0.1:4869
+2013/07/08 23:42:35:525657 [INFO] zhttpd.c:370 send_document_cb() Got a GET request for </upload.html>
+2013/07/08 23:42:35:583969 [INFO] zhttpd.c:367 send_document_cb() favicon.ico Request, Denied.
+2013/07/08 23:43:09:910276 [INFO] zhttpd.c:105 post_request_cb() Received a POST request for /upload
+2013/07/08 23:43:09:910315 [INFO] zhttpd.c:106 post_request_cb() Headers:
+2013/07/08 23:43:09:910332 [INFO] zhttpd.c:111 post_request_cb()   Host: 127.0.0.1:4869
+2013/07/08 23:43:09:910345 [INFO] zhttpd.c:111 post_request_cb()   Connection: keep-alive
+2013/07/08 23:43:09:910358 [INFO] zhttpd.c:111 post_request_cb()   Content-Length: 97487
+2013/07/08 23:43:09:910371 [INFO] zhttpd.c:111 post_request_cb()   Cache-Control: max-age=0
+2013/07/08 23:43:09:910382 [INFO] zhttpd.c:111 post_request_cb()   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+2013/07/08 23:43:09:910395 [INFO] zhttpd.c:111 post_request_cb()   Origin: http://127.0.0.1:4869
+2013/07/08 23:43:09:910407 [INFO] zhttpd.c:111 post_request_cb()   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+2013/07/08 23:43:09:910417 [INFO] zhttpd.c:111 post_request_cb()   Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryylRBkkRUpIkjHFr2
+2013/07/08 23:43:09:910432 [INFO] zhttpd.c:155 post_request_cb() boundary Find. boundary = ----WebKitFormBoundaryylRBkkRUpIkjHFr2
+2013/07/08 23:43:09:910445 [INFO] zhttpd.c:111 post_request_cb()   Referer: http://127.0.0.1:4869/upload.html
+2013/07/08 23:43:09:910456 [INFO] zhttpd.c:111 post_request_cb()   Accept-Encoding: gzip,deflate,sdch
+2013/07/08 23:43:09:910467 [INFO] zhttpd.c:111 post_request_cb()   Accept-Language: zh-CN,zh;q=0.8
+2013/07/08 23:43:09:910482 [INFO] zhttpd.c:174 post_request_cb() evblen = 97487
+2013/07/08 23:43:09:910568 [INFO] zhttpd.c:176 post_request_cb() rmblen = 97487
+2013/07/08 23:43:09:910585 [INFO] zhttpd.c:216 post_request_cb() boundaryPattern = 
+------WebKitFormBoundaryylRBkkRUpIkjHFr2, strlen = 42
+2013/07/08 23:43:09:910600 [INFO] zhttpd.c:243 post_request_cb() fileName = 49eeb931tc8541a3a649f&690.jpeg
+2013/07/08 23:43:09:910616 [INFO] zutil.c:89 is_img() compare jpegoad - jpg.
+2013/07/08 23:43:09:910627 [INFO] zutil.c:89 is_img() compare jpegoad - jpeg.
+2013/07/08 23:43:09:910638 [INFO] zhttpd.c:265 post_request_cb() start = 134
+2013/07/08 23:43:09:910648 [INFO] zhttpd.c:272 post_request_cb() end = 158
+2013/07/08 23:43:09:910679 [INFO] zhttpd.c:274 post_request_cb() start = 162
+2013/07/08 23:43:09:911082 [INFO] zhttpd.c:281 post_request_cb() end = 97441
+2013/07/08 23:43:09:911098 [INFO] zhttpd.c:285 post_request_cb() postSize = 97487
+2013/07/08 23:43:09:911109 [INFO] zhttpd.c:286 post_request_cb() imgSize = 97279
+2013/07/08 23:43:09:911120 [INFO] zhttpd.c:289 post_request_cb() Begin to Save Image...
+2013/07/08 23:43:09:911136 [INFO] zimg.c:6 save_img() Begin to Caculate MD5...
+2013/07/08 23:43:09:911910 [INFO] zimg.c:28 save_img() md5: d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:09:911928 [INFO] zimg.c:34 save_img() savePath: ./img/d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:09:911961 [ERROR] zutil.c:104 is_dir() Path[./img/d8c78e3426b4f5d6f982d5a356d962a6] is Not Existed!
+2013/07/08 23:43:09:911979 [INFO] zutil.c:120 mk_dir() Begin to mk_dir()...
+2013/07/08 23:43:09:912098 [INFO] zutil.c:127 mk_dir() mkdir[./img/d8c78e3426b4f5d6f982d5a356d962a6] sucessfully!
+2013/07/08 23:43:09:912118 [INFO] zimg.c:46 save_img() saveName-->: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:09:912345 [INFO] zimg.c:70 save_img() Image [./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg] Write Successfully!
+2013/07/08 23:43:09:912781 [INFO] zcache.c:40 set_cache() Cache Set Successfully. Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:09:912855 [INFO] zhttpd.c:308 post_request_cb() ============post_request_cb() DONE!===============
+2013/07/08 23:43:18:448209 [INFO] zhttpd.c:370 send_document_cb() Got a GET request for </d8c78e3426b4f5d6f982d5a356d962a6>
+2013/07/08 23:43:18:448317 [WARNING] zhttpd.c:395 send_document_cb() Stat whole_path[./www/d8c78e3426b4f5d6f982d5a356d962a6] Failed! Goto zimg_cb() for Searching.
+2013/07/08 23:43:18:448336 [INFO] zimg.c:105 get_img() get_img() start processing zimg request...
+2013/07/08 23:43:18:448506 [INFO] zcache.c:15 find_cache() Cache Find Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:18:448528 [INFO] zimg.c:110 get_img() Hit Cache. rspPath: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:18:448540 [INFO] zimg.c:221 get_img() Goto Section openFile.
+2013/07/08 23:43:18:448573 [INFO] zimg.c:299 get_img() Got the file!
+2013/07/08 23:43:24:093635 [INFO] zhttpd.c:370 send_document_cb() Got a GET request for </d8c78e3426b4f5d6f982d5a356d962a6?w=100>
+2013/07/08 23:43:24:093689 [WARNING] zhttpd.c:395 send_document_cb() Stat whole_path[./www/d8c78e3426b4f5d6f982d5a356d962a6] Failed! Goto zimg_cb() for Searching.
+2013/07/08 23:43:24:093716 [INFO] zimg.c:105 get_img() get_img() start processing zimg request...
+2013/07/08 23:43:24:093906 [WARNING] zcache.c:22 find_cache() Cache Key[path:d8c78e3426b4f5d6f982d5a356d962a6:100:0:1:0] Not Find!
+2013/07/08 23:43:24:093933 [INFO] zimg.c:121 get_img() docroot: ./img
+2013/07/08 23:43:24:093946 [INFO] zimg.c:122 get_img() req->md5: d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:24:093957 [INFO] zimg.c:123 get_img() whole_path: ./img/d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:24:094163 [INFO] zcache.c:15 find_cache() Cache Find Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:24:094184 [INFO] zimg.c:151 get_img() Hit Cache. origPath: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:24:094212 [INFO] zimg.c:195 get_img() Goto getOrigPath...
+2013/07/08 23:43:24:094227 [INFO] zimg.c:212 get_img() File Path: ./img/d8c78e3426b4f5d6f982d5a356d962a6/100*0p.jpeg
+2013/07/08 23:43:24:094238 [INFO] zimg.c:215 get_img() Section genRspPath has steped in. isGenRsp = 1
+2013/07/08 23:43:24:094250 [INFO] zimg.c:217 get_img() cacheKey = path:d8c78e3426b4f5d6f982d5a356d962a6:100:0:1:0
+2013/07/08 23:43:24:094489 [INFO] zcache.c:40 set_cache() Cache Set Successfully. Key[path:d8c78e3426b4f5d6f982d5a356d962a6:100:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/100*0p.jpeg
+2013/07/08 23:43:24:094539 [INFO] zimg.c:221 get_img() Goto Section openFile.
+2013/07/08 23:43:24:094576 [INFO] zimg.c:229 get_img() Not find the file, begin to resize...
+2013/07/08 23:43:24:311435 [INFO] zimg.c:262 get_img() Resize img succ.
+2013/07/08 23:43:24:314027 [INFO] zimg.c:284 get_img() New img[./img/d8c78e3426b4f5d6f982d5a356d962a6/100*0p.jpeg] storaged.
+2013/07/08 23:43:27:848890 [INFO] zhttpd.c:370 send_document_cb() Got a GET request for </d8c78e3426b4f5d6f982d5a356d962a6?w=200>
+2013/07/08 23:43:27:848940 [WARNING] zhttpd.c:395 send_document_cb() Stat whole_path[./www/d8c78e3426b4f5d6f982d5a356d962a6] Failed! Goto zimg_cb() for Searching.
+2013/07/08 23:43:27:848960 [INFO] zimg.c:105 get_img() get_img() start processing zimg request...
+2013/07/08 23:43:27:849108 [WARNING] zcache.c:22 find_cache() Cache Key[path:d8c78e3426b4f5d6f982d5a356d962a6:200:0:1:0] Not Find!
+2013/07/08 23:43:27:849128 [INFO] zimg.c:121 get_img() docroot: ./img
+2013/07/08 23:43:27:849140 [INFO] zimg.c:122 get_img() req->md5: d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:27:849151 [INFO] zimg.c:123 get_img() whole_path: ./img/d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:27:849277 [INFO] zcache.c:15 find_cache() Cache Find Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:27:849296 [INFO] zimg.c:151 get_img() Hit Cache. origPath: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:27:849308 [INFO] zimg.c:195 get_img() Goto getOrigPath...
+2013/07/08 23:43:27:849321 [INFO] zimg.c:212 get_img() File Path: ./img/d8c78e3426b4f5d6f982d5a356d962a6/200*0p.jpeg
+2013/07/08 23:43:27:849331 [INFO] zimg.c:215 get_img() Section genRspPath has steped in. isGenRsp = 1
+2013/07/08 23:43:27:849341 [INFO] zimg.c:217 get_img() cacheKey = path:d8c78e3426b4f5d6f982d5a356d962a6:200:0:1:0
+2013/07/08 23:43:27:849589 [INFO] zcache.c:40 set_cache() Cache Set Successfully. Key[path:d8c78e3426b4f5d6f982d5a356d962a6:200:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/200*0p.jpeg
+2013/07/08 23:43:27:849610 [INFO] zimg.c:221 get_img() Goto Section openFile.
+2013/07/08 23:43:27:849667 [INFO] zimg.c:229 get_img() Not find the file, begin to resize...
+2013/07/08 23:43:27:879430 [INFO] zimg.c:262 get_img() Resize img succ.
+2013/07/08 23:43:27:885253 [INFO] zimg.c:284 get_img() New img[./img/d8c78e3426b4f5d6f982d5a356d962a6/200*0p.jpeg] storaged.
+2013/07/08 23:43:32:577432 [INFO] zhttpd.c:370 send_document_cb() Got a GET request for </d8c78e3426b4f5d6f982d5a356d962a6?h=200>
+2013/07/08 23:43:32:577533 [WARNING] zhttpd.c:395 send_document_cb() Stat whole_path[./www/d8c78e3426b4f5d6f982d5a356d962a6] Failed! Goto zimg_cb() for Searching.
+2013/07/08 23:43:32:577560 [INFO] zimg.c:105 get_img() get_img() start processing zimg request...
+2013/07/08 23:43:32:577819 [WARNING] zcache.c:22 find_cache() Cache Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:200:1:0] Not Find!
+2013/07/08 23:43:32:577843 [INFO] zimg.c:121 get_img() docroot: ./img
+2013/07/08 23:43:32:577857 [INFO] zimg.c:122 get_img() req->md5: d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:32:577868 [INFO] zimg.c:123 get_img() whole_path: ./img/d8c78e3426b4f5d6f982d5a356d962a6
+2013/07/08 23:43:32:578074 [INFO] zcache.c:15 find_cache() Cache Find Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:0:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:32:578095 [INFO] zimg.c:151 get_img() Hit Cache. origPath: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*0p.jpeg
+2013/07/08 23:43:32:578108 [INFO] zimg.c:195 get_img() Goto getOrigPath...
+2013/07/08 23:43:32:578122 [INFO] zimg.c:212 get_img() File Path: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*200p.jpeg
+2013/07/08 23:43:32:578133 [INFO] zimg.c:215 get_img() Section genRspPath has steped in. isGenRsp = 1
+2013/07/08 23:43:32:578146 [INFO] zimg.c:217 get_img() cacheKey = path:d8c78e3426b4f5d6f982d5a356d962a6:0:200:1:0
+2013/07/08 23:43:32:578336 [INFO] zcache.c:40 set_cache() Cache Set Successfully. Key[path:d8c78e3426b4f5d6f982d5a356d962a6:0:200:1:0]: ./img/d8c78e3426b4f5d6f982d5a356d962a6/0*200p.jpeg
+2013/07/08 23:43:32:578431 [INFO] zimg.c:221 get_img() Goto Section openFile.
+2013/07/08 23:43:32:578540 [INFO] zimg.c:229 get_img() Not find the file, begin to resize...
+2013/07/08 23:43:32:615063 [INFO] zimg.c:262 get_img() Resize img succ.
+2013/07/08 23:43:32:624857 [INFO] zimg.c:284 get_img() New img[./img/d8c78e3426b4f5d6f982d5a356d962a6/0*200p.jpeg] storaged.
