@@ -92,7 +92,6 @@ err:
 int get_img(zimg_req_t *req, struct evbuffer *evb, char *imgType)
 {
     int result = -1;
-    const char *docroot = _img_path;
     char rspPath[512];
     char *whole_path = NULL;
     size_t len;
@@ -111,13 +110,13 @@ int get_img(zimg_req_t *req, struct evbuffer *evb, char *imgType)
     }
 
 genRspPath:
-    len = strlen(req->md5) + strlen(docroot) + 2;
+    len = strlen(req->md5) + strlen(_img_path) + 2;
     if (!(whole_path = malloc(len))) {
         LOG_PRINT(LOG_ERROR, "malloc failed!");
         goto err;
     }
-    evutil_snprintf(whole_path, len, "%s/%s", docroot, req->md5);
-    LOG_PRINT(LOG_INFO, "docroot: %s", docroot);
+    evutil_snprintf(whole_path, len, "%s/%s", _img_path, req->md5);
+    LOG_PRINT(LOG_INFO, "docroot: %s", _img_path);
     LOG_PRINT(LOG_INFO, "req->md5: %s", req->md5);
     LOG_PRINT(LOG_INFO, "whole_path: %s", whole_path);
 
@@ -300,8 +299,6 @@ openFile:
     result = 1;
 
 err:
-    if (fd>=0)
-        close(fd);
     if (whole_path)
         free(whole_path);
     return result;

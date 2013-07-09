@@ -332,6 +332,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	size_t len;
 	int fd = -1;
 	struct stat st;
+    zimg_req_t *zimg_req = NULL;
 
     if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
     {
@@ -388,7 +389,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 
 	if (stat(whole_path, &st)<0) {
         LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
-        char md5[33];
+        char *md5 = (char *)malloc(strlen(decoded_path) + 1);
         if(decoded_path[0] == '/')
             strcpy(md5, decoded_path+1);
         char *path_end;
@@ -424,7 +425,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
                 gray = 0;
         }
 
-        zimg_req_t *zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
+        zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
         zimg_req -> md5 = md5;
         zimg_req -> width = width;
         zimg_req -> height = height;
@@ -439,7 +440,6 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
             LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
             goto err;
         }
-        free(zimg_req);
 		evhttp_add_header(evhttp_request_get_output_headers(req),
 		    "Content-Type", type);
         evhttp_send_reply(req, 200, "OK", evb);
@@ -513,6 +513,12 @@ err:
 	if (fd>=0)
 		close(fd);
 done:
+    if(zimg_req)
+    {
+        if(zimg_req->md5)
+            free(zimg_req->md5);
+        free(zimg_req);
+    }
 	if (decoded)
 		evhttp_uri_free(decoded);
 	if (decoded_path)

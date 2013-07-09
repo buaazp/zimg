@@ -1,21 +1,21 @@
-2013/07/09 18:02:46:738881 [INFO] main.c:50 main() Begin to Read Config File[conf/config.ini]
-2013/07/09 18:02:46:738933 [INFO] zconf.c:45 get_conf_key() Key [port] = 4869
-2013/07/09 18:02:46:738945 [INFO] main.c:59 main() Get port: 4869
-2013/07/09 18:02:46:738970 [INFO] zconf.c:45 get_conf_key() Key [mport] = 11211
-2013/07/09 18:02:46:738979 [INFO] main.c:70 main() Get mport: 11211
-2013/07/09 18:02:46:738997 [INFO] zconf.c:45 get_conf_key() Key [root-path] = ./www
-2013/07/09 18:02:46:739006 [INFO] main.c:80 main() Get root_path: ./www
-2013/07/09 18:02:46:739024 [INFO] zconf.c:45 get_conf_key() Key [img-path] = ./img
-2013/07/09 18:02:46:739032 [INFO] main.c:90 main() Get img-path: ./img
-2013/07/09 18:02:46:739051 [INFO] zconf.c:45 get_conf_key() Key [mip] = 127.0.0.1
-2013/07/09 18:02:46:739059 [INFO] main.c:100 main() Get mip: 127.0.0.1
-2013/07/09 18:02:46:739066 [INFO] main.c:104 main() conf/config.ini Read Finished.
-2013/07/09 18:02:46:739074 [INFO] main.c:107 main() Begin to Init the Path zimg Using...
-2013/07/09 18:02:46:739084 [INFO] zutil.c:110 is_dir() Path[./www] is A Dir.
-2013/07/09 18:02:46:739094 [INFO] zutil.c:110 is_dir() Path[./img] is A Dir.
-2013/07/09 18:02:46:739101 [INFO] main.c:125 main() Paths Init Finished.
-2013/07/09 18:02:46:739108 [INFO] main.c:128 main() Begin to Init Memcached Connection...
-2013/07/09 18:02:46:739164 [INFO] main.c:138 main() Memcached Connection Init Finished.
-2013/07/09 18:02:46:739173 [INFO] main.c:139 main() memcached connection to: 127.0.0.1:11211
-2013/07/09 18:02:46:739180 [INFO] main.c:143 main() Begin to Start Httpd Server...
-2013/07/09 18:02:46:739657 [INFO] zhttpd.c:556 display_address() Listening on 127.0.0.1:4869
+2013/07/10 02:02:36:456424 [INFO] main.c:50 main() Begin to Read Config File[conf/config.ini]
+2013/07/10 02:02:36:456572 [INFO] zconf.c:45 get_conf_key() Key [port] = 4869
+2013/07/10 02:02:36:456608 [INFO] main.c:59 main() Get port: 4869
+2013/07/10 02:02:36:456684 [INFO] zconf.c:45 get_conf_key() Key [mport] = 11211
+2013/07/10 02:02:36:456705 [INFO] main.c:70 main() Get mport: 11211
+2013/07/10 02:02:36:456746 [INFO] zconf.c:45 get_conf_key() Key [root-path] = ./www
+2013/07/10 02:02:36:456763 [INFO] main.c:80 main() Get root_path: ./www
+2013/07/10 02:02:36:456802 [INFO] zconf.c:45 get_conf_key() Key [img-path] = ./img
+2013/07/10 02:02:36:456820 [INFO] main.c:90 main() Get img-path: ./img
+2013/07/10 02:02:36:456858 [INFO] zconf.c:45 get_conf_key() Key [mip] = 127.0.0.1
+2013/07/10 02:02:36:456875 [INFO] main.c:100 main() Get mip: 127.0.0.1
+2013/07/10 02:02:36:456890 [INFO] main.c:104 main() conf/config.ini Read Finished.
+2013/07/10 02:02:36:456905 [INFO] main.c:107 main() Begin to Init the Path zimg Using...
+2013/07/10 02:02:36:456926 [INFO] zutil.c:110 is_dir() Path[./www] is A Dir.
+2013/07/10 02:02:36:456947 [INFO] zutil.c:110 is_dir() Path[./img] is A Dir.
+2013/07/10 02:02:36:456962 [INFO] main.c:125 main() Paths Init Finished.
+2013/07/10 02:02:36:456976 [INFO] main.c:128 main() Begin to Init Memcached Connection...
+2013/07/10 02:02:36:457095 [INFO] main.c:138 main() Memcached Connection Init Finished.
+2013/07/10 02:02:36:457114 [INFO] main.c:139 main() memcached connection to: 127.0.0.1:11211
+2013/07/10 02:02:36:457129 [INFO] main.c:143 main() Begin to Start Httpd Server...
+2013/07/10 02:02:36:458212 [INFO] zhttpd.c:562 display_address() Listening on 127.0.0.1:4869
