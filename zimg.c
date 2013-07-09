@@ -99,6 +99,7 @@ int get_img(zimg_req_t *req, struct evbuffer *evb, char *imgType)
     int fd = -1;
     int isGenRsp = -1;
     char cacheKey[256];
+    DIR *dir = NULL;
 
     LOG_PRINT(LOG_INFO, "get_img() start processing zimg request...");
 
@@ -149,14 +150,13 @@ genRspPath:
         LOG_PRINT(LOG_INFO, "Hit Cache. origPath: %s", origPath);
         goto getOrigPath;
     }
-    DIR *dir;
     if (!(dir = opendir(whole_path)))
     {
         LOG_PRINT(LOG_ERROR, "Dir[%s] open failed.", whole_path);
         goto err;
     }
-    struct dirent *ent;
-    char *origName;
+    struct dirent *ent = NULL;
+    char *origName = NULL;
     int find = 0;
 
     while(ent = readdir(dir))
@@ -175,7 +175,6 @@ genRspPath:
             break;
         }
     }
-    closedir(dir);
     if(find == 0)
     {
         LOG_PRINT(LOG_ERROR, "Get 0rig Image Failed.");
@@ -297,8 +296,17 @@ openFile:
         evbuffer_add_file(evb, fd, 0, st.st_size);
     }
     result = 1;
+    goto done;
 
 err:
+    if(fd != -1)
+        close(fd);
+
+done:
+    if(origName)
+        free(origName);
+    if(dir)
+        closedir(dir);
     if (whole_path)
         free(whole_path);
     return result;
