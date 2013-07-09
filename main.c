@@ -33,9 +33,10 @@ int main(int argc, char **argv)
 
     //start log module... ./log/zimg.log
     log_init();
-    char *logFile = (char *)malloc(strlen(log_path) + 10);
-    sprintf(logFile, "%s/zimg.log", log_path);
-    _log_id = log_open(logFile, "a");
+    char *log_file = (char *)malloc(strlen(log_path) + 10);
+    sprintf(log_file, "%s/zimg.log", log_path);
+    _log_id = log_open(log_file, "a");
+    free(log_file);
     /*
     int i;
     for(i = 0; i < 8; i++)
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
-    if(start_httpd(_port, _root_path) == -1)
+    if(start_httpd(_port) == -1)
     {
         LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
     }

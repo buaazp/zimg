@@ -3,14 +3,13 @@
 
 int save_img(const char *type, const char *buff, const int len, char *md5)
 {
+    int result = -1;
     LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
     md5_state_t mdctx;
     md5_byte_t md_value[16];
     char md5sum[33];
     unsigned int md_len, i;
     int h, l;
-    int fd = -1;
-    int wlen = 0;
     md5_init(&mdctx);
     md5_append(&mdctx, (const unsigned char*)(buff), len);
     md5_finish(&mdctx, md_value);
@@ -26,6 +25,11 @@ int save_img(const char *type, const char *buff, const int len, char *md5)
     md5sum[32] = '\0';
     strcpy(md5, md5sum);
     LOG_PRINT(LOG_INFO, "md5: %s", md5sum);
+
+//    char *md5sum = "5f189d8ec57f5a5a0d3dcba47fa797e2";
+
+    int fd = -1;
+    int wlen = 0;
 
     char *savePath = (char *)malloc(512);
     char *saveName = (char *)malloc(512);
@@ -54,20 +58,15 @@ int save_img(const char *type, const char *buff, const int len, char *md5)
     if(wlen == -1)
     {
         LOG_PRINT(LOG_ERROR, "write() failed!");
-        close(fd);
         goto err;
     }
     else if(wlen < len)
     {
         LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
-        close(fd);
         goto err;
     }
-    if(fd != -1)
-    {
-        close(fd);
-    }
     LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
+    result = 1;
 
     // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
     char *cacheKey = (char *)malloc(strlen(md5sum) + 10);
@@ -75,17 +74,16 @@ int save_img(const char *type, const char *buff, const int len, char *md5)
     set_cache(cacheKey, saveName);
     free(cacheKey);
 
-    return 1;
-
-
 err:
+    if(fd != -1)
+        close(fd);
     if(savePath)
         free(savePath);
     if(saveName)
         free(saveName);
     if(origName)
         free(origName);
-    return -1;
+    return result;
 }
 
 
@@ -93,6 +91,7 @@ err:
  * http://127.0.0.1:4869/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&p=1&g=1 */
 int get_img(zimg_req_t *req, struct evbuffer *evb, char *imgType)
 {
+    int result = -1;
     const char *docroot = _img_path;
     char rspPath[512];
     char *whole_path = NULL;
@@ -285,7 +284,6 @@ openFile:
         }
         magick_wand=DestroyMagickWand(magick_wand);
         MagickWandTerminus();
-        goto done;
     }
     else if (fstat(fd, &st)<0) 
     {
@@ -299,16 +297,13 @@ openFile:
         LOG_PRINT(LOG_INFO, "Got the file!");
         evbuffer_add_file(evb, fd, 0, st.st_size);
     }
-    goto done;
+    result = 1;
 
 err:
     if (fd>=0)
         close(fd);
-    return -1;
-
-done:
     if (whole_path)
         free(whole_path);
-    return 1;
+    return result;
 }
 

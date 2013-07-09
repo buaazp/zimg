@@ -93,6 +93,7 @@ int is_img(const char *filename)
             break;
         }
     }
+    free(lower);
     return isimg;
 }
 

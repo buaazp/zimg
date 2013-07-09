@@ -98,8 +98,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     struct evkeyvalq *headers;
     struct evkeyval *header;
     int postSize = 0;
-    char *root_path = (char *)arg;
-    char *boundary, *boundary_end = NULL;
+    char *boundary = NULL, *boundary_end = NULL;
     int boundary_len = 0;
     
 	LOG_PRINT(LOG_INFO, "Received a POST request for %s", evhttp_request_get_uri(req));
@@ -196,14 +195,10 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     */
 
     int start = -1, end = -1;
-    //char fileNamePattern[] = {'f', 'i', 'l', 'e', 'n', 'a', 'm', 'e', '='};
-    //char typePattern[] = {'C', 'o', 'n', 't', 'e', 'n', 't', '-', 'T', 'y', 'p', 'e'};
     char *fileNamePattern = "filename=";
     char *typePattern = "Content-Type";
     char *quotePattern = "\"";
     char *blankPattern = "\r\n";
-    //char quotePattern[] = {'\"'};
-    //char blankPattern[] = {'\r', '\n'};
     char *boundaryPattern = (char *)malloc(boundary_len + 4);
     sprintf(boundaryPattern, "\r\n--%s", boundary);
     /*
@@ -306,11 +301,19 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     evhttp_send_reply(req, 200, "OK", evb);
     evbuffer_free(evb);
     LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
-    return;
+    goto done;
 
 err:
     evhttp_send_error(req, 500, "Image Upload Failed!");
     LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
+
+done:
+    if(fileName)
+        free(fileName);
+    if(boundaryPattern)
+        free(boundaryPattern);
+    if(buff)
+        free(buff);
 }
 
 
@@ -321,7 +324,6 @@ err:
 static void send_document_cb(struct evhttp_request *req, void *arg)
 {
 	struct evbuffer *evb = NULL;
-	const char *docroot = arg;
 	const char *uri = evhttp_request_get_uri(req);
 	struct evhttp_uri *decoded = NULL;
 	const char *path;
@@ -334,19 +336,12 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
     if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
     {
         LOG_PRINT(LOG_INFO, "POST --> post_request_cb(req, %s)", _img_path);
-        post_request_cb(req, _img_path);
-        /*
-        if(post_request_cb(req, _img_path) == -1)
-        {
-            LOG_PRINT(LOG_ERROR, "post_request_cb() call failed!");
-            return;
-        }
-        */
+        post_request_cb(req, NULL);
         LOG_PRINT(LOG_INFO, "post_request_cb(req, %s) --> POST", _img_path);
         return;
     }
     else if(evhttp_request_get_command(req) != EVHTTP_REQ_GET){
-        dump_request_cb(req, arg);
+        dump_request_cb(req, NULL);
         return;
     }
 
@@ -381,12 +376,12 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	if (strstr(decoded_path, ".."))
 		goto err;
 
-	len = strlen(decoded_path)+strlen(docroot)+1;
+	len = strlen(decoded_path)+strlen(_root_path)+1;
 	if (!(whole_path = malloc(len))) {
 		LOG_PRINT(LOG_ERROR, "malloc");
 		goto err;
 	}
-	evutil_snprintf(whole_path, len, "%s%s", docroot, decoded_path);
+	evutil_snprintf(whole_path, len, "%s%s", _root_path, decoded_path);
 
 	/* This holds the content we're sending. */
 	evb = evbuffer_new();
@@ -568,7 +563,7 @@ static int display_address(struct evhttp_bound_socket *handle)
     return 0;
 }
 
-int start_httpd(int port, char *root_path)
+int start_httpd(int port)
 {
     struct event_base *base;
     struct evhttp *http;
@@ -595,13 +590,13 @@ int start_httpd(int port, char *root_path)
 
     /* The /dump URI will dump all requests to stdout and say 200 ok. */
     evhttp_set_cb(http, "/dump", dump_request_cb, NULL);
-    evhttp_set_cb(http, "/upload", post_request_cb, _img_path);
+    evhttp_set_cb(http, "/upload", post_request_cb, NULL);
 
     /* We want to accept arbitrary requests, so we need to set a "generic"
      * cb.  We can also add callbacks for specific paths. */
     //evhttp_set_gencb(http, zimg_cb, _img_path);
     //evhttp_set_gencb(http, post_request_cb, _img_path);
-    evhttp_set_gencb(http, send_document_cb, root_path);
+    evhttp_set_gencb(http, send_document_cb, NULL);
 
     /* Now we tell the evhttp what port to listen on */
     handle = evhttp_bind_socket_with_handle(http, ip, port);

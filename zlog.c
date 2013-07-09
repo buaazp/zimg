@@ -136,12 +136,11 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     if (*p != '\n')
         fputc('\n', fp);
  
-    //缓冲区数据写入文件流
-    fflush(fp);
 
     if (log_valid(log_id))
     {
-        //fflush(log_files[log_id]);
+        //缓冲区数据写入文件流
+        fflush(fp);
 
         spin_unlock(&log_locks[log_id]);
     }
