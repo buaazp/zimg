@@ -136,8 +136,12 @@ int main(int argc, char **argv)
     memcached_server_list_free(servers);
     memcached_behavior_set(_memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
     LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
-    LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
-    free(mserver);
+    if(set_cache("test", "1") == -1)
+        LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);
+    else
+        LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
+    if(mserver)
+        free(mserver);
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");

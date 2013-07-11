@@ -25,6 +25,17 @@ static const struct table_entry {
 };
 
 /* Try to guess a good content-type for 'path' */
+static const char * guess_type(const char *type)
+{
+	const struct table_entry *ent;
+	for (ent = &content_type_table[0]; ent->extension; ++ent) {
+		if (!evutil_ascii_strcasecmp(ent->extension, type))
+			return ent->content_type;
+	}
+	return "application/misc";
+}
+
+/* Try to guess a good content-type for 'path' */
 static const char * guess_content_type(const char *path)
 {
 	const char *last_period, *extension;
@@ -282,7 +293,8 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
     char md5sum[33];
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");
-    if(save_img(fileType, buff+start, imgSize, md5sum) == -1)
+    //if(save_img(fileType, buff+start, imgSize, md5sum) == -1)
+    if(save_img(buff+start, imgSize, md5sum) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
@@ -434,20 +446,20 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
         //zimg_proportion = (proportion == 1 ? true : false);
         //zimg_gray = (gray == 1 ? true : false);
 
-        char type[16];
-        if(get_img(zimg_req, evb, type) == -1)
+        char img_type[10];
+        if(get_img(zimg_req, evb, img_type) == -1)
         {
             LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
             goto err;
         }
-		evhttp_add_header(evhttp_request_get_output_headers(req),
-		    "Content-Type", type);
+        LOG_PRINT(LOG_INFO, "Got the File!");
+        LOG_PRINT(LOG_INFO, "img_type: %s", img_type);
+		const char *type = guess_type(img_type);
+        LOG_PRINT(LOG_INFO, "guess_img_type: %s", type);
+		evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
         evhttp_send_reply(req, 200, "OK", evb);
         goto done;
-        
 
-//        zimg_cb(req, NULL);
-//        goto done;
 	}
 
 
@@ -569,6 +581,7 @@ static int display_address(struct evhttp_bound_socket *handle)
     return 0;
 }
 
+
 int start_httpd(int port)
 {
     struct event_base *base;
@@ -601,7 +614,7 @@ int start_httpd(int port)
     /* We want to accept arbitrary requests, so we need to set a "generic"
      * cb.  We can also add callbacks for specific paths. */
     //evhttp_set_gencb(http, zimg_cb, _img_path);
-    //evhttp_set_gencb(http, post_request_cb, _img_path);
+    //evhttp_set_gencb(http, test_cb, NULL);
     evhttp_set_gencb(http, send_document_cb, NULL);
 
     /* Now we tell the evhttp what port to listen on */
