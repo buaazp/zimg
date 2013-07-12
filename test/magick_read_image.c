@@ -6,7 +6,7 @@
 int main()
 {
     int i;
-    for(i = 0; i < 2000; i++)
+    for(i = 0; i < 1; i++)
     {
         MagickWand *magick_wand;
         MagickWandGenesis();
@@ -14,6 +14,9 @@ int main()
 
         const char *rspPath = "./5f189.jpeg";
         MagickReadImage(magick_wand, rspPath);
+        MagickSizeType imgSize;
+        MagickGetImageLength(magick_wand, &imgSize);
+        printf("Got Image Size: %d\n", (int)imgSize);
 
         magick_wand=DestroyMagickWand(magick_wand);
         MagickWandTerminus();

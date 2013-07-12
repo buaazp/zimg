@@ -1,7 +1,7 @@
 #include "zimg.h"
 #include "zmd5.h"
 
-int save_img(const char *buff, const int len, char *md5)
+int save_img(const char *buff, const int len, char *md5, const char *type)
 {
     int result = -1;
 
@@ -27,6 +27,7 @@ int save_img(const char *buff, const int len, char *md5)
     strcpy(md5, md5sum);
     LOG_PRINT(LOG_INFO, "md5: %s", md5sum);
 
+    char *cacheKey = (char *)malloc(strlen(md5sum) + 32);
     char *savePath = (char *)malloc(512);
     char *saveName = (char *)malloc(512);
     sprintf(savePath, "%s/%s", _img_path, md5sum);
@@ -36,7 +37,7 @@ int save_img(const char *buff, const int len, char *md5)
         if(mk_dir(savePath) == -1)
         {
             LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
-            goto err;
+            goto done;
         }
     }
 
@@ -45,10 +46,22 @@ int save_img(const char *buff, const int len, char *md5)
 	if(new_img(buff, len, saveName) == -1)
 	{
 		LOG_PRINT(LOG_WARNING, "Save Image[%s] Failed!", saveName);
+        goto done;
 	}
+
+    if(len <= CACHE_MAX_SIZE)
+    {
+        // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        sprintf(cacheKey, "img:%s:0:0:1:0", md5sum);
+        set_cache_bin(cacheKey, buff, len);
+        sprintf(cacheKey, "type:%s:0:0:1:0", md5sum);
+        set_cache(cacheKey, type);
+    }
 	result = 1;
 
-err:
+done:
+    if(cacheKey)
+        free(cacheKey);
     if(savePath)
         free(savePath);
     if(saveName)
@@ -66,23 +79,23 @@ int new_img(const char *buff, const size_t len, const char *saveName)
 	if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
 	{
 		LOG_PRINT(LOG_ERROR, "fd open failed!");
-		goto err;
+		goto done;
 	}
 	wlen = write(fd, buff, len);
 	if(wlen == -1)
 	{
 		LOG_PRINT(LOG_ERROR, "write() failed!");
-		goto err;
+		goto done;
 	}
 	else if(wlen < len)
 	{
 		LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
-		goto err;
+		goto done;
 	}
 	LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
 	result = 1;
 
-err:
+done:
 	if(fd != -1)
 		close(fd);
 	return result;
@@ -90,12 +103,14 @@ err:
 
 /* get image method used for zimg servise, such as:
  * http://127.0.0.1:4869/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&p=1&g=1 */
-int get_img(zimg_req_t *req, char **buff, char *img_type, size_t *img_size)
+int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
 {
     int result = -1;
     char *rspPath = (char *)malloc(512);
+    char *cacheKey = (char *)malloc(strlen(req->md5) + 32);
     char *whole_path = NULL;
     char *origPath = NULL;
+    char *img_format = NULL;
     size_t len;
     MagickBooleanType status;
     MagickWand *magick_wand;
@@ -107,7 +122,7 @@ int get_img(zimg_req_t *req, char **buff, char *img_type, size_t *img_size)
     len = strlen(req->md5) + strlen(_img_path) + 2;
     if (!(whole_path = malloc(len))) {
         LOG_PRINT(LOG_ERROR, "whole_path malloc failed!");
-        goto err;
+        goto done;
     }
     evutil_snprintf(whole_path, len, "%s/%s", _img_path, req->md5);
     LOG_PRINT(LOG_INFO, "docroot: %s", _img_path);
@@ -139,17 +154,78 @@ int get_img(zimg_req_t *req, char **buff, char *img_type, size_t *img_size)
     }
     LOG_PRINT(LOG_INFO, "Got the rspPath: %s", rspPath);
 
+    // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+    sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+    if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
+    {
+        LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cacheKey);
+        sprintf(cacheKey, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        if(find_cache(cacheKey, img_type) == -1)
+        {
+            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cacheKey);
+            strcpy(img_type, "jpeg");
+        }
+        result = 1;
+        goto done;
+    }
+
     LOG_PRINT(LOG_INFO, "Start to Find the Image...");
     int got_rsp = 1;
     status=MagickReadImage(magick_wand, rspPath);
     if(status == MagickFalse)
     {
         got_rsp = -1;
-        status = MagickReadImage(magick_wand, origPath);
-        if(status == MagickFalse)
+
+        // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        sprintf(cacheKey, "img:%s:0:0:1:0", req->md5);
+        if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
         {
-            ThrowWandException(magick_wand);
-            goto err;
+            LOG_PRINT(LOG_INFO, "Hit Orignal Image Cache[Key: %s].", cacheKey);
+            status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+            if(status == MagickFalse)
+            {
+                LOG_PRINT(LOG_WARNING, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
+                ThrowWandException(magick_wand);
+                del_cache(cacheKey);
+                status = MagickReadImage(magick_wand, origPath);
+                if(status == MagickFalse)
+                {
+                    ThrowWandException(magick_wand);
+                    goto done;
+                }
+                else
+                {
+                    *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+                    if(*img_size <= CACHE_MAX_SIZE)
+                    {
+                        set_cache_bin(cacheKey, *buff_ptr, *img_size);
+                        img_format = MagickGetImageFormat(magick_wand);
+                        sprintf(cacheKey, "type:%s:0:0:1:0", req->md5);
+                        set_cache(cacheKey, img_format);
+                    }
+                }
+            }
+        }
+        else
+        {
+            LOG_PRINT(LOG_INFO, "Not Hit Original Image Cache. Begin to Open it.");
+            status = MagickReadImage(magick_wand, origPath);
+            if(status == MagickFalse)
+            {
+                ThrowWandException(magick_wand);
+                goto done;
+            }
+            else
+            {
+                *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+                if(*img_size <= CACHE_MAX_SIZE)
+                {
+                    set_cache_bin(cacheKey, *buff_ptr, *img_size);
+                    img_format = MagickGetImageFormat(magick_wand);
+                    sprintf(cacheKey, "type:%s:0:0:1:0", req->md5);
+                    set_cache(cacheKey, img_format);
+                }
+            }
         }
         int width, height;
         width = req->width;
@@ -173,7 +249,7 @@ int get_img(zimg_req_t *req, char **buff, char *img_type, size_t *img_size)
             if(status == MagickFalse)
             {
                 LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", origPath);
-                goto err;
+                goto done;
             }
             LOG_PRINT(LOG_INFO, "Resize img succ.");
         }
@@ -184,24 +260,38 @@ int get_img(zimg_req_t *req, char **buff, char *img_type, size_t *img_size)
             LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
         }
     }
-    char *img_format = NULL;
     img_format = MagickGetImageFormat(magick_wand);
     strcpy(img_type, img_format);
-    if(img_format)
-        free(img_format);
     LOG_PRINT(LOG_INFO, "Got Image Format: %s", img_type);
 
-    *buff = MagickGetImageBlob(magick_wand, img_size);
-	req->rspPath = rspPath;
+    *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+
+    if(*img_size <= CACHE_MAX_SIZE)
+    {
+        // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        set_cache_bin(cacheKey, *buff_ptr, *img_size);
+        sprintf(cacheKey, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        set_cache(cacheKey, img_type);
+    }
 
     result = 1;
 	if(got_rsp == -1)
+    {
+        LOG_PRINT(LOG_INFO, "Image[%s] is Not Existed. Begin to Save it.", rspPath);
 		result = 2;
+    }
     else
         LOG_PRINT(LOG_INFO, "Image[%s] is Existed.", rspPath);
-err:
+
+done:
+	req->rspPath = rspPath;
     magick_wand=DestroyMagickWand(magick_wand);
     MagickWandTerminus();
+    if(img_format)
+        free(img_format);
+    if(cacheKey)
+        free(cacheKey);
     if (origPath)
         free(origPath);
     if (whole_path)

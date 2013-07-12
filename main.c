@@ -135,6 +135,8 @@ int main(int argc, char **argv)
     memcached_server_push(_memc, servers);
     memcached_server_list_free(servers);
     memcached_behavior_set(_memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+    //使用NO-BLOCK，防止memcache倒掉时挂死          
+    memcached_behavior_set(_memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
     LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
     if(set_cache("test", "1") == -1)
         LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);

@@ -294,7 +294,7 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");
     //if(save_img(fileType, buff+start, imgSize, md5sum) == -1)
-    if(save_img(buff+start, imgSize, md5sum) == -1)
+    if(save_img(buff+start, imgSize, md5sum, fileType) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
