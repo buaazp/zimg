@@ -6,4 +6,5 @@ typedef struct zimg_req_s {
     int height;
     bool proportion;
     bool gray;
+	char *rspPath;
 } zimg_req_t;

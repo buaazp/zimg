@@ -345,6 +345,7 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
 	int fd = -1;
 	struct stat st;
     zimg_req_t *zimg_req = NULL;
+	char *buff = NULL;
 
     if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
     {
@@ -447,18 +448,34 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
         //zimg_gray = (gray == 1 ? true : false);
 
         char img_type[10];
-        if(get_img(zimg_req, evb, img_type) == -1)
+		int get_img_rst = get_img(zimg_req, &buff, img_type, &len);
+
+
+        if(get_img_rst == -1)
         {
             LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
             goto err;
         }
+
+        LOG_PRINT(LOG_INFO, "get buffer length: %d", len);
+		evbuffer_add(evb, buff, len);
+
         LOG_PRINT(LOG_INFO, "Got the File!");
         LOG_PRINT(LOG_INFO, "img_type: %s", img_type);
 		const char *type = guess_type(img_type);
         LOG_PRINT(LOG_INFO, "guess_img_type: %s", type);
 		evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
         evhttp_send_reply(req, 200, "OK", evb);
-        goto done;
+
+
+ 		if(get_img_rst == 2)
+		{
+			if(new_img(buff, len, zimg_req->rspPath) == -1)
+			{
+				LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rspPath);
+			}
+		}
+		goto done;
 
 	}
 
@@ -525,10 +542,14 @@ err:
 	if (fd>=0)
 		close(fd);
 done:
+	if(buff)
+		free(buff);
     if(zimg_req)
     {
         if(zimg_req->md5)
             free(zimg_req->md5);
+        if(zimg_req->rspPath)
+            free(zimg_req->rspPath);
         free(zimg_req);
     }
 	if (decoded)
@@ -588,7 +609,7 @@ int start_httpd(int port)
     struct evhttp *http;
     struct evhttp_bound_socket *handle;
 
-    char *ip = "127.0.0.1";
+    char *ip = "0.0.0.0";
 
     if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
         return -1;

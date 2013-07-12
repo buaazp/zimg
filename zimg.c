@@ -3,6 +3,11 @@
 
 int save_img(const char *buff, const int len, char *md5)
 {
+    MagickBooleanType status;
+    MagickWand *wand;
+    MagickWandGenesis();
+    wand = NewMagickWand();
+
     int result = -1;
     LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
     md5_state_t mdctx;
@@ -39,18 +44,17 @@ int save_img(const char *buff, const int len, char *md5)
         }
     }
 
-    MagickBooleanType status;
-    MagickWand *wand;
-    MagickWandGenesis();
-    wand = NewMagickWand();
     status = MagickReadImageBlob(wand, buff, len);
     if (status == MagickFalse)
     {
         ThrowWandException(wand);
         goto err;
     }
-    const char *type = MagickGetImageFormat(wand);
+	char *type = NULL;
+    type = MagickGetImageFormat(wand);
     LOG_PRINT(LOG_INFO, "ImageFormat: %s", type);
+	if(type)
+		free(type);
 
     sprintf(saveName, "%s/0*0p", savePath);
     LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
@@ -67,10 +71,10 @@ int save_img(const char *buff, const int len, char *md5)
         LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
         result = 1;
     }
-    wand=DestroyMagickWand(wand);
-    MagickWandTerminus();
 
 err:
+    wand=DestroyMagickWand(wand);
+    MagickWandTerminus();
     if(savePath)
         free(savePath);
     if(saveName)
@@ -78,30 +82,45 @@ err:
     return result;
 }
 
-int get_test_img(zimg_req_t *req, struct evbuffer *evb, char *img_type)
+int new_img(const char *buff, const size_t len, const char *rspPath)
 {
-    int result = 1;
+	int result = -1;
+	LOG_PRINT(LOG_INFO, "Start to Storage the New Image...");
+    MagickBooleanType status;
     MagickWand *magick_wand;
     MagickWandGenesis();
     magick_wand = NewMagickWand();
 
-    const char *rspPath = "./img/5f189d8ec57f5a5a0d3dcba47fa797e2/0*0p";
-    MagickReadImage(magick_wand, rspPath);
-    strcpy(img_type, "JPEG");
-    evbuffer_add(evb, NULL, 0);
+	status = MagickReadImageBlob(magick_wand, buff, len);
+    if (status == MagickFalse)
+    {
+        ThrowWandException(magick_wand);
+        goto err;
+    }
 
+	status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
+	if (status == MagickFalse)
+	{
+		ThrowWandException(magick_wand);
+		LOG_PRINT(LOG_WARNING, "New img[%s] Write Failed!", rspPath);
+		goto err;
+	}
+
+	result = 1;
+	LOG_PRINT(LOG_INFO, "New img[%s] storaged.", rspPath);
+
+err:
     magick_wand=DestroyMagickWand(magick_wand);
     MagickWandTerminus();
-    return result;
+	return result;
 }
-
 
 /* get image method used for zimg servise, such as:
  * http://127.0.0.1:4869/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&p=1&g=1 */
-int get_img(zimg_req_t *req, struct evbuffer *evb, char *img_type)
+int get_img(zimg_req_t *req, char **buff, char *img_type, size_t *img_size)
 {
     int result = -1;
-    char rspPath[512];
+    char *rspPath = (char *)malloc(512);
     char *whole_path = NULL;
     char *origPath = NULL;
     size_t len;
@@ -194,44 +213,19 @@ int get_img(zimg_req_t *req, struct evbuffer *evb, char *img_type)
     }
     char *img_format = NULL;
     img_format = MagickGetImageFormat(magick_wand);
-//    const char *img_format = "JPEG";
     strcpy(img_type, img_format);
     if(img_format)
         free(img_format);
     LOG_PRINT(LOG_INFO, "Got Image Format: %s", img_type);
-    MagickSizeType imgSize;
-    status = MagickGetImageLength(magick_wand, &imgSize);
-    if (status == MagickFalse)
-    {
-        LOG_PRINT(LOG_ERROR, "Get Image Length Failed!");
-        ThrowWandException(magick_wand);
-        goto err;
-    }
-    size_t imgSizet = imgSize;
-    char *imgBuff = NULL;
-    imgBuff = MagickGetImageBlob(magick_wand, &imgSizet);
-    //Designed for High Performance: Reply Customer First, Storage Image Second.
-    evbuffer_add(evb, imgBuff, imgSizet);
-    if(imgBuff)
-        free(imgBuff);
+
+    *buff = MagickGetImageBlob(magick_wand, img_size);
+	req->rspPath = rspPath;
+
     result = 1;
-    if(got_rsp == -1)
-    {
-        LOG_PRINT(LOG_INFO, "Start to Storage the New Image...");
-        status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
-        if (status == MagickFalse)
-        {
-            ThrowWandException(magick_wand);
-            LOG_PRINT(LOG_WARNING, "New img[%s] Write Failed!", rspPath);
-        }
-        else
-        {
-            LOG_PRINT(LOG_INFO, "New img[%s] storaged.", rspPath);
-        }
-    }
+	if(got_rsp == -1)
+		result = 2;
     else
         LOG_PRINT(LOG_INFO, "Image[%s] is Existed.", rspPath);
-
 err:
     magick_wand=DestroyMagickWand(magick_wand);
     MagickWandTerminus();

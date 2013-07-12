@@ -1,2 +1,2 @@
 #!/bin/bash
-top -pid `pgrep main |xargs perl -e "print join ',',@ARGV"`
+top -p `pgrep main |xargs perl -e "print join ',',@ARGV"`
