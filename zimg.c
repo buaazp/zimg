@@ -3,12 +3,8 @@
 
 int save_img(const char *buff, const int len, char *md5)
 {
-    MagickBooleanType status;
-    MagickWand *wand;
-    MagickWandGenesis();
-    wand = NewMagickWand();
-
     int result = -1;
+
     LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
     md5_state_t mdctx;
     md5_byte_t md_value[16];
@@ -44,37 +40,15 @@ int save_img(const char *buff, const int len, char *md5)
         }
     }
 
-    status = MagickReadImageBlob(wand, buff, len);
-    if (status == MagickFalse)
-    {
-        ThrowWandException(wand);
-        goto err;
-    }
-	char *type = NULL;
-    type = MagickGetImageFormat(wand);
-    LOG_PRINT(LOG_INFO, "ImageFormat: %s", type);
-	if(type)
-		free(type);
-
     sprintf(saveName, "%s/0*0p", savePath);
     LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
-
-    status=MagickWriteImages(wand, saveName, MagickTrue);
-    if (status == MagickFalse)
-    {
-        ThrowWandException(wand);
-        LOG_PRINT(LOG_ERROR, "New img[%s] Write Failed!", saveName);
-        goto err;
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
-        result = 1;
-    }
+	if(new_img(buff, len, saveName) == -1)
+	{
+		LOG_PRINT(LOG_WARNING, "Save Image[%s] Failed!", saveName);
+	}
+	result = 1;
 
 err:
-    wand=DestroyMagickWand(wand);
-    MagickWandTerminus();
     if(savePath)
         free(savePath);
     if(saveName)
@@ -82,36 +56,35 @@ err:
     return result;
 }
 
-int new_img(const char *buff, const size_t len, const char *rspPath)
+int new_img(const char *buff, const size_t len, const char *saveName)
 {
 	int result = -1;
 	LOG_PRINT(LOG_INFO, "Start to Storage the New Image...");
-    MagickBooleanType status;
-    MagickWand *magick_wand;
-    MagickWandGenesis();
-    magick_wand = NewMagickWand();
+	int fd = -1;
+	int wlen = 0;
 
-	status = MagickReadImageBlob(magick_wand, buff, len);
-    if (status == MagickFalse)
-    {
-        ThrowWandException(magick_wand);
-        goto err;
-    }
-
-	status=MagickWriteImages(magick_wand, rspPath, MagickTrue);
-	if (status == MagickFalse)
+	if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
 	{
-		ThrowWandException(magick_wand);
-		LOG_PRINT(LOG_WARNING, "New img[%s] Write Failed!", rspPath);
+		LOG_PRINT(LOG_ERROR, "fd open failed!");
 		goto err;
 	}
-
+	wlen = write(fd, buff, len);
+	if(wlen == -1)
+	{
+		LOG_PRINT(LOG_ERROR, "write() failed!");
+		goto err;
+	}
+	else if(wlen < len)
+	{
+		LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
+		goto err;
+	}
+	LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
 	result = 1;
-	LOG_PRINT(LOG_INFO, "New img[%s] storaged.", rspPath);
 
 err:
-    magick_wand=DestroyMagickWand(magick_wand);
-    MagickWandTerminus();
+	if(fd != -1)
+		close(fd);
 	return result;
 }
 
