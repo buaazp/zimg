@@ -290,6 +290,12 @@ static void post_request_cb(struct evhttp_request *req, void *arg)
 
     LOG_PRINT(LOG_INFO, "postSize = %d", postSize);
     LOG_PRINT(LOG_INFO, "imgSize = %d", imgSize);
+    if(imgSize <= 0)
+    {
+        LOG_PRINT(LOG_ERROR, "Image Size is Zero!");
+        goto err;
+    }
+
     char md5sum[33];
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");

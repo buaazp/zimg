@@ -26,6 +26,7 @@ img/.DS_Store
 *.swp
 
 *.log
+*.dSYM
 
 old/
 img/

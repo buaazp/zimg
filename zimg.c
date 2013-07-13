@@ -110,6 +110,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     char *cacheKey = (char *)malloc(strlen(req->md5) + 32);
     char *whole_path = NULL;
     char *origPath = NULL;
+    char *colorPath = NULL;
     char *img_format = NULL;
     size_t len;
     MagickBooleanType status;
@@ -143,7 +144,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     sprintf(origPath, "%s/0*0p", whole_path);
     LOG_PRINT(LOG_INFO, "0rig File Path: %s", origPath);
 
-    if(req->width == 0 && req->height == 0)
+    if(req->width == 0 && req->height == 0 && req->gray == 0)
     {
         LOG_PRINT(LOG_INFO, "Return original image.");
         strcpy(rspPath, origPath);
@@ -175,6 +176,48 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     if(status == MagickFalse)
     {
         got_rsp = -1;
+        
+
+        if(req->gray == 1)
+        {
+            sprintf(cacheKey, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
+            if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
+            {
+                LOG_PRINT(LOG_INFO, "Hit Color Image Cache[Key: %s, len: %d].", cacheKey, *img_size);
+                status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+                if(status == MagickFalse)
+                {
+                    LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cacheKey);
+                    del_cache(cacheKey);
+                }
+                else
+                {
+                    LOG_PRINT(LOG_INFO, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cacheKey, *img_size);
+                    goto convert;
+                }
+            }
+
+            len = strlen(rspPath);
+            colorPath = (char *)malloc(len);
+            strncpy(colorPath, rspPath, len);
+            colorPath[len - 1] = '\0';
+            LOG_PRINT(LOG_INFO, "colorPath: %s", colorPath);
+            status=MagickReadImage(magick_wand, colorPath);
+            if(status == MagickTrue)
+            {
+                LOG_PRINT(LOG_INFO, "Read Image from Color Image[%s] Succ. Goto Convert.", colorPath);
+                *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+                if(*img_size <= CACHE_MAX_SIZE)
+                {
+                    set_cache_bin(cacheKey, *buff_ptr, *img_size);
+                    img_format = MagickGetImageFormat(magick_wand);
+                    sprintf(cacheKey, "type:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
+                    set_cache(cacheKey, img_format);
+                }
+
+                goto convert;
+            }
+        }
 
         // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
         sprintf(cacheKey, "img:%s:0:0:1:0", req->md5);
@@ -240,7 +283,8 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
                 {
                     height = width * oheight / owidth;
                 }
-                else if(height != 0 && width == 0)
+                //else if(height != 0 && width == 0)
+                else
                 {
                     width = height * owidth / oheight;
                 }
@@ -260,6 +304,29 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
             LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
         }
     }
+    else
+    {
+        goto finish;
+    }
+
+
+
+convert:
+    if(req->gray == 1)
+    {
+        LOG_PRINT(LOG_INFO, "Start to Remove Color!");
+        status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
+        if(status == MagickFalse)
+        {
+            LOG_PRINT(LOG_ERROR, "Image[%s] Remove Color Failed!", origPath);
+            goto done;
+        }
+        LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
+    }
+
+
+
+finish:
     img_format = MagickGetImageFormat(magick_wand);
     strcpy(img_type, img_format);
     LOG_PRINT(LOG_INFO, "Got Image Format: %s", img_type);
