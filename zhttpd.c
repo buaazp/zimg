@@ -426,22 +426,44 @@ static void send_document_cb(struct evhttp_request *req, void *arg)
         else
         {
             evhttp_parse_query(uri, &params);
+            const char *str_w, *str_h;
             if(evhttp_find_header(&params, "w"))
-                width = atoi(evhttp_find_header(&params, "w"));
+                str_w = evhttp_find_header(&params, "w");
             else
-                width = 0;
+                str_w = "0";
             if(evhttp_find_header(&params, "h"))
-                height = atoi(evhttp_find_header(&params, "h"));
+                str_h = evhttp_find_header(&params, "h");
             else
-                height = 0;
-            if(evhttp_find_header(&params, "p"))
-                proportion = atoi(evhttp_find_header(&params, "p"));
+                str_h = "0";
+            LOG_PRINT(LOG_INFO, "w() = %s; h() = %s;", str_w, str_h);
+            if(strcmp(str_w, "g") == 0 && strcmp(str_h, "w") == 0)
+            {
+                LOG_PRINT(LOG_INFO, "Love is Eternal.");
+                evbuffer_add_printf(evb, "<html>\n <head>\n"
+                    "  <title>Love is Eternal</title>\n"
+                    " </head>\n"
+                    " <body>\n"
+                    "  <h1>Single1024</h1>\n"
+                    "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
+                    "</body>\n</html>\n"
+                    );
+                evhttp_add_header(evhttp_request_get_output_headers(req),"Content-Type", "text/html");
+                evhttp_send_reply(req, 200, "OK", evb);
+                goto done;
+            }
             else
-                proportion = 1;
-            if(evhttp_find_header(&params, "g"))
-                gray = atoi(evhttp_find_header(&params, "g"));
-            else
-                gray = 0;
+            {
+                width = atoi(str_w);
+                height = atoi(str_h);
+                if(evhttp_find_header(&params, "p"))
+                    proportion = atoi(evhttp_find_header(&params, "p"));
+                else
+                    proportion = 1;
+                if(evhttp_find_header(&params, "g"))
+                    gray = atoi(evhttp_find_header(&params, "g"));
+                else
+                    gray = 0;
+            }
         }
 
         zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
