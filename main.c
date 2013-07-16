@@ -147,11 +147,16 @@ int main(int argc, char **argv)
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
-    if(start_httpd(_port) == -1)
+    if(runServer(_port) == -1)
     {
         LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
     }
-
+//
+//    if(start_httpd(_port) == -1)
+//    {
+//        LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
+//    }
+//
     memcached_free(_memc);
     log_close(_log_id);
     return 0;

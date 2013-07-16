@@ -55,7 +55,7 @@ not_found:
 
 /* Callback used for the /dump URI, and for every non-GET request:
  * dumps all information to stdout and gives back a trivial 200 ok */
-static void dump_request_cb(struct evhttp_request *req, void *arg)
+void dump_request_cb(struct evhttp_request *req, void *arg)
 {
 	const char *cmdtype;
 	struct evkeyvalq *headers;
@@ -103,7 +103,7 @@ static void dump_request_cb(struct evhttp_request *req, void *arg)
 
 /* Callback used for the POST requset:
  * storage image data and gives back a trivial 200 ok */
-static void post_request_cb(struct evhttp_request *req, void *arg)
+void post_request_cb(struct evhttp_request *req, void *arg)
 {
     struct evbuffer *evb = NULL;
     struct evkeyvalq *headers;
@@ -339,7 +339,7 @@ done:
  * any other callback.  Like any evhttp server callback, it has a simple job:
  * it must eventually call evhttp_send_error() or evhttp_send_reply().
  */
-static void send_document_cb(struct evhttp_request *req, void *arg)
+void send_document_cb(struct evhttp_request *req, void *arg)
 {
 	struct evbuffer *evb = NULL;
 	const char *uri = evhttp_request_get_uri(req);
@@ -665,16 +665,57 @@ int start_httpd(int port)
     //evhttp_set_gencb(http, zimg_cb, _img_path);
     //evhttp_set_gencb(http, test_cb, NULL);
     evhttp_set_gencb(http, send_document_cb, NULL);
+//
+//    /* Now we tell the evhttp what port to listen on */
+//    handle = evhttp_bind_socket_with_handle(http, ip, port);
+//    if (!handle) 
+//    {
+//        LOG_PRINT(LOG_ERROR, "couldn't bind to port %d. Exiting.", port);
+//        return -1;
+//    }
+//
 
-    /* Now we tell the evhttp what port to listen on */
-    handle = evhttp_bind_socket_with_handle(http, ip, port);
-    if (!handle) 
-    {
-        LOG_PRINT(LOG_ERROR, "couldn't bind to port %d. Exiting.", port);
+    //worker init do:
+    evutil_socket_t fd;
+    struct sockaddr_in listen_addr;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+        err(1, "listen failed");
+    }
+    if (evutil_make_socket_nonblocking(fd) < 0)
         return -1;
+    if (evutil_make_socket_closeonexec(fd) < 0)
+        return -1;
+    int reuseaddr_on = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr_on, sizeof(reuseaddr_on));
+
+    memset(&listen_addr, 0, sizeof(listen_addr));
+    listen_addr.sin_family = AF_INET;
+    listen_addr.sin_addr.s_addr = INADDR_ANY;
+    listen_addr.sin_port = htons(port);
+    if (bind(fd, (struct sockaddr *)&listen_addr, sizeof(listen_addr)) < 0) {
+        err(1, "bind failed");
     }
 
+    if (listen(fd, 128) == -1) {
+        event_sock_warn(fd, "%s: listen", __func__);
+        evutil_closesocket(fd);
+        return (-1);
+    }
+    //worker init done.
+    handle = evhttp_accept_socket_with_handle(http, fd);
+
+    if (handle != NULL) {
+        LOG_PRINT(LOG_INFO, "Bound to port %d - Awaiting connections ... ", port);
+    }
+    else
+        return -1;
+
+
+
     display_address(handle);
+    evhttp_free(http);
     event_base_dispatch(base);
     return 0;
 }
