@@ -11,6 +11,8 @@ int main(int argc, char **argv)
     char _mip[128];
     extern int _log_id;
     _log_id = -1;
+    _init_path = getcwd(NULL, 0);
+    LOG_PRINT(LOG_INFO, "Get init-path: %s", _init_path);
 
     if(get_conf_key(conf, "zlog", "log-path", log_path) == -1)
     {

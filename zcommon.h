@@ -33,10 +33,11 @@
 #define _DEBUG 1
 
 #define MAX_LINE 1024 
-#define CACHE_MAX_SIZE 524288
+#define CACHE_MAX_SIZE 1024*1024
 
 char _root_path[512];
 char _img_path[512];
+char *_init_path;
 int _port;
 int _log_id;
 

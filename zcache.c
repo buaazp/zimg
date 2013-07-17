@@ -26,7 +26,7 @@ int exist_cache(const char *key)
     else
     {
         const char *str_rc = memcached_strerror(_memc, rc);
-        LOG_PRINT(LOG_INFO, "Cas Result: %s", str_rc);
+        LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
     }
 
     return rst;
@@ -57,7 +57,7 @@ int find_cache(const char *key, char *value)
     else
     {
         const char *str_rc = memcached_strerror(_memc, rc);
-        LOG_PRINT(LOG_INFO, "Cas Result: %s", str_rc);
+        LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
     }
 
     return rst;
@@ -81,7 +81,7 @@ int set_cache(const char *key, const char *value)
     {
         LOG_PRINT(LOG_WARNING, "Cache Set(Key: %s Value: %s) Failed!", key, value);
         const char *str_rc = memcached_strerror(_memc, rc);
-        LOG_PRINT(LOG_INFO, "Cas Result: %s", str_rc);
+        LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
         rst = -1;
     }
 
@@ -110,7 +110,7 @@ int find_cache_bin(const char *key, char **value_ptr, size_t *len)
     else
     {
         const char *str_rc = memcached_strerror(_memc, rc);
-        LOG_PRINT(LOG_INFO, "Cas Result: %s", str_rc);
+        LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
     }
 
     return rst;
@@ -134,7 +134,7 @@ int set_cache_bin(const char *key, const char *value, const size_t len)
     {
         LOG_PRINT(LOG_WARNING, "Binary Cache Set(Key: %s ) Failed!", key);
         const char *str_rc = memcached_strerror(_memc, rc);
-        LOG_PRINT(LOG_INFO, "Cas Result: %s", str_rc);
+        LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
         rst = -1;
     }
 
@@ -159,7 +159,7 @@ int del_cache(const char *key)
     {
         LOG_PRINT(LOG_WARNING, "Cache Key[%s] Delete Failed!", key);
         const char *str_rc = memcached_strerror(_memc, rc);
-        LOG_PRINT(LOG_INFO, "Cas Result: %s", str_rc);
+        LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
         rst = -1;
     }
 

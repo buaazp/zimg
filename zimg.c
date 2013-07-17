@@ -31,8 +31,6 @@ int save_img(const char *buff, const int len, char *md5, const char *type)
     char *savePath = (char *)malloc(512);
     char *saveName = (char *)malloc(512);
 
-    sprintf(savePath, "%s/%s", _img_path, md5sum);
-    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
     sprintf(cacheKey, "img:%s:0:0:1:0", md5sum);
     if(exist_cache(cacheKey) == 1)
     {
@@ -40,21 +38,48 @@ int save_img(const char *buff, const int len, char *md5, const char *type)
         result = 1;
         goto done;
     }
-
     LOG_PRINT(LOG_INFO, "exist_cache not found. Begin to Check File.");
+
+    //caculate 2-level path
+    int lvl1 = str_hash(md5sum);
+    //sprintf(savePath, "%s/%d", _img_path, lvl1);
+//    if(is_dir(savePath) == -1)
+//    {
+//        if(mk_dir(savePath) == -1)
+//        {
+//            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
+//            goto done;
+//        }
+//    }
+    int lvl2 = str_hash(md5sum + 3);
+    //sprintf(savePath, "%s/%d", savePath, lvl2);
+//    if(is_dir(savePath) == -1)
+//    {
+//        if(mk_dir(savePath) == -1)
+//        {
+//            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
+//            goto done;
+//        }
+//    }
+
+
+    //sprintf(savePath, "%s/%s", savePath, md5sum);
+    sprintf(savePath, "%s/%d/%d/%s", _img_path, lvl1, lvl2, md5sum);
+    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
+
     if(is_dir(savePath) == 1)
     {
         LOG_PRINT(LOG_INFO, "Check File Exist. Needn't Save.");
-        result = 1;
-        goto done;
+        goto cache;
     }
 
-    if(mk_dir(savePath) == -1)
+    if(mk_dirs(savePath) == -1)
     {
         LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
         goto done;
     }
-
+    chdir(_init_path);
+    LOG_PRINT(LOG_INFO, "savePath[%s] Create Finish.", savePath);
     sprintf(saveName, "%s/0*0p", savePath);
     LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
 	if(new_img(buff, len, saveName) == -1)
@@ -63,7 +88,8 @@ int save_img(const char *buff, const int len, char *md5, const char *type)
         goto done;
 	}
 
-    if(len <= CACHE_MAX_SIZE)
+cache:
+    if(len < CACHE_MAX_SIZE)
     {
         // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
         sprintf(cacheKey, "img:%s:0:0:1:0", md5sum);
@@ -92,18 +118,18 @@ int new_img(const char *buff, const size_t len, const char *saveName)
 
 	if((fd = open(saveName, O_WRONLY|O_TRUNC|O_CREAT, 00644)) < 0)
 	{
-		LOG_PRINT(LOG_ERROR, "fd open failed!");
+		LOG_PRINT(LOG_ERROR, "fd(%s) open failed!", saveName);
 		goto done;
 	}
 	wlen = write(fd, buff, len);
 	if(wlen == -1)
 	{
-		LOG_PRINT(LOG_ERROR, "write() failed!");
+		LOG_PRINT(LOG_ERROR, "write(%s) failed!", saveName);
 		goto done;
 	}
 	else if(wlen < len)
 	{
-		LOG_PRINT(LOG_ERROR, "Only part of data is been writed.");
+		LOG_PRINT(LOG_ERROR, "Only part of [%s] is been writed.", saveName);
 		goto done;
 	}
 	LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
@@ -134,12 +160,30 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
 
     LOG_PRINT(LOG_INFO, "get_img() start processing zimg request...");
 
-    len = strlen(req->md5) + strlen(_img_path) + 2;
+    // to gen cacheKey like this: img:926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
+    sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+    if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
+    {
+        LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cacheKey);
+        sprintf(cacheKey, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        if(find_cache(cacheKey, img_type) == -1)
+        {
+            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cacheKey);
+            strcpy(img_type, "jpeg");
+        }
+        result = 1;
+        goto done;
+    }
+    LOG_PRINT(LOG_INFO, "Start to Find the Image...");
+
+    len = strlen(req->md5) + strlen(_img_path) + 12;
     if (!(whole_path = malloc(len))) {
         LOG_PRINT(LOG_ERROR, "whole_path malloc failed!");
         goto done;
     }
-    evutil_snprintf(whole_path, len, "%s/%s", _img_path, req->md5);
+    int lvl1 = str_hash(req->md5);
+    int lvl2 = str_hash(req->md5 + 3);
+    sprintf(whole_path, "%s/%d/%d/%s", _img_path, lvl1, lvl2, req->md5);
     LOG_PRINT(LOG_INFO, "docroot: %s", _img_path);
     LOG_PRINT(LOG_INFO, "req->md5: %s", req->md5);
     LOG_PRINT(LOG_INFO, "whole_path: %s", whole_path);
@@ -168,29 +212,11 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
         sprintf(rspPath, "%s/%s", whole_path, name);
     }
     LOG_PRINT(LOG_INFO, "Got the rspPath: %s", rspPath);
-
-    // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
-    sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-    if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
-    {
-        LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cacheKey);
-        sprintf(cacheKey, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-        if(find_cache(cacheKey, img_type) == -1)
-        {
-            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cacheKey);
-            strcpy(img_type, "jpeg");
-        }
-        result = 1;
-        goto done;
-    }
-
-    LOG_PRINT(LOG_INFO, "Start to Find the Image...");
     int got_rsp = 1;
     status=MagickReadImage(magick_wand, rspPath);
     if(status == MagickFalse)
     {
         got_rsp = -1;
-        
 
         if(req->gray == 1)
         {
@@ -221,7 +247,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
             {
                 LOG_PRINT(LOG_INFO, "Read Image from Color Image[%s] Succ. Goto Convert.", colorPath);
                 *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
-                if(*img_size <= CACHE_MAX_SIZE)
+                if(*img_size < CACHE_MAX_SIZE)
                 {
                     set_cache_bin(cacheKey, *buff_ptr, *img_size);
                     img_format = MagickGetImageFormat(magick_wand);
@@ -253,7 +279,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
                 else
                 {
                     *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
-                    if(*img_size <= CACHE_MAX_SIZE)
+                    if(*img_size < CACHE_MAX_SIZE)
                     {
                         set_cache_bin(cacheKey, *buff_ptr, *img_size);
                         img_format = MagickGetImageFormat(magick_wand);
@@ -275,7 +301,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
             else
             {
                 *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
-                if(*img_size <= CACHE_MAX_SIZE)
+                if(*img_size < CACHE_MAX_SIZE)
                 {
                     set_cache_bin(cacheKey, *buff_ptr, *img_size);
                     img_format = MagickGetImageFormat(magick_wand);
@@ -347,7 +373,7 @@ finish:
 
     *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
 
-    if(*img_size <= CACHE_MAX_SIZE)
+    if(*img_size < CACHE_MAX_SIZE)
     {
         // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
         sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);

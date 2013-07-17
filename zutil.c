@@ -61,7 +61,7 @@ int get_type(const char *filename, char *type)
     char *flag, *tmp;
     if((flag = strchr(filename, '.')) == 0)
     {
-        LOG_PRINT(LOG_ERROR, "FileName [%s] Has No '.' in It.", filename);
+        LOG_PRINT(LOG_WARNING, "FileName [%s] Has No '.' in It.", filename);
         return -1;
     }
     while((tmp = strchr(flag + 1, '.')) != 0)
@@ -102,7 +102,7 @@ int is_dir(const char *path)
     struct stat st;
     if(stat(path, &st)<0)
     {
-        LOG_PRINT(LOG_ERROR, "Path[%s] is Not Existed!", path);
+        LOG_PRINT(LOG_WARNING, "Path[%s] is Not Existed!", path);
         return -1;
     }
     if(S_ISDIR(st.st_mode))
@@ -122,7 +122,7 @@ int mk_dir(const char *path)
         int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(status == -1)
         {
-            LOG_PRINT(LOG_ERROR, "mkdir[%s] Failed!", path);
+            LOG_PRINT(LOG_WARNING, "mkdir[%s] Failed!", path);
             return -1;
         }
         LOG_PRINT(LOG_INFO, "mkdir[%s] sucessfully!", path);
@@ -130,7 +130,79 @@ int mk_dir(const char *path)
     }
     else
     {
-        LOG_PRINT(LOG_ERROR, "Path[%s] is Existed!", path);
+        LOG_PRINT(LOG_WARNING, "Path[%s] is Existed!", path);
         return -1;
     }
+}
+
+int mk_dirs(const char *dir)
+{
+    char tmp[512];
+    char *p;
+    if (strlen(dir) == 0 || dir == NULL) 
+    {
+        LOG_PRINT(LOG_WARNING, "strlen(dir) is 0 or dir is NULL.");
+        return -1;
+    }
+    memset(tmp, 0, sizeof(tmp));
+    strncpy(tmp, dir, strlen(dir));
+    if (tmp[0] == '/' && tmp[1]== '/') 
+        p = strchr(tmp + 2, '/'); 
+    else 
+        p = strchr(tmp, '/');
+    if (p) 
+    {
+        *p = '\0';
+        mkdir(tmp,0777);
+        chdir(tmp);
+    } 
+    else 
+    {
+        mkdir(tmp,0777);
+        chdir(tmp);
+        return 1;
+    }
+    mk_dirs(p + 1);
+    return 1;
+}
+
+//将十六进制的字符串转换成整数
+static int htoi(char s[])
+{
+    int i;
+    int n = 0;
+    if (s[0] == '0' && (s[1]=='x' || s[1]=='X'))
+    {
+        i = 2;
+    }
+    else
+    {
+        i = 0;
+    }
+    for (; (s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'z') || (s[i] >='A' && s[i] <= 'Z');++i)
+    {
+        if (s[i] > '9')
+        {
+            n = 16 * n + (10 + s[i] - 'a');
+        }
+        else
+        {
+            n = 16 * n + (s[i] - '0');
+        }
+    }
+    return n;
+}
+
+
+int str_hash(const char *str)
+{
+    char c[4];
+    strncpy(c, str, 3);
+    c[3] = '\0';
+    LOG_PRINT(LOG_INFO, "str = %s.", c);
+    int d = htoi(c);
+    LOG_PRINT(LOG_INFO, "str(3)_to_d = %d.", d);
+    d = d / 4;
+    LOG_PRINT(LOG_INFO, "str(3)/4 = %d.", d);
+    return d;
 }
