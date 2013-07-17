@@ -30,15 +30,29 @@ int save_img(const char *buff, const int len, char *md5, const char *type)
     char *cacheKey = (char *)malloc(strlen(md5sum) + 32);
     char *savePath = (char *)malloc(512);
     char *saveName = (char *)malloc(512);
+
     sprintf(savePath, "%s/%s", _img_path, md5sum);
     LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
-    if(is_dir(savePath) == -1)
+    sprintf(cacheKey, "img:%s:0:0:1:0", md5sum);
+    if(exist_cache(cacheKey) == 1)
     {
-        if(mk_dir(savePath) == -1)
-        {
-            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
-            goto done;
-        }
+        LOG_PRINT(LOG_INFO, "File Exist, Needn't Save.");
+        result = 1;
+        goto done;
+    }
+
+    LOG_PRINT(LOG_INFO, "exist_cache not found. Begin to Check File.");
+    if(is_dir(savePath) == 1)
+    {
+        LOG_PRINT(LOG_INFO, "Check File Exist. Needn't Save.");
+        result = 1;
+        goto done;
+    }
+
+    if(mk_dir(savePath) == -1)
+    {
+        LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
+        goto done;
     }
 
     sprintf(saveName, "%s/0*0p", savePath);
