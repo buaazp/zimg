@@ -121,6 +121,13 @@ int new_img(const char *buff, const size_t len, const char *saveName)
 		LOG_PRINT(LOG_ERROR, "fd(%s) open failed!", saveName);
 		goto done;
 	}
+
+    if(flock(fd, LOCK_EX | LOCK_NB) == -1)
+    {
+        LOG_PRINT(LOG_WARNING, "This fd is Locked by Other thread.");
+        goto done;
+    }
+
 	wlen = write(fd, buff, len);
 	if(wlen == -1)
 	{
@@ -137,7 +144,10 @@ int new_img(const char *buff, const size_t len, const char *saveName)
 
 done:
 	if(fd != -1)
+    {
+        flock(fd, LOCK_UN | LOCK_NB);
 		close(fd);
+    }
 	return result;
 }
 
