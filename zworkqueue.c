@@ -13,7 +13,7 @@
 
 /**
  * @file zworkqueue.c
- * @brief Workqueue functions used for muti-thread libevent support.
+ * @brief Workqueue functions used for multi-thread libevent support.
  * @author 招牌疯子 zp@buaa.us
  * @version 1.0
  * @date 2013-07-19

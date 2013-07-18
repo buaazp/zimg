@@ -6,7 +6,7 @@ It's entirely written by C. <br />
 zimg has high performance in image field. More infomation: [Benchmark](http://zimg.buaa.us/benchmark.html) <br />
 It's designed for high concurrency image server. <br />
 Contact me: zp@buaa.us <br />
-Or in weibo: [(@招牌疯子)](http://weibo.com/819880808) <br />
+Or in weibo: [@招牌疯子](http://weibo.com/819880808) <br />
 
 ### Dependence:
 We stand on the shoulders of giants. <br />
@@ -15,10 +15,11 @@ We stand on the shoulders of giants. <br />
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system. <br />
 
 ### Supplying:
-storage users' upload images. <br />
-get image through HTTP protocol. <br />
-return resized image by request parameter. <br />
-use memcached to improve performance. <br />
+storage users' upload images. <br>
+get image through HTTP protocol. <br>
+return resized image by request parameter. <br>
+use memcached to improve performance. <br>
+multi-thread support for multi-core processor server. <br>
 
 ### In Planning:
 distributed architecture. <br />
@@ -26,7 +27,7 @@ performance optimization. <br />
 security measures. <br />
 
 ### Project Homepage
-[(in building…)](http://zimg.buaa.us/) <br />
+[in building…](http://zimg.buaa.us/) <br />
 
 ### Contribute
 welcome forever! <br />
