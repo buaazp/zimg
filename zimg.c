@@ -1,6 +1,7 @@
 #include "zimg.h"
 #include "zmd5.h"
 
+extern struct setting settings;
 int save_img(const char *buff, const int len, char *md5, const char *type)
 {
     int result = -1;
@@ -64,7 +65,7 @@ int save_img(const char *buff, const int len, char *md5, const char *type)
 
 
     //sprintf(savePath, "%s/%s", savePath, md5sum);
-    sprintf(savePath, "%s/%d/%d/%s", _img_path, lvl1, lvl2, md5sum);
+    sprintf(savePath, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
     LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
 
     if(is_dir(savePath) == 1)
@@ -186,15 +187,15 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     }
     LOG_PRINT(LOG_INFO, "Start to Find the Image...");
 
-    len = strlen(req->md5) + strlen(_img_path) + 12;
+    len = strlen(req->md5) + strlen(settings.img_path) + 12;
     if (!(whole_path = malloc(len))) {
         LOG_PRINT(LOG_ERROR, "whole_path malloc failed!");
         goto done;
     }
     int lvl1 = str_hash(req->md5);
     int lvl2 = str_hash(req->md5 + 3);
-    sprintf(whole_path, "%s/%d/%d/%s", _img_path, lvl1, lvl2, req->md5);
-    LOG_PRINT(LOG_INFO, "docroot: %s", _img_path);
+    sprintf(whole_path, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, req->md5);
+    LOG_PRINT(LOG_INFO, "docroot: %s", settings.img_path);
     LOG_PRINT(LOG_INFO, "req->md5: %s", req->md5);
     LOG_PRINT(LOG_INFO, "whole_path: %s", whole_path);
 

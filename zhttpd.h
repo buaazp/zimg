@@ -1,3 +1,6 @@
+#ifndef ZHTTPD_H
+#define ZHTTPD_H
+
 #include "zcommon.h"
 
 static const char * guess_content_type(const char *path);
@@ -11,3 +14,5 @@ void post_request_cb(struct evhttp_request *req, void *arg);
 void send_document_cb(struct evhttp_request *req, void *arg);
 static int display_address(struct evhttp_bound_socket *handle);
 int start_httpd(int port);
+
+#endif

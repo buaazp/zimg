@@ -1,6 +1,5 @@
 #ifndef ZLOG_H
 #define ZLOG_H
-#endif
 
 
 #include <pthread.h>
@@ -34,3 +33,4 @@ void    log_flush(int log_id);                      /* 将缓冲区数据写入�
  
 void    log_close(int log_id);                      /* 关闭日志文件 */
 
+#endif

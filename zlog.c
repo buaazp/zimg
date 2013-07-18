@@ -1,5 +1,6 @@
 #include "zlog.h"
 
+extern struct setting settings;
 /* 日志记录 */
 struct log_level_desc{
     enum LOG_LEVEL  level;
@@ -70,18 +71,16 @@ int log_open(const char *path, const char* mode)
 /* 写入日志文件 */
 void log_printf0(int log_id, int log_level, const char *fmt, ...)
 {
+    if(settings.log == false)
+        return;
+
     FILE *fp;
     time_t t;
     char tmbuf[30];
     const char *p;
     va_list args;
     int level;
- 
-    /*
-    if (!log_valid(log_id))
-        return;
-        */
- 
+
 #ifndef _DEBUG
     if (log_level == LOG_LEVEL_DEBUG)
         return;

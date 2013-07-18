@@ -4,6 +4,7 @@
 // this data is for KMP searching 
 //int pi[128];
 char uri_root[512];
+extern struct setting settings;
 
 static const struct table_entry {
 	const char *extension;
@@ -345,6 +346,7 @@ void send_document_cb(struct evhttp_request *req, void *arg)
 	const char *uri = evhttp_request_get_uri(req);
 	struct evhttp_uri *decoded = NULL;
 	const char *path;
+    char *md5 = NULL;
 	char *decoded_path;
 	char *whole_path = NULL;
 	size_t len;
@@ -355,9 +357,9 @@ void send_document_cb(struct evhttp_request *req, void *arg)
 
     if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
     {
-        LOG_PRINT(LOG_INFO, "POST --> post_request_cb(req, %s)", _img_path);
+        LOG_PRINT(LOG_INFO, "POST --> post_request_cb(req, %s)", settings.img_path);
         post_request_cb(req, NULL);
-        LOG_PRINT(LOG_INFO, "post_request_cb(req, %s) --> POST", _img_path);
+        LOG_PRINT(LOG_INFO, "post_request_cb(req, %s) --> POST", settings.img_path);
         return;
     }
     else if(evhttp_request_get_command(req) != EVHTTP_REQ_GET){
@@ -396,19 +398,19 @@ void send_document_cb(struct evhttp_request *req, void *arg)
 	if (strstr(decoded_path, ".."))
 		goto err;
 
-	len = strlen(decoded_path)+strlen(_root_path)+1;
+	len = strlen(decoded_path)+strlen(settings.root_path)+1;
 	if (!(whole_path = malloc(len))) {
 		LOG_PRINT(LOG_ERROR, "malloc");
 		goto err;
 	}
-	evutil_snprintf(whole_path, len, "%s%s", _root_path, decoded_path);
+	evutil_snprintf(whole_path, len, "%s%s", settings.root_path, decoded_path);
 
 	/* This holds the content we're sending. */
 	evb = evbuffer_new();
 
 	if (stat(whole_path, &st)<0) {
         LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
-        char *md5 = (char *)malloc(strlen(decoded_path) + 1);
+        md5 = (char *)malloc(strlen(decoded_path) + 1);
         if(decoded_path[0] == '/')
             strcpy(md5, decoded_path+1);
         char *path_end;

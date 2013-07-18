@@ -1,126 +1,113 @@
 #include "zcommon.h"
 #include "zlog.h"
 
+extern struct setting settings;
+
+static void settings_init(void) 
+{
+    strcpy(settings.root_path, "./www");
+    strcpy(settings.img_path, "./img");
+    settings.port = 4869;
+    settings.backlog = 1024;
+    settings.num_threads = 4;         /* N workers */
+    settings.log = false;
+    settings.cache_on = false;
+    settings.cache_port = 11211;
+}
+
+static void sighandler(int signal) 
+{
+    LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
+    kill_server();
+}
+
 int main(int argc, char **argv)
 {
-    //Read config
-    char *conf = "conf/config.ini";
-    char log_path[512];
-    char strport[10];
-    char strmport[10];
-    char _mip[128];
+    int c;
+    char *log_path = "log/zimg.log";
     extern int _log_id;
     _log_id = -1;
     _init_path = getcwd(NULL, 0);
     LOG_PRINT(LOG_INFO, "Get init-path: %s", _init_path);
 
-    if(get_conf_key(conf, "zlog", "log-path", log_path) == -1)
-    {
-        LOG_PRINT(LOG_WARNING, "Key log-path read failed. Use ./log as default.");
-        strcpy(log_path, "./log");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Get log-path: %s", log_path);
-    }
+    /* Set signal handlers */
+    sigset_t sigset;
+    sigemptyset(&sigset);
+    struct sigaction siginfo = {
+        .sa_handler = sighandler,
+        .sa_mask = sigset,
+        .sa_flags = SA_RESTART,
+    };
+    sigaction(SIGINT, &siginfo, NULL);
+    sigaction(SIGTERM, &siginfo, NULL);
 
-    if(is_dir(log_path) != 1)
+
+    settings_init();
+    while (-1 != (c = getopt(argc, argv,
+                    "p:"
+                    "t:"
+                    "l"
+                    "m:"
+                    "d"
+                    )))
     {
-        if(mk_dir(log_path) != 1)
+        switch(c)
         {
-            LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", log_path);
-            return -1;
+            case 'p':
+                settings.port = atoi(optarg);
+                break;
+            case 't':
+                settings.num_threads = atoi(optarg);
+                if (settings.num_threads <= 0) {
+                    fprintf(stderr, "Number of threads must be greater than 0\n");
+                    return 1;
+                }
+                /* There're other problems when you get above 64 threads.
+                 * In the future we should portably detect # of cores for the
+                 * default.
+                 */
+                if (settings.num_threads > 64) {
+                    fprintf(stderr, "WARNING: Setting a high number of worker"
+                            "threads is not recommended.\n"
+                            " Set this value to the number of cores in"
+                            " your machine or less.\n");
+                }
+                break;
+            case 'l':
+                settings.log = true;
+                break;
+            case 'm':
+                settings.cache_port = atoi(optarg);
+                break;
+            default:
+                fprintf(stderr, "Illegal argument \"%c\"\n", c);
+                return 1;
         }
     }
 
     //start log module... ./log/zimg.log
-    log_init();
-    char *log_file = (char *)malloc(strlen(log_path) + 10);
-    sprintf(log_file, "%s/zimg.log", log_path);
-    _log_id = log_open(log_file, "a");
-    free(log_file);
-    /*
-    int i;
-    for(i = 0; i < 8; i++)
+    if(settings.log)
     {
-        DEBUG_PRINT("这是DEBUG测试，LEVEL=%d.", i);
-        LOG_PRINT(i, "这是LOG测试，LEVEL=%d.", i);
+        log_init();
+        _log_id = log_open(log_path, "a");
     }
-    */
-
-
-    LOG_PRINT(LOG_INFO, "Begin to Read Config File[%s]", conf);
-
-    if(get_conf_key(conf, "zhttpd", "port", strport) == -1)
-    {
-        LOG_PRINT(LOG_WARNING, "Key port read failed. Use 4869 as default.");
-        strcpy(strport, "4869");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Get port: %s", strport);
-    }
-    _port = atoi(strport);
-
-    if(get_conf_key(conf, "memcached", "mport", strmport) == -1)
-    {
-        LOG_PRINT(LOG_WARNING, "Key mport read failed. Use 11211 as default.");
-        strcpy(strmport, "11211");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Get mport: %s", strmport);
-    }
-
-    if(get_conf_key(conf, "zhttpd", "root-path", _root_path) == -1)
-    {
-        LOG_PRINT(LOG_WARNING, "Key root-path read failed. Use ./www as default.");
-        strcpy(_root_path, "./www");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Get root_path: %s", _root_path);
-    }
-
-    if(get_conf_key(conf, "zimg", "img-path", _img_path) == -1)
-    {
-        LOG_PRINT(LOG_WARNING, "Key img-path read failed. Use ./img as default.");
-        strcpy(_img_path, "./img");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Get img-path: %s", _img_path);
-    }
-
-    if(get_conf_key(conf, "memcached", "mip", _mip) == -1)
-    {
-        LOG_PRINT(LOG_WARNING, "Key mip read failed. Use 127.0.0.1 as default.");
-        strcpy(_mip, "127.0.0.1");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Get mip: %s", _mip);
-    }
-
-
-    LOG_PRINT(LOG_INFO, "%s Read Finished.", conf);
 
     //init the Path zimg need to use.
     LOG_PRINT(LOG_INFO, "Begin to Init the Path zimg Using...");
-    if(is_dir(_root_path) != 1)
+    if(is_dir(settings.root_path) != 1)
     {
-        if(mk_dir(_root_path) != 1)
+        if(mk_dir(settings.root_path) != 1)
         {
-            LOG_PRINT(LOG_ERROR, "_root_path[%s] Create Failed!", _root_path);
+            LOG_PRINT(LOG_ERROR, "root_path[%s] Create Failed!", settings.root_path);
             return -1;
         }
     }
 
-    if(is_dir(_img_path) != 1)
+    if(is_dir(settings.img_path) != 1)
     {
-        if(mk_dir(_img_path) != 1)
+        if(mk_dir(settings.img_path) != 1)
         {
-            LOG_PRINT(LOG_ERROR, "_img_path[%s] Create Failed!", _img_path);
+            LOG_PRINT(LOG_ERROR, "img_path[%s] Create Failed!", settings.img_path);
             return -1;
         }
     }
@@ -130,8 +117,8 @@ int main(int argc, char **argv)
     LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
     _memc= memcached_create(NULL);
 
-    char *mserver = (char *)malloc(strlen(_mip) + strlen(strmport) + 2);
-    sprintf(mserver, "%s:%s", _mip, strmport);
+    char mserver[32];
+    sprintf(mserver, "127.0.0.1:%d", settings.cache_port);
     memcached_server_st *servers = memcached_servers_parse(mserver);
 
     memcached_server_push(_memc, servers);
@@ -140,26 +127,26 @@ int main(int argc, char **argv)
     //使用NO-BLOCK，防止memcache倒掉时挂死          
     memcached_behavior_set(_memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
     LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
-    if(set_cache("test", "1") == -1)
+    if(set_cache("zimg", "1") == -1)
+    {
         LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);
+        settings.cache_on = false;
+    }
     else
+    {
         LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
-    if(mserver)
-        free(mserver);
+        settings.cache_on = true;
+    }
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
-    if(runServer(_port) == -1)
+    if(runServer(settings.port) == -1)
     {
         LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
     }
-//
-//    if(start_httpd(_port) == -1)
-//    {
-//        LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
-//    }
-//
+
     memcached_free(_memc);
     log_close(_log_id);
+    fprintf(stdout, "\nByebye!\n");
     return 0;
 }

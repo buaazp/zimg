@@ -1,8 +1,11 @@
 #include "zcommon.h"
+extern struct setting settings;
 
 int exist_cache(const char *key)
 {
     int rst = -1;
+    if(settings.cache_on == false)
+        return rst;
 
     size_t valueLen;
     uint32_t  flags;
@@ -35,6 +38,8 @@ int exist_cache(const char *key)
 int find_cache(const char *key, char *value)
 {
     int rst = -1;
+    if(settings.cache_on == false)
+        return rst;
 
     size_t valueLen;
     uint32_t  flags;
@@ -66,6 +71,8 @@ int find_cache(const char *key, char *value)
 int set_cache(const char *key, const char *value)
 {
     int rst = -1;
+    if(settings.cache_on == false)
+        return rst;
 
     uint32_t  flags;
     memcached_return rc;
@@ -91,6 +98,8 @@ int set_cache(const char *key, const char *value)
 int find_cache_bin(const char *key, char **value_ptr, size_t *len)
 {
     int rst = -1;
+    if(settings.cache_on == false)
+        return rst;
 
     uint32_t  flags;
     memcached_return rc;
@@ -119,6 +128,8 @@ int find_cache_bin(const char *key, char **value_ptr, size_t *len)
 int set_cache_bin(const char *key, const char *value, const size_t len)
 {
     int rst = -1;
+    if(settings.cache_on == false)
+        return rst;
 
     uint32_t  flags;
     memcached_return rc;
@@ -145,6 +156,8 @@ int set_cache_bin(const char *key, const char *value, const size_t len)
 int del_cache(const char *key)
 {
     int rst = -1;
+    if(settings.cache_on == false)
+        return rst;
 
     memcached_return rc;
 

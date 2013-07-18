@@ -1,6 +1,5 @@
 #ifndef ZCOMMON_H
 #define ZCOMMON_H
-#endif
 
 
 #include <stdio.h>
@@ -42,12 +41,20 @@
 /* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
 #define NUM_THREADS 4
 
-char _root_path[512];
-char _img_path[512];
-char *_init_path;
-int _port;
-int _log_id;
+struct setting{
+    char root_path[512];
+    char img_path[512];
+    int port;
+    int backlog;
+    int num_threads;
+    bool log;
+    int cache_port;
+    bool cache_on;
+} settings;
 
+
+char *_init_path;
+int _log_id;
 memcached_st *_memc;
 
 #define LOG_FATAL 0                        /* System is unusable */
@@ -132,3 +139,4 @@ memcached_st *_memc;
     description=(char *) MagickRelinquishMemory(description); \
 }
 
+#endif

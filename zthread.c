@@ -24,10 +24,7 @@
 #include "zworkqueue.h"
 #include "zcommon.h"
 
-/* Connection backlog (# of backlogged connections to accept). */
-#define CONNECTION_BACKLOG 128
-/* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
-#define NUM_THREADS 4
+extern struct setting settings;
 
 /**
  * Struct to carry around connection (client)-specific data.
@@ -36,7 +33,7 @@ static struct event_base *evbase_accept;
 static workqueue_t workqueue;
 
 /* Signal handler function (defined below). */
-static void sighandler(int signal);
+//static void sighandler(int signal);
 
 /**
  * Set a socket to non-blocking mode.
@@ -79,18 +76,18 @@ int runServer(int port) {
 
 	/* Initialize libevent. */
 	event_init();
-
-	/* Set signal handlers */
-	sigset_t sigset;
-	sigemptyset(&sigset);
-	struct sigaction siginfo = {
-		.sa_handler = sighandler,
-		.sa_mask = sigset,
-		.sa_flags = SA_RESTART,
-	};
-	sigaction(SIGINT, &siginfo, NULL);
-	sigaction(SIGTERM, &siginfo, NULL);
-
+//
+//	/* Set signal handlers */
+//	sigset_t sigset;
+//	sigemptyset(&sigset);
+//	struct sigaction siginfo = {
+//		.sa_handler = sighandler,
+//		.sa_mask = sigset,
+//		.sa_flags = SA_RESTART,
+//	};
+//	sigaction(SIGINT, &siginfo, NULL);
+//	sigaction(SIGTERM, &siginfo, NULL);
+//
 	/* Create our listening socket. */
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenfd < 0) {
@@ -105,7 +102,7 @@ int runServer(int port) {
         LOG_PRINT(LOG_ERROR, "Bind Socket Failed!");
         return -1;
 	}
-	if (listen(listenfd, CONNECTION_BACKLOG) < 0) {
+	if (listen(listenfd, settings.backlog) < 0) {
         LOG_PRINT(LOG_ERROR, "Listen Socket Failed!");
         return -1;
 	}
@@ -125,7 +122,7 @@ int runServer(int port) {
 	}
 
 	/* Initialize work queue. */
-	if (workqueue_init(&workqueue, NUM_THREADS)) {
+	if (workqueue_init(&workqueue, settings.num_threads)) {
 		LOG_PRINT(LOG_WARNING, "Failed to create work queue");
 		close(listenfd);
 		workqueue_shutdown(&workqueue);
@@ -165,9 +162,9 @@ void kill_server(void) {
 	LOG_PRINT(LOG_INFO, "Stopping workers.\n");
 	workqueue_shutdown(&workqueue);
 }
-
-static void sighandler(int signal) {
-	LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
-	kill_server();
-}
-
+//
+//static void sighandler(int signal) {
+//	LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
+//	kill_server();
+//}
+//

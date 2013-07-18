@@ -1,3 +1,7 @@
+#ifndef ZIMG_H
+#define ZIMG_H
+
+
 #include "zcommon.h"
 
 typedef struct zimg_req_s {
@@ -8,3 +12,5 @@ typedef struct zimg_req_s {
     bool gray;
 	char *rspPath;
 } zimg_req_t;
+
+#endif

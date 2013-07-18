@@ -1,6 +1,5 @@
 #ifndef ZUTIL_H
 #define ZUTIL_H
-#endif
 
 #include "zcommon.h"
 
@@ -10,3 +9,5 @@ int get_type(const char *filename, char *type);
 int is_img(const char *filename);
 int is_dir(const char *path);
 int mk_dir(const char *path);
+
+#endif

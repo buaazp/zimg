@@ -1,5 +1,5 @@
-#ifndef md5_INCLUDED
-#  define md5_INCLUDED
+#ifndef ZMD5_H
+#define ZMD5_H
 
 #include <stdint.h>
 
