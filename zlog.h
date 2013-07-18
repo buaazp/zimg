@@ -1,3 +1,9 @@
+#ifndef ZLOG_H
+#define ZLOG_H
+#endif
+
+
+#include <pthread.h>
 #include "zcommon.h"
 #include "zspinlock.h"
 

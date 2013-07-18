@@ -9,10 +9,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include "zworkqueue.h"
+#include "zhttpd.h"
+#include "zcommon.h"
 
 #define LL_ADD(item, list) { \
-	item->prev = NULL; \
-	item->next = list; \
+	if(list != NULL) \
+    { \
+        item->next = list; \
+        item->next->prev = item; \
+        item->prev = NULL; \
+    } \
+    else \
+    { \
+        item->next = NULL; \
+        item->prev = NULL; \
+    } \
 	list = item; \
 }
 
@@ -26,6 +37,7 @@
 static void *worker_function(void *ptr) {
 	worker_t *worker = (worker_t *)ptr;
 	job_t *job;
+    LOG_PRINT(LOG_INFO, "Worker Created. Waiting for Jobs... ");
 
 	while (1) {
 		/* Wait until we get notified. */
@@ -46,9 +58,30 @@ static void *worker_function(void *ptr) {
 		if (job == NULL) continue;
 
 		/* Execute the job. */
-		job->job_function(job);
+		//job->job_function(job);
+        struct evhttp_bound_socket *handle;
+        handle = evhttp_accept_socket_with_handle(worker->http, job->user_data);
+        if (handle != NULL) {
+            LOG_PRINT(LOG_INFO, "Bound to port - Awaiting connections ... ");
+        }
+        free(job);
+        event_base_dispatch(worker->evbase);
 	}
 
+    LOG_PRINT(LOG_INFO, "Stopping worker_evhttp loop.");
+    if (event_base_loopexit(worker->evbase, NULL)) {
+        LOG_PRINT(LOG_ERROR, "Error shutting down server");
+    }
+    if (worker->http != NULL) {
+        evhttp_free(worker->http);
+        worker->http = NULL;
+    }
+    if (worker->evbase != NULL) {
+        event_base_free(worker->evbase);
+        worker->evbase = NULL;
+    }
+//    LL_REMOVE(worker, worker->workqueue->workers);
+    LOG_PRINT(LOG_INFO, "Worker Shutdown.");
 	free(worker);
 	pthread_exit(NULL);
 }
@@ -70,7 +103,22 @@ int workqueue_init(workqueue_t *workqueue, int numWorkers) {
 			return 1;
 		}
 		memset(worker, 0, sizeof(*worker));
-		worker->workqueue = workqueue;
+        
+        if ((worker->evbase = event_base_new()) == NULL) {
+            LOG_PRINT(LOG_WARNING, "Worker event_base creation failed");
+            return 1;
+        }
+
+        if ((worker->http = evhttp_new(worker->evbase)) == NULL) {
+            LOG_PRINT(LOG_WARNING, "Worker evhttp creation failed");
+            return 1;
+        }
+
+        evhttp_set_cb(worker->http, "/dump", dump_request_cb, NULL);
+        evhttp_set_cb(worker->http, "/upload", post_request_cb, NULL);
+        evhttp_set_gencb(worker->http, send_document_cb, NULL);
+
+        worker->workqueue = workqueue;
 		if (pthread_create(&worker->thread, NULL, worker_function, (void *)worker)) {
 			perror("Failed to start all worker threads");
 			free(worker);
@@ -83,12 +131,30 @@ int workqueue_init(workqueue_t *workqueue, int numWorkers) {
 }
 
 void workqueue_shutdown(workqueue_t *workqueue) {
+    LOG_PRINT(LOG_INFO, "Start to Close Workers...");
 	worker_t *worker = NULL;
+//    job_t *job;
+
+//    if ((job = malloc(sizeof(*job))) == NULL) 
+//    {
+//        LOG_PRINT(LOG_WARNING, "Failed to allocate memory for job state");
+//    }
+//    else
+//        job->user_data = -1;
 
 	/* Set all workers to terminate. */
-	for (worker = workqueue->workers; worker != NULL; worker = worker->next) {
+	for (worker = workqueue->workers; worker != NULL; worker = worker->next) 
+    {
 		worker->terminate = 1;
 	}
+//    if(job)
+//    {
+//        for (worker = workqueue->workers; worker != NULL; worker = worker->next) 
+//        {
+//            workqueue_add_job(workqueue, job);
+//        }
+//        free(job);
+//    }
 
 	/* Remove all workers and jobs from the work queue.
 	 * wake up all workers so that they will terminate. */

@@ -1,4 +1,11 @@
 #include "zutil.h"
+#include <sys/syscall.h>
+
+pid_t gettid()
+{
+    return syscall(SYS_gettid);  /*这才是内涵*/
+}
+
 
 // this data is for KMP searching
 static int pi[128];

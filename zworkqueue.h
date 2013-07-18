@@ -5,13 +5,17 @@
  * See the accompanying LICENSE.txt for details.
  */
 
-#ifndef WORKQUEUE_H
-#define WORKQUEUE_H
+#ifndef ZWORKQUEUE_H
+#define ZWORKQUEUE_H
 
 #include <pthread.h>
+#include <event.h>
+#include <evhttp.h>
 
 typedef struct worker {
 	pthread_t thread;
+    struct event_base *evbase;
+    struct evhttp *http;
 	int terminate;
 	struct workqueue *workqueue;
 	struct worker *prev;
@@ -19,8 +23,7 @@ typedef struct worker {
 } worker_t;
 
 typedef struct job {
-	void (*job_function)(struct job *job);
-	void *user_data;
+	int user_data;
 	struct job *prev;
 	struct job *next;
 } job_t;

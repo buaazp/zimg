@@ -1,3 +1,8 @@
+#ifndef ZCOMMON_H
+#define ZCOMMON_H
+#endif
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +39,8 @@
 
 #define MAX_LINE 1024 
 #define CACHE_MAX_SIZE 1024*1024
+/* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
+#define NUM_THREADS 4
 
 char _root_path[512];
 char _img_path[512];

@@ -1,3 +1,7 @@
+#ifndef ZUTIL_H
+#define ZUTIL_H
+#endif
+
 #include "zcommon.h"
 
 static void kmp_init(const unsigned char *pattern, int pattern_size);
