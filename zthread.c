@@ -1,11 +1,22 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
 /**
- * Multithreaded, libevent-based socket server.
- * Copyright (c) 2012 Ronald Bennett Cemer
- * This software is licensed under the BSD license.
- * See the accompanying LICENSE.txt for details.
- *
- * To compile: gcc -o echoserver_threaded echoserver_threaded.c workqueue.c -levent -lpthread
- * To run: ./echoserver_threaded
+ * @file zthread.c
+ * @brief Muti-thread libevent support functions.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
  */
 
 #include <sys/types.h>
@@ -32,13 +43,18 @@ extern struct setting settings;
 static struct event_base *evbase_accept;
 static workqueue_t workqueue;
 
-/* Signal handler function (defined below). */
-//static void sighandler(int signal);
+// functions list
+static int set_non_block(int fd);
+void on_accept(int fd, short ev, void *arg);
+int run_server(int port);
+void kill_server(void);
+
 
 /**
  * Set a socket to non-blocking mode.
  */
-static int set_non_block(int fd) {
+static int set_non_block(int fd) 
+{
 	int flags;
 
 	flags = fcntl(fd, F_GETFL);
@@ -52,7 +68,8 @@ static int set_non_block(int fd) {
  * This function will be called by libevent when there is a connection
  * ready to be accepted.
  */
-void on_accept(int fd, short ev, void *arg) {
+void on_accept(int fd, short ev, void *arg) 
+{
 	workqueue_t *workqueue = (workqueue_t *)arg;
 	job_t *job;
     /* Create a job object and add it to the work queue. */
@@ -68,7 +85,8 @@ void on_accept(int fd, short ev, void *arg) {
 /**
  * Run the server.  This function blocks, only returning when the server has terminated.
  */
-int runServer(int port) {
+int run_server(int port) 
+{
 	int listenfd;
 	struct sockaddr_in listen_addr;
 	struct event ev_accept;
@@ -76,18 +94,7 @@ int runServer(int port) {
 
 	/* Initialize libevent. */
 	event_init();
-//
-//	/* Set signal handlers */
-//	sigset_t sigset;
-//	sigemptyset(&sigset);
-//	struct sigaction siginfo = {
-//		.sa_handler = sighandler,
-//		.sa_mask = sigset,
-//		.sa_flags = SA_RESTART,
-//	};
-//	sigaction(SIGINT, &siginfo, NULL);
-//	sigaction(SIGTERM, &siginfo, NULL);
-//
+
 	/* Create our listening socket. */
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenfd < 0) {
@@ -152,9 +159,10 @@ int runServer(int port) {
 
 /**
  * Kill the server.  This function can be called from another thread to kill the
- * server, causing runServer() to return.
+ * server, causing run_server() to return.
  */
-void kill_server(void) {
+void kill_server(void) 
+{
 	LOG_PRINT(LOG_INFO, "Stopping socket listener event loop.");
 	if (event_base_loopexit(evbase_accept, NULL)) {
 		LOG_PRINT(LOG_ERROR, "Error shutting down server");
@@ -162,9 +170,3 @@ void kill_server(void) {
 	LOG_PRINT(LOG_INFO, "Stopping workers.\n");
 	workqueue_shutdown(&workqueue);
 }
-//
-//static void sighandler(int signal) {
-//	LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
-//	kill_server();
-//}
-//

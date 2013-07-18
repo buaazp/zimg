@@ -1,7 +1,33 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
+/**
+ * @file zimg.c
+ * @brief Convert, get and save image functions.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
+ */
+
 #include "zimg.h"
 #include "zmd5.h"
 
 extern struct setting settings;
+
+int save_img(const char *buff, const int len, char *md5, const char *type);
+int new_img(const char *buff, const size_t len, const char *saveName);
+int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size);
+
 int save_img(const char *buff, const int len, char *md5, const char *type)
 {
     int result = -1;

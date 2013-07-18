@@ -1,4 +1,31 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
+/**
+ * @file zmd5.c
+ * @brief Caculate md5 functions.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
+ */
+
 #include "zmd5.h"
+
+static void md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/);
+void md5_init(md5_state_t *pms);
+void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
+void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
+
 
 #ifndef HAVE_SSL /* only if we do not use OpenSSL provided implementation */
 

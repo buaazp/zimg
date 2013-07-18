@@ -1,8 +1,22 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
 /**
- * Multithreaded work queue.
- * Copyright (c) 2012 Ronald Bennett Cemer
- * This software is licensed under the BSD license.
- * See the accompanying LICENSE.txt for details.
+ * @file zworkqueue.h
+ * @brief Workqueue header.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
  */
 
 #ifndef ZWORKQUEUE_H

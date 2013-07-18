@@ -1,10 +1,36 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
+/**
+ * @file zhttpd.c
+ * @brief http protocol parse functions.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
+ */
+
 #include "zhttpd.h"
 #include "zimg.h"
 
-// this data is for KMP searching 
-//int pi[128];
 char uri_root[512];
 extern struct setting settings;
+
+static const char * guess_type(const char *type);
+static const char * guess_content_type(const char *path);
+void dump_request_cb(struct evhttp_request *req, void *arg);
+void post_request_cb(struct evhttp_request *req, void *arg);
+void send_document_cb(struct evhttp_request *req, void *arg);
+static int display_address(struct evhttp_bound_socket *handle);
 
 static const struct table_entry {
 	const char *extension;
@@ -175,11 +201,7 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     char buffline[128];
     int rmblen, evblen;
     int imgSize = 0;
-//    int wlen = 0;
-//    int fd = -1;
 
-    //************* print the binary data of img
-    //puts("Input data: <<<");
     while((evblen = evbuffer_get_length(buf)) > 0)
     {
         LOG_PRINT(LOG_INFO, "evblen = %d", evblen);
@@ -190,21 +212,7 @@ void post_request_cb(struct evhttp_request *req, void *arg)
             LOG_PRINT(LOG_ERROR, "evbuffer_remove failed!");
             goto err;
         }
-        /*
-        else
-        {
-            (void) fwrite(buff, 1, rmblen, stdout);
-        }
-        */
     }
-    //puts(">>>");
-
-    /*
-    LOG_PRINT(LOG_INFO, "input data>>>");
-    (void) fwrite(buff, 1, rmblen, stdout);
-    printf("\n");
-    LOG_PRINT(LOG_INFO, ">>>");
-    */
 
     int start = -1, end = -1;
     char *fileNamePattern = "filename=";
@@ -213,13 +221,6 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     char *blankPattern = "\r\n";
     char *boundaryPattern = (char *)malloc(boundary_len + 4);
     sprintf(boundaryPattern, "\r\n--%s", boundary);
-    /*
-    LOG_PRINT(LOG_INFO, "boundaryPattern[%d] = %c", boundary_len + 3, boundaryPattern[boundary_len+3]);
-    if(boundaryPattern[boundary_len+4] == '\0')
-        LOG_PRINT(LOG_INFO, "boundaryPattern[%d] = %s", boundary_len + 4, "\\0");
-    else
-        LOG_PRINT(LOG_INFO, "boundaryPattern[%d] = %c", boundary_len + 4, boundaryPattern[boundary_len+4]);
-    */
     LOG_PRINT(LOG_INFO, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, postSize, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
@@ -300,7 +301,6 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     char md5sum[33];
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");
-    //if(save_img(fileType, buff+start, imgSize, md5sum) == -1)
     if(save_img(buff+start, imgSize, md5sum, fileType) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
@@ -474,8 +474,6 @@ void send_document_cb(struct evhttp_request *req, void *arg)
         zimg_req -> height = height;
         zimg_req -> proportion = proportion;
         zimg_req -> gray = gray;
-        //zimg_proportion = (proportion == 1 ? true : false);
-        //zimg_gray = (gray == 1 ? true : false);
 
         char img_type[10];
 		int get_img_rst = get_img(zimg_req, &buff, img_type, &len);
@@ -633,91 +631,3 @@ static int display_address(struct evhttp_bound_socket *handle)
 }
 
 
-int start_httpd(int port)
-{
-    struct event_base *base;
-    struct evhttp *http;
-    struct evhttp_bound_socket *handle;
-
-    char *ip = "0.0.0.0";
-
-    if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
-        return -1;
-    base = event_base_new();
-    if (!base) 
-    {
-        LOG_PRINT(LOG_ERROR, "Couldn't create an event_base: exiting");
-        return -1;
-    }
-
-    /* Create a new evhttp object to handle requests. */
-    http = evhttp_new(base);
-    if (!http) 
-    {
-        LOG_PRINT(LOG_ERROR, "couldn't create evhttp. Exiting.");
-        return -1;
-    }
-
-    /* The /dump URI will dump all requests to stdout and say 200 ok. */
-    evhttp_set_cb(http, "/dump", dump_request_cb, NULL);
-    evhttp_set_cb(http, "/upload", post_request_cb, NULL);
-
-    /* We want to accept arbitrary requests, so we need to set a "generic"
-     * cb.  We can also add callbacks for specific paths. */
-    //evhttp_set_gencb(http, zimg_cb, _img_path);
-    //evhttp_set_gencb(http, test_cb, NULL);
-    evhttp_set_gencb(http, send_document_cb, NULL);
-//
-//    /* Now we tell the evhttp what port to listen on */
-//    handle = evhttp_bind_socket_with_handle(http, ip, port);
-//    if (!handle) 
-//    {
-//        LOG_PRINT(LOG_ERROR, "couldn't bind to port %d. Exiting.", port);
-//        return -1;
-//    }
-//
-
-    //worker init do:
-    evutil_socket_t fd;
-    struct sockaddr_in listen_addr;
-
-    fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd < 0) {
-        err(1, "listen failed");
-    }
-    if (evutil_make_socket_nonblocking(fd) < 0)
-        return -1;
-    if (evutil_make_socket_closeonexec(fd) < 0)
-        return -1;
-    int reuseaddr_on = 1;
-    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr_on, sizeof(reuseaddr_on));
-
-    memset(&listen_addr, 0, sizeof(listen_addr));
-    listen_addr.sin_family = AF_INET;
-    listen_addr.sin_addr.s_addr = INADDR_ANY;
-    listen_addr.sin_port = htons(port);
-    if (bind(fd, (struct sockaddr *)&listen_addr, sizeof(listen_addr)) < 0) {
-        err(1, "bind failed");
-    }
-
-    if (listen(fd, 128) == -1) {
-        event_sock_warn(fd, "%s: listen", __func__);
-        evutil_closesocket(fd);
-        return (-1);
-    }
-    //worker init done.
-    handle = evhttp_accept_socket_with_handle(http, fd);
-
-    if (handle != NULL) {
-        LOG_PRINT(LOG_INFO, "Bound to port %d - Awaiting connections ... ", port);
-    }
-    else
-        return -1;
-
-
-
-    display_address(handle);
-    evhttp_free(http);
-    event_base_dispatch(base);
-    return 0;
-}

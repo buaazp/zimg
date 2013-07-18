@@ -1,6 +1,35 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
+/**
+ * @file zlog.c
+ * @brief Logger functions.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
+ */
+
 #include "zlog.h"
 
 extern struct setting settings;
+
+static int log_valid(int log_id);
+void log_init();
+int log_open(const char *path, const char* mode);
+void log_printf0(int log_id, int log_level, const char *fmt, ...);
+void log_flush(int log_id);
+void log_close(int log_id);
+
 /* 日志记录 */
 struct log_level_desc{
     enum LOG_LEVEL  level;

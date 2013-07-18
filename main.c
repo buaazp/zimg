@@ -1,7 +1,32 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+/**
+ * @file main.c
+ * @brief Entrance of zimg.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
+ */
+
 #include "zcommon.h"
 #include "zlog.h"
 
 extern struct setting settings;
+
+static void settings_init(void); 
+static void sighandler(int signal); 
+int main(int argc, char **argv);
+
 
 static void settings_init(void) 
 {
@@ -140,7 +165,7 @@ int main(int argc, char **argv)
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
-    if(runServer(settings.port) == -1)
+    if(run_server(settings.port) == -1)
     {
         LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
     }

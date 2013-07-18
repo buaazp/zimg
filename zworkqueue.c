@@ -1,8 +1,22 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+
 /**
- * Multithreaded work queue.
- * Copyright (c) 2012 Ronald Bennett Cemer
- * This software is licensed under the BSD license.
- * See the accompanying LICENSE.txt for details.
+ * @file zworkqueue.c
+ * @brief Workqueue functions used for muti-thread libevent support.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 1.0
+ * @date 2013-07-19
  */
 
 #include <stdio.h>
@@ -11,6 +25,12 @@
 #include "zworkqueue.h"
 #include "zhttpd.h"
 #include "zcommon.h"
+
+static void *worker_function(void *ptr);
+int workqueue_init(workqueue_t *workqueue, int numWorkers);
+void workqueue_shutdown(workqueue_t *workqueue);
+void workqueue_add_job(workqueue_t *workqueue, job_t *job); 
+
 
 #define LL_ADD(item, list) { \
 	if(list != NULL) \
@@ -34,7 +54,8 @@
 	item->prev = item->next = NULL; \
 }
 
-static void *worker_function(void *ptr) {
+static void *worker_function(void *ptr) 
+{
 	worker_t *worker = (worker_t *)ptr;
 	job_t *job;
     LOG_PRINT(LOG_INFO, "Worker Created. Waiting for Jobs... ");
@@ -80,13 +101,14 @@ static void *worker_function(void *ptr) {
         event_base_free(worker->evbase);
         worker->evbase = NULL;
     }
-//    LL_REMOVE(worker, worker->workqueue->workers);
+    LL_REMOVE(worker, worker->workqueue->workers);
     LOG_PRINT(LOG_INFO, "Worker Shutdown.");
 	free(worker);
 	pthread_exit(NULL);
 }
 
-int workqueue_init(workqueue_t *workqueue, int numWorkers) {
+int workqueue_init(workqueue_t *workqueue, int numWorkers) 
+{
 	int i;
 	worker_t *worker;
 	pthread_cond_t blank_cond = PTHREAD_COND_INITIALIZER;
@@ -130,31 +152,16 @@ int workqueue_init(workqueue_t *workqueue, int numWorkers) {
 	return 0;
 }
 
-void workqueue_shutdown(workqueue_t *workqueue) {
+void workqueue_shutdown(workqueue_t *workqueue) 
+{
     LOG_PRINT(LOG_INFO, "Start to Close Workers...");
 	worker_t *worker = NULL;
-//    job_t *job;
-
-//    if ((job = malloc(sizeof(*job))) == NULL) 
-//    {
-//        LOG_PRINT(LOG_WARNING, "Failed to allocate memory for job state");
-//    }
-//    else
-//        job->user_data = -1;
 
 	/* Set all workers to terminate. */
 	for (worker = workqueue->workers; worker != NULL; worker = worker->next) 
     {
 		worker->terminate = 1;
 	}
-//    if(job)
-//    {
-//        for (worker = workqueue->workers; worker != NULL; worker = worker->next) 
-//        {
-//            workqueue_add_job(workqueue, job);
-//        }
-//        free(job);
-//    }
 
 	/* Remove all workers and jobs from the work queue.
 	 * wake up all workers so that they will terminate. */
@@ -165,7 +172,8 @@ void workqueue_shutdown(workqueue_t *workqueue) {
 	pthread_mutex_unlock(&workqueue->jobs_mutex);
 }
 
-void workqueue_add_job(workqueue_t *workqueue, job_t *job) {
+void workqueue_add_job(workqueue_t *workqueue, job_t *job) 
+{
 	/* Add the job to the job queue, and notify a worker. */
 	pthread_mutex_lock(&workqueue->jobs_mutex);
 	LL_ADD(job, workqueue->waiting_jobs);
