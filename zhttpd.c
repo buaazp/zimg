@@ -29,10 +29,9 @@ extern struct setting settings;
 
 static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
-//void dump_request_cb(evhtp_request_t *req, void *arg);
+void dump_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void send_document_cb(evhtp_request_t *req, void *arg);
-static int display_address(struct evhttp_bound_socket *handle);
 
 static const struct table_entry {
 	const char *extension;
@@ -82,51 +81,44 @@ not_found:
 	return "application/misc";
 }
 
-///* Callback used for the /dump URI, and for every non-GET request:
-// * dumps all information to stdout and gives back a trivial 200 ok */
-//void dump_request_cb(evhtp_request_t *req, void *arg)
-//{
-//	const char *cmdtype;
-//	struct evkeyvalq *headers;
-//	struct evkeyval *header;
-//	struct evbuffer *buf;
-//
-//	switch (evhtp_request_t_get_command(req)) {
-//	case EVHTTP_REQ_GET: cmdtype = "GET"; break;
-//	case EVHTTP_REQ_POST: cmdtype = "POST"; break;
-//	case EVHTTP_REQ_HEAD: cmdtype = "HEAD"; break;
-//	case EVHTTP_REQ_PUT: cmdtype = "PUT"; break;
-//	case EVHTTP_REQ_DELETE: cmdtype = "DELETE"; break;
-//	case EVHTTP_REQ_OPTIONS: cmdtype = "OPTIONS"; break;
-//	case EVHTTP_REQ_TRACE: cmdtype = "TRACE"; break;
-//	case EVHTTP_REQ_CONNECT: cmdtype = "CONNECT"; break;
-//	case EVHTTP_REQ_PATCH: cmdtype = "PATCH"; break;
-//	default: cmdtype = "unknown"; break;
-//	}
-//
-//	LOG_PRINT(LOG_INFO, "Received a %s request for %s",
-//	    cmdtype, evhtp_request_t_get_uri(req));
-//    LOG_PRINT(LOG_INFO, "Headers:");
-//
-//	headers = evhtp_request_t_get_input_headers(req);
-//	for (header = headers->tqh_first; header;
-//	    header = header->next.tqe_next) {
-//		LOG_PRINT(LOG_INFO, "  %s: %s", header->key, header->value);
-//	}
-//
-//	buf = evhtp_request_t_get_input_buffer(req);
-//	puts("Input data: <<<");
-//	while (evbuffer_get_length(buf)) {
-//		int n;
-//		char cbuf[128];
-//		n = evbuffer_remove(buf, cbuf, sizeof(buf)-1);
-//		if (n > 0)
-//			(void) fwrite(cbuf, 1, n, stdout);
-//	}
-//	puts(">>>");
-//
-//	evhttp_send_reply(req, 200, "OK", NULL);
-//}
+/* Callback used for the /dump URI, and for every non-GET request:
+ * dumps all information to stdout and gives back a trivial 200 ok */
+void dump_request_cb(evhtp_request_t *req, void *arg)
+{
+	const char *cmdtype;
+    const char *uri = req->uri->path->full;
+
+	//switch (evhtp_request_t_get_command(req)) {
+    switch (evhtp_request_get_method(req)){
+	case EVHTTP_REQ_GET: cmdtype = "GET"; break;
+	case EVHTTP_REQ_POST: cmdtype = "POST"; break;
+	case EVHTTP_REQ_HEAD: cmdtype = "HEAD"; break;
+	case EVHTTP_REQ_PUT: cmdtype = "PUT"; break;
+	case EVHTTP_REQ_DELETE: cmdtype = "DELETE"; break;
+	case EVHTTP_REQ_OPTIONS: cmdtype = "OPTIONS"; break;
+	case EVHTTP_REQ_TRACE: cmdtype = "TRACE"; break;
+	case EVHTTP_REQ_CONNECT: cmdtype = "CONNECT"; break;
+	case EVHTTP_REQ_PATCH: cmdtype = "PATCH"; break;
+	default: cmdtype = "unknown"; break;
+	}
+
+	LOG_PRINT(LOG_INFO, "Received a %s request for %s",
+	    cmdtype, uri);
+
+    evbuffer_add_reference(req->buffer_out, "dump_request_cb\n", 12, NULL, NULL);
+	evbuf_t *buf = req->buffer_in;;
+	puts("Input data: <<<");
+	while (evbuffer_get_length(buf)) {
+		int n;
+		char cbuf[128];
+		n = evbuffer_remove(buf, cbuf, sizeof(buf)-1);
+		if (n > 0)
+			(void) fwrite(cbuf, 1, n, stdout);
+	}
+	puts(">>>");
+
+    evhtp_send_reply(req, EVHTP_RES_OK);
+}
 
 
 
@@ -188,12 +180,18 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     buf = req->buffer_in;
     buff = (char *)malloc(post_size);
     int rmblen, evblen;
-    int imgSize = 0;
+    int img_size = 0;
+
+    if(evbuffer_get_length(buf) <= 0)
+    {
+        LOG_PRINT(LOG_ERROR, "Empty Request!");
+        goto err;
+    }
 
     while((evblen = evbuffer_get_length(buf)) > 0)
     {
         LOG_PRINT(LOG_INFO, "evblen = %d", evblen);
-        //rmblen = evbuffer_remove(buf, buff, evblen);
+        rmblen = evbuffer_remove(buf, buff, evblen);
         LOG_PRINT(LOG_INFO, "rmblen = %d", rmblen);
         if(rmblen < 0)
         {
@@ -275,12 +273,12 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     }
     end += start;
     LOG_PRINT(LOG_INFO, "end = %d", end);
-    imgSize = end - start;
+    img_size = end - start;
 
 
     LOG_PRINT(LOG_INFO, "post_size = %d", post_size);
-    LOG_PRINT(LOG_INFO, "imgSize = %d", imgSize);
-    if(imgSize <= 0)
+    LOG_PRINT(LOG_INFO, "img_size = %d", img_size);
+    if(img_size <= 0)
     {
         LOG_PRINT(LOG_ERROR, "Image Size is Zero!");
         goto err;
@@ -289,7 +287,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     char md5sum[33];
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");
-    if(save_img(buff+start, imgSize, md5sum, fileType) == -1)
+    if(save_img(buff+start, img_size, md5sum, fileType) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
@@ -478,45 +476,4 @@ done:
         free(zimg_req);
     }
 }
-
-static int display_address(struct evhttp_bound_socket *handle)
-{
-    /* Extract and display the address we're listening on. */
-    struct sockaddr_storage ss;
-    evutil_socket_t fd;
-    ev_socklen_t socklen = sizeof(ss);
-    char addrbuf[128];
-    void *inaddr;
-    const char *addr;
-    int got_port = -1;
-    fd = evhttp_bound_socket_get_fd(handle);
-    memset(&ss, 0, sizeof(ss));
-    if (getsockname(fd, (struct sockaddr *)&ss, &socklen)) {
-        LOG_PRINT(LOG_ERROR, "getsockname() failed");
-        return -1;
-    }
-    if (ss.ss_family == AF_INET) {
-        got_port = ntohs(((struct sockaddr_in*)&ss)->sin_port);
-        inaddr = &((struct sockaddr_in*)&ss)->sin_addr;
-    } else if (ss.ss_family == AF_INET6) {
-        got_port = ntohs(((struct sockaddr_in6*)&ss)->sin6_port);
-        inaddr = &((struct sockaddr_in6*)&ss)->sin6_addr;
-    } else {
-        fprintf(stderr, "Weird address family %d\n",
-            ss.ss_family);
-        return -1;
-    }
-    addr = evutil_inet_ntop(ss.ss_family, inaddr, addrbuf,
-        sizeof(addrbuf));
-    if (addr) {
-        LOG_PRINT(LOG_INFO, "Listening on %s:%d", addr, got_port);
-        evutil_snprintf(uri_root, sizeof(uri_root),
-            "http://%s:%d",addr,got_port);
-    } else {
-        fprintf(stderr, "evutil_inet_ntop failed\n");
-        return -1;
-    }
-    return 0;
-}
-
 

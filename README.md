@@ -11,6 +11,7 @@ Or in weibo: [@招牌疯子](http://weibo.com/819880808) <br />
 ### Dependence:
 We stand on the shoulders of giants. <br />
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO. <br />
+[libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API. <br>
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images. <br />
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system. <br />
 

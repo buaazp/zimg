@@ -22,6 +22,7 @@
 #include "zlog.h"
 #include <evhtp.h>
 #include "zhttpd.h"
+#include <inttypes.h>
 
 extern struct setting settings;
 evbase_t *evbase;
@@ -42,20 +43,13 @@ static void settings_init(void)
     settings.log = false;
     settings.cache_on = false;
     settings.cache_port = 11211;
+    settings.max_keepalives = 1;
 }
 
 static void sighandler(int signal) 
 {
     LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
     kill_server();
-}
-
-void testcb(evhtp_request_t * req, void * a) {
-    const char * str = a;
-
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!<br>%s</h1></body></html>", str);
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
-    evhtp_send_reply(req, EVHTP_RES_OK);
 }
 
 int main(int argc, char **argv)
@@ -85,8 +79,8 @@ int main(int argc, char **argv)
                     "t:"
                     "l"
                     "m:"
-                    "d"
                     "h"
+                    "k:"
                     )))
     {
         switch(c)
@@ -118,8 +112,11 @@ int main(int argc, char **argv)
                 settings.cache_port = atoi(optarg);
                 break;
             case 'h':
-                printf("Usage: ./zimg -p port -t thread_num -m memcached_port -l[og] -h[elp]\n");
+                printf("Usage: ./zimg -p port -t thread_num -m memcached_port -l[og] -k max_keepalives -h[elp]\n");
                 exit(1);
+            case 'k':
+                settings.max_keepalives = atoll(optarg);
+                break;
             default:
                 fprintf(stderr, "Illegal argument \"%c\"\n", c);
                 return 1;
@@ -184,14 +181,13 @@ int main(int argc, char **argv)
     evbase = event_base_new();
     evhtp_t  * htp    = evhtp_new(evbase, NULL);
 
-//    evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
-//    evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
-    evhtp_set_cb(htp, "/upload", send_document_cb, NULL);
+    evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
+    evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     evhtp_set_gencb(htp, send_document_cb, NULL);
-//    evhtp_set_gencb(htp, testcb, "simple");
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, NULL, settings.num_threads, NULL);
 #endif
+    evhtp_set_max_keepalive_requests(htp, settings.max_keepalives);
     evhtp_bind_socket(htp, "0.0.0.0", settings.port, settings.backlog);
 
     event_base_loop(evbase, 0);

@@ -25,7 +25,7 @@
 #include <evhtp.h>
 #include "zcommon.h"
 
-//void dump_request_cb(evhtp_request_t *req, void *arg);
+void dump_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void send_document_cb(evhtp_request_t *req, void *arg);
 
