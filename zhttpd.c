@@ -21,6 +21,7 @@
 
 #include "zhttpd.h"
 #include "zimg.h"
+#include "zworkqueue.h"
 
 char uri_root[512];
 extern struct setting settings;
@@ -84,6 +85,7 @@ not_found:
  * dumps all information to stdout and gives back a trivial 200 ok */
 void dump_request_cb(struct evhttp_request *req, void *arg)
 {
+    worker_t *worker = (worker_t *)arg;
 	const char *cmdtype;
 	struct evkeyvalq *headers;
 	struct evkeyval *header;
@@ -124,6 +126,8 @@ void dump_request_cb(struct evhttp_request *req, void *arg)
 	puts(">>>");
 
 	evhttp_send_reply(req, 200, "OK", NULL);
+    if(worker->evbase)
+        event_base_loopbreak(worker->evbase);
 }
 
 
@@ -132,6 +136,7 @@ void dump_request_cb(struct evhttp_request *req, void *arg)
  * storage image data and gives back a trivial 200 ok */
 void post_request_cb(struct evhttp_request *req, void *arg)
 {
+    worker_t *worker = (worker_t *)arg;
     struct evbuffer *evb = NULL;
     struct evkeyvalq *headers;
     struct evkeyval *header;
@@ -333,6 +338,8 @@ done:
         free(boundaryPattern);
     if(buff)
         free(buff);
+    if(worker->evbase)
+        event_base_loopbreak(worker->evbase);
 }
 
 
@@ -342,16 +349,17 @@ done:
  */
 void send_document_cb(struct evhttp_request *req, void *arg)
 {
+    worker_t *worker = (worker_t *)arg;
 	struct evbuffer *evb = NULL;
 	const char *uri = evhttp_request_get_uri(req);
 	struct evhttp_uri *decoded = NULL;
 	const char *path;
     char *md5 = NULL;
-	char *decoded_path;
-	char *whole_path = NULL;
+	char *decoded_path = NULL;
+//	char *whole_path = NULL;
 	size_t len;
-	int fd = -1;
-	struct stat st;
+//	int fd = -1;
+//	struct stat st;
     zimg_req_t *zimg_req = NULL;
 	char *buff = NULL;
 
@@ -398,24 +406,30 @@ void send_document_cb(struct evhttp_request *req, void *arg)
 	if (strstr(decoded_path, ".."))
 		goto err;
 
-	len = strlen(decoded_path)+strlen(settings.root_path)+1;
-	if (!(whole_path = malloc(len))) {
-		LOG_PRINT(LOG_ERROR, "malloc");
-		goto err;
-	}
-	evutil_snprintf(whole_path, len, "%s%s", settings.root_path, decoded_path);
-
+    md5 = (char *)malloc(strlen(decoded_path) + 1);
+    if(decoded_path[0] == '/')
+        strcpy(md5, decoded_path+1);
+    char *path_end;
+    if((path_end = strchr(md5, '/')) != 0)
+        path_end[0] = '\0';
+    if(is_md5(md5) == -1)
+    {
+        LOG_PRINT(LOG_ERROR, "Url is Not a zimg Request.");
+        goto err;
+    }
+//
+//	len = strlen(decoded_path)+strlen(settings.root_path)+1;
+//	if (!(whole_path = malloc(len))) {
+//		LOG_PRINT(LOG_ERROR, "malloc");
+//		goto err;
+//	}
+//	evutil_snprintf(whole_path, len, "%s%s", settings.root_path, decoded_path);
+//
 	/* This holds the content we're sending. */
 	evb = evbuffer_new();
 
-	if (stat(whole_path, &st)<0) {
-        LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
-        md5 = (char *)malloc(strlen(decoded_path) + 1);
-        if(decoded_path[0] == '/')
-            strcpy(md5, decoded_path+1);
-        char *path_end;
-        if((path_end = strchr(md5, '/')) != 0)
-            path_end[0] = '\0';
+//	if (stat(whole_path, &st)<0) {
+//        LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
         int width, height, proportion, gray;
         struct evkeyvalq params;
         if(strchr(uri, '?') == 0)
@@ -505,70 +519,70 @@ void send_document_cb(struct evhttp_request *req, void *arg)
 		}
 		goto done;
 
-	}
+//	}
 
-
-	if (S_ISDIR(st.st_mode)) {
-		/* If it's a directory, read the comments and make a little
-		 * index page */
-		DIR *dir;
-		struct dirent *ent;
-		const char *trailing_slash = "";
-
-		if (!strlen(path) || path[strlen(path)-1] != '/')
-			trailing_slash = "/";
-
-		if (!(dir = opendir(whole_path)))
-			goto err;
-
-		evbuffer_add_printf(evb, "<html>\n <head>\n"
-		    "  <title>%s</title>\n"
-		    "  <base href='%s%s%s'>\n"
-		    " </head>\n"
-		    " <body>\n"
-		    "  <h1>%s</h1>\n"
-		    "  <ul>\n",
-		    decoded_path, /* XXX html-escape this. */
-		    uri_root, path, /* XXX html-escape this? */
-		    trailing_slash,
-		    decoded_path /* XXX html-escape this */);
-		while ((ent = readdir(dir))) {
-			const char *name = ent->d_name;
-			evbuffer_add_printf(evb,
-			    "    <li><a href=\"%s\">%s</a>\n",
-			    name, name);/* XXX escape this */
-		}
-		evbuffer_add_printf(evb, "</ul></body></html>\n");
-		closedir(dir);
-		evhttp_add_header(evhttp_request_get_output_headers(req),
-		    "Content-Type", "text/html");
-	} else {
-		/* Otherwise it's a file; add it to the buffer to get
-		 * sent via sendfile */
-		const char *type = guess_content_type(decoded_path);
-		if ((fd = open(whole_path, O_RDONLY)) < 0) 
-        {
-            LOG_PRINT(LOG_ERROR, "Open File[%s] Failed!", whole_path);
-            goto err;
-        }
-
-		if (fstat(fd, &st)<0) {
-			/* Make sure the length still matches, now that we
-			 * opened the file :/ */
-			LOG_PRINT(LOG_ERROR, "Fstat File[%s] Failed!", whole_path);
-			goto err;
-		}
-		evhttp_add_header(evhttp_request_get_output_headers(req),
-		    "Content-Type", type);
-		evbuffer_add_file(evb, fd, 0, st.st_size);
-	}
-
-	evhttp_send_reply(req, 200, "OK", evb);
-	goto done;
+//
+//	if (S_ISDIR(st.st_mode)) {
+//		/* If it's a directory, read the comments and make a little
+//		 * index page */
+//		DIR *dir;
+//		struct dirent *ent;
+//		const char *trailing_slash = "";
+//
+//		if (!strlen(path) || path[strlen(path)-1] != '/')
+//			trailing_slash = "/";
+//
+//		if (!(dir = opendir(whole_path)))
+//			goto err;
+//
+//		evbuffer_add_printf(evb, "<html>\n <head>\n"
+//		    "  <title>%s</title>\n"
+//		    "  <base href='%s%s%s'>\n"
+//		    " </head>\n"
+//		    " <body>\n"
+//		    "  <h1>%s</h1>\n"
+//		    "  <ul>\n",
+//		    decoded_path, /* XXX html-escape this. */
+//		    uri_root, path, /* XXX html-escape this? */
+//		    trailing_slash,
+//		    decoded_path /* XXX html-escape this */);
+//		while ((ent = readdir(dir))) {
+//			const char *name = ent->d_name;
+//			evbuffer_add_printf(evb,
+//			    "    <li><a href=\"%s\">%s</a>\n",
+//			    name, name);/* XXX escape this */
+//		}
+//		evbuffer_add_printf(evb, "</ul></body></html>\n");
+//		closedir(dir);
+//		evhttp_add_header(evhttp_request_get_output_headers(req),
+//		    "Content-Type", "text/html");
+//	} else {
+//		/* Otherwise it's a file; add it to the buffer to get
+//		 * sent via sendfile */
+//		const char *type = guess_content_type(decoded_path);
+//		if ((fd = open(whole_path, O_RDONLY)) < 0) 
+//        {
+//            LOG_PRINT(LOG_ERROR, "Open File[%s] Failed!", whole_path);
+//            goto err;
+//        }
+//
+//		if (fstat(fd, &st)<0) {
+//			/* Make sure the length still matches, now that we
+//			 * opened the file :/ */
+//			LOG_PRINT(LOG_ERROR, "Fstat File[%s] Failed!", whole_path);
+//			goto err;
+//		}
+//		evhttp_add_header(evhttp_request_get_output_headers(req),
+//		    "Content-Type", type);
+//		evbuffer_add_file(evb, fd, 0, st.st_size);
+//	}
+//
+//	evhttp_send_reply(req, 200, "OK", evb);
+//	goto done;
 err:
 	evhttp_send_error(req, 404, "404 Not Found!");
-	if (fd>=0)
-		close(fd);
+//	if (fd>=0)
+//		close(fd);
 done:
 	if(buff)
 		free(buff);
@@ -584,10 +598,12 @@ done:
 		evhttp_uri_free(decoded);
 	if (decoded_path)
 		free(decoded_path);
-	if (whole_path)
-		free(whole_path);
+//	if (whole_path)
+//		free(whole_path);
 	if (evb)
 		evbuffer_free(evb);
+    if(worker->evbase)
+        event_base_loopbreak(worker->evbase);
 }
 
 static int display_address(struct evhttp_bound_socket *handle)

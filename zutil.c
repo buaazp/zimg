@@ -31,6 +31,7 @@ int is_img(const char *filename);
 int is_dir(const char *path);
 int mk_dir(const char *path);
 int mk_dirs(const char *dir);
+int is_md5(char *s);
 static int htoi(char s[]);
 int str_hash(const char *str);
 
@@ -208,6 +209,20 @@ int mk_dirs(const char *dir)
     return 1;
 }
 
+//check the string is a md5 style
+int is_md5(char *s)
+{
+    int rst = -1;
+    int i = 0;
+    for (; (s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f') || (s[i] >='A' && s[i] <= 'F');++i)
+    {
+    }
+    if(i == 32 && s[i] == '\0')
+        rst = 1;
+    return rst;
+}
+
+
 //将十六进制的字符串转换成整数
 static int htoi(char s[])
 {
@@ -242,7 +257,8 @@ int str_hash(const char *str)
     strncpy(c, str, 3);
     c[3] = '\0';
     LOG_PRINT(LOG_INFO, "str = %s.", c);
-    int d = htoi(c);
+    //int d = htoi(c);
+    int d = strtol(c, NULL, 16);
     LOG_PRINT(LOG_INFO, "str(3)_to_d = %d.", d);
     d = d / 4;
     LOG_PRINT(LOG_INFO, "str(3)/4 = %d.", d);

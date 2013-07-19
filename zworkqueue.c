@@ -65,6 +65,8 @@ static void *worker_function(void *ptr)
 		pthread_mutex_lock(&worker->workqueue->jobs_mutex);
 		while (worker->workqueue->waiting_jobs == NULL) {
 			pthread_cond_wait(&worker->workqueue->jobs_cond, &worker->workqueue->jobs_mutex);
+            /* If we're supposed to terminate, break out of our continuous loop. */
+            if (worker->terminate) break;
 		}
 		job = worker->workqueue->waiting_jobs;
 		if (job != NULL) {
@@ -72,8 +74,8 @@ static void *worker_function(void *ptr)
 		}
 		pthread_mutex_unlock(&worker->workqueue->jobs_mutex);
 
-		/* If we're supposed to terminate, break out of our continuous loop. */
-		if (worker->terminate) break;
+        /* If we're supposed to terminate, break out of our continuous loop. */
+        if (worker->terminate) break;
 
 		/* If we didn't get a job, then there's nothing to do at this time. */
 		if (job == NULL) continue;
@@ -84,6 +86,7 @@ static void *worker_function(void *ptr)
         handle = evhttp_accept_socket_with_handle(worker->http, job->user_data);
         if (handle != NULL) {
             LOG_PRINT(LOG_INFO, "Bound to port - Awaiting connections ... ");
+            //mm_free(handle);
         }
         free(job);
         event_base_dispatch(worker->evbase);
@@ -136,9 +139,9 @@ int workqueue_init(workqueue_t *workqueue, int numWorkers)
             return 1;
         }
 
-        evhttp_set_cb(worker->http, "/dump", dump_request_cb, NULL);
-        evhttp_set_cb(worker->http, "/upload", post_request_cb, NULL);
-        evhttp_set_gencb(worker->http, send_document_cb, NULL);
+        evhttp_set_cb(worker->http, "/dump", dump_request_cb, worker);
+        evhttp_set_cb(worker->http, "/upload", post_request_cb, worker);
+        evhttp_set_gencb(worker->http, send_document_cb, worker);
 
         worker->workqueue = workqueue;
 		if (pthread_create(&worker->thread, NULL, worker_function, (void *)worker)) {
@@ -166,7 +169,8 @@ void workqueue_shutdown(workqueue_t *workqueue)
 	/* Remove all workers and jobs from the work queue.
 	 * wake up all workers so that they will terminate. */
 	pthread_mutex_lock(&workqueue->jobs_mutex);
-	workqueue->workers = NULL;
+    LOG_PRINT(LOG_INFO, "broadcast shutdown signal...");
+	//workqueue->workers = NULL;
 	workqueue->waiting_jobs = NULL;
 	pthread_cond_broadcast(&workqueue->jobs_cond);
 	pthread_mutex_unlock(&workqueue->jobs_mutex);

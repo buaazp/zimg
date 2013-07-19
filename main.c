@@ -74,6 +74,7 @@ int main(int argc, char **argv)
                     "l"
                     "m:"
                     "d"
+                    "h"
                     )))
     {
         switch(c)
@@ -104,6 +105,9 @@ int main(int argc, char **argv)
             case 'm':
                 settings.cache_port = atoi(optarg);
                 break;
+            case 'h':
+                printf("Usage: ./zimg -p port -t thread_num -m memcached_port -l[og] -h[elp]\n");
+                exit(1);
             default:
                 fprintf(stderr, "Illegal argument \"%c\"\n", c);
                 return 1;

@@ -69,28 +69,8 @@ int save_img(const char *buff, const int len, char *md5, const char *type)
 
     //caculate 2-level path
     int lvl1 = str_hash(md5sum);
-    //sprintf(savePath, "%s/%d", _img_path, lvl1);
-//    if(is_dir(savePath) == -1)
-//    {
-//        if(mk_dir(savePath) == -1)
-//        {
-//            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
-//            goto done;
-//        }
-//    }
     int lvl2 = str_hash(md5sum + 3);
-    //sprintf(savePath, "%s/%d", savePath, lvl2);
-//    if(is_dir(savePath) == -1)
-//    {
-//        if(mk_dir(savePath) == -1)
-//        {
-//            LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
-//            goto done;
-//        }
-//    }
-
-
-    //sprintf(savePath, "%s/%s", savePath, md5sum);
+    
     sprintf(savePath, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
     LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
 
@@ -183,7 +163,7 @@ done:
 int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
 {
     int result = -1;
-    char *rspPath = (char *)malloc(512);
+    char *rspPath = NULL;
     char *cacheKey = (char *)malloc(strlen(req->md5) + 32);
     char *whole_path = NULL;
     char *origPath = NULL;
@@ -191,9 +171,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     char *img_format = NULL;
     size_t len;
     MagickBooleanType status;
-    MagickWand *magick_wand;
-    MagickWandGenesis();
-    magick_wand = NewMagickWand();
+    MagickWand *magick_wand = NULL;
 
     LOG_PRINT(LOG_INFO, "get_img() start processing zimg request...");
 
@@ -239,6 +217,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     sprintf(origPath, "%s/0*0p", whole_path);
     LOG_PRINT(LOG_INFO, "0rig File Path: %s", origPath);
 
+    rspPath = (char *)malloc(512);
     if(req->width == 0 && req->height == 0 && req->gray == 0)
     {
         LOG_PRINT(LOG_INFO, "Return original image.");
@@ -250,6 +229,10 @@ int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
     }
     LOG_PRINT(LOG_INFO, "Got the rspPath: %s", rspPath);
     int got_rsp = 1;
+
+
+    MagickWandGenesis();
+    magick_wand = NewMagickWand();
     status=MagickReadImage(magick_wand, rspPath);
     if(status == MagickFalse)
     {
@@ -430,8 +413,11 @@ finish:
 
 done:
 	req->rspPath = rspPath;
-    magick_wand=DestroyMagickWand(magick_wand);
-    MagickWandTerminus();
+    if(magick_wand)
+    {
+        magick_wand=DestroyMagickWand(magick_wand);
+        MagickWandTerminus();
+    }
     if(img_format)
         free(img_format);
     if(cacheKey)
