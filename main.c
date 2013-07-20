@@ -35,7 +35,7 @@ void kill_server(void);
 
 static void settings_init(void) 
 {
-    strcpy(settings.root_path, "./www");
+//    strcpy(settings.root_path, "./www");
     strcpy(settings.img_path, "./img");
     settings.port = 4869;
     settings.backlog = 1024;
@@ -43,7 +43,7 @@ static void settings_init(void)
     settings.log = false;
     settings.cache_on = false;
     settings.cache_port = 11211;
-    settings.max_keepalives = 1;
+    settings.max_keepalives = 0;
 }
 
 static void sighandler(int signal) 
@@ -122,25 +122,32 @@ int main(int argc, char **argv)
                 return 1;
         }
     }
-
+    //init the Path zimg need to use.
+    LOG_PRINT(LOG_INFO, "Begin to Init the Path zimg Using...");
+//    if(is_dir(settings.root_path) != 1)
+//    {
+//        if(mk_dir(settings.root_path) != 1)
+//        {
+//            LOG_PRINT(LOG_ERROR, "root_path[%s] Create Failed!", settings.root_path);
+//            return -1;
+//        }
+//    }
+//
+//
     //start log module... ./log/zimg.log
+    if(is_dir("./log") != 1)
+    {
+        if(mk_dir("./log") != 1)
+        {
+            LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", "./log");
+            return -1;
+        }
+    }
     if(settings.log)
     {
         log_init();
         _log_id = log_open(log_path, "a");
     }
-
-    //init the Path zimg need to use.
-    LOG_PRINT(LOG_INFO, "Begin to Init the Path zimg Using...");
-    if(is_dir(settings.root_path) != 1)
-    {
-        if(mk_dir(settings.root_path) != 1)
-        {
-            LOG_PRINT(LOG_ERROR, "root_path[%s] Create Failed!", settings.root_path);
-            return -1;
-        }
-    }
-
     if(is_dir(settings.img_path) != 1)
     {
         if(mk_dir(settings.img_path) != 1)
@@ -150,7 +157,8 @@ int main(int argc, char **argv)
         }
     }
     LOG_PRINT(LOG_INFO,"Paths Init Finished.");
-    
+
+   
     //init memcached connection...
     LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
     _memc= memcached_create(NULL);
