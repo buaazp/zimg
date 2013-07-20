@@ -19,6 +19,7 @@
  * @date 2013-07-19
  */
 
+#include <evhtp.h>
 #include "zhttpd.h"
 #include "zimg.h"
 #include "zworkqueue.h"
@@ -28,10 +29,9 @@ extern struct setting settings;
 
 static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
-void dump_request_cb(struct evhttp_request *req, void *arg);
-void post_request_cb(struct evhttp_request *req, void *arg);
-void send_document_cb(struct evhttp_request *req, void *arg);
-static int display_address(struct evhttp_bound_socket *handle);
+void dump_request_cb(evhtp_request_t *req, void *arg);
+void post_request_cb(evhtp_request_t *req, void *arg);
+void send_document_cb(evhtp_request_t *req, void *arg);
 
 static const struct table_entry {
 	const char *extension;
@@ -83,15 +83,13 @@ not_found:
 
 /* Callback used for the /dump URI, and for every non-GET request:
  * dumps all information to stdout and gives back a trivial 200 ok */
-void dump_request_cb(struct evhttp_request *req, void *arg)
+void dump_request_cb(evhtp_request_t *req, void *arg)
 {
-    worker_t *worker = (worker_t *)arg;
 	const char *cmdtype;
-	struct evkeyvalq *headers;
-	struct evkeyval *header;
-	struct evbuffer *buf;
+    const char *uri = req->uri->path->full;
 
-	switch (evhttp_request_get_command(req)) {
+	//switch (evhtp_request_t_get_command(req)) {
+    switch (evhtp_request_get_method(req)){
 	case EVHTTP_REQ_GET: cmdtype = "GET"; break;
 	case EVHTTP_REQ_POST: cmdtype = "POST"; break;
 	case EVHTTP_REQ_HEAD: cmdtype = "HEAD"; break;
@@ -105,16 +103,10 @@ void dump_request_cb(struct evhttp_request *req, void *arg)
 	}
 
 	LOG_PRINT(LOG_INFO, "Received a %s request for %s",
-	    cmdtype, evhttp_request_get_uri(req));
-    LOG_PRINT(LOG_INFO, "Headers:");
+	    cmdtype, uri);
 
-	headers = evhttp_request_get_input_headers(req);
-	for (header = headers->tqh_first; header;
-	    header = header->next.tqe_next) {
-		LOG_PRINT(LOG_INFO, "  %s: %s", header->key, header->value);
-	}
-
-	buf = evhttp_request_get_input_buffer(req);
+    evbuffer_add_reference(req->buffer_out, "dump_request_cb\n", 12, NULL, NULL);
+	evbuf_t *buf = req->buffer_in;;
 	puts("Input data: <<<");
 	while (evbuffer_get_length(buf)) {
 		int n;
@@ -125,87 +117,76 @@ void dump_request_cb(struct evhttp_request *req, void *arg)
 	}
 	puts(">>>");
 
-	evhttp_send_reply(req, 200, "OK", NULL);
-    if(worker->evbase)
-        event_base_loopbreak(worker->evbase);
+    evhtp_send_reply(req, EVHTP_RES_OK);
 }
 
 
 
 /* Callback used for the POST requset:
  * storage image data and gives back a trivial 200 ok */
-void post_request_cb(struct evhttp_request *req, void *arg)
+void post_request_cb(evhtp_request_t *req, void *arg)
 {
-    worker_t *worker = (worker_t *)arg;
-    struct evbuffer *evb = NULL;
-    struct evkeyvalq *headers;
-    struct evkeyval *header;
-    int postSize = 0;
+    int post_size = 0;
     char *boundary = NULL, *boundary_end = NULL;
     int boundary_len = 0;
-    
-	LOG_PRINT(LOG_INFO, "Received a POST request for %s", evhttp_request_get_uri(req));
-    LOG_PRINT(LOG_INFO, "Headers:");
+    char *fileName = NULL;
+    char *boundaryPattern = NULL;
+    char *buff = NULL;
+  
 
-	headers = evhttp_request_get_input_headers(req);
-	for (header = headers->tqh_first; header; header = header->next.tqe_next) 
+    const char *content_len = evhtp_header_find(req->headers_in, "Content-Length");
+    post_size = atoi(content_len);
+    const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
+    if(strstr(content_type, "multipart/form-data") == 0)
     {
-		LOG_PRINT(LOG_INFO, "  %s: %s", header->key, header->value);
-        if(strstr(header->key, "Content-Length") == header->key)
-        {
-            postSize = atoi(header->value);
-        }
-        else if(strstr(header->key, "Content-Type") == header->key)
-        {
-            if(strstr(header->value, "multipart/form-data") == 0)
-            {
-                LOG_PRINT(LOG_ERROR, "POST form error!");
-                goto err;
-            }
-            else if(strstr(header->value, "boundary") == 0)
-            {
-                LOG_PRINT(LOG_ERROR, "boundary NOT found!");
-                goto err;
-            }
-            else
-            {
-                boundary = strchr(header->value, '=');
-                boundary++;
-                boundary_len = strlen(boundary);
+        LOG_PRINT(LOG_ERROR, "POST form error!");
+        goto err;
+    }
+    else if(strstr(content_type, "boundary") == 0)
+    {
+        LOG_PRINT(LOG_ERROR, "boundary NOT found!");
+        goto err;
+    }
 
-                if (boundary[0] == '"') 
-                {
-                    boundary++;
-                    boundary_end = strchr(boundary, '"');
-                    if (!boundary_end) 
-                    {
-                        LOG_PRINT(LOG_ERROR, "Invalid boundary in multipart/form-data POST data");
-                        goto err;
-                    }
-                } 
-                else 
-                {
-                    /* search for the end of the boundary */
-                    boundary_end = strpbrk(boundary, ",;");
-                }
-                if (boundary_end) 
-                {
-                    boundary_end[0] = '\0';
-                    boundary_len = boundary_end-boundary;
-                }
+    boundary = strchr(content_type, '=');
+    boundary++;
+    boundary_len = strlen(boundary);
 
-                LOG_PRINT(LOG_INFO, "boundary Find. boundary = %s", boundary);
-            }
+    if (boundary[0] == '"') 
+    {
+        boundary++;
+        boundary_end = strchr(boundary, '"');
+        if (!boundary_end) 
+        {
+            LOG_PRINT(LOG_ERROR, "Invalid boundary in multipart/form-data POST data");
+            goto err;
         }
-	}
+    } 
+    else 
+    {
+        /* search for the end of the boundary */
+        boundary_end = strpbrk(boundary, ",;");
+    }
+    if (boundary_end) 
+    {
+        boundary_end[0] = '\0';
+        boundary_len = boundary_end-boundary;
+    }
+
+    LOG_PRINT(LOG_INFO, "boundary Find. boundary = %s", boundary);
+            
     /* 依靠evbuffer自己实现php处理函数 */
-	struct evbuffer *buf;
-    buf = evhttp_request_get_input_buffer(req);
-    char *buff = (char *)malloc(postSize);
-    char *fileName;
-    char buffline[128];
+	evbuf_t *buf;
+    buf = req->buffer_in;
+    buff = (char *)malloc(post_size);
     int rmblen, evblen;
-    int imgSize = 0;
+    int img_size = 0;
+
+    if(evbuffer_get_length(buf) <= 0)
+    {
+        LOG_PRINT(LOG_ERROR, "Empty Request!");
+        goto err;
+    }
 
     while((evblen = evbuffer_get_length(buf)) > 0)
     {
@@ -220,14 +201,14 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     }
 
     int start = -1, end = -1;
-    char *fileNamePattern = "filename=";
-    char *typePattern = "Content-Type";
-    char *quotePattern = "\"";
-    char *blankPattern = "\r\n";
-    char *boundaryPattern = (char *)malloc(boundary_len + 4);
+    const char *fileNamePattern = "filename=";
+    const char *typePattern = "Content-Type";
+    const char *quotePattern = "\"";
+    const char *blankPattern = "\r\n";
+    boundaryPattern = (char *)malloc(boundary_len + 4);
     sprintf(boundaryPattern, "\r\n--%s", boundary);
     LOG_PRINT(LOG_INFO, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
-    if((start = kmp(buff, postSize, fileNamePattern, strlen(fileNamePattern))) == -1)
+    if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Content-Disposition Not Found!");
         goto err;
@@ -236,7 +217,7 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     if(buff[start] == '\"')
     {
         start++;
-        if((end = kmp(buff+start, postSize-start, quotePattern, strlen(quotePattern))) == -1)
+        if((end = kmp(buff+start, post_size-start, quotePattern, strlen(quotePattern))) == -1)
         {
             LOG_PRINT(LOG_ERROR, "quote \" Not Found!");
             goto err;
@@ -244,7 +225,7 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     }
     else
     {
-        if((end = kmp(buff+start, postSize-start, blankPattern, strlen(blankPattern))) == -1)
+        if((end = kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
         {
             LOG_PRINT(LOG_ERROR, "quote \" Not Found!");
             goto err;
@@ -269,14 +250,14 @@ void post_request_cb(struct evhttp_request *req, void *arg)
 
     end += start;
 
-    if((start = kmp(buff+end, postSize-end, typePattern, strlen(typePattern))) == -1)
+    if((start = kmp(buff+end, post_size-end, typePattern, strlen(typePattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Content-Type Not Found!");
         goto err;
     }
     start += end;
     LOG_PRINT(LOG_INFO, "start = %d", start);
-    if((end =  kmp(buff+start, postSize-start, blankPattern, strlen(blankPattern))) == -1)
+    if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Not complete!");
         goto err;
@@ -285,19 +266,19 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     LOG_PRINT(LOG_INFO, "end = %d", end);
     start = end + 4;
     LOG_PRINT(LOG_INFO, "start = %d", start);
-    if((end = kmp(buff+start, postSize-start, boundaryPattern, strlen(boundaryPattern))) == -1)
+    if((end = kmp(buff+start, post_size-start, boundaryPattern, strlen(boundaryPattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Not complete!");
         goto err;
     }
     end += start;
     LOG_PRINT(LOG_INFO, "end = %d", end);
-    imgSize = end - start;
+    img_size = end - start;
 
 
-    LOG_PRINT(LOG_INFO, "postSize = %d", postSize);
-    LOG_PRINT(LOG_INFO, "imgSize = %d", imgSize);
-    if(imgSize <= 0)
+    LOG_PRINT(LOG_INFO, "post_size = %d", post_size);
+    LOG_PRINT(LOG_INFO, "img_size = %d", img_size);
+    if(img_size <= 0)
     {
         LOG_PRINT(LOG_ERROR, "Image Size is Zero!");
         goto err;
@@ -306,29 +287,30 @@ void post_request_cb(struct evhttp_request *req, void *arg)
     char md5sum[33];
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");
-    if(save_img(buff+start, imgSize, md5sum, fileType) == -1)
+    if(save_img(buff+start, img_size, md5sum, fileType) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
     }
 
-    evb = evbuffer_new();
-    evbuffer_add_printf(evb, "<html>\n <head>\n"
-        "  <title>%s</title>\n"
-        " </head>\n"
-        " <body>\n"
-        "  <h1>MD5: %s</h1>\n",
-        "Upload Successfully",
-        md5sum);
-    evbuffer_add_printf(evb, "</body></html>\n");
-    evhttp_add_header(evhttp_request_get_output_headers(req),"Content-Type", "text/html");
-    evhttp_send_reply(req, 200, "OK", evb);
-    evbuffer_free(evb);
+    evbuffer_add_printf(req->buffer_out, 
+        "<html>\n<head>\n"
+        "<title>Upload Successfully</title>\n"
+        "</head>\n"
+        "<body>\n"
+        "<h1>MD5: %s</h1>\n"
+        "</body>\n</html>\n",
+        md5sum
+        );
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
     goto done;
 
 err:
-    evhttp_send_error(req, 500, "Image Upload Failed!");
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_200);
     LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
 
 done:
@@ -338,8 +320,6 @@ done:
         free(boundaryPattern);
     if(buff)
         free(buff);
-    if(worker->evbase)
-        event_base_loopbreak(worker->evbase);
 }
 
 
@@ -347,242 +327,143 @@ done:
  * any other callback.  Like any evhttp server callback, it has a simple job:
  * it must eventually call evhttp_send_error() or evhttp_send_reply().
  */
-void send_document_cb(struct evhttp_request *req, void *arg)
+void send_document_cb(evhtp_request_t *req, void *arg)
 {
-    worker_t *worker = (worker_t *)arg;
-	struct evbuffer *evb = NULL;
-	const char *uri = evhttp_request_get_uri(req);
-	struct evhttp_uri *decoded = NULL;
-	const char *path;
     char *md5 = NULL;
-	char *decoded_path = NULL;
-//	char *whole_path = NULL;
 	size_t len;
-//	int fd = -1;
-//	struct stat st;
     zimg_req_t *zimg_req = NULL;
 	char *buff = NULL;
 
-    if (evhttp_request_get_command(req) == EVHTTP_REQ_POST) 
-    {
-        LOG_PRINT(LOG_INFO, "POST --> post_request_cb(req, %s)", settings.img_path);
-        post_request_cb(req, NULL);
-        LOG_PRINT(LOG_INFO, "post_request_cb(req, %s) --> POST", settings.img_path);
-        return;
-    }
-    else if(evhttp_request_get_command(req) != EVHTTP_REQ_GET){
-        dump_request_cb(req, NULL);
-        return;
-    }
+	const char *uri;
+	uri = req->uri->path->full;
+	const char *rfull = req->uri->path->full;
+	const char *rpath = req->uri->path->path;
+	const char *rfile= req->uri->path->file;
+	LOG_PRINT(LOG_INFO, "uri->path->full: %s",  rfull);
+	LOG_PRINT(LOG_INFO, "uri->path->path: %s",  rpath);
+	LOG_PRINT(LOG_INFO, "uri->path->file: %s",  rfile);
 
-	/* Decode the URI */
-	decoded = evhttp_uri_parse(uri);
-	if (!decoded) {
-		LOG_PRINT(LOG_INFO, "It's not a good URI. Sending BADREQUEST");
-		evhttp_send_error(req, HTTP_BADREQUEST, 0);
-		return;
-	}
-
-	/* Let's see what path the user asked for. */
-	path = evhttp_uri_get_path(decoded);
-	if (!path) path = "/";
-
-    if(strstr(path, "favicon.ico"))
+    if(strstr(uri, "favicon.ico"))
     {
         LOG_PRINT(LOG_INFO, "favicon.ico Request, Denied.");
         return;
     }
 	LOG_PRINT(LOG_INFO, "Got a GET request for <%s>",  uri);
 
-
-	/* We need to decode it, to see what path the user really wanted. */
-	decoded_path = evhttp_uridecode(path, 0, NULL);
-	if (decoded_path == NULL)
-		goto err;
 	/* Don't allow any ".."s in the path, to avoid exposing stuff outside
 	 * of the docroot.  This test is both overzealous and underzealous:
 	 * it forbids aceptable paths like "/this/one..here", but it doesn't
 	 * do anything to prevent symlink following." */
-	if (strstr(decoded_path, ".."))
+	if (strstr(uri, ".."))
 		goto err;
 
-    md5 = (char *)malloc(strlen(decoded_path) + 1);
-    if(decoded_path[0] == '/')
-        strcpy(md5, decoded_path+1);
-    char *path_end;
-    if((path_end = strchr(md5, '/')) != 0)
-        path_end[0] = '\0';
+    md5 = (char *)malloc(strlen(uri) + 1);
+    if(uri[0] == '/')
+        strcpy(md5, uri+1);
+    else
+        strcpy(md5, uri);
+	LOG_PRINT(LOG_INFO, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Url is Not a zimg Request.");
         goto err;
     }
-//
-//	len = strlen(decoded_path)+strlen(settings.root_path)+1;
-//	if (!(whole_path = malloc(len))) {
-//		LOG_PRINT(LOG_ERROR, "malloc");
-//		goto err;
-//	}
-//	evutil_snprintf(whole_path, len, "%s%s", settings.root_path, decoded_path);
-//
 	/* This holds the content we're sending. */
-	evb = evbuffer_new();
 
-//	if (stat(whole_path, &st)<0) {
-//        LOG_PRINT(LOG_WARNING, "Stat whole_path[%s] Failed! Goto zimg_cb() for Searching.", whole_path);
-        int width, height, proportion, gray;
-        struct evkeyvalq params;
-        if(strchr(uri, '?') == 0)
+    int width, height, proportion, gray;
+    if(strchr(uri, '?') == 0)
+    {
+        width = 0;
+        height = 0;
+        proportion = 1;
+        gray = 0;
+    }
+    else
+    {
+        evhtp_kvs_t *params;
+        params = req->uri->query;
+        const char *str_w, *str_h;
+        str_w = evhtp_kv_find(params, "w");
+        if(str_w == NULL)
+            str_w = "0";
+        str_h = evhtp_kv_find(params, "h");
+        if(str_h == NULL)
+            str_h = "0";
+        LOG_PRINT(LOG_INFO, "w() = %s; h() = %s;", str_w, str_h);
+        if(strcmp(str_w, "g") == 0 && strcmp(str_h, "w") == 0)
         {
-            width = 0;
-            height = 0;
-            proportion = 1;
-            gray = 0;
+            LOG_PRINT(LOG_INFO, "Love is Eternal.");
+            evbuffer_add_printf(req->buffer_out, "<html>\n <head>\n"
+                "  <title>Love is Eternal</title>\n"
+                " </head>\n"
+                " <body>\n"
+                "  <h1>Single1024</h1>\n"
+                "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
+                "</body>\n</html>\n"
+                );
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+            evhtp_send_reply(req, EVHTP_RES_OK);
+            goto done;
         }
         else
         {
-            evhttp_parse_query(uri, &params);
-            const char *str_w, *str_h;
-            if(evhttp_find_header(&params, "w"))
-                str_w = evhttp_find_header(&params, "w");
+            width = atoi(str_w);
+            height = atoi(str_h);
+            const char *str_p = evhtp_kv_find(params, "p");
+            const char *str_g = evhtp_kv_find(params, "g");
+            if(str_p)
+                proportion = atoi(str_p);
             else
-                str_w = "0";
-            if(evhttp_find_header(&params, "h"))
-                str_h = evhttp_find_header(&params, "h");
+                proportion = 1;
+            if(str_g)
+                gray = atoi(str_g);
             else
-                str_h = "0";
-            LOG_PRINT(LOG_INFO, "w() = %s; h() = %s;", str_w, str_h);
-            if(strcmp(str_w, "g") == 0 && strcmp(str_h, "w") == 0)
-            {
-                LOG_PRINT(LOG_INFO, "Love is Eternal.");
-                evbuffer_add_printf(evb, "<html>\n <head>\n"
-                    "  <title>Love is Eternal</title>\n"
-                    " </head>\n"
-                    " <body>\n"
-                    "  <h1>Single1024</h1>\n"
-                    "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
-                    "</body>\n</html>\n"
-                    );
-                evhttp_add_header(evhttp_request_get_output_headers(req),"Content-Type", "text/html");
-                evhttp_send_reply(req, 200, "OK", evb);
-                goto done;
-            }
-            else
-            {
-                width = atoi(str_w);
-                height = atoi(str_h);
-                if(evhttp_find_header(&params, "p"))
-                    proportion = atoi(evhttp_find_header(&params, "p"));
-                else
-                    proportion = 1;
-                if(evhttp_find_header(&params, "g"))
-                    gray = atoi(evhttp_find_header(&params, "g"));
-                else
-                    gray = 0;
-            }
+                gray = 0;
         }
+    }
 
-        zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
-        zimg_req -> md5 = md5;
-        zimg_req -> width = width;
-        zimg_req -> height = height;
-        zimg_req -> proportion = proportion;
-        zimg_req -> gray = gray;
+    zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
+    zimg_req -> md5 = md5;
+    zimg_req -> width = width;
+    zimg_req -> height = height;
+    zimg_req -> proportion = proportion;
+    zimg_req -> gray = gray;
 
-        char img_type[10];
-		int get_img_rst = get_img(zimg_req, &buff, img_type, &len);
+    char img_type[10];
+    int get_img_rst = get_img(zimg_req, &buff, img_type, &len);
 
 
-        if(get_img_rst == -1)
+    if(get_img_rst == -1)
+    {
+        LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
+        goto err;
+    }
+
+    LOG_PRINT(LOG_INFO, "get buffer length: %d", len);
+    evbuffer_add(req->buffer_out, buff, len);
+
+    LOG_PRINT(LOG_INFO, "Got the File!");
+    LOG_PRINT(LOG_INFO, "img_type: %s", img_type);
+    const char *type = guess_type(img_type);
+    LOG_PRINT(LOG_INFO, "guess_img_type: %s", type);
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_OK);
+
+
+    if(get_img_rst == 2)
+    {
+        if(new_img(buff, len, zimg_req->rspPath) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
-            goto err;
+            LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rspPath);
         }
+    }
+    goto done;
 
-        LOG_PRINT(LOG_INFO, "get buffer length: %d", len);
-		evbuffer_add(evb, buff, len);
-
-        LOG_PRINT(LOG_INFO, "Got the File!");
-        LOG_PRINT(LOG_INFO, "img_type: %s", img_type);
-		const char *type = guess_type(img_type);
-        LOG_PRINT(LOG_INFO, "guess_img_type: %s", type);
-		evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", type);
-        evhttp_send_reply(req, 200, "OK", evb);
-
-
- 		if(get_img_rst == 2)
-		{
-			if(new_img(buff, len, zimg_req->rspPath) == -1)
-			{
-				LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rspPath);
-			}
-		}
-		goto done;
-
-//	}
-
-//
-//	if (S_ISDIR(st.st_mode)) {
-//		/* If it's a directory, read the comments and make a little
-//		 * index page */
-//		DIR *dir;
-//		struct dirent *ent;
-//		const char *trailing_slash = "";
-//
-//		if (!strlen(path) || path[strlen(path)-1] != '/')
-//			trailing_slash = "/";
-//
-//		if (!(dir = opendir(whole_path)))
-//			goto err;
-//
-//		evbuffer_add_printf(evb, "<html>\n <head>\n"
-//		    "  <title>%s</title>\n"
-//		    "  <base href='%s%s%s'>\n"
-//		    " </head>\n"
-//		    " <body>\n"
-//		    "  <h1>%s</h1>\n"
-//		    "  <ul>\n",
-//		    decoded_path, /* XXX html-escape this. */
-//		    uri_root, path, /* XXX html-escape this? */
-//		    trailing_slash,
-//		    decoded_path /* XXX html-escape this */);
-//		while ((ent = readdir(dir))) {
-//			const char *name = ent->d_name;
-//			evbuffer_add_printf(evb,
-//			    "    <li><a href=\"%s\">%s</a>\n",
-//			    name, name);/* XXX escape this */
-//		}
-//		evbuffer_add_printf(evb, "</ul></body></html>\n");
-//		closedir(dir);
-//		evhttp_add_header(evhttp_request_get_output_headers(req),
-//		    "Content-Type", "text/html");
-//	} else {
-//		/* Otherwise it's a file; add it to the buffer to get
-//		 * sent via sendfile */
-//		const char *type = guess_content_type(decoded_path);
-//		if ((fd = open(whole_path, O_RDONLY)) < 0) 
-//        {
-//            LOG_PRINT(LOG_ERROR, "Open File[%s] Failed!", whole_path);
-//            goto err;
-//        }
-//
-//		if (fstat(fd, &st)<0) {
-//			/* Make sure the length still matches, now that we
-//			 * opened the file :/ */
-//			LOG_PRINT(LOG_ERROR, "Fstat File[%s] Failed!", whole_path);
-//			goto err;
-//		}
-//		evhttp_add_header(evhttp_request_get_output_headers(req),
-//		    "Content-Type", type);
-//		evbuffer_add_file(evb, fd, 0, st.st_size);
-//	}
-//
-//	evhttp_send_reply(req, 200, "OK", evb);
-//	goto done;
 err:
-	evhttp_send_error(req, 404, "404 Not Found!");
-//	if (fd>=0)
-//		close(fd);
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
+
 done:
 	if(buff)
 		free(buff);
@@ -594,56 +475,5 @@ done:
             free(zimg_req->rspPath);
         free(zimg_req);
     }
-	if (decoded)
-		evhttp_uri_free(decoded);
-	if (decoded_path)
-		free(decoded_path);
-//	if (whole_path)
-//		free(whole_path);
-	if (evb)
-		evbuffer_free(evb);
-    if(worker->evbase)
-        event_base_loopbreak(worker->evbase);
 }
-
-static int display_address(struct evhttp_bound_socket *handle)
-{
-    /* Extract and display the address we're listening on. */
-    struct sockaddr_storage ss;
-    evutil_socket_t fd;
-    ev_socklen_t socklen = sizeof(ss);
-    char addrbuf[128];
-    void *inaddr;
-    const char *addr;
-    int got_port = -1;
-    fd = evhttp_bound_socket_get_fd(handle);
-    memset(&ss, 0, sizeof(ss));
-    if (getsockname(fd, (struct sockaddr *)&ss, &socklen)) {
-        LOG_PRINT(LOG_ERROR, "getsockname() failed");
-        return -1;
-    }
-    if (ss.ss_family == AF_INET) {
-        got_port = ntohs(((struct sockaddr_in*)&ss)->sin_port);
-        inaddr = &((struct sockaddr_in*)&ss)->sin_addr;
-    } else if (ss.ss_family == AF_INET6) {
-        got_port = ntohs(((struct sockaddr_in6*)&ss)->sin6_port);
-        inaddr = &((struct sockaddr_in6*)&ss)->sin6_addr;
-    } else {
-        fprintf(stderr, "Weird address family %d\n",
-            ss.ss_family);
-        return -1;
-    }
-    addr = evutil_inet_ntop(ss.ss_family, inaddr, addrbuf,
-        sizeof(addrbuf));
-    if (addr) {
-        LOG_PRINT(LOG_INFO, "Listening on %s:%d", addr, got_port);
-        evutil_snprintf(uri_root, sizeof(uri_root),
-            "http://%s:%d",addr,got_port);
-    } else {
-        fprintf(stderr, "evutil_inet_ntop failed\n");
-        return -1;
-    }
-    return 0;
-}
-
 

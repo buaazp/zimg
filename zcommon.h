@@ -54,6 +54,7 @@
 #include <wand/MagickWand.h>
 #include <libmemcached/memcached.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #define _DEBUG 1
 
@@ -71,6 +72,7 @@ struct setting{
     bool log;
     int cache_port;
     bool cache_on;
+    uint64_t max_keepalives;
 } settings;
 
 

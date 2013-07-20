@@ -20,12 +20,17 @@
 
 #include "zcommon.h"
 #include "zlog.h"
+#include <evhtp.h>
+#include "zhttpd.h"
+#include <inttypes.h>
 
 extern struct setting settings;
+evbase_t *evbase;
 
 static void settings_init(void); 
 static void sighandler(int signal); 
 int main(int argc, char **argv);
+void kill_server(void);
 
 
 static void settings_init(void) 
@@ -38,6 +43,7 @@ static void settings_init(void)
     settings.log = false;
     settings.cache_on = false;
     settings.cache_port = 11211;
+    settings.max_keepalives = 1;
 }
 
 static void sighandler(int signal) 
@@ -73,8 +79,8 @@ int main(int argc, char **argv)
                     "t:"
                     "l"
                     "m:"
-                    "d"
                     "h"
+                    "k:"
                     )))
     {
         switch(c)
@@ -106,8 +112,11 @@ int main(int argc, char **argv)
                 settings.cache_port = atoi(optarg);
                 break;
             case 'h':
-                printf("Usage: ./zimg -p port -t thread_num -m memcached_port -l[og] -h[elp]\n");
+                printf("Usage: ./zimg -p port -t thread_num -m memcached_port -l[og] -k max_keepalives -h[elp]\n");
                 exit(1);
+            case 'k':
+                settings.max_keepalives = atoll(optarg);
+                break;
             default:
                 fprintf(stderr, "Illegal argument \"%c\"\n", c);
                 return 1;
@@ -169,13 +178,37 @@ int main(int argc, char **argv)
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
-    if(run_server(settings.port) == -1)
-    {
-        LOG_PRINT(LOG_ERROR, "zhttpd start failed.");
-    }
+    evbase = event_base_new();
+    evhtp_t  * htp    = evhtp_new(evbase, NULL);
+
+    evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
+    evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
+    evhtp_set_gencb(htp, send_document_cb, NULL);
+#ifndef EVHTP_DISABLE_EVTHR
+    evhtp_use_threads(htp, NULL, settings.num_threads, NULL);
+#endif
+    evhtp_set_max_keepalive_requests(htp, settings.max_keepalives);
+    evhtp_bind_socket(htp, "0.0.0.0", settings.port, settings.backlog);
+
+    event_base_loop(evbase, 0);
+
+    evhtp_unbind_socket(htp);
+    evhtp_free(htp);
+    event_base_free(evbase);
 
     memcached_free(_memc);
-    log_close(_log_id);
+    if(_log_id != -1)
+        log_close(_log_id);
     fprintf(stdout, "\nByebye!\n");
     return 0;
+}
+
+
+void kill_server(void)
+{
+    LOG_PRINT(LOG_INFO, "Stopping socket listener event loop.");
+    if (event_base_loopexit(evbase, NULL)) {
+        LOG_PRINT(LOG_ERROR, "Error shutting down server");
+    }
+    LOG_PRINT(LOG_INFO, "Stopping workers.\n");
 }
