@@ -122,14 +122,6 @@ int main(int argc, char **argv)
                 return 1;
         }
     }
-
-    //start log module... ./log/zimg.log
-    if(settings.log)
-    {
-        log_init();
-        _log_id = log_open(log_path, "a");
-    }
-
     //init the Path zimg need to use.
     LOG_PRINT(LOG_INFO, "Begin to Init the Path zimg Using...");
 //    if(is_dir(settings.root_path) != 1)
@@ -141,6 +133,21 @@ int main(int argc, char **argv)
 //        }
 //    }
 //
+//
+    //start log module... ./log/zimg.log
+    if(is_dir("./log") != 1)
+    {
+        if(mk_dir("./log") != 1)
+        {
+            LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", "./log");
+            return -1;
+        }
+    }
+    if(settings.log)
+    {
+        log_init();
+        _log_id = log_open(log_path, "a");
+    }
     if(is_dir(settings.img_path) != 1)
     {
         if(mk_dir(settings.img_path) != 1)
@@ -150,7 +157,8 @@ int main(int argc, char **argv)
         }
     }
     LOG_PRINT(LOG_INFO,"Paths Init Finished.");
-    
+
+   
     //init memcached connection...
     LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
     _memc= memcached_create(NULL);

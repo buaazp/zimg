@@ -27,7 +27,7 @@ char uri_root[512];
 
 static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
-static void print_headers(evhtp_header_t * header, void * arg); 
+static int print_headers(evhtp_header_t * header, void * arg); 
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void send_document_cb(evhtp_request_t *req, void *arg);
@@ -100,7 +100,7 @@ not_found:
 	return "application/misc";
 }
 
-static void print_headers(evhtp_header_t * header, void * arg) 
+static int print_headers(evhtp_header_t * header, void * arg) 
 {
     evbuf_t * buf = arg;
 
