@@ -22,13 +22,12 @@
 #include <evhtp.h>
 #include "zhttpd.h"
 #include "zimg.h"
-#include "zworkqueue.h"
 
 char uri_root[512];
-extern struct setting settings;
 
 static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
+static void print_headers(evhtp_header_t * header, void * arg); 
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void send_document_cb(evhtp_request_t *req, void *arg);
@@ -50,6 +49,26 @@ static const struct table_entry {
 	{ "pdf", "application/pdf" },
 	{ "ps", "application/postsript" },
 	{ NULL, NULL },
+};
+
+static const char * method_strmap[] = {
+    "GET",
+    "HEAD",
+    "POST",
+    "PUT",
+    "DELETE",
+    "MKCOL",
+    "COPY",
+    "MOVE",
+    "OPTIONS",
+    "PROPFIND",
+    "PROPATCH",
+    "LOCK",
+    "UNLOCK",
+    "TRACE",
+    "CONNECT",
+    "PATCH",
+    "UNKNOWN",
 };
 
 /* Try to guess a good content-type for 'path' */
@@ -81,6 +100,16 @@ not_found:
 	return "application/misc";
 }
 
+static void print_headers(evhtp_header_t * header, void * arg) 
+{
+    evbuf_t * buf = arg;
+
+    evbuffer_add(buf, header->key, header->klen);
+    evbuffer_add(buf, ": ", 2);
+    evbuffer_add(buf, header->val, header->vlen);
+    evbuffer_add(buf, "\r\n", 2);
+}
+
 /* Callback used for the /dump URI, and for every non-GET request:
  * dumps all information to stdout and gives back a trivial 200 ok */
 void dump_request_cb(evhtp_request_t *req, void *arg)
@@ -89,23 +118,17 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
     const char *uri = req->uri->path->full;
 
 	//switch (evhtp_request_t_get_command(req)) {
-    switch (evhtp_request_get_method(req)){
-	case EVHTTP_REQ_GET: cmdtype = "GET"; break;
-	case EVHTTP_REQ_POST: cmdtype = "POST"; break;
-	case EVHTTP_REQ_HEAD: cmdtype = "HEAD"; break;
-	case EVHTTP_REQ_PUT: cmdtype = "PUT"; break;
-	case EVHTTP_REQ_DELETE: cmdtype = "DELETE"; break;
-	case EVHTTP_REQ_OPTIONS: cmdtype = "OPTIONS"; break;
-	case EVHTTP_REQ_TRACE: cmdtype = "TRACE"; break;
-	case EVHTTP_REQ_CONNECT: cmdtype = "CONNECT"; break;
-	case EVHTTP_REQ_PATCH: cmdtype = "PATCH"; break;
-	default: cmdtype = "unknown"; break;
-	}
+    int req_method = evhtp_request_get_method(req);
+    if(req_method >= 16)
+        req_method = 16;
 
-	LOG_PRINT(LOG_INFO, "Received a %s request for %s",
-	    cmdtype, uri);
+	LOG_PRINT(LOG_INFO, "Received a %s request for %s", method_strmap[req_method], uri);
+    evbuffer_add_printf(req->buffer_out, "uri : %s\r\n", uri);
+    evbuffer_add_printf(req->buffer_out, "query : %s\r\n", req->uri->query_raw);
+    evhtp_headers_for_each(req->uri->query, print_headers, req->buffer_out);
+    evbuffer_add_printf(req->buffer_out, "Method : %s\n", method_strmap[req_method]);
+    evhtp_headers_for_each(req->headers_in, print_headers, req->buffer_out);
 
-    evbuffer_add_reference(req->buffer_out, "dump_request_cb\n", 12, NULL, NULL);
 	evbuf_t *buf = req->buffer_in;;
 	puts("Input data: <<<");
 	while (evbuffer_get_length(buf)) {
@@ -117,6 +140,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 	}
 	puts(">>>");
 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
 
@@ -132,7 +156,17 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     char *fileName = NULL;
     char *boundaryPattern = NULL;
     char *buff = NULL;
-  
+
+    int req_method = evhtp_request_get_method(req);
+    if(req_method >= 16)
+        req_method = 16;
+    LOG_PRINT(LOG_INFO, "Method: %d", req_method);
+    if(method_strmap[req_method] != "POST")
+    {
+        LOG_PRINT(LOG_INFO, "Request Method Not Support.");
+        goto err;
+    }
+
 
     const char *content_len = evhtp_header_find(req->headers_in, "Content-Length");
     post_size = atoi(content_len);
@@ -287,7 +321,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     char md5sum[33];
 
     LOG_PRINT(LOG_INFO, "Begin to Save Image...");
-    if(save_img(buff+start, img_size, md5sum, fileType) == -1)
+    if(save_img(buff+start, img_size, md5sum) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
@@ -334,6 +368,23 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req_t *zimg_req = NULL;
 	char *buff = NULL;
 
+    int req_method = evhtp_request_get_method(req);
+    if(req_method >= 16)
+        req_method = 16;
+    LOG_PRINT(LOG_INFO, "Method: %d", req_method);
+    if(method_strmap[req_method] == "POST")
+    {
+        LOG_PRINT(LOG_INFO, "POST Request.");
+        post_request_cb(req, NULL);
+        return;
+    }
+    else if(method_strmap[req_method] != "GET")
+    {
+        LOG_PRINT(LOG_INFO, "Request Method Not Support.");
+        goto err;
+    }
+
+
 	const char *uri;
 	uri = req->uri->path->full;
 	const char *rfull = req->uri->path->full;
@@ -371,7 +422,9 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	/* This holds the content we're sending. */
 
     int width, height, proportion, gray;
-    if(strchr(uri, '?') == 0)
+    evhtp_kvs_t *params;
+    params = req->uri->query;
+    if(!params)
     {
         width = 0;
         height = 0;
@@ -380,8 +433,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
     else
     {
-        evhtp_kvs_t *params;
-        params = req->uri->query;
         const char *str_w, *str_h;
         str_w = evhtp_kv_find(params, "w");
         if(str_w == NULL)
@@ -403,6 +454,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 );
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
             evhtp_send_reply(req, EVHTP_RES_OK);
+            LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
             goto done;
         }
         else
@@ -429,8 +481,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req -> proportion = proportion;
     zimg_req -> gray = gray;
 
-    char img_type[10];
-    int get_img_rst = get_img(zimg_req, &buff, img_type, &len);
+    int get_img_rst = get_img(zimg_req, &buff,  &len);
 
 
     if(get_img_rst == -1)
@@ -443,11 +494,9 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evbuffer_add(req->buffer_out, buff, len);
 
     LOG_PRINT(LOG_INFO, "Got the File!");
-    LOG_PRINT(LOG_INFO, "img_type: %s", img_type);
-    const char *type = guess_type(img_type);
-    LOG_PRINT(LOG_INFO, "guess_img_type: %s", type);
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/png", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
+    LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
 
 
     if(get_img_rst == 2)
@@ -463,6 +512,7 @@ err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
+    LOG_PRINT(LOG_INFO, "============send_document_cb() ERROR!===============");
 
 done:
 	if(buff)
