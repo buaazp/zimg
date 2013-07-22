@@ -160,6 +160,7 @@ int set_cache_bin(const char *key, const char *value, const size_t len)
     {
         LOG_PRINT(LOG_INFO, "Binary Cache Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
+		settings.cache_on = true;
     }
     else
     {
@@ -167,6 +168,7 @@ int set_cache_bin(const char *key, const char *value, const size_t len)
         const char *str_rc = memcached_strerror(_memc, rc);
         LOG_PRINT(LOG_INFO, "Cache Result: %s", str_rc);
         rst = -1;
+		settings.cache_on = false;
     }
 
     return rst;

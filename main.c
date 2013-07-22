@@ -41,9 +41,9 @@ static void settings_init(void)
     settings.backlog = 1024;
     settings.num_threads = 4;         /* N workers */
     settings.log = false;
-    settings.cache_on = false;
+    settings.cache_on = true;
     settings.cache_port = 11211;
-    settings.max_keepalives = 0;
+    settings.max_keepalives = 1;
 }
 
 static void sighandler(int signal) 
