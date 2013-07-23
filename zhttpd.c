@@ -495,7 +495,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evbuffer_add(req->buffer_out, buff, len);
 
     LOG_PRINT(LOG_INFO, "Got the File!");
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/png", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
 

@@ -34,7 +34,7 @@
 extern struct setting settings;
 
 int save_img(const char *buff, const int len, char *md5);
-int new_img(const char *buff, const size_t len, const char *saveName);
+int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size);
 
 int save_img(const char *buff, const int len, char *md5)
@@ -63,12 +63,12 @@ int save_img(const char *buff, const int len, char *md5)
     strcpy(md5, md5sum);
     LOG_PRINT(LOG_INFO, "md5: %s", md5sum);
 
-    char *cacheKey = (char *)malloc(strlen(md5sum) + 32);
-    char *savePath = (char *)malloc(512);
-    char *saveName = (char *)malloc(512);
+    char *cache_key = (char *)malloc(strlen(md5sum) + 32);
+    char *save_path = (char *)malloc(512);
+    char *save_name = (char *)malloc(512);
 
-    sprintf(cacheKey, "img:%s:0:0:1:0", md5sum);
-    if(exist_cache(cacheKey) == 1)
+    sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
+    if(exist_cache(cache_key) == 1)
     {
         LOG_PRINT(LOG_INFO, "File Exist, Needn't Save.");
         result = 1;
@@ -80,61 +80,61 @@ int save_img(const char *buff, const int len, char *md5)
     int lvl1 = str_hash(md5sum);
     int lvl2 = str_hash(md5sum + 3);
     
-    sprintf(savePath, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
-    LOG_PRINT(LOG_INFO, "savePath: %s", savePath);
+    sprintf(save_path, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
+    LOG_PRINT(LOG_INFO, "save_path: %s", save_path);
 
-    if(is_dir(savePath) == 1)
+    if(is_dir(save_path) == 1)
     {
         LOG_PRINT(LOG_INFO, "Check File Exist. Needn't Save.");
         goto cache;
     }
 
-    if(mk_dirs(savePath) == -1)
+    if(mk_dirs(save_path) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "savePath[%s] Create Failed!", savePath);
+        LOG_PRINT(LOG_ERROR, "save_path[%s] Create Failed!", save_path);
         goto done;
     }
     chdir(_init_path);
-    LOG_PRINT(LOG_INFO, "savePath[%s] Create Finish.", savePath);
-    sprintf(saveName, "%s/0*0p", savePath);
-    LOG_PRINT(LOG_INFO, "saveName-->: %s", saveName);
-	if(new_img(buff, len, saveName) == -1)
+    LOG_PRINT(LOG_INFO, "save_path[%s] Create Finish.", save_path);
+    sprintf(save_name, "%s/0*0p", save_path);
+    LOG_PRINT(LOG_INFO, "save_name-->: %s", save_name);
+	if(new_img(buff, len, save_name) == -1)
 	{
-		LOG_PRINT(LOG_WARNING, "Save Image[%s] Failed!", saveName);
+		LOG_PRINT(LOG_WARNING, "Save Image[%s] Failed!", save_name);
         goto done;
 	}
 
 cache:
     if(len < CACHE_MAX_SIZE)
     {
-        // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
-        sprintf(cacheKey, "img:%s:0:0:1:0", md5sum);
-        set_cache_bin(cacheKey, buff, len);
-//        sprintf(cacheKey, "type:%s:0:0:1:0", md5sum);
-//        set_cache(cacheKey, type);
+        // to gen cache_key like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
+        set_cache_bin(cache_key, buff, len);
+//        sprintf(cache_key, "type:%s:0:0:1:0", md5sum);
+//        set_cache(cache_key, type);
     }
 	result = 1;
 
 done:
-    if(cacheKey)
-        free(cacheKey);
-    if(savePath)
-        free(savePath);
-    if(saveName)
-        free(saveName);
+    if(cache_key)
+        free(cache_key);
+    if(save_path)
+        free(save_path);
+    if(save_name)
+        free(save_name);
     return result;
 }
 
-int new_img(const char *buff, const size_t len, const char *saveName)
+int new_img(const char *buff, const size_t len, const char *save_name)
 {
 	int result = -1;
 	LOG_PRINT(LOG_INFO, "Start to Storage the New Image...");
 	int fd = -1;
 	int wlen = 0;
 
-	if((fd = open(saveName, O_WRONLY | O_TRUNC | O_CREAT, 00644)) < 0)
+	if((fd = open(save_name, O_WRONLY | O_TRUNC | O_CREAT, 00644)) < 0)
 	{
-		LOG_PRINT(LOG_ERROR, "fd(%s) open failed!", saveName);
+		LOG_PRINT(LOG_ERROR, "fd(%s) open failed!", save_name);
 		goto done;
 	}
 
@@ -147,16 +147,16 @@ int new_img(const char *buff, const size_t len, const char *saveName)
 	wlen = write(fd, buff, len);
 	if(wlen == -1)
 	{
-		LOG_PRINT(LOG_ERROR, "write(%s) failed!", saveName);
+		LOG_PRINT(LOG_ERROR, "write(%s) failed!", save_name);
 		goto done;
 	}
 	else if(wlen < len)
 	{
-		LOG_PRINT(LOG_ERROR, "Only part of [%s] is been writed.", saveName);
+		LOG_PRINT(LOG_ERROR, "Only part of [%s] is been writed.", save_name);
 		goto done;
 	}
     flock(fd, LOCK_UN | LOCK_NB);
-	LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", saveName);
+	LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", save_name);
 	result = 1;
 
 done:
@@ -169,14 +169,13 @@ done:
 
 /* get image method used for zimg servise, such as:
  * http://127.0.0.1:4869/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&p=1&g=1 */
-//int get_img(zimg_req_t *req, char **buff_ptr, char *img_type, size_t *img_size)
 int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 {
     int result = -1;
     char *rspPath = NULL;
-    char *cacheKey = (char *)malloc(strlen(req->md5) + 32);
+    char *cache_key = (char *)malloc(strlen(req->md5) + 32);
     char *whole_path = NULL;
-    char *origPath = NULL;
+    char *orig_path = NULL;
     char *colorPath = NULL;
     char *img_format = NULL;
     size_t len;
@@ -188,15 +187,15 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
     LOG_PRINT(LOG_INFO, "get_img() start processing zimg request...");
 
-    // to gen cacheKey like this: img:926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-    if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
+    // to gen cache_key like this: img:926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
+    sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+    if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
     {
-        LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cacheKey);
-//        sprintf(cacheKey, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-//        if(find_cache(cacheKey, img_type) == -1)
+        LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cache_key);
+//        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+//        if(find_cache(cache_key, img_type) == -1)
 //        {
-//            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cacheKey);
+//            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cache_key);
 //            strcpy(img_type, "jpeg");
 //        }
         result = 1;
@@ -226,15 +225,15 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     else
         sprintf(name, "%d*%d", req->width, req->height);
 
-    origPath = (char *)malloc(strlen(whole_path) + 6);
-    sprintf(origPath, "%s/0*0p", whole_path);
-    LOG_PRINT(LOG_INFO, "0rig File Path: %s", origPath);
+    orig_path = (char *)malloc(strlen(whole_path) + 6);
+    sprintf(orig_path, "%s/0*0p", whole_path);
+    LOG_PRINT(LOG_INFO, "0rig File Path: %s", orig_path);
 
     rspPath = (char *)malloc(512);
     if(req->width == 0 && req->height == 0 && req->gray == 0)
     {
         LOG_PRINT(LOG_INFO, "Return original image.");
-        strcpy(rspPath, origPath);
+        strcpy(rspPath, orig_path);
     }
     else
     {
@@ -254,19 +253,19 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
         if(req->gray == 1)
         {
-            sprintf(cacheKey, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
-            if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
+            sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
+            if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
             {
-                LOG_PRINT(LOG_INFO, "Hit Color Image Cache[Key: %s, len: %d].", cacheKey, *img_size);
+                LOG_PRINT(LOG_INFO, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
                 status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
                 if(status == MagickFalse)
                 {
-                    LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cacheKey);
-                    del_cache(cacheKey);
+                    LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
+                    del_cache(cache_key);
                 }
                 else
                 {
-                    LOG_PRINT(LOG_INFO, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cacheKey, *img_size);
+                    LOG_PRINT(LOG_INFO, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, *img_size);
                     goto convert;
                 }
             }
@@ -283,28 +282,28 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(cacheKey, *buff_ptr, *img_size);
+                    set_cache_bin(cache_key, *buff_ptr, *img_size);
 //                    img_format = MagickGetImageFormat(magick_wand);
-//                    sprintf(cacheKey, "type:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
-//                    set_cache(cacheKey, img_format);
+//                    sprintf(cache_key, "type:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
+//                    set_cache(cache_key, img_format);
                 }
 
                 goto convert;
             }
         }
 
-        // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
-        sprintf(cacheKey, "img:%s:0:0:1:0", req->md5);
-        if(find_cache_bin(cacheKey, buff_ptr, img_size) == 1)
+        // to gen cache_key like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
+        if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
         {
-            LOG_PRINT(LOG_INFO, "Hit Orignal Image Cache[Key: %s].", cacheKey);
+            LOG_PRINT(LOG_INFO, "Hit Orignal Image Cache[Key: %s].", cache_key);
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
             if(status == MagickFalse)
             {
                 LOG_PRINT(LOG_WARNING, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 ThrowWandException(magick_wand);
-                del_cache(cacheKey);
-                status = MagickReadImage(magick_wand, origPath);
+                del_cache(cache_key);
+                status = MagickReadImage(magick_wand, orig_path);
                 if(status == MagickFalse)
                 {
                     ThrowWandException(magick_wand);
@@ -315,10 +314,10 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                     if(*img_size < CACHE_MAX_SIZE)
                     {
-                        set_cache_bin(cacheKey, *buff_ptr, *img_size);
+                        set_cache_bin(cache_key, *buff_ptr, *img_size);
 //                        img_format = MagickGetImageFormat(magick_wand);
-//                        sprintf(cacheKey, "type:%s:0:0:1:0", req->md5);
-//                        set_cache(cacheKey, img_format);
+//                        sprintf(cache_key, "type:%s:0:0:1:0", req->md5);
+//                        set_cache(cache_key, img_format);
                     }
                 }
             }
@@ -326,7 +325,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         else
         {
             LOG_PRINT(LOG_INFO, "Not Hit Original Image Cache. Begin to Open it.");
-            status = MagickReadImage(magick_wand, origPath);
+            status = MagickReadImage(magick_wand, orig_path);
             if(status == MagickFalse)
             {
                 ThrowWandException(magick_wand);
@@ -337,10 +336,10 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(cacheKey, *buff_ptr, *img_size);
+                    set_cache_bin(cache_key, *buff_ptr, *img_size);
 //                    img_format = MagickGetImageFormat(magick_wand);
-//                    sprintf(cacheKey, "type:%s:0:0:1:0", req->md5);
-//                    set_cache(cacheKey, img_format);
+//                    sprintf(cache_key, "type:%s:0:0:1:0", req->md5);
+//                    set_cache(cache_key, img_format);
                 }
             }
         }
@@ -366,14 +365,14 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", origPath);
+                LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", orig_path);
                 goto err;
             }
             LOG_PRINT(LOG_INFO, "Resize img succ.");
         }
         else
         {
-            strcpy(rspPath, origPath);
+            strcpy(rspPath, orig_path);
             got_rsp = 1;
             LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
         }
@@ -412,17 +411,40 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
 
 convert:
+	//gray image
     if(req->gray == 1)
     {
         LOG_PRINT(LOG_INFO, "Start to Remove Color!");
         status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_ERROR, "Image[%s] Remove Color Failed!", origPath);
+            LOG_PRINT(LOG_ERROR, "Image[%s] Remove Color Failed!", orig_path);
             goto err;
         }
         LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
     }
+
+	//compress image
+	LOG_PRINT(LOG_INFO, "Start to Compress the Image!");
+	const char *img_type = MagickGetFormat(magick_wand);
+	if(strcmp(img_type, "JPEG") != 0)
+	{
+        LOG_PRINT(LOG_INFO, "Conver Image Format from %s to JPEG.", img_type);
+		MagickSetImageFormat(magick_wand, "JPEG");
+	}
+	LOG_PRINT(LOG_INFO, "Compress Image with JPEGCompression");
+	MagickSetCompression(magick_wand, JPEGCompression);
+	unsigned long quality = MagickGetCompressionQuality(magick_wand) * 0.75;
+	if(quality == 0)
+	{
+		quality = 75;
+	}
+	LOG_PRINT(LOG_INFO, "Set Compression Quality to 75%.");
+	MagickSetCompressionQuality(magick_wand, quality);
+
+	//strip image EXIF infomation
+	LOG_PRINT(LOG_INFO, "Start to Remove Exif Infomation of the Image...");
+	MagickStripImage(magick_wand);
     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
     if(*buff_ptr == NULL)
     {
@@ -435,11 +457,11 @@ convert:
 done:
     if(*img_size < CACHE_MAX_SIZE)
     {
-        // to gen cacheKey like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
-        sprintf(cacheKey, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-        set_cache_bin(cacheKey, *buff_ptr, *img_size);
-//        sprintf(cacheKey, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-//        set_cache(cacheKey, img_type);
+        // to gen cache_key like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        set_cache_bin(cache_key, *buff_ptr, *img_size);
+//        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+//        set_cache(cache_key, img_type);
     }
 
     result = 1;
@@ -462,10 +484,10 @@ err:
     }
     if(img_format)
         free(img_format);
-    if(cacheKey)
-        free(cacheKey);
-    if (origPath)
-        free(origPath);
+    if(cache_key)
+        free(cache_key);
+    if (orig_path)
+        free(orig_path);
     if (whole_path)
         free(whole_path);
     return result;
