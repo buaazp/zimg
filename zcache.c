@@ -19,7 +19,9 @@
  */
 
 
-#include "zcommon.h"
+#include "zcache.h"
+#include "zlog.h"
+
 extern struct setting settings;
 
 int exist_cache(const char *key);
@@ -94,10 +96,9 @@ int set_cache(const char *key, const char *value)
     if(settings.cache_on == false)
         return rst;
 
-    uint32_t  flags;
     memcached_return rc;
 
-    rc = memcached_set(_memc, key, strlen(key), value, strlen(value), 0, flags);
+    rc = memcached_set(_memc, key, strlen(key), value, strlen(value), 0, 0);
 
     if (rc == MEMCACHED_SUCCESS) 
     {
@@ -151,10 +152,9 @@ int set_cache_bin(const char *key, const char *value, const size_t len)
     if(settings.cache_on == false)
         return rst;
 
-    uint32_t  flags;
     memcached_return rc;
 
-    rc = memcached_set(_memc, key, strlen(key), value, len, 0, flags);
+    rc = memcached_set(_memc, key, strlen(key), value, len, 0, 0);
 
     if (rc == MEMCACHED_SUCCESS) 
     {

@@ -19,6 +19,8 @@
  * @date 2013-07-19
  */
 
+#include <sys/time.h>
+#include <stdarg.h>
 #include "zlog.h"
 
 extern struct setting settings;
@@ -141,7 +143,7 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     gettimeofday(&tv , NULL);
     memset(tmbuf, 0, sizeof(tmbuf));
     strftime(tmbuf, sizeof(tmbuf), "%Y/%m/%d %H:%M:%S", localtime(&t));
-    fprintf (fp, "%s:%.6d ", tmbuf, tv.tv_usec);
+    fprintf (fp, "%s:%.6d ", tmbuf, (int)tv.tv_usec);
 
     //线程信息
     fprintf(fp, "Thread ID: %lu ", (unsigned long)pthread_self());

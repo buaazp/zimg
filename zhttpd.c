@@ -19,9 +19,10 @@
  * @date 2013-07-19
  */
 
-#include <evhtp.h>
 #include "zhttpd.h"
 #include "zimg.h"
+#include "zutil.h"
+#include "zlog.h"
 
 char uri_root[512];
 
@@ -108,13 +109,13 @@ static int print_headers(evhtp_header_t * header, void * arg)
     evbuffer_add(buf, ": ", 2);
     evbuffer_add(buf, header->val, header->vlen);
     evbuffer_add(buf, "\r\n", 2);
+	return 1;
 }
 
 /* Callback used for the /dump URI, and for every non-GET request:
  * dumps all information to stdout and gives back a trivial 200 ok */
 void dump_request_cb(evhtp_request_t *req, void *arg)
 {
-	const char *cmdtype;
     const char *uri = req->uri->path->full;
 
 	//switch (evhtp_request_t_get_command(req)) {
@@ -161,7 +162,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(req_method >= 16)
         req_method = 16;
     LOG_PRINT(LOG_INFO, "Method: %d", req_method);
-    if(method_strmap[req_method] != "POST")
+    if(strcmp(method_strmap[req_method], "POST") != 0)
     {
         LOG_PRINT(LOG_INFO, "Request Method Not Support.");
         goto err;
@@ -372,13 +373,13 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(req_method >= 16)
         req_method = 16;
     LOG_PRINT(LOG_INFO, "Method: %d", req_method);
-    if(method_strmap[req_method] == "POST")
+    if(strcmp(method_strmap[req_method], "POST") == 0)
     {
         LOG_PRINT(LOG_INFO, "POST Request.");
         post_request_cb(req, NULL);
         return;
     }
-    else if(method_strmap[req_method] != "GET")
+	else if(strcmp(method_strmap[req_method], "GET") != 0)
     {
         LOG_PRINT(LOG_INFO, "Request Method Not Support.");
         goto err;
@@ -416,7 +417,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	LOG_PRINT(LOG_INFO, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Url is Not a zimg Request.");
+        LOG_PRINT(LOG_WARNING, "Url is Not a zimg Request.");
         goto err;
     }
 	/* This holds the content we're sending. */

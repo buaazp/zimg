@@ -19,13 +19,18 @@
  * @date 2013-07-19
  */
 
-#include "zutil.h"
 #include <sys/syscall.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "zutil.h"
+#include "zlog.h"
 
 //functions list
 pid_t gettid();
-static void kmp_init(const unsigned char *pattern, int pattern_size);
-int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen);
+static void kmp_init(const char *pattern, int pattern_size);
+int kmp(const char *matcher, int mlen, const char *pattern, int plen);
 int get_type(const char *filename, char *type);
 int is_img(const char *filename);
 int is_dir(const char *path);
@@ -47,7 +52,7 @@ pid_t gettid()
 static int pi[128];
 
 /* KMP for searching */
-static void kmp_init(const unsigned char *pattern, int pattern_size)  // prefix-function
+static void kmp_init(const char *pattern, int pattern_size)  // prefix-function
 {
     pi[0] = 0;  // pi[0] always equals to 0 by defination
     int k = 0;  // an important pointer
@@ -65,7 +70,7 @@ static void kmp_init(const unsigned char *pattern, int pattern_size)  // prefix-
     // The worst-case time complexity of this procedure is O(pattern_size)
 }
 
-int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen)
+int kmp(const char *matcher, int mlen, const char *pattern, int plen)
 {
     // this function does string matching using the KMP algothm.
     // matcher and pattern are pointers to BINARY sequencies, while mlen

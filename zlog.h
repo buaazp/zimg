@@ -44,14 +44,14 @@ enum LOG_LEVEL{
     LOG_LEVEL_DEBUG,                        /* DEBUG message */
 };
  
-void    log_init();                         /* 初始化日志模块 */
+void log_init();                         /* 初始化日志模块 */
  
 int log_open(const char *path, const char* mode);           /* 打开用户日志文件 */
  
-void    log_printf0(int log_id, int level, const char *fmt, ...);   /* 无位置信息 */
+void log_printf0(int log_id, int level, const char *fmt, ...);   /* 无位置信息 */
  
-void    log_flush(int log_id);                      /* 将缓冲区数据写入日志 */
+void log_flush(int log_id);                      /* 将缓冲区数据写入日志 */
  
-void    log_close(int log_id);                      /* 关闭日志文件 */
+void log_close(int log_id);                      /* 关闭日志文件 */
 
 #endif

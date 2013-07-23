@@ -25,12 +25,13 @@
 #include "zcommon.h"
 
 pid_t gettid();
-int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen);
+int kmp(const char *matcher, int mlen, const char *pattern, int plen);
 int get_type(const char *filename, char *type);
 int is_img(const char *filename);
 int is_dir(const char *path);
 int mk_dir(const char *path);
 int mk_dirs(const char *dir);
+int is_md5(char *s);
 int str_hash(const char *str);
 
 

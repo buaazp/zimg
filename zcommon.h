@@ -26,35 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/queue.h>
-#include <sys/socket.h>
-#include <signal.h>
-/*
-#include <event.h>
-#include <evhttp.h>
-*/
-#include <event2/event.h>
-#include <event2/http.h>
-#include <event2/buffer.h>
-#include <event2/util.h>
-#include <event2/keyvalq_struct.h>
-#ifdef _EVENT_HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#ifdef _XOPEN_SOURCE_EXTENDED
-#include <arpa/inet.h>
-#endif
-#endif
-#include <errno.h>
-#include <dirent.h>
-#include <time.h>
-#include <wand/MagickWand.h>
 #include <libmemcached/memcached.h>
 #include <stdbool.h>
-#include <inttypes.h>
 
 #define _DEBUG 1
 
@@ -100,58 +73,6 @@ memcached_st *_memc;
         log_printf0(_log_id, level, fmt, ##__VA_ARGS__)
 #endif
  
-
-
-//#ifdef _DEBUG
-//  #define DEBUG_PRINT(fmt, args...) \
-//    do{ \
-//        time_t t; \
-//        struct tm *p; \
-//        struct timeval tv; \
-//        gettimeofday (&tv , NULL); \
-//        time(&t); \
-//        p = localtime(&t); \
-//        fprintf(stdout, "\033[40;32;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [DEBUG] %s:%d %s() "fmt"\n\033[5m", \
-//                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-//                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
-//                __FILE__, __LINE__, __FUNCTION__, \
-//                ##args ); \
-//    }while(0)
-//
-//  #define DEBUG_WARNING(fmt, args...) \
-//    do{ \
-//        time_t t; \
-//        struct tm *p; \
-//        struct timeval tv; \
-//        gettimeofday (&tv , NULL); \
-//        time(&t); \
-//        p = localtime(&t); \
-//        fprintf(stdout, "\033[40;33;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [WARNING] %s:%d %s() "fmt"\n\033[5m", \
-//                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-//                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
-//                __FILE__, __LINE__, __FUNCTION__, \
-//                ##args ); \
-//    }while(0)
-//
-//  #define DEBUG_ERROR(fmt, args...) \
-//    do{ \
-//        time_t t; \
-//        struct tm *p; \
-//        struct timeval tv; \
-//        gettimeofday (&tv , NULL); \
-//        time(&t); \
-//        p = localtime(&t); \
-//        fprintf(stderr, "\033[40;31;m%.4d/%.2d/%.2d %.2d:%.2d:%.2d:%.6d [ERROR] %s:%d %s() "fmt"\n\033[5m", \
-//                (1900+p->tm_year), (1+p->tm_mon),  p->tm_mday, \
-//                p->tm_hour, p->tm_min, p->tm_sec, tv.tv_usec, \
-//                __FILE__, __LINE__, __FUNCTION__, \
-//                ##args ); \
-//    }while(0)
-//#else
-//  #define DEBUG_PRINT(fmt, args...) 
-//  #define DEBUG_WARNING(fmt, args...) 
-//  #define DEBUG_ERROR(fmt, args...)
-//#endif
 
 #define ThrowWandException(wand) \
 { \

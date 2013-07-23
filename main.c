@@ -18,11 +18,15 @@
  * @date 2013-07-19
  */
 
-#include "zcommon.h"
-#include "zlog.h"
 #include <evhtp.h>
-#include "zhttpd.h"
 #include <inttypes.h>
+#include <unistd.h>
+#include <signal.h>
+#include "zcommon.h"
+#include "zhttpd.h"
+#include "zutil.h"
+#include "zlog.h"
+#include "zcache.h"
 
 extern struct setting settings;
 evbase_t *evbase;

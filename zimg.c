@@ -19,8 +19,17 @@
  * @date 2013-07-19
  */
 
+#include <sys/file.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <wand/MagickWand.h>
 #include "zimg.h"
 #include "zmd5.h"
+#include "zlog.h"
+#include "zcache.h"
+#include "zutil.h"
 
 extern struct setting settings;
 
@@ -36,7 +45,7 @@ int save_img(const char *buff, const int len, char *md5)
     md5_state_t mdctx;
     md5_byte_t md_value[16];
     char md5sum[33];
-    unsigned int md_len, i;
+    int i;
     int h, l;
     md5_init(&mdctx);
     md5_append(&mdctx, (const unsigned char*)(buff), len);
@@ -271,7 +280,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             if(status == MagickTrue)
             {
                 LOG_PRINT(LOG_INFO, "Read Image from Color Image[%s] Succ. Goto Convert.", colorPath);
-                *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+                *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
                     set_cache_bin(cacheKey, *buff_ptr, *img_size);
@@ -303,7 +312,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 }
                 else
                 {
-                    *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+                    *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                     if(*img_size < CACHE_MAX_SIZE)
                     {
                         set_cache_bin(cacheKey, *buff_ptr, *img_size);
@@ -325,7 +334,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             }
             else
             {
-                *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+                *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
                     set_cache_bin(cacheKey, *buff_ptr, *img_size);
@@ -380,7 +389,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             goto err;
         }
         LOG_PRINT(LOG_INFO, "img_size = %d", *img_size);
-        //*buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+        //*buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
         if(*img_size <= 0)
         {
             LOG_PRINT(LOG_ERROR, "File[%s] is Empty.", rspPath);
@@ -414,7 +423,7 @@ convert:
         }
         LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
     }
-    *buff_ptr = MagickGetImageBlob(magick_wand, img_size);
+    *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
     if(*buff_ptr == NULL)
     {
         LOG_PRINT(LOG_ERROR, "Magick Get Image Blob Failed!");
