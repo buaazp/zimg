@@ -107,7 +107,7 @@ int save_img(const char *buff, const int len, char *md5)
 cache:
     if(len < CACHE_MAX_SIZE)
     {
-        // to gen cache_key like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
         set_cache_bin(cache_key, buff, len);
 //        sprintf(cache_key, "type:%s:0:0:1:0", md5sum);
@@ -172,11 +172,11 @@ done:
 int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 {
     int result = -1;
-    char *rspPath = NULL;
+    char *rsp_path = NULL;
     char *cache_key = (char *)malloc(strlen(req->md5) + 32);
     char *whole_path = NULL;
     char *orig_path = NULL;
-    char *colorPath = NULL;
+    char *color_path = NULL;
     char *img_format = NULL;
     size_t len;
     int fd = -1;
@@ -229,27 +229,28 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     sprintf(orig_path, "%s/0*0p", whole_path);
     LOG_PRINT(LOG_INFO, "0rig File Path: %s", orig_path);
 
-    rspPath = (char *)malloc(512);
+    rsp_path = (char *)malloc(512);
     if(req->width == 0 && req->height == 0 && req->gray == 0)
     {
         LOG_PRINT(LOG_INFO, "Return original image.");
-        strcpy(rspPath, orig_path);
+        strcpy(rsp_path, orig_path);
     }
     else
     {
-        sprintf(rspPath, "%s/%s", whole_path, name);
+        sprintf(rsp_path, "%s/%s", whole_path, name);
     }
-    LOG_PRINT(LOG_INFO, "Got the rspPath: %s", rspPath);
-    int got_rsp = 1;
+    LOG_PRINT(LOG_INFO, "Got the rsp_path: %s", rsp_path);
+    bool got_rsp = true;
+	bool got_color = false;
 
 
-    //status=MagickReadImage(magick_wand, rspPath);
-    if((fd = open(rspPath, O_RDONLY)) == -1)
+    //status=MagickReadImage(magick_wand, rsp_path);
+    if((fd = open(rsp_path, O_RDONLY)) == -1)
     //if(status == MagickFalse)
     {
         MagickWandGenesis();
         magick_wand = NewMagickWand();
-        got_rsp = -1;
+        got_rsp = false;
 
         if(req->gray == 1)
         {
@@ -265,20 +266,22 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 }
                 else
                 {
+					got_color = true;
                     LOG_PRINT(LOG_INFO, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, *img_size);
                     goto convert;
                 }
             }
 
-            len = strlen(rspPath);
-            colorPath = (char *)malloc(len);
-            strncpy(colorPath, rspPath, len);
-            colorPath[len - 1] = '\0';
-            LOG_PRINT(LOG_INFO, "colorPath: %s", colorPath);
-            status=MagickReadImage(magick_wand, colorPath);
+            len = strlen(rsp_path);
+            color_path = (char *)malloc(len);
+            strncpy(color_path, rsp_path, len);
+            color_path[len - 1] = '\0';
+            LOG_PRINT(LOG_INFO, "color_path: %s", color_path);
+            status=MagickReadImage(magick_wand, color_path);
             if(status == MagickTrue)
             {
-                LOG_PRINT(LOG_INFO, "Read Image from Color Image[%s] Succ. Goto Convert.", colorPath);
+				got_color = true;
+                LOG_PRINT(LOG_INFO, "Read Image from Color Image[%s] Succ. Goto Convert.", color_path);
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
@@ -292,7 +295,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             }
         }
 
-        // to gen cache_key like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
         if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
         {
@@ -370,10 +373,22 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             }
             LOG_PRINT(LOG_INFO, "Resize img succ.");
         }
-        else
+		/* this section can caculate the correct rsp_path, but not use, so I note them
+        else if(req->gray == true)
+		{
+            strcpy(rsp_path, orig_path);
+			rsp_path[strlen(orig_path)] = 'g';
+			rsp_path[strlen(orig_path) + 1] = '\0';
+			got_rsp = true;
+            LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original gray image.");
+            LOG_PRINT(LOG_INFO, "Original Gray Image: %s", rsp_path);
+		}
+		*/
+		else
         {
-            strcpy(rspPath, orig_path);
-            got_rsp = 1;
+			// Note this strcpy because rsp_path is not useful. We needn't to save the new image.
+            //strcpy(rsp_path, orig_path);
+			got_rsp = true;
             LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
         }
     }
@@ -391,18 +406,18 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         //*buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
         if(*img_size <= 0)
         {
-            LOG_PRINT(LOG_ERROR, "File[%s] is Empty.", rspPath);
+            LOG_PRINT(LOG_ERROR, "File[%s] is Empty.", rsp_path);
             goto err;
         }
         if((rlen = read(fd, *buff_ptr, *img_size)) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "File[%s] Read Failed.", rspPath);
+            LOG_PRINT(LOG_ERROR, "File[%s] Read Failed.", rsp_path);
             LOG_PRINT(LOG_ERROR, "Error: %s.", strerror(errno));
             goto err;
         }
         else if(rlen < *img_size)
         {
-            LOG_PRINT(LOG_ERROR, "File[%s] Read Not Compeletly.", rspPath);
+            LOG_PRINT(LOG_ERROR, "File[%s] Read Not Compeletly.", rsp_path);
             goto err;
         }
         goto done;
@@ -412,7 +427,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
 convert:
 	//gray image
-    if(req->gray == 1)
+    if(req->gray == true)
     {
         LOG_PRINT(LOG_INFO, "Start to Remove Color!");
         status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
@@ -424,27 +439,48 @@ convert:
         LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
     }
 
-	//compress image
-	LOG_PRINT(LOG_INFO, "Start to Compress the Image!");
-	const char *img_type = MagickGetFormat(magick_wand);
-	if(strcmp(img_type, "JPEG") != 0)
+	if(got_color == false || req->width == 0)
 	{
-        LOG_PRINT(LOG_INFO, "Conver Image Format from %s to JPEG.", img_type);
-		MagickSetImageFormat(magick_wand, "JPEG");
-	}
-	LOG_PRINT(LOG_INFO, "Compress Image with JPEGCompression");
-	MagickSetCompression(magick_wand, JPEGCompression);
-	unsigned long quality = MagickGetCompressionQuality(magick_wand) * 0.75;
-	if(quality == 0)
-	{
-		quality = 75;
-	}
-	LOG_PRINT(LOG_INFO, "Set Compression Quality to 75%.");
-	MagickSetCompressionQuality(magick_wand, quality);
+		//compress image
+		LOG_PRINT(LOG_INFO, "Start to Compress the Image!");
+		char *img_type = MagickGetImageFormat(magick_wand);
+		LOG_PRINT(LOG_INFO, "Image Format is %s", img_type);
+		if(strcmp(img_type, "JPEG") != 0)
+		{
+			LOG_PRINT(LOG_INFO, "Convert Image Format from %s to JPEG.", img_type);
+			status = MagickSetImageFormat(magick_wand, "JPEG");
+			if(status == MagickFalse)
+			{
+				LOG_PRINT(LOG_WARNING, "Image[%s] Convert Format Failed!", orig_path);
+			}
+			LOG_PRINT(LOG_INFO, "Compress Image with JPEGCompression");
+			status = MagickSetImageCompression(magick_wand, JPEGCompression);
+			if(status == MagickFalse)
+			{
+				LOG_PRINT(LOG_WARNING, "Image[%s] Compression Failed!", orig_path);
+			}
+		}
+		size_t quality = MagickGetImageCompressionQuality(magick_wand) * 0.75;
+		LOG_PRINT(LOG_INFO, "Image Compression Quality is %u.", quality);
+		if(quality == 0)
+		{
+			quality = 75;
+		}
+		LOG_PRINT(LOG_INFO, "Set Compression Quality to 75%.");
+		status = MagickSetImageCompressionQuality(magick_wand, quality);
+		if(status == MagickFalse)
+		{
+			LOG_PRINT(LOG_WARNING, "Set Compression Quality Failed!");
+		}
 
-	//strip image EXIF infomation
-	LOG_PRINT(LOG_INFO, "Start to Remove Exif Infomation of the Image...");
-	MagickStripImage(magick_wand);
+		//strip image EXIF infomation
+		LOG_PRINT(LOG_INFO, "Start to Remove Exif Infomation of the Image...");
+		status = MagickStripImage(magick_wand);
+		if(status == MagickFalse)
+		{
+			LOG_PRINT(LOG_WARNING, "Remove Exif Infomation of the ImageFailed!");
+		}
+	}
     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
     if(*buff_ptr == NULL)
     {
@@ -457,7 +493,7 @@ convert:
 done:
     if(*img_size < CACHE_MAX_SIZE)
     {
-        // to gen cache_key like this: rspPath-/926ee2f570dc50b2575e35a6712b08ce
+        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
         set_cache_bin(cache_key, *buff_ptr, *img_size);
 //        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
@@ -465,18 +501,18 @@ done:
     }
 
     result = 1;
-	if(got_rsp == -1)
+	if(got_rsp == false)
     {
-        LOG_PRINT(LOG_INFO, "Image[%s] is Not Existed. Begin to Save it.", rspPath);
+        LOG_PRINT(LOG_INFO, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
 		result = 2;
     }
     else
-        LOG_PRINT(LOG_INFO, "Image[%s] is Existed.", rspPath);
+        LOG_PRINT(LOG_INFO, "Image Needn't to Storage.", rsp_path);
 
 err:
     if(fd != -1)
         close(fd);
-	req->rspPath = rspPath;
+	req->rsp_path = rsp_path;
     if(magick_wand)
     {
         magick_wand=DestroyMagickWand(magick_wand);

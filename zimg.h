@@ -31,7 +31,7 @@ typedef struct zimg_req_s {
     int height;
     bool proportion;
     bool gray;
-	char *rspPath;
+	char *rsp_path;
 } zimg_req_t;
 
 int save_img(const char *buff, const int len, char *md5);

@@ -502,9 +502,9 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
     if(get_img_rst == 2)
     {
-        if(new_img(buff, len, zimg_req->rspPath) == -1)
+        if(new_img(buff, len, zimg_req->rsp_path) == -1)
         {
-            LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rspPath);
+            LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rsp_path);
         }
     }
     goto done;
@@ -522,8 +522,8 @@ done:
     {
         if(zimg_req->md5)
             free(zimg_req->md5);
-        if(zimg_req->rspPath)
-            free(zimg_req->rspPath);
+        if(zimg_req->rsp_path)
+            free(zimg_req->rsp_path);
         free(zimg_req);
     }
 }
