@@ -98,7 +98,8 @@ int log_open(const char *path, const char* mode)
  
     return LOG_INVALID;
 }
- 
+
+
 /* 写入日志文件 */
 void log_printf0(int log_id, int log_level, const char *fmt, ...)
 {

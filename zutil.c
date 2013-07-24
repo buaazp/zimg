@@ -41,15 +41,14 @@ static int htoi(char s[]);
 int str_hash(const char *str);
 
 
+// this data is for KMP searching
+static int pi[128];
 
 pid_t gettid()
 {
-    return syscall(SYS_gettid);  /*这才是内涵*/
+    return syscall(SYS_gettid);
 }
 
-
-// this data is for KMP searching
-static int pi[128];
 
 /* KMP for searching */
 static void kmp_init(const char *pattern, int pattern_size)  // prefix-function
@@ -70,6 +69,16 @@ static void kmp_init(const char *pattern, int pattern_size)  // prefix-function
     // The worst-case time complexity of this procedure is O(pattern_size)
 }
 
+/**
+ * @brief kmp The kmp algorithm.
+ *
+ * @param matcher The buffer.
+ * @param mlen Buffer length.
+ * @param pattern The pattern.
+ * @param plen Pattern length.
+ *
+ * @return The place of pattern in buffer.
+ */
 int kmp(const char *matcher, int mlen, const char *pattern, int plen)
 {
     // this function does string matching using the KMP algothm.
@@ -104,6 +113,14 @@ int kmp(const char *matcher, int mlen, const char *pattern, int plen)
         return -1;
 }
 
+/**
+ * @brief get_type It tell you the type of a file.
+ *
+ * @param filename The name of the file.
+ * @param type Save the type string.
+ *
+ * @return 1 for success and -1 for fail.
+ */
 int get_type(const char *filename, char *type)
 {
     char *flag, *tmp;
@@ -121,6 +138,13 @@ int get_type(const char *filename, char *type)
     return 1;
 }
 
+/**
+ * @brief is_img Check a file is a image we support(jpg, png, gif).
+ *
+ * @param filename The name of the file.
+ *
+ * @return  1 for success and 0 for fail.
+ */
 int is_img(const char *filename)
 {
     char *imgType[] = {"jpg", "jpeg", "png", "gif"};
@@ -145,6 +169,13 @@ int is_img(const char *filename)
     return isimg;
 }
 
+/**
+ * @brief is_dir Check a path is a directory.
+ *
+ * @param path The path input.
+ *
+ * @return 1 for yes and -1 for no.
+ */
 int is_dir(const char *path)
 {
     struct stat st;
@@ -162,6 +193,13 @@ int is_dir(const char *path)
         return -1;
 }
 
+/**
+ * @brief mk_dir It create a new directory with the path input.
+ *
+ * @param path The path you want to create.
+ *
+ * @return  1 for success and -1 for fail.
+ */
 int mk_dir(const char *path)
 {
     if(access(path, 0) == -1)
@@ -183,6 +221,13 @@ int mk_dir(const char *path)
     }
 }
 
+/**
+ * @brief mk_dirs It creates a multi-level directory like ./img/330/28/557.
+ *
+ * @param dir The path of a multi-level directory.
+ *
+ * @return  1 for success and -1 for fail.
+ */
 int mk_dirs(const char *dir)
 {
     char tmp[512];
@@ -214,7 +259,13 @@ int mk_dirs(const char *dir)
     return 1;
 }
 
-//check the string is a md5 style
+/**
+ * @brief is_md5 Check the string is a md5 style.
+ *
+ * @param s The string.
+ *
+ * @return 1 for yes and -1 for no.
+ */
 int is_md5(char *s)
 {
     int rst = -1;
@@ -228,7 +279,13 @@ int is_md5(char *s)
 }
 
 
-//将十六进制的字符串转换成整数
+/**
+ * @brief htoi Exchange a hexadecimal string to a number.
+ *
+ * @param s[] The hexadecimal string.
+ *
+ * @return The number in the string.
+ */
 static int htoi(char s[])
 {
     int i;
@@ -256,6 +313,13 @@ static int htoi(char s[])
 }
 
 
+/**
+ * @brief str_hash Hash algorithm of processing a md5 string.
+ *
+ * @param str The md5 string.
+ *
+ * @return The number less than 1024.
+ */
 int str_hash(const char *str)
 {
     char c[4];

@@ -27,7 +27,7 @@
 #include "zcommon.h"
 #include "zspinlock.h"
 
-#define MAX_LOGS        5                 /* 用户最多可打开日志数 */
+#define MAX_LOGS        100                 /* 用户最多可打开日志数 */
  
 #define LOG_INVALID     -1                  /* 无效的日志描述符(初始化定义) */
 #define LOG_SYSTEM       0                  /* 系统日志(xmalloc, xabort.etc) */
@@ -43,7 +43,7 @@ enum LOG_LEVEL{
     LOG_LEVEL_INFO,                         /* Information */
     LOG_LEVEL_DEBUG,                        /* DEBUG message */
 };
- 
+
 void log_init();                         /* 初始化日志模块 */
  
 int log_open(const char *path, const char* mode);           /* 打开用户日志文件 */

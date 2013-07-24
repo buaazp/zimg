@@ -72,7 +72,13 @@ static const char * method_strmap[] = {
     "UNKNOWN",
 };
 
-/* Try to guess a good content-type for 'path' */
+/**
+ * @brief guess_type It returns a HTTP type by guessing the file type.
+ *
+ * @param type Input a file type.
+ *
+ * @return Const string of type.
+ */
 static const char * guess_type(const char *type)
 {
 	const struct table_entry *ent;
@@ -84,6 +90,13 @@ static const char * guess_type(const char *type)
 }
 
 /* Try to guess a good content-type for 'path' */
+/**
+ * @brief guess_content_type Likes guess_type, but it process a whole path of file.
+ *
+ * @param path The path of a file you want to guess type.
+ *
+ * @return The string of type.
+ */
 static const char * guess_content_type(const char *path)
 {
 	const char *last_period, *extension;
@@ -101,6 +114,14 @@ not_found:
 	return "application/misc";
 }
 
+/**
+ * @brief print_headers It displays all headers and values.
+ *
+ * @param header The header of a request.
+ * @param arg The evbuff you want to store the k-v string.
+ *
+ * @return It always return 1 for success.
+ */
 static int print_headers(evhtp_header_t * header, void * arg) 
 {
     evbuf_t * buf = arg;
@@ -112,8 +133,12 @@ static int print_headers(evhtp_header_t * header, void * arg)
 	return 1;
 }
 
-/* Callback used for the /dump URI, and for every non-GET request:
- * dumps all information to stdout and gives back a trivial 200 ok */
+/**
+ * @brief dump_request_cb The callback of a dump request.
+ *
+ * @param req The request you want to dump.
+ * @param arg It is not useful.
+ */
 void dump_request_cb(evhtp_request_t *req, void *arg)
 {
     const char *uri = req->uri->path->full;
@@ -141,14 +166,19 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 	}
 	puts(">>>");
 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
 
 
 
-/* Callback used for the POST requset:
- * storage image data and gives back a trivial 200 ok */
+/**
+ * @brief post_request_cb The callback function of a POST request to upload a image.
+ *
+ * @param req The request with image buffer.
+ * @param arg It is not useful.
+ */
 void post_request_cb(evhtp_request_t *req, void *arg)
 {
     int post_size = 0;
@@ -337,6 +367,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         "</body>\n</html>\n",
         md5sum
         );
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
@@ -344,6 +375,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_200);
     LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
@@ -358,9 +390,11 @@ done:
 }
 
 
-/* This callback gets invoked when we get any http request that doesn't match
- * any other callback.  Like any evhttp server callback, it has a simple job:
- * it must eventually call evhttp_send_error() or evhttp_send_reply().
+/**
+ * @brief send_document_cb The callback function of get a image request.
+ *
+ * @param req The request with a list of params and the md5 of image.
+ * @param arg It is not useful.
  */
 void send_document_cb(evhtp_request_t *req, void *arg)
 {
@@ -453,6 +487,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
                 "</body>\n</html>\n"
                 );
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
             evhtp_send_reply(req, EVHTP_RES_OK);
             LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -495,6 +530,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evbuffer_add(req->buffer_out, buff, len);
 
     LOG_PRINT(LOG_INFO, "Got the File!");
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -511,6 +547,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
     LOG_PRINT(LOG_INFO, "============send_document_cb() ERROR!===============");

@@ -39,10 +39,12 @@
 struct setting{
     char root_path[512];
     char img_path[512];
+    char log_name[512];
     int port;
     int backlog;
     int num_threads;
     bool log;
+    char cache_ip[128];
     int cache_port;
     bool cache_on;
     uint64_t max_keepalives;
@@ -50,8 +52,6 @@ struct setting{
 
 
 char *_init_path;
-int _log_id;
-memcached_st *_memc;
 
 #define LOG_FATAL 0                        /* System is unusable */
 #define LOG_ALERT 1                        /* Action must be taken immediately */
@@ -65,12 +65,20 @@ memcached_st *_memc;
 
 #ifdef _DEBUG 
   #define LOG_PRINT(level, fmt, ...)            \
-        log_printf0(_log_id, level, "%s:%d %s() "fmt,   \
+    do { \
+        int log_id = log_open(settings.log_name, "a"); \
+        log_printf0(log_id, level, "%s:%d %s() "fmt,   \
         __FILE__, __LINE__, __FUNCTION__, \
-        ##__VA_ARGS__)
+        ##__VA_ARGS__); \
+        log_close(log_id); \
+    }while(0) 
 #else
   #define LOG_PRINT(level, fmt, ...)            \
-        log_printf0(_log_id, level, fmt, ##__VA_ARGS__)
+    do { \
+        int log_id = log_open(settings.log_name, "a"); \
+        log_printf0(log_id, level, fmt, ##__VA_ARGS__) ; \
+        log_close(log_id); \
+    }while(0) 
 #endif
  
 

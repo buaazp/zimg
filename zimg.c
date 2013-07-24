@@ -220,10 +220,10 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     {
         LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cache_key);
 //        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-//        if(find_cache(cache_key, img_type) == -1)
+//        if(find_cache(cache_key, img_format) == -1)
 //        {
 //            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cache_key);
-//            strcpy(img_type, "jpeg");
+//            strcpy(img_format, "jpeg");
 //        }
         result = 1;
         goto err;
@@ -425,6 +425,11 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         fstat(fd, &f_stat);
         size_t rlen = 0;
         *img_size = f_stat.st_size;
+        if(*img_size <= 0)
+        {
+            LOG_PRINT(LOG_ERROR, "File[%s] is Empty.", rsp_path);
+            goto err;
+        }
         if((*buff_ptr = (char *)malloc(*img_size)) == NULL)
         {
             LOG_PRINT(LOG_ERROR, "buff_ptr Malloc Failed!");
@@ -432,11 +437,6 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         }
         LOG_PRINT(LOG_INFO, "img_size = %d", *img_size);
         //*buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-        if(*img_size <= 0)
-        {
-            LOG_PRINT(LOG_ERROR, "File[%s] is Empty.", rsp_path);
-            goto err;
-        }
         if((rlen = read(fd, *buff_ptr, *img_size)) == -1)
         {
             LOG_PRINT(LOG_ERROR, "File[%s] Read Failed.", rsp_path);
@@ -467,15 +467,15 @@ convert:
         LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
     }
 
-    if(got_color == false || req->width == 0)
+    if(got_color == false || (got_color == true && req->width == 0) )
     {
         //compress image
         LOG_PRINT(LOG_INFO, "Start to Compress the Image!");
-        char *img_type = MagickGetImageFormat(magick_wand);
-        LOG_PRINT(LOG_INFO, "Image Format is %s", img_type);
-        if(strcmp(img_type, "JPEG") != 0)
+        img_format = MagickGetImageFormat(magick_wand);
+        LOG_PRINT(LOG_INFO, "Image Format is %s", img_format);
+        if(strcmp(img_format, "JPEG") != 0)
         {
-            LOG_PRINT(LOG_INFO, "Convert Image Format from %s to JPEG.", img_type);
+            LOG_PRINT(LOG_INFO, "Convert Image Format from %s to JPEG.", img_format);
             status = MagickSetImageFormat(magick_wand, "JPEG");
             if(status == MagickFalse)
             {
@@ -515,7 +515,6 @@ convert:
         LOG_PRINT(LOG_ERROR, "Magick Get Image Blob Failed!");
         goto err;
     }
-    goto done;
 
 
 done:
@@ -525,7 +524,7 @@ done:
         sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
         set_cache_bin(cache_key, *buff_ptr, *img_size);
 //        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-//        set_cache(cache_key, img_type);
+//        set_cache(cache_key, img_format);
     }
 
     result = 1;

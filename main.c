@@ -37,31 +37,46 @@ int main(int argc, char **argv);
 void kill_server(void);
 
 
+/**
+ * @brief settings_init Init the setting with default values.
+ */
 static void settings_init(void) 
 {
 //    strcpy(settings.root_path, "./www");
     strcpy(settings.img_path, "./img");
+    strcpy(settings.log_name, "./log/zimg.log");
     settings.port = 4869;
     settings.backlog = 1024;
     settings.num_threads = 4;         /* N workers */
     settings.log = false;
     settings.cache_on = true;
+    strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
 }
 
+/**
+ * @brief sighandler Signal process function.
+ *
+ * @param signal System signals.
+ */
 static void sighandler(int signal) 
 {
     LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
     kill_server();
 }
 
+/**
+ * @brief main The entrance of zimg.
+ *
+ * @param argc Count of args.
+ * @param argv Arg list.
+ *
+ * @return It returns a int to system.
+ */
 int main(int argc, char **argv)
 {
     int c;
-    char *log_path = "log/zimg.log";
-    extern int _log_id;
-    _log_id = -1;
     _init_path = getcwd(NULL, 0);
     LOG_PRINT(LOG_INFO, "Get init-path: %s", _init_path);
 
@@ -82,7 +97,9 @@ int main(int argc, char **argv)
                     "p:"
                     "t:"
                     "l"
+                    "M:"
                     "m:"
+                    "b:"
                     "h"
                     "k:"
                     )))
@@ -112,15 +129,21 @@ int main(int argc, char **argv)
             case 'l':
                 settings.log = true;
                 break;
+            case 'M':
+                strcpy(settings.cache_ip, optarg);
+                break;
             case 'm':
                 settings.cache_port = atoi(optarg);
                 break;
-            case 'h':
-                printf("Usage: ./zimg -p port -t thread_num -m memcached_port -l[og] -k max_keepalives -h[elp]\n");
-                exit(1);
+            case 'b':
+                settings.backlog = atoi(optarg);
+                break;
             case 'k':
                 settings.max_keepalives = atoll(optarg);
                 break;
+            case 'h':
+                printf("Usage: ./zimg -p port -t thread_num -M memcached_ip -m memcached_port -l[og] -b backlog_num -k max_keepalives -h[elp]\n");
+                exit(1);
             default:
                 fprintf(stderr, "Illegal argument \"%c\"\n", c);
                 return 1;
@@ -139,19 +162,20 @@ int main(int argc, char **argv)
 //
 //
     //start log module... ./log/zimg.log
-    if(is_dir("./log") != 1)
-    {
-        if(mk_dir("./log") != 1)
-        {
-            LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", "./log");
-            return -1;
-        }
-    }
     if(settings.log)
     {
+        const char *log_path = "./log";
+        if(is_dir(log_path) != 1)
+        {
+            if(mk_dir(log_path) != 1)
+            {
+                LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", log_path);
+                return -1;
+            }
+        }
         log_init();
-        _log_id = log_open(log_path, "a");
     }
+
     if(is_dir(settings.img_path) != 1)
     {
         if(mk_dir(settings.img_path) != 1)
@@ -165,17 +189,18 @@ int main(int argc, char **argv)
    
     //init memcached connection...
     LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
-    _memc= memcached_create(NULL);
+    memcached_st *memc;
+    memc= memcached_create(NULL);
 
     char mserver[32];
-    sprintf(mserver, "127.0.0.1:%d", settings.cache_port);
+    sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
     memcached_server_st *servers = memcached_servers_parse(mserver);
 
-    memcached_server_push(_memc, servers);
+    memcached_server_push(memc, servers);
     memcached_server_list_free(servers);
-    memcached_behavior_set(_memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
     //使用NO-BLOCK，防止memcache倒掉时挂死          
-    memcached_behavior_set(_memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
     LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
     if(set_cache("zimg", "1") == -1)
     {
@@ -187,6 +212,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
         settings.cache_on = true;
     }
+    memcached_free(memc);
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
@@ -208,14 +234,14 @@ int main(int argc, char **argv)
     evhtp_free(htp);
     event_base_free(evbase);
 
-    memcached_free(_memc);
-    if(_log_id != -1)
-        log_close(_log_id);
     fprintf(stdout, "\nByebye!\n");
     return 0;
 }
 
 
+/**
+ * @brief kill_server Kill threads and exit the event_base_loop.
+ */
 void kill_server(void)
 {
     LOG_PRINT(LOG_INFO, "Stopping socket listener event loop.");
