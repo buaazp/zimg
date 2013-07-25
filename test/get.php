@@ -1,11 +1,12 @@
-<html>
-<body>
 <?php
+
+$imagick = new Imagick();
 
 function convert($image, $width, $height, $propor, $gray) 
 {
     $rst = -1;
-    $imagick = new Imagick();
+    //echo $image . '<br>';
+    global $imagick;
     $imagick->readImage($image);
     $w = $imagick->getImageWidth();
     $h = $imagick->getImageHeight();
@@ -24,7 +25,7 @@ function convert($image, $width, $height, $propor, $gray)
         }
         $imagick->setImageCompressionQuality($a);
         $imagick->stripImage();
-        $imagick->writeImage('new.jpeg');
+        $imagick->writeImage($width . '_' . $height . '_' . $propor .'_' . $gray);
         $rst = 1;
     }
     else if(($width != '0' && $w > $width) || ($height != '0' && $h > $height)) 
@@ -34,8 +35,6 @@ function convert($image, $width, $height, $propor, $gray)
             if($width == '0' || $height == '0')
             {
                 $rst = -1;
-                $imagick->clear();
-                $imagick->destroy();
                 return $rst;
             }
             else
@@ -65,7 +64,7 @@ function convert($image, $width, $height, $propor, $gray)
         }
         $imagick->setImageCompressionQuality($a);
         $imagick->stripImage();
-        $imagick->writeImage('new.jpeg');
+        $imagick->writeImage($width . '_' . $height . '_' . $propor .'_' . $gray);
         $rst = 1;
     }
     else if($gray == '1')
@@ -78,7 +77,7 @@ function convert($image, $width, $height, $propor, $gray)
         }
         $imagick->setImageCompressionQuality($a);
         $imagick->stripImage();
-        $imagick->writeImage('new.jpeg');
+        $imagick->writeImage($width . '_' . $height . '_' . $propor .'_' . $gray);
         $rst = 1;
     }
     else
@@ -86,8 +85,6 @@ function convert($image, $width, $height, $propor, $gray)
         $rst = 2;
     }
 
-    $imagick->clear();
-    $imagick->destroy();
     return $rst;
 }
 
@@ -130,10 +127,12 @@ if(is_array($_GET) && count($_GET)>0)
         }
 
         $file_name = './'. $md5 . '.jpeg';
-        /* echo $file_name . '<br>'; */
+        //echo $file_name . '<br>'; 
         if($width == '0' && $height == '0' && $gray == '0')
         {
-            echo "<img src=" . $file_name . ">";
+            $imagick->readImage($file_name);
+            header( "Content-Type: image/jpeg" );
+            echo $imagick;
         }
         else
         {
@@ -141,21 +140,26 @@ if(is_array($_GET) && count($_GET)>0)
             //echo 'rst = ' . $rst . '<br>';
             if($rst == 1)
             {
-                echo "<img src=./new.jpeg>";
+                header( "Content-Type: image/jpeg" );
+                echo $imagick;
             }
             else if($rst == 2)
             {
-                echo "<img src=" . $file_name . ">";
+                $imagick->readImage($file_name);
+                header( "Content-Type: image/jpeg" );
+                echo $imagick;
             }
             else
             {
-                echo "<h1>404 Not Found!</h1>";
+                header( "Content-Type: text/html" );
+                echo "<html><body><h1>404 Not Found!</h1></body></html>";
             }
         }
     }
     else
     {
-        echo "<h1>404 Not Found!</h1>";
+        header( "Content-Type: text/html" );
+        echo "<html><body><h1>404 Not Found!</h1></body></html>";
     }
 }
 else
@@ -164,7 +168,7 @@ else
 }
 
 
+$imagick->clear();
+$imagick->destroy();
 ?>
 
-</body>
-</html>
