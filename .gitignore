@@ -16,9 +16,7 @@
 *.out
 *.app
 *.c.swp
-.gitignore
-img/.DS_Store
-.DS_Store
+*.DS_Store
 .gitignore
 img/.DS_Store
 .DS_Store
@@ -28,7 +26,5 @@ img/.DS_Store
 *.log
 *.dSYM
 
-old/
 img/
-main
 zimg
