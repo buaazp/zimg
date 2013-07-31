@@ -46,7 +46,7 @@ static void settings_init(void)
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
     settings.port = 4869;
-    settings.backlog = 1024;
+    settings.backlog = 10240;
     settings.num_threads = 4;         /* N workers */
     settings.log = false;
     settings.cache_on = true;
@@ -221,6 +221,7 @@ int main(int argc, char **argv)
 
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
+    //evhtp_set_gencb(htp, echo_cb, NULL);
     evhtp_set_gencb(htp, send_document_cb, NULL);
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, NULL, settings.num_threads, NULL);

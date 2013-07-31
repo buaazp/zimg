@@ -30,6 +30,7 @@ static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
 static int print_headers(evhtp_header_t * header, void * arg); 
 void dump_request_cb(evhtp_request_t *req, void *arg);
+void echo_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void send_document_cb(evhtp_request_t *req, void *arg);
 
@@ -171,6 +172,19 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
 
+/**
+ * @brief echo_cb Callback function of echo test.
+ *
+ * @param req The request of a test url.
+ * @param arg It is not useful.
+ */
+void echo_cb(evhtp_request_t *req, void *arg)
+{
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>zimg works!</h1></body></html>");
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_OK);
+}
 
 
 /**
