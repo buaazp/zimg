@@ -167,7 +167,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 	}
 	puts(">>>");
 
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
@@ -181,7 +181,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 void echo_cb(evhtp_request_t *req, void *arg)
 {
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>zimg works!</h1></body></html>");
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
@@ -381,7 +381,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         "</body>\n</html>\n",
         md5sum
         );
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
@@ -389,7 +389,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_200);
     LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
@@ -501,7 +501,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
                 "</body>\n</html>\n"
                 );
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
             evhtp_send_reply(req, EVHTP_RES_OK);
             LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -544,7 +544,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evbuffer_add(req->buffer_out, buff, len);
 
     LOG_PRINT(LOG_INFO, "Got the File!");
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -561,7 +561,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
     LOG_PRINT(LOG_INFO, "============send_document_cb() ERROR!===============");
