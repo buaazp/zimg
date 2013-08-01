@@ -1,7 +1,7 @@
 #zimg#
 
 
-zimg ([Homepage](http://zimg.buaa.us/)) is a light image storage and processing system. It's written by C and it has high performance in image field. There is a benchmark test report with more infomation: [Benchmark](http://zimg.buaa.us/benchmark.html). zimg is designed for high concurrency image server. It supports many features for uploading and getting images.  
+zimg is a light image storage and processing system. It's written by C and it has high performance in image field. There is a benchmark test report with more infomation: [Benchmark](http://zimg.buaa.us/benchmark.html). zimg is designed for high concurrency image server. It supports many features for uploading and getting images.  
 
 Author: [@招牌疯子](http://weibo.com/819880808)  
 Contact me: zp@buaa.us  
