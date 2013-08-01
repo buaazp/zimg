@@ -36,7 +36,6 @@ There is a architecture design document of zimg. It is written in Chinese.
 ### Download
 The source code is licensed under a BSD-like License.  
 All versions on [Github](https://github.com/buaazp/zimg).  
-Please take a look at 'ChangLog' file in the distribution, see what's new.
 
 ### Build
 
