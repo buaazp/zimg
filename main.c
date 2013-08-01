@@ -46,7 +46,7 @@ static void settings_init(void)
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
     settings.port = 4869;
-    settings.backlog = 10240;
+    settings.backlog = 1024;
     settings.num_threads = 4;         /* N workers */
     settings.log = false;
     settings.cache_on = true;
