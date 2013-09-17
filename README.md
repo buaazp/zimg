@@ -30,7 +30,7 @@ Performance optimization.
 Security measures.  
 
 ### Documentation:
-There is a architecture design document of zimg. It is written in Chinese.  
+There is an architecture design document of zimg. It is written in Chinese.  
 [Architecture Design of Image Server](http://zimg.buaa.us/arch_design.html)
 
 ### Download:
