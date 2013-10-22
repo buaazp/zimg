@@ -152,7 +152,7 @@ int is_img(const char *filename)
     char *tmp;
     int i;
     int isimg = 0;
-    for(i = 0; i < strlen(filename); i++)
+    for(i = 0; filename[i]; i++)
     {
         lower[i] = tolower(filename[i]);
     }
