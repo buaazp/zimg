@@ -156,6 +156,7 @@ int is_img(const char *filename)
     {
         lower[i] = tolower(filename[i]);
     }
+    lower[strlen(filename)] = '\0';
     for(i = 0; i < 4; i++)
     {
         LOG_PRINT(LOG_INFO, "compare %s - %s.", lower, imgType[i]);
