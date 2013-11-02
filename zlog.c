@@ -76,6 +76,9 @@ void log_init()
 /* 打开用户日志文件 */
 int log_open(const char *path, const char* mode)
 {
+    if(settings.log == false)
+        return -1;
+
     int i;
  
     for (i = LOG_USER; i < MAX_LOGS+1; i++)
