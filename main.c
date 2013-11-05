@@ -42,7 +42,7 @@ void kill_server(void);
  */
 static void settings_init(void) 
 {
-//    strcpy(settings.root_path, "./www");
+    strcpy(settings.root_path, "./www/index.html");
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
     settings.port = 4869;
