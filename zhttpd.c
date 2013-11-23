@@ -313,7 +313,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         if((end = kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "quote \" Not Found!");
+            LOG_PRINT(LOG_ERROR, "quote \\r\\n Not Found!");
             goto err;
         }
     }

@@ -19,6 +19,7 @@
  */
 
 #include <evhtp.h>
+#include <wand/MagickWand.h>
 #include <inttypes.h>
 #include <unistd.h>
 #include <signal.h>
@@ -49,7 +50,7 @@ static void settings_init(void)
     settings.backlog = 1024;
     settings.num_threads = 4;         /* N workers */
     settings.log = false;
-    settings.cache_on = true;
+    settings.cache_on = false;
     strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
@@ -97,6 +98,7 @@ int main(int argc, char **argv)
                     "p:"
                     "t:"
                     "l"
+                    "c"
                     "M:"
                     "m:"
                     "b:"
@@ -129,6 +131,9 @@ int main(int argc, char **argv)
             case 'l':
                 settings.log = true;
                 break;
+            case 'c':
+                settings.cache_on = true;
+                break;
             case 'M':
                 strcpy(settings.cache_ip, optarg);
                 break;
@@ -142,7 +147,7 @@ int main(int argc, char **argv)
                 settings.max_keepalives = atoll(optarg);
                 break;
             case 'h':
-                printf("Usage: ./zimg -p port -t thread_num -M memcached_ip -m memcached_port -l[og] -b backlog_num -k max_keepalives -h[elp]\n");
+                printf("Usage: ./zimg -p port -t thread_num -M memcached_ip -m memcached_port -l[og] -c[ache] -b backlog_num -k max_keepalives -h[elp]\n");
                 exit(1);
             default:
                 fprintf(stderr, "Illegal argument \"%c\"\n", c);
@@ -188,31 +193,38 @@ int main(int argc, char **argv)
 
    
     //init memcached connection...
-    LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
-    memcached_st *memc;
-    memc= memcached_create(NULL);
-
-    char mserver[32];
-    sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
-    memcached_server_st *servers = memcached_servers_parse(mserver);
-
-    memcached_server_push(memc, servers);
-    memcached_server_list_free(servers);
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
-    //使用NO-BLOCK，防止memcache倒掉时挂死          
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-    LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
-    if(set_cache("zimg", "1") == -1)
+    if(settings.cache_on == true)
     {
-        LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);
-        settings.cache_on = false;
+        LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
+        memcached_st *memc;
+        memc= memcached_create(NULL);
+
+        char mserver[32];
+        sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
+        memcached_server_st *servers = memcached_servers_parse(mserver);
+
+        memcached_server_push(memc, servers);
+        memcached_server_list_free(servers);
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+        //使用NO-BLOCK，防止memcache倒掉时挂死          
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
+        if(set_cache("zimg", "1") == -1)
+        {
+            LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);
+            settings.cache_on = false;
+        }
+        else
+        {
+            LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
+            settings.cache_on = true;
+        }
+        memcached_free(memc);
     }
     else
-    {
-        LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
-        settings.cache_on = true;
-    }
-    memcached_free(memc);
+        LOG_PRINT(LOG_INFO, "Don't use memcached as cache.");
+    //init magickwand
+    MagickWandGenesis();
 
     //begin to start httpd...
     LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
@@ -234,6 +246,7 @@ int main(int argc, char **argv)
     evhtp_unbind_socket(htp);
     evhtp_free(htp);
     event_base_free(evbase);
+    MagickWandTerminus();
 
     fprintf(stdout, "\nByebye!\n");
     return 0;

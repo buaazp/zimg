@@ -276,7 +276,6 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     if((fd = open(rsp_path, O_RDONLY)) == -1)
         //if(status == MagickFalse)
     {
-        MagickWandGenesis();
         magick_wand = NewMagickWand();
         got_rsp = false;
 
@@ -543,7 +542,6 @@ err:
     if(magick_wand)
     {
         magick_wand=DestroyMagickWand(magick_wand);
-        MagickWandTerminus();
     }
     if(img_format)
         free(img_format);
