@@ -44,6 +44,11 @@ All versions on [Github](https://github.com/buaazp/zimg).
 	make  
 	./zimg  
 
+### Example:
+A zimg server in my VPS to test functions.  
+[http://zimg.buaa.us:4869/](http://zimg.buaa.us:4869/)
+
+
 ### Feedback:
 If you have any question, please submit comment here or mention me on [Weibo](http://weibo.com/819880808).  
 Technical issues are also welcomed to be submitted on [GitHub](https://github.com/buaazp/zimg/issues).
