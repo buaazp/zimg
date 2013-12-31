@@ -28,3 +28,8 @@ img/.DS_Store
 
 img/
 zimg
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile

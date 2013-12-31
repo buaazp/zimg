@@ -40,6 +40,7 @@ All versions on [Github](https://github.com/buaazp/zimg).
 ### Build:
 
 	cd zimg  
+    cmake .
 	make  
 	./zimg  
 
