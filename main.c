@@ -167,6 +167,7 @@ int main(int argc, char **argv)
         if(daemon(1, 1) < 0)
         {
             fprintf(stderr, "Create daemon failed!\n");
+            return -1;
         }
     }
     //init the Path zimg need to use.
