@@ -43,12 +43,15 @@ void kill_server(void);
  */
 static void settings_init(void) 
 {
+    settings.daemon = 0;
     strcpy(settings.root_path, "./www/index.html");
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
     settings.port = 4869;
     settings.backlog = 1024;
-    settings.num_threads = 4;         /* N workers */
+    //int th_n = get_cpu_cores();
+    //printf("CPU cores: %d\n", th_n); 
+    settings.num_threads = get_cpu_cores();         /* N workers */
     settings.log = false;
     settings.cache_on = false;
     strcpy(settings.cache_ip, "127.0.0.1");
@@ -95,6 +98,7 @@ int main(int argc, char **argv)
 
     settings_init();
     while (-1 != (c = getopt(argc, argv,
+                    "d"
                     "p:"
                     "t:"
                     "l"
@@ -108,6 +112,9 @@ int main(int argc, char **argv)
     {
         switch(c)
         {
+            case 'd':
+                settings.daemon = 1;
+                break;
             case 'p':
                 settings.port = atoi(optarg);
                 break;
@@ -147,11 +154,19 @@ int main(int argc, char **argv)
                 settings.max_keepalives = atoll(optarg);
                 break;
             case 'h':
-                printf("Usage: ./zimg -p port -t thread_num -M memcached_ip -m memcached_port -l[og] -c[ache] -b backlog_num -k max_keepalives -h[elp]\n");
+                printf("Usage: ./zimg -d[aemon] -p port -t thread_num -M memcached_ip -m memcached_port -l[og] -c[ache] -b backlog_num -k max_keepalives -h[elp]\n");
                 exit(1);
             default:
                 fprintf(stderr, "Illegal argument \"%c\"\n", c);
                 return 1;
+        }
+    }
+
+    if(settings.daemon == 1)
+    {
+        if(daemon(1, 1) < 0)
+        {
+            fprintf(stderr, "Create daemon failed!\n");
         }
     }
     //init the Path zimg need to use.

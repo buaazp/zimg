@@ -29,6 +29,7 @@
 
 //functions list
 pid_t gettid();
+int get_cpu_cores();
 static void kmp_init(const char *pattern, int pattern_size);
 int kmp(const char *matcher, int mlen, const char *pattern, int plen);
 int get_type(const char *filename, char *type);
@@ -49,6 +50,10 @@ pid_t gettid()
     return syscall(SYS_gettid);
 }
 
+int get_cpu_cores()
+{
+    return (int)sysconf(_SC_NPROCESSORS_CONF);
+}
 
 /* KMP for searching */
 static void kmp_init(const char *pattern, int pattern_size)  // prefix-function

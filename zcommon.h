@@ -37,6 +37,7 @@
 #define NUM_THREADS 4
 
 struct setting{
+    int daemon;
     char root_path[512];
     char img_path[512];
     char log_name[512];
