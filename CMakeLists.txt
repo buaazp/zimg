@@ -79,6 +79,7 @@ find_package(OpenSSL)
 find_package(ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package(LibMemcached REQUIRED)
 find_package(libevhtp REQUIRED)
+find_package(LibLua REQUIRED)
 
 find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
 
@@ -109,8 +110,8 @@ set(ZIMG_EXTERNAL_LIBS
 		${OPENSSL_LIBRARIES}
         ${ImageMagick_MagickWand_LIBRARY}
         ${LIBEVHTP_LIBRARY}
-        ${LIBEVENT_LIBRARY}
         ${LIBMEMCACHED_LIBRARY}
+        ${LIBLUA_LIBRARY}
 )
 
 if (NOT ${LIBEVENT_PTHREADS_FOUND})
@@ -135,7 +136,7 @@ if (EVHTP_DISABLE_SSL)
 	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DEVHTP_DISABLE_SSL")
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS "-L/usr/lib")
+set(CMAKE_EXE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib")
 add_executable(zimg ${ZIMG_SOURCES})
 target_link_libraries(zimg ${ZIMG_EXTERNAL_LIBS})
 

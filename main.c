@@ -28,15 +28,28 @@
 #include "zutil.h"
 #include "zlog.h"
 #include "zcache.h"
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 extern struct setting settings;
 evbase_t *evbase;
 
+void usage(int argc, char **argv);
 static void settings_init(void); 
+static int load_conf(const char *conf); 
 static void sighandler(int signal); 
 int main(int argc, char **argv);
 void kill_server(void);
 
+
+void usage(int argc, char **argv)
+{
+    printf("Usage:\n");
+    printf("    %s [-d] /path/to/zimg.lua\n", argv[0]);
+    printf("Options:\n");
+    printf("    -d    run as daemon\n");
+}
 
 /**
  * @brief settings_init Init the setting with default values.
@@ -49,14 +62,72 @@ static void settings_init(void)
     strcpy(settings.log_name, "./log/zimg.log");
     settings.port = 4869;
     settings.backlog = 1024;
-    //int th_n = get_cpu_cores();
-    //printf("CPU cores: %d\n", th_n); 
     settings.num_threads = get_cpu_cores();         /* N workers */
     settings.log = false;
     settings.cache_on = false;
     strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
+}
+
+static int load_conf(const char *conf)
+{
+    int result = -1;
+    lua_State *L = lua_open();
+    luaL_openlibs(L);
+    if (luaL_loadfile(L, conf) || lua_pcall(L, 0, 0, 0))
+    {
+        lua_close(L);
+        return -1;
+    }
+
+    lua_getglobal(L, "daemon"); //stack index: -12
+    lua_getglobal(L, "port");
+    lua_getglobal(L, "thread_num");
+    lua_getglobal(L, "cache");
+    lua_getglobal(L, "mc_ip");
+    lua_getglobal(L, "mc_port");
+    lua_getglobal(L, "log");
+    lua_getglobal(L, "backlog_num");
+    lua_getglobal(L, "max_keepalives");
+
+    lua_getglobal(L, "root_path");
+    lua_getglobal(L, "img_path");
+    lua_getglobal(L, "log_name"); //stack index: -1
+
+    if(lua_isnumber(L, -12))
+        settings.daemon = (int)lua_tonumber(L, -12);
+    if(lua_isnumber(L, -11))
+        settings.port = (int)lua_tonumber(L, -11);
+    printf("settings.port: %d\n", settings.port);
+    if(lua_isnumber(L, -10))
+        settings.num_threads = (int)lua_tonumber(L, -10);         /* N workers */
+    printf("settings.num_threads: %d\n", settings.num_threads);
+    if(lua_isnumber(L, -9))
+        settings.cache_on = (int)lua_tonumber(L, -9);
+    printf("settings.cache_on: %d\n", settings.cache_on);
+    if(lua_isstring(L, -8))
+        strcpy(settings.cache_ip, lua_tostring(L, -8));
+    printf("settings.cache_ip: %s\n", settings.cache_ip);
+    if(lua_isnumber(L, -7))
+        settings.cache_port = (int)lua_tonumber(L, -7);
+    if(lua_isnumber(L, -6))
+        settings.log = (int)lua_tonumber(L, -6);
+    if(lua_isnumber(L, -5))
+        settings.backlog = (int)lua_tonumber(L, -5);
+    if(lua_isnumber(L, -4))
+        settings.max_keepalives = (int)lua_tonumber(L, -4);
+
+    if(lua_isstring(L, -3))
+        strcpy(settings.root_path, lua_tostring(L, -3));
+    printf("settings.root_path: %s\n", settings.root_path);
+    if(lua_isstring(L, -2))
+        strcpy(settings.img_path, lua_tostring(L, -2));
+    if(lua_isstring(L, -1))
+        strcpy(settings.log_name, lua_tostring(L, -1));
+
+    lua_close(L);
+    return 1;
 }
 
 /**
@@ -95,71 +166,39 @@ int main(int argc, char **argv)
     sigaction(SIGINT, &siginfo, NULL);
     sigaction(SIGTERM, &siginfo, NULL);
 
+    if(argc < 2)
+    {
+        usage(argc, argv);
+        return -1;
+    }
 
     settings_init();
-    while (-1 != (c = getopt(argc, argv,
-                    "d"
-                    "p:"
-                    "t:"
-                    "l"
-                    "c"
-                    "M:"
-                    "m:"
-                    "b:"
-                    "h"
-                    "k:"
-                    )))
+    const char *conf_file = NULL;
+    for(int i=1; i<argc; i++)
     {
-        switch(c)
-        {
-            case 'd':
-                settings.daemon = 1;
-                break;
-            case 'p':
-                settings.port = atoi(optarg);
-                break;
-            case 't':
-                settings.num_threads = atoi(optarg);
-                if (settings.num_threads <= 0) {
-                    fprintf(stderr, "Number of threads must be greater than 0\n");
-                    return 1;
-                }
-                /* There're other problems when you get above 64 threads.
-                 * In the future we should portably detect # of cores for the
-                 * default.
-                 */
-                if (settings.num_threads > 64) {
-                    fprintf(stderr, "WARNING: Setting a high number of worker"
-                            "threads is not recommended.\n"
-                            " Set this value to the number of cores in"
-                            " your machine or less.\n");
-                }
-                break;
-            case 'l':
-                settings.log = true;
-                break;
-            case 'c':
-                settings.cache_on = true;
-                break;
-            case 'M':
-                strcpy(settings.cache_ip, optarg);
-                break;
-            case 'm':
-                settings.cache_port = atoi(optarg);
-                break;
-            case 'b':
-                settings.backlog = atoi(optarg);
-                break;
-            case 'k':
-                settings.max_keepalives = atoll(optarg);
-                break;
-            case 'h':
-                printf("Usage: ./zimg -d[aemon] -p port -t thread_num -M memcached_ip -m memcached_port -l[og] -c[ache] -b backlog_num -k max_keepalives -h[elp]\n");
-                exit(1);
-            default:
-                fprintf(stderr, "Illegal argument \"%c\"\n", c);
-                return 1;
+        if(strcmp(argv[i], "-d") == 0){
+            settings.daemon = 1;
+        }else{
+            conf_file = argv[i];
         }
+    }
+
+    if(conf_file == NULL)
+    {
+        usage(argc, argv);
+        return -1;
+    }
+
+    if(is_file(conf_file) == -1)
+    {
+        fprintf(stderr, "'%s' is not a file or not exists!\n", conf_file);
+        return -1;
+    }
+
+    if(load_conf(conf_file) == -1)
+    {
+        fprintf(stderr, "'%s' load failed!\n", conf_file);
+        return -1;
     }
 
     if(settings.daemon == 1)

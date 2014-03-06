@@ -41,7 +41,6 @@ int is_md5(char *s);
 static int htoi(char s[]);
 int str_hash(const char *str);
 
-
 // this data is for KMP searching
 static int pi[128];
 
@@ -142,6 +141,32 @@ int get_type(const char *filename, char *type)
     sprintf(type, "%s", flag);
     return 1;
 }
+
+/**
+ * @brief is_file Check a filename is a file.
+ *
+ * @param filename The filename input.
+ *
+ * @return 1 for yes and -1 for no.
+ */
+int is_file(const char *filename)
+{
+    struct stat st;
+    if(stat(filename, &st)<0)
+    {
+        LOG_PRINT(LOG_WARNING, "File[%s] is Not Existed!", filename);
+        return -1;
+    }
+    if(S_ISREG(st.st_mode))
+    {
+        LOG_PRINT(LOG_INFO, "File[%s] is A File.", filename);
+        return 1;
+    }
+    else
+        return -1;
+}
+
+
 
 /**
  * @brief is_img Check a file is a image we support(jpg, png, gif).
