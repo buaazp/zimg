@@ -16,6 +16,7 @@ Contact me: zp@buaa.us
 [libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API.  
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
+[lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
 
 ### Supplying:
 Receive and storage users' upload images.  
