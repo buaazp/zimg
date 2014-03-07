@@ -597,7 +597,7 @@ int get_img2(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     LOG_PRINT(LOG_INFO, "Start to Find the Image...");
     if(get_img_ssdb(cache_key, buff_ptr, img_size) == 1)
     {
-        LOG_PRINT(LOG_ERROR, "Get image [%s] from ssdb succ.", cache_key);
+        LOG_PRINT(LOG_INFO, "Get image [%s] from ssdb succ.", cache_key);
         result = 1;
         goto err;
     }
@@ -624,7 +624,7 @@ int get_img2(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         }
         if(get_img_ssdb(cache_key, buff_ptr, img_size) == 1)
         {
-            LOG_PRINT(LOG_ERROR, "Get color image [%s] from ssdb.", cache_key);
+            LOG_PRINT(LOG_INFO, "Get color image [%s] from ssdb.", cache_key);
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
             if(status == MagickTrue)
             {
@@ -789,10 +789,10 @@ int save_img_ssdb(const char *cache_key, const char *buff, const size_t len)
     if(c->err)
     {
         redisFree(c);
-        LOG_PRINT(LOG_ERROR, "Connect to redisServer faile");
+        LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
         return -1;
     }
-    LOG_PRINT(LOG_INFO, "Connect to redisServer Success");
+    LOG_PRINT(LOG_INFO, "Connect to ssdb server Success");
 
     redisReply *r = (redisReply*)redisCommand(c, "SET %s %b", cache_key, buff, len);
     if( NULL == r)
@@ -821,10 +821,10 @@ int get_img_ssdb(const char *cache_key, char **buff, size_t *len)
     if(c->err)
     {
         redisFree(c);
-        LOG_PRINT(LOG_ERROR, "Connect to redisServer faile");
+        LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
         return -1;
     }
-    LOG_PRINT(LOG_INFO, "Connect to redisServer Success");
+    LOG_PRINT(LOG_INFO, "Connect to ssdb server Success");
 
     redisReply *r = (redisReply*)redisCommand(c, "GET %s", cache_key);
     if( NULL == r)
@@ -847,7 +847,7 @@ int get_img_ssdb(const char *cache_key, char **buff, size_t *len)
 
     freeReplyObject(r);
     redisFree(c);
-    LOG_PRINT(LOG_INFO, "Succeed to get [%s] from ssdb. length = [%d].", cache_key, len);
+    LOG_PRINT(LOG_INFO, "Succeed to get [%s] from ssdb. length = [%d].", cache_key, *len);
 
     return 1;
 }
