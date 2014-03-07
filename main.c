@@ -68,11 +68,13 @@ static void settings_init(void)
     strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
+    settings.mode = 1;
+    strcpy(settings.ssdb_ip, "127.0.0.1");
+    settings.ssdb_port = 6379;
 }
 
 static int load_conf(const char *conf)
 {
-    int result = -1;
     lua_State *L = lua_open();
     luaL_openlibs(L);
     if (luaL_loadfile(L, conf) || lua_pcall(L, 0, 0, 0))
@@ -82,51 +84,89 @@ static int load_conf(const char *conf)
     }
 
     lua_getglobal(L, "daemon"); //stack index: -12
+    if(lua_isnumber(L, -1))
+        settings.daemon = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     lua_getglobal(L, "port");
+    if(lua_isnumber(L, -1))
+        settings.port = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    printf("settings.port: %d\n", settings.port);
+
     lua_getglobal(L, "thread_num");
+    if(lua_isnumber(L, -1))
+        settings.num_threads = (int)lua_tonumber(L, -1);         /* N workers */
+    lua_pop(L, 1);
+    printf("settings.num_threads: %d\n", settings.num_threads);
+
     lua_getglobal(L, "cache");
+    if(lua_isnumber(L, -1))
+        settings.cache_on = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    printf("settings.cache_on: %d\n", settings.cache_on);
+
     lua_getglobal(L, "mc_ip");
+    if(lua_isstring(L, -1))
+        strcpy(settings.cache_ip, lua_tostring(L, -1));
+    lua_pop(L, 1);
+    printf("settings.cache_ip: %s\n", settings.cache_ip);
+
     lua_getglobal(L, "mc_port");
+    if(lua_isnumber(L, -1))
+        settings.cache_port = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     lua_getglobal(L, "log");
+    if(lua_isnumber(L, -1))
+        settings.log = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     lua_getglobal(L, "backlog_num");
+    if(lua_isnumber(L, -1))
+        settings.backlog = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     lua_getglobal(L, "max_keepalives");
+    if(lua_isnumber(L, -1))
+        settings.max_keepalives = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
 
     lua_getglobal(L, "root_path");
-    lua_getglobal(L, "img_path");
-    lua_getglobal(L, "log_name"); //stack index: -1
-
-    if(lua_isnumber(L, -12))
-        settings.daemon = (int)lua_tonumber(L, -12);
-    if(lua_isnumber(L, -11))
-        settings.port = (int)lua_tonumber(L, -11);
-    printf("settings.port: %d\n", settings.port);
-    if(lua_isnumber(L, -10))
-        settings.num_threads = (int)lua_tonumber(L, -10);         /* N workers */
-    printf("settings.num_threads: %d\n", settings.num_threads);
-    if(lua_isnumber(L, -9))
-        settings.cache_on = (int)lua_tonumber(L, -9);
-    printf("settings.cache_on: %d\n", settings.cache_on);
-    if(lua_isstring(L, -8))
-        strcpy(settings.cache_ip, lua_tostring(L, -8));
-    printf("settings.cache_ip: %s\n", settings.cache_ip);
-    if(lua_isnumber(L, -7))
-        settings.cache_port = (int)lua_tonumber(L, -7);
-    if(lua_isnumber(L, -6))
-        settings.log = (int)lua_tonumber(L, -6);
-    if(lua_isnumber(L, -5))
-        settings.backlog = (int)lua_tonumber(L, -5);
-    if(lua_isnumber(L, -4))
-        settings.max_keepalives = (int)lua_tonumber(L, -4);
-
-    if(lua_isstring(L, -3))
-        strcpy(settings.root_path, lua_tostring(L, -3));
+    if(lua_isstring(L, -1))
+        strcpy(settings.root_path, lua_tostring(L, -1));
+    lua_pop(L, 1);
     printf("settings.root_path: %s\n", settings.root_path);
-    if(lua_isstring(L, -2))
-        strcpy(settings.img_path, lua_tostring(L, -2));
+
+    lua_getglobal(L, "img_path");
+    if(lua_isstring(L, -1))
+        strcpy(settings.img_path, lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "log_name"); //stack index: -1
     if(lua_isstring(L, -1))
         strcpy(settings.log_name, lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "mode");
+    if(lua_isnumber(L, -1))
+        settings.mode = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "ssdb_ip");
+    if(lua_isstring(L, -1))
+        strcpy(settings.ssdb_ip, lua_tostring(L, -1));
+    lua_pop(L, 1);
+    printf("settings.ssdb_ip: %s\n", settings.ssdb_ip);
+
+    lua_getglobal(L, "ssdb_port");
+    if(lua_isnumber(L, -1))
+        settings.ssdb_port = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    printf("settings.ssdb_port: %d\n", settings.ssdb_port);
 
     lua_close(L);
+
     return 1;
 }
 

@@ -45,10 +45,13 @@ struct setting{
     int backlog;
     int num_threads;
     bool log;
+    bool cache_on;
     char cache_ip[128];
     int cache_port;
-    bool cache_on;
     uint64_t max_keepalives;
+    int mode;
+    char ssdb_ip[128];
+    int ssdb_port;
 } settings;
 
 

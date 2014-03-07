@@ -585,7 +585,11 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req -> proportion = proportion;
     zimg_req -> gray = gray;
 
-    int get_img_rst = get_img(zimg_req, &buff,  &len);
+    int get_img_rst = -1;
+    if(settings.mode == 1)
+        get_img_rst = get_img(zimg_req, &buff,  &len);
+    else if(settings.mode == 2)
+        get_img_rst = get_img2(zimg_req, &buff,  &len);
 
 
     if(get_img_rst == -1)

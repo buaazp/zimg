@@ -80,6 +80,7 @@ find_package(ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package(LibMemcached REQUIRED)
 find_package(libevhtp REQUIRED)
 find_package(LibLua REQUIRED)
+find_package(LibHiredis REQUIRED)
 
 find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
 
@@ -112,6 +113,7 @@ set(ZIMG_EXTERNAL_LIBS
         ${LIBEVHTP_LIBRARY}
         ${LIBMEMCACHED_LIBRARY}
         ${LIBLUA_LIBRARY}
+        ${LIBHIREDIS_LIBRARY}
 )
 
 if (NOT ${LIBEVENT_PTHREADS_FOUND})
