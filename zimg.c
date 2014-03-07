@@ -809,6 +809,7 @@ int save_img_ssdb(const char *cache_key, const char *buff, const size_t len)
         return -1;
     }
     freeReplyObject(r);
+    redisFree(c);
     LOG_PRINT(LOG_INFO, "Succeed to save [%s] to ssdb. length = [%d].", cache_key, len);
 
     return 1;
@@ -841,11 +842,11 @@ int get_img_ssdb(const char *cache_key, char **buff, size_t *len)
     }
 
     *len = r->len;
-    printf("get_img2() len=%d\n", *len);
-    printf("get_img2() r->len=%d\n", r->len);
+    *buff = (char *)malloc(r->len);
     memcpy(*buff, r->str, r->len);
 
     freeReplyObject(r);
+    redisFree(c);
     LOG_PRINT(LOG_INFO, "Succeed to get [%s] from ssdb. length = [%d].", cache_key, len);
 
     return 1;

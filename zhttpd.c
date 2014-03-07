@@ -633,8 +633,11 @@ done:
     {
         if(zimg_req->md5)
             free(zimg_req->md5);
-        if(zimg_req->rsp_path)
-            free(zimg_req->rsp_path);
+        if(settings.mode == 1)
+        {
+            if(zimg_req->rsp_path)
+                free(zimg_req->rsp_path);
+        }
         free(zimg_req);
     }
 }

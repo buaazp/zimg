@@ -13,7 +13,7 @@ mc_ip='127.0.0.1'
 mc_port=11211
 
 --log config
-log=1
+log=0
 log_name='./log/zimg.log'
 
 --htdoc config
