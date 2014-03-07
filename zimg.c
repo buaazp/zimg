@@ -601,6 +601,28 @@ int get_img2(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         result = 1;
         goto err;
     }
+    if(req->width == 0 && req->height == 0 && req->gray == 0)
+    {
+        sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
+        LOG_PRINT(LOG_INFO, "Return original image.");
+        if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
+        {
+            LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cache_key);
+            result = 1;
+            goto err;
+        }
+        if(get_img_ssdb(cache_key, buff_ptr, img_size) == 1)
+        {
+            LOG_PRINT(LOG_INFO, "Get color image [%s] from ssdb.", cache_key);
+            result = 1;
+            goto err;
+        }
+        else
+        {
+            LOG_PRINT(LOG_ERROR, "Get image [%s] from ssdb failed.", cache_key);
+            goto err;
+        }
+    }
 
     magick_wand = NewMagickWand();
     if(req->gray == 1)
@@ -664,37 +686,40 @@ int get_img2(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         goto err;
     }
 
-    int width, height;
-    width = req->width;
-    height = req->height;
-    float owidth = MagickGetImageWidth(magick_wand);
-    float oheight = MagickGetImageHeight(magick_wand);
-    if(width <= owidth && height <= oheight)
+    if(!(req->width == 0 && req->height == 0))
     {
-        if(req->proportion == 1)
+        int width, height;
+        width = req->width;
+        height = req->height;
+        float owidth = MagickGetImageWidth(magick_wand);
+        float oheight = MagickGetImageHeight(magick_wand);
+        if(width <= owidth && height <= oheight)
         {
-            if(req->width != 0 && req->height == 0)
+            if(req->proportion == 1)
             {
-                height = width * oheight / owidth;
+                if(req->width != 0 && req->height == 0)
+                {
+                    height = width * oheight / owidth;
+                }
+                else
+                {
+                    width = height * owidth / oheight;
+                }
             }
-            else
+            status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
+            if(status == MagickFalse)
             {
-                width = height * owidth / oheight;
+                LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", cache_key);
+                goto err;
             }
+            LOG_PRINT(LOG_INFO, "Resize img succ.");
         }
-        status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
-        if(status == MagickFalse)
+        else
         {
-            LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", cache_key);
+            LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
+            result = 1;
             goto err;
         }
-        LOG_PRINT(LOG_INFO, "Resize img succ.");
-    }
-    else
-    {
-        LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
-        result = 1;
-        goto err;
     }
 
 
