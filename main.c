@@ -60,6 +60,8 @@ static void settings_init(void)
     strcpy(settings.root_path, "./www/index.html");
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
+    strcpy(settings.version, "1.1.0");
+    sprintf(settings.server_name, "zimg/%s", settings.version);
     settings.port = 4869;
     settings.backlog = 1024;
     settings.num_threads = get_cpu_cores();         /* N workers */
@@ -92,25 +94,30 @@ static int load_conf(const char *conf)
     if(lua_isnumber(L, -1))
         settings.port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    printf("settings.port: %d\n", settings.port);
+    //printf("settings.port: %d\n", settings.port);
 
     lua_getglobal(L, "thread_num");
     if(lua_isnumber(L, -1))
         settings.num_threads = (int)lua_tonumber(L, -1);         /* N workers */
     lua_pop(L, 1);
-    printf("settings.num_threads: %d\n", settings.num_threads);
+    //printf("settings.num_threads: %d\n", settings.num_threads);
+
+    lua_getglobal(L, "system");
+    if(lua_isstring(L, -1))
+        sprintf(settings.server_name, "%s %s", settings.server_name, lua_tostring(L, -1));
+    lua_pop(L, 1);
 
     lua_getglobal(L, "cache");
     if(lua_isnumber(L, -1))
         settings.cache_on = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    printf("settings.cache_on: %d\n", settings.cache_on);
+    //printf("settings.cache_on: %d\n", settings.cache_on);
 
     lua_getglobal(L, "mc_ip");
     if(lua_isstring(L, -1))
         strcpy(settings.cache_ip, lua_tostring(L, -1));
     lua_pop(L, 1);
-    printf("settings.cache_ip: %s\n", settings.cache_ip);
+    //printf("settings.cache_ip: %s\n", settings.cache_ip);
 
     lua_getglobal(L, "mc_port");
     if(lua_isnumber(L, -1))
@@ -136,7 +143,7 @@ static int load_conf(const char *conf)
     if(lua_isstring(L, -1))
         strcpy(settings.root_path, lua_tostring(L, -1));
     lua_pop(L, 1);
-    printf("settings.root_path: %s\n", settings.root_path);
+    //printf("settings.root_path: %s\n", settings.root_path);
 
     lua_getglobal(L, "img_path");
     if(lua_isstring(L, -1))
@@ -157,13 +164,13 @@ static int load_conf(const char *conf)
     if(lua_isstring(L, -1))
         strcpy(settings.ssdb_ip, lua_tostring(L, -1));
     lua_pop(L, 1);
-    printf("settings.ssdb_ip: %s\n", settings.ssdb_ip);
+    //printf("settings.ssdb_ip: %s\n", settings.ssdb_ip);
 
     lua_getglobal(L, "ssdb_port");
     if(lua_isnumber(L, -1))
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    printf("settings.ssdb_port: %d\n", settings.ssdb_port);
+    //printf("settings.ssdb_port: %d\n", settings.ssdb_port);
 
     lua_close(L);
 

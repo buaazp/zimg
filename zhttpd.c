@@ -28,7 +28,6 @@
 #include "zutil.h"
 #include "zlog.h"
 
-static char *server_name = "zimg/1.0.0 (Unix)";
 extern struct setting settings;
 
 static const char * guess_type(const char *type);
@@ -173,7 +172,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 	puts(">>>");
 
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
@@ -188,7 +187,7 @@ void echo_cb(evhtp_request_t *req, void *arg)
 {
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>zimg works!</h1></body></html>");
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
@@ -396,7 +395,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         md5sum, settings.port, md5sum
         );
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
@@ -405,7 +404,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_200);
     LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
@@ -485,7 +484,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         }
         evbuffer_add_printf(req->buffer_out, "<html>\n </html>\n");
         //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
         LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -496,7 +495,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_INFO, "favicon.ico Request, Denied.");
         //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
         goto done;
@@ -555,7 +554,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 "</body>\n</html>\n"
                 );
             //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
             evhtp_send_reply(req, EVHTP_RES_OK);
             LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -603,7 +602,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
     LOG_PRINT(LOG_INFO, "Got the File!");
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
@@ -621,7 +620,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
     LOG_PRINT(LOG_INFO, "============send_document_cb() ERROR!===============");

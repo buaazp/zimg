@@ -41,6 +41,8 @@ struct setting{
     char root_path[512];
     char img_path[512];
     char log_name[512];
+    char version[128];
+    char server_name[128];
     int port;
     int backlog;
     int num_threads;
