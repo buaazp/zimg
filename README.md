@@ -18,7 +18,7 @@ Contact me: zp@buaa.us
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
-[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.
+[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
 [ssdb](https://github.com/ideawu/ssdb): SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.  
 
 ### Supplying:
@@ -46,7 +46,7 @@ All versions on [Github](https://github.com/buaazp/zimg).
 ### Build:
 
 	cd zimg  
-    cmake .
+	cmake .  
 	make  
 	./zimg  
 	
