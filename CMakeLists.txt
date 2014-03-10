@@ -101,6 +101,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${OPENSSL_INCLUDE_DIR}
 	${LIBEVENT_INCLUDE_DIR}
+    ${LIBLUA_INCLUDE_DIR}
     ${ImageMagick_MagickWand_INCLUDE_DIR}
 )
 

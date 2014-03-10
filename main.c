@@ -75,7 +75,7 @@ static void settings_init(void)
 
 static int load_conf(const char *conf)
 {
-    lua_State *L = lua_open();
+    lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     if (luaL_loadfile(L, conf) || lua_pcall(L, 0, 0, 0))
     {
@@ -191,7 +191,7 @@ static void sighandler(int signal)
  */
 int main(int argc, char **argv)
 {
-    int c;
+    int i;
     _init_path = getcwd(NULL, 0);
     LOG_PRINT(LOG_INFO, "Get init-path: %s", _init_path);
 
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 
     settings_init();
     const char *conf_file = NULL;
-    for(int i=1; i<argc; i++)
+    for(i=1; i<argc; i++)
     {
         if(strcmp(argv[i], "-d") == 0){
             settings.daemon = 1;
