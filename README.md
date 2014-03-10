@@ -7,6 +7,7 @@ Author: [@招牌疯子](http://weibo.com/819880808)
 Contact me: zp@buaa.us  
 
 ### Versions:
+- 03/10/2014 - zimg 1.1.0 Release.
 - 08/01/2013 - zimg 1.0.0 Release.
 
 ### Dependence:
@@ -17,6 +18,8 @@ Contact me: zp@buaa.us
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
+[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.
+[ssdb](https://github.com/ideawu/ssdb): SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.  
 
 ### Supplying:
 Receive and storage users' upload images.  
@@ -24,6 +27,8 @@ Transfer image through HTTP protocol.
 Process resized and grayed image by request parameter.  
 Use memcached to improve performance.  
 Multi-thread support for multi-core processor server.  
+Use lua for conf and other functions.
+Support SSDB mode to save images and backups.
 
 ### In Planning:
 Distributed architecture.  
