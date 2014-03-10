@@ -27,8 +27,8 @@ Transfer image through HTTP protocol.
 Process resized and grayed image by request parameter.  
 Use memcached to improve performance.  
 Multi-thread support for multi-core processor server.  
-Use lua for conf and other functions.
-Support SSDB mode to save images and backups.
+Use lua for conf and other functions.  
+Support SSDB mode to save images and backups.  
 
 ### In Planning:
 Distributed architecture.  
