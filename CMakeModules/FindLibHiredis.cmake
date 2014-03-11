@@ -5,7 +5,7 @@
 # LIBHIREDIS_INCLUDE_DIR - the LIBHIREDIS include directory
 # LIBHIREDIS_LIBRARIES 0 The libraries needed to use LIBHIREDIS
 
-FIND_PATH(LIBHIREDIS_INCLUDE_DIR NAMES hiredis.h PATH /usr/local/include/hiredis)
+FIND_PATH(LIBHIREDIS_INCLUDE_DIR NAMES hiredis/hiredis.h)
 FIND_LIBRARY(LIBHIREDIS_LIBRARY NAMES hiredis PATH /usr/lib /usr/local/lib)
 
 INCLUDE(FindPackageHandleStandardArgs)
