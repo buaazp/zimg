@@ -52,3 +52,7 @@ A zimg server in my VPS to test functions.
 If you have any question, please submit comment here or mention me on [Weibo](http://weibo.com/819880808).  
 Technical issues are also welcomed to be submitted on [GitHub](https://github.com/buaazp/zimg/issues).
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/buaazp/zimg/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
