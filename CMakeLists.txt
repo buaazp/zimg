@@ -79,13 +79,10 @@ find_package(OpenSSL)
 find_package(ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package(LibMemcached REQUIRED)
 find_package(libevhtp REQUIRED)
-find_package(LibLua REQUIRED)
+find_package(Lua51 REQUIRED)
 find_package(LibHiredis REQUIRED)
 
 find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
-
-set(IMAGEMAGICK_INCLUDE_DIRS ${ImageMagick_INCLUDE_DIRS})
-set(IMAGEMAGICK_LIBRARIES ${ImageMagick_LIBRARIES})
 
 if (NOT OPENSSL_FOUND)
 	message("Diabling SSL")
@@ -104,8 +101,8 @@ include_directories(
     ${LIBEVHTP_INCLUDE_DIR}
     ${LIBHIREDIS_INCLUDE_DIR}
     ${LIBMEMCACHED_INCLUDE_DIR}
-    ${LIBLUA_INCLUDE_DIR}
-    ${ImageMagick_MagickWand_INCLUDE_DIR}
+    ${LUA_INCLUDE_DIR}
+    ${ImageMagick_INCLUDE_DIRS}
 )
 
 set(ZIMG_EXTERNAL_LIBS
@@ -116,7 +113,7 @@ set(ZIMG_EXTERNAL_LIBS
         ${ImageMagick_MagickWand_LIBRARY}
         ${LIBEVHTP_LIBRARY}
         ${LIBMEMCACHED_LIBRARY}
-        ${LIBLUA_LIBRARY}
+        ${LUA_LIBRARIES}
         ${LIBHIREDIS_LIBRARY}
 )
 
