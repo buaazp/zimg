@@ -32,6 +32,9 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#define _STR(s) #s   
+#define STR(s) _STR(s)
+
 extern struct setting settings;
 evbase_t *evbase;
 
@@ -60,7 +63,7 @@ static void settings_init(void)
     strcpy(settings.root_path, "./www/index.html");
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
-    strcpy(settings.version, "1.1.0");
+    strcpy(settings.version, STR(ZIMG_VERSION));
     sprintf(settings.server_name, "zimg/%s", settings.version);
     settings.port = 4869;
     settings.backlog = 1024;
@@ -73,6 +76,8 @@ static void settings_init(void)
     settings.mode = 1;
     strcpy(settings.ssdb_ip, "127.0.0.1");
     settings.ssdb_port = 6379;
+    strcpy(settings.beansdb_ip, "127.0.0.1");
+    settings.beansdb_port = 7905;
 }
 
 static int load_conf(const char *conf)
@@ -158,6 +163,16 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "mode");
     if(lua_isnumber(L, -1))
         settings.mode = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "beansdb_ip");
+    if(lua_isstring(L, -1))
+        strcpy(settings.beansdb_ip, lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "beansdb_port");
+    if(lua_isnumber(L, -1))
+        settings.beansdb_port= (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "ssdb_ip");
@@ -248,12 +263,19 @@ int main(int argc, char **argv)
         return -1;
     }
 
+
     if(settings.daemon == 1)
     {
         if(daemon(1, 1) < 0)
         {
             fprintf(stderr, "Create daemon failed!\n");
             return -1;
+        }
+        else
+        {
+            fprintf(stdout, "zimg %s\n", settings.version);
+            fprintf(stdout, "Copyright (c) 2013-2014 zimg.buaa.us\n");
+            fprintf(stderr, "\n");
         }
     }
     //init the Path zimg need to use.

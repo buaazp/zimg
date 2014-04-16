@@ -37,3 +37,4 @@ tags
 
 hiredis
 hiredis.c
+conf/debug.lua

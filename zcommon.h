@@ -29,7 +29,9 @@
 #include <libmemcached/memcached.h>
 #include <stdbool.h>
 
-#define _DEBUG 1
+#ifndef ZIMG_VERSION
+#define ZIMG_VERSION "1.5.0"
+#endif
 
 #define MAX_LINE 1024 
 #define CACHE_MAX_SIZE 1024*1024
@@ -52,10 +54,21 @@ struct setting{
     int cache_port;
     uint64_t max_keepalives;
     int mode;
+    char beansdb_ip[128];
+    int beansdb_port;
     char ssdb_ip[128];
     int ssdb_port;
 } settings;
 
+
+typedef struct zimg_req_s {
+    char *md5;
+    int width;
+    int height;
+    bool proportion;
+    bool gray;
+    char *rsp_path;
+} zimg_req_t;
 
 char *_init_path;
 
@@ -69,7 +82,7 @@ char *_init_path;
 #define LOG_DEBUG 7                       /* DEBUG message */
 
 
-#ifdef _DEBUG 
+#ifdef DEBUG 
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
         int log_id = log_open(settings.log_name, "a"); \

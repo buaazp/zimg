@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 project(zimg)
 
-set(PROJECT_MAJOR_VERSION 1)
+set(PROJECT_MAJOR_VERSION 2)
 set(PROJECT_MINOR_VERSION 0)
 set(PROJECT_PATCH_VERSION 0)
 
 set (PROJECT_VERSION ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+
 
 INCLUDE (CheckFunctionExists)
 INCLUDE (CheckIncludeFiles)
@@ -33,6 +34,7 @@ CHECK_INCLUDE_FILES(sys/un.h HAVE_SYS_UN)
 CHECK_TYPE_SIZE("int" SIZEOF_INT)
 CHECK_TYPE_SIZE("long" SIZEOF_LONG)
 CHECK_TYPE_SIZE("short" SIZEOF_SHORT)
+
 
 if (NOT HAVE_STRNDUP)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_STRNDUP")
@@ -69,10 +71,6 @@ SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(BaseConfig)
 
-message("Build Type: ${CMAKE_BUILD_TYPE}")
-message("Std CFLAGS: ${CMAKE_C_FLAGS}")
-message("Dbg CFLAGS: ${CMAKE_C_FLAGS_DEBUG}")
-message("Rel CFLAGS: ${CMAKE_C_FLAGS_RELEASE}")
 
 find_package(LibEvent REQUIRED)
 find_package(OpenSSL)
@@ -80,7 +78,7 @@ find_package(ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package(LibMemcached REQUIRED)
 find_package(libevhtp REQUIRED)
 find_package(Lua51 REQUIRED)
-find_package(LibHiredis REQUIRED)
+find_package(LibHiredis)
 
 find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
 
@@ -125,11 +123,17 @@ if (NOT ${LIBEVENT_OPENSSL_FOUND})
 	set (EVHTP_DISABLE_SSL 1)
 endif(NOT ${LIBEVENT_OPENSSL_FOUND})
 
-set(ZIMG_SOURCES zhttpd.c zspinlock.c zlog.c zmd5.c zutil.c zcache.c zimg.c main.c)
+set(ZIMG_SOURCES zhttpd.c zspinlock.c zlog.c zmd5.c zutil.c zcache.c zimg.c zssdb.c zbeansdb.c main.c)
 
 if (NOT EVHTP_DISABLE_EVTHR)
 	set (ZIMG_EXTERNAL_LIBS ${ZIMG_EXTERNAL_LIBS} pthread)
 endif(NOT EVHTP_DISABLE_EVTHR)
+
+if (LIBHIREDIS_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSESSDB")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DUSESSDB")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DUSESSDB")
+endif(LIBHIREDIS_FOUND)
 
 if (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNDEBUG")
@@ -138,6 +142,15 @@ endif (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 if (EVHTP_DISABLE_SSL)
 	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DEVHTP_DISABLE_SSL")
 endif()
+
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZIMG_VERSION=${PROJECT_VERSION}")
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG -DZIMG_VERSION=${PROJECT_VERSION}")
+set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DZIMG_VERSION=${PROJECT_VERSION}")
+
+message("Build Type: ${CMAKE_BUILD_TYPE}")
+message("Std CFLAGS: ${CMAKE_C_FLAGS}")
+message("Dbg CFLAGS: ${CMAKE_C_FLAGS_DEBUG}")
+message("Rel CFLAGS: ${CMAKE_C_FLAGS_RELEASE}")
 
 set(CMAKE_EXE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib")
 add_executable(zimg ${ZIMG_SOURCES})
