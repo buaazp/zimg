@@ -6,6 +6,8 @@ zimg ([Homepage](http://zimg.buaa.us/)) is a light image storage and processing 
 Author: [@招牌疯子](http://weibo.com/819880808)  
 Contact me: zp@buaa.us  
 
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/buaazp/zimg/trend.png)](https://bitdeli.com/free "Bitdeli Badge")  
+
 ### Versions:
 - 04/16/2014 - zimg 2.0.0 Release. *Important milestone for zimg.*
 - 03/10/2014 - zimg 1.1.0 Release.
