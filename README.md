@@ -1,8 +1,9 @@
 #zimg#
 
 
-zimg ([Homepage](http://zimg.buaa.us/)) is a light image storage and processing system. It's written by C and it has high performance in image field. There is a benchmark test report with more infomation: [Benchmark](http://zimg.buaa.us/benchmark.html). zimg is designed for high concurrency image server. It supports many features for uploading and downloading images.  
+zimg is a light image storage and processing system. It's written by C and it has high performance in image field. There is a benchmark test report with more infomation: [Benchmark](http://zimg.buaa.us/benchmark.html). zimg is designed for high concurrency image server. It supports many features for uploading and downloading images.  
 
+Homepage: [zimg.buaa.us](http://zimg.buaa.us/)  
 Author: [@招牌疯子](http://weibo.com/819880808)  
 Contact me: zp@buaa.us  
 
@@ -25,7 +26,7 @@ Contact me: zp@buaa.us
 [beansdb](https://github.com/douban/beansdb): Beansdb is a distributed key-value storage system designed for large scale online system, aiming for high avaliablility and easy management.  
 [beanseye](https://github.com/douban/beanseye): Beanseye is proxy and monitor for beansdb, written in Go.  
 #### [Optional] For ssdb backend:  
-[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
+[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database. *[Note]: zimg contains libhiredis.*  
 [ssdb](https://github.com/ideawu/ssdb): SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.  
 
 
