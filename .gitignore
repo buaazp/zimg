@@ -26,15 +26,16 @@ img/.DS_Store
 *.log
 *.dSYM
 
-img/
-zimg
+bin/img/
+bin/log/
+bin/zimg
 
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-Makefile
 tags
 
-hiredis
-hiredis.c
-conf/debug.lua
+bin/conf/debug.lua
+build/
+src/include/evhtp-config.h
+src/hiredis.c

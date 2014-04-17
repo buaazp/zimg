@@ -62,7 +62,8 @@ You should build dependences above and make sure the beansdb, beanseye or ssdb b
 git clone https://github.com/buaazp/zimg
 cd zimg   
 make  
-./bin/zimg conf/zimg.lua
+cd bin  
+./zimg conf/zimg.lua
 ````
 ### Config:
 
