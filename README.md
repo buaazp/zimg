@@ -17,7 +17,7 @@ Contact me: zp@buaa.us
 > We stand on the shoulders of giants.  
 
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO.  
-[libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API.  
+[libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API. *[Note]: zimg contains libevhtp.*  
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
@@ -48,7 +48,7 @@ There is an architecture design document of zimg v1.0.
 It is written in Chinese.  
 [Architecture Design of zimg](http://zimg.buaa.us/arch_design.html)  
 And this document is to introduce zimg v2.0.  
-[Distributed image storage server zimg](http://zimg.buaa.us/arch_design_distributed.html)
+[Distributed Image Storage Server: zimg](http://zimg.buaa.us/arch_design_distributed.html)
 
 ### Download:
 The source code is licensed under a BSD-like License.  
@@ -60,10 +60,9 @@ You should build dependences above and make sure the beansdb, beanseye or ssdb b
  
 ````
 git clone https://github.com/buaazp/zimg
-cd zimg  
-cmake .  
+cd zimg   
 make  
-./zimg conf/zimg.lua
+./bin/zimg conf/zimg.lua
 ````
 ### Config:
 
