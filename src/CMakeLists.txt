@@ -56,7 +56,7 @@ OPTION(EVHTP_DISABLE_SSL       "Disable ssl support"      OFF)
 OPTION(EVHTP_DISABLE_EVTHR     "Disable evthread support" OFF)
 
 # -DEVHTP_DISABLE_REGEX:STRING=ON
-OPTION(EVHTP_DIABLE_REGEX      "Disable regex support"    OFF)
+OPTION(EVHTP_DISABLE_REGEX      "Disable regex support"    OFF)
 
 # -DEVHTP_BUILD_SHARED:STRING=ON
 OPTION(EVHTP_BUILD_SHARED      "Build shared library too" OFF)
@@ -74,14 +74,39 @@ include(BaseConfig)
 
 
 find_package(LibEvent REQUIRED)
-find_package(OpenSSL)
+if (NOT LIBEVENT_OPENSSL_LIBRARY)
+    set (EVHTP_DISABLE_SSL ON)
+endif()
+if (NOT EVHTP_DISABLE_SSL)
+    find_package (OpenSSL)
+endif()
+find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
+
+if (NOT EVHTP_DISABLE_REGEX)
+    find_library (HAS_SYS_ONIG onig)
+    if (NOT HAS_SYS_ONIG)
+        set (ONIG_SOURCES "")
+        set (ONIG_LIBS "")
+        set (ONIG_INCLUDE_DIR "")
+        set (EVHTP_DISABLE_REGEX ON)
+    else()
+        message("-- Using system libonig")
+        set (ONIG_SOURCES "")
+        set (ONIG_LIBS ${HAS_SYS_ONIG})
+        set (ONIG_INCLUDE_DIR "")
+    endif (NOT HAS_SYS_ONIG)
+else()
+    set(ONIG_SOURCES "")
+    set(ONIG_LIBS "")
+    set(ONIG_INCLUDE_DIR "")
+endif()
+
 find_package(ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package(LibMemcached REQUIRED)
-find_package(libevhtp REQUIRED)
 find_package(Lua51 REQUIRED)
+#find_package(libevhtp REQUIRED)
 #find_package(LibHiredis)
 
-find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
 
 if (NOT OPENSSL_FOUND)
 	message("Diabling SSL")
@@ -92,8 +117,6 @@ if (NOT OPENSSL_FOUND)
 	set (LIBEVENT_OPENSSL_LIBRARY "")
 endif()
 
-message ("include path: ${LIBEVHTP_INCLUDE_DIR}")
-message ("lib path: ${LIBEVHTP_LIBRARY}")
 
 include_directories(
 	${OPENSSL_INCLUDE_DIR}
@@ -118,27 +141,28 @@ set(ZIMG_EXTERNAL_LIBS
 )
 
 if (NOT ${LIBEVENT_PTHREADS_FOUND})
-	set(EVHTP_DISABLE_EVTHR 1)
+    set(EVHTP_DISABLE_EVTHR ON)
 endif(NOT ${LIBEVENT_PTHREADS_FOUND})
-
-if (NOT ${LIBEVENT_OPENSSL_FOUND})
-	set (EVHTP_DISABLE_SSL 1)
-endif(NOT ${LIBEVENT_OPENSSL_FOUND})
-
-#set (ZIMG_SOURCES zhttpd.c zspinlock.c zlog.c zmd5.c zutil.c zcache.c zimg.c zssdb.c zbeansdb.c main.c)
-
-aux_source_directory (${PROJECT_SOURCE_DIR} ZIMG_SOURCES)
-set (SOURCES ${ZIMG_SOURCES})
 
 if (NOT EVHTP_DISABLE_EVTHR)
 	set (ZIMG_EXTERNAL_LIBS ${ZIMG_EXTERNAL_LIBS} pthread)
 endif(NOT EVHTP_DISABLE_EVTHR)
+
+configure_file (
+    ${CMAKE_CURRENT_SOURCE_DIR}/evhtp-config.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/evhtp-config.h
+)
 
 #if (LIBHIREDIS_FOUND)
 #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSESSDB")
 #    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DUSESSDB")
 #    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DUSESSDB")
 #endif(LIBHIREDIS_FOUND)
+
+#set (ZIMG_SOURCES zhttpd.c zspinlock.c zlog.c zmd5.c zutil.c zcache.c zimg.c zssdb.c zbeansdb.c main.c)
+
+aux_source_directory (${PROJECT_SOURCE_DIR} ZIMG_SOURCES)
+set (SOURCES ${ZIMG_SOURCES})
 
 if (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNDEBUG")

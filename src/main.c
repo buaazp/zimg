@@ -23,14 +23,14 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <signal.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include "zcommon.h"
 #include "zhttpd.h"
 #include "zutil.h"
 #include "zlog.h"
 #include "zcache.h"
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
 
 #define _STR(s) #s   
 #define STR(s) _STR(s)
