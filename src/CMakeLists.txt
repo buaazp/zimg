@@ -79,7 +79,7 @@ find_package(ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package(LibMemcached REQUIRED)
 find_package(libevhtp REQUIRED)
 find_package(Lua51 REQUIRED)
-find_package(LibHiredis)
+#find_package(LibHiredis)
 
 find_path(LIBEVENT_INCLUDE_DIR event2/event.h REQUIRED)
 
@@ -96,7 +96,6 @@ message ("include path: ${LIBEVHTP_INCLUDE_DIR}")
 message ("lib path: ${LIBEVHTP_LIBRARY}")
 
 include_directories(
-    #    "${CMAKE_CURRENT_SOURCE_DIR}/include"
 	${OPENSSL_INCLUDE_DIR}
 	${LIBEVENT_INCLUDE_DIR}
     ${LIBEVHTP_INCLUDE_DIR}
@@ -107,7 +106,6 @@ include_directories(
 )
 
 set(ZIMG_EXTERNAL_LIBS
-    # "${CMAKE_CURRENT_SOURCE_DIR}/lib/*"
     ${LIBEVENT_LIBRARY}
     ${LIBEVENT_PTHREADS_LIBRARY}
     ${LIBEVENT_OPENSSL_LIBRARY}
@@ -127,17 +125,20 @@ if (NOT ${LIBEVENT_OPENSSL_FOUND})
 	set (EVHTP_DISABLE_SSL 1)
 endif(NOT ${LIBEVENT_OPENSSL_FOUND})
 
-set(ZIMG_SOURCES zhttpd.c zspinlock.c zlog.c zmd5.c zutil.c zcache.c zimg.c zssdb.c zbeansdb.c main.c)
+#set (ZIMG_SOURCES zhttpd.c zspinlock.c zlog.c zmd5.c zutil.c zcache.c zimg.c zssdb.c zbeansdb.c main.c)
+
+aux_source_directory (${PROJECT_SOURCE_DIR} ZIMG_SOURCES)
+set (SOURCES ${ZIMG_SOURCES})
 
 if (NOT EVHTP_DISABLE_EVTHR)
 	set (ZIMG_EXTERNAL_LIBS ${ZIMG_EXTERNAL_LIBS} pthread)
 endif(NOT EVHTP_DISABLE_EVTHR)
 
-if (LIBHIREDIS_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSESSDB")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DUSESSDB")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DUSESSDB")
-endif(LIBHIREDIS_FOUND)
+#if (LIBHIREDIS_FOUND)
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSESSDB")
+#    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DUSESSDB")
+#    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DUSESSDB")
+#endif(LIBHIREDIS_FOUND)
 
 if (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNDEBUG")
@@ -157,6 +158,6 @@ message("Dbg CFLAGS: ${CMAKE_C_FLAGS_DEBUG}")
 message("Rel CFLAGS: ${CMAKE_C_FLAGS_RELEASE}")
 
 set(CMAKE_EXE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib")
-add_executable(zimg ${ZIMG_SOURCES})
+add_executable(zimg ${SOURCES})
 target_link_libraries(zimg ${ZIMG_EXTERNAL_LIBS})
 

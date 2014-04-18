@@ -25,7 +25,8 @@
 #include "zssdb.h"
 #include "zlog.h"
 #include "zcache.h"
-#include <hiredis/hiredis.h>
+//#include <hiredis/hiredis.h>
+#include "hiredis/hiredis.h"
 
 extern struct setting settings;
 
