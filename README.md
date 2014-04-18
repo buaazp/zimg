@@ -10,7 +10,7 @@ Contact me: zp@buaa.us
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/buaazp/zimg/trend.png)](https://bitdeli.com/free "Bitdeli Badge")  
 
 ### Versions:
-- 04/16/2014 - zimg 2.0.0 Release. *Important milestone for zimg.*
+- 04/26/2014 - zimg 2.0.0 Release. *Important milestone for zimg.*
 - 03/10/2014 - zimg 1.1.0 Release.
 - 08/01/2013 - zimg 1.0.0 Release.
 
@@ -18,7 +18,6 @@ Contact me: zp@buaa.us
 > We stand on the shoulders of giants.  
 
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO.  
-[libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API. *[Note]: zimg contains libevhtp.*  
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
@@ -26,9 +25,13 @@ Contact me: zp@buaa.us
 [beansdb](https://github.com/douban/beansdb): Beansdb is a distributed key-value storage system designed for large scale online system, aiming for high avaliablility and easy management.  
 [beanseye](https://github.com/douban/beanseye): Beanseye is proxy and monitor for beansdb, written in Go.  
 #### [Optional] For ssdb backend:  
-[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database. *[Note]: zimg contains libhiredis.*  
 [ssdb](https://github.com/ideawu/ssdb): SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.  
 
+#### Thanks to:  
+> zimg contains libevhtp and libhiredis. You needn't install them now.
+
+[libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API.  
+[hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
 
 ### Supplying:
 Receive and storage users' upload images.  
