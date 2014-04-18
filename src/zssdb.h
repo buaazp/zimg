@@ -19,8 +19,6 @@
  */
 
 
-#ifdef USESSDB
-
 #ifndef ZSSDB_H
 #define ZSSDB_H
 
@@ -32,5 +30,4 @@ int save_img_ssdb(const char *cache_key, const char *buff, const size_t len);
 int get_img_ssdb(const char *cache_key, char **buff, size_t *len);
 
 
-#endif
 #endif

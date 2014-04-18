@@ -19,6 +19,7 @@
  * @date 2013-07-19
  */
 
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -27,6 +28,8 @@
 #include "zimg.h"
 #include "zutil.h"
 #include "zlog.h"
+#include "zbeansdb.h"
+#include "zssdb.h"
 
 extern struct setting settings;
 
@@ -589,10 +592,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         get_img_rst = get_img(zimg_req, &buff,  &len);
     else if(settings.mode == 2)
         get_img_rst = get_img_mode_beansdb(zimg_req, &buff,  &len);
-#ifdef USESSDB
     else if(settings.mode == 3)
         get_img_rst = get_img_mode_ssdb(zimg_req, &buff,  &len);
-#endif
     else
     {
         LOG_PRINT(LOG_ERROR, "backend mode[%d] illegal!", settings.mode);

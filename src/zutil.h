@@ -25,8 +25,10 @@
 #include "zcommon.h"
 
 pid_t gettid();
+int get_cpu_cores();
 int kmp(const char *matcher, int mlen, const char *pattern, int plen);
 int get_type(const char *filename, char *type);
+int is_file(const char *filename);
 int is_img(const char *filename);
 int is_dir(const char *path);
 int mk_dir(const char *path);

@@ -18,6 +18,7 @@
  * @date 2013-07-19
  */
 
+#include <stdio.h>
 #include <evhtp.h>
 #include <wand/MagickWand.h>
 #include <inttypes.h>

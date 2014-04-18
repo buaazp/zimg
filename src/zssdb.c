@@ -19,8 +19,6 @@
  * @date 2014-04-16
  */
 
-#ifdef USESSDB
- 
 #include <wand/MagickWand.h>
 #include "zssdb.h"
 #include "zlog.h"
@@ -366,4 +364,3 @@ int get_img_ssdb(const char *cache_key, char **buff, size_t *len)
     return 1;
 }
 
-#endif

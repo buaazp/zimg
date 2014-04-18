@@ -19,6 +19,7 @@
  * @date 2013-07-19
  */
 
+#include <stdio.h>
 #include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -30,12 +31,15 @@
 #include "zlog.h"
 #include "zcache.h"
 #include "zutil.h"
+#include "zbeansdb.h"
+#include "zssdb.h"
 
 extern struct setting settings;
 
 int save_img(const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size);
+
 
 /**
  * @brief save_img Save buffer from POST requests
@@ -100,7 +104,6 @@ int save_img(const char *buff, const int len, char *md5)
             goto done;
         }
     }
-#ifdef USESSDB
     else if(settings.mode == 3)
     {
         if(save_img_ssdb(cache_key, buff, len) == -1)
@@ -113,7 +116,6 @@ int save_img(const char *buff, const int len, char *md5)
             goto done;
         }
     }
-#endif
 
     //caculate 2-level path
     int lvl1 = str_hash(md5sum);
