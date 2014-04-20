@@ -540,14 +540,18 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         const char *str_w, *str_h;
         str_w = evhtp_kv_find(params, "w");
         if(str_w == NULL)
+        {
             str_w = "0";
+        }
         str_h = evhtp_kv_find(params, "h");
         if(str_h == NULL)
+        {
             str_h = "0";
-        LOG_PRINT(LOG_INFO, "w() = %s; h() = %s;", str_w, str_h);
+        }
+        LOG_PRINT(LOG_DEBUG, "w() = %s; h() = %s;", str_w, str_h);
         if(strcmp(str_w, "g") == 0 && strcmp(str_h, "w") == 0)
         {
-            LOG_PRINT(LOG_INFO, "Love is Eternal.");
+            LOG_PRINT(LOG_DEBUG, "Love is Eternal.");
             evbuffer_add_printf(req->buffer_out, "<html>\n <head>\n"
                 "  <title>Love is Eternal</title>\n"
                 " </head>\n"
@@ -556,11 +560,10 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
                 "</body>\n</html>\n"
                 );
-            //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
             evhtp_send_reply(req, EVHTP_RES_OK);
-            LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
+            LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
             goto done;
         }
         else
@@ -570,11 +573,15 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             const char *str_p = evhtp_kv_find(params, "p");
             const char *str_g = evhtp_kv_find(params, "g");
             if(str_p)
+            {
                 proportion = atoi(str_p);
+            }
             else
                 proportion = 1;
             if(str_g)
+            {
                 gray = atoi(str_g);
+            }
             else
                 gray = 0;
         }

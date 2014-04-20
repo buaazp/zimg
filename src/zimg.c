@@ -80,14 +80,15 @@ int save_img(const char *buff, const int len, char *md5)
     char *save_path = (char *)malloc(512);
     char *save_name = (char *)malloc(512);
 
-    sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
+    //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
+    gen_key(cache_key, md5sum, 0);
     if(exist_cache(cache_key) == 1)
     {
-        LOG_PRINT(LOG_INFO, "File Exist, Needn't Save.");
+        LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
         result = 1;
         goto done;
     }
-    LOG_PRINT(LOG_INFO, "exist_cache not found. Begin to Save File.");
+    LOG_PRINT(LOG_DEBUG, "exist_cache not found. Begin to Save File.");
 
 
     if(settings.mode == 2)
@@ -148,11 +149,9 @@ int save_img(const char *buff, const int len, char *md5)
 cache:
     if(len < CACHE_MAX_SIZE)
     {
-        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
-        sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
+        //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
+        gen_key(cache_key, md5sum, 0);
         set_cache_bin(cache_key, buff, len);
-//        sprintf(cache_key, "type:%s:0:0:1:0", md5sum);
-//        set_cache(cache_key, type);
     }
     result = 1;
 
@@ -247,23 +246,18 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     bool got_rsp = true;
     bool got_color = false;
 
-    LOG_PRINT(LOG_INFO, "get_img() start processing zimg request...");
+    LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
     // to gen cache_key like this: img:926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+    //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+    gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
     if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
     {
-        LOG_PRINT(LOG_INFO, "Hit Cache[Key: %s].", cache_key);
-//        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-//        if(find_cache(cache_key, img_format) == -1)
-//        {
-//            LOG_PRINT(LOG_WARNING, "Cannot Hit Type Cache[Key: %s]. Use jpeg As Default.", cache_key);
-//            strcpy(img_format, "jpeg");
-//        }
+        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
         result = 1;
         goto err;
     }
-    LOG_PRINT(LOG_INFO, "Start to Find the Image...");
+    LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
 
     len = strlen(req->md5) + strlen(settings.img_path) + 12;
     if (!(whole_path = malloc(len)))
@@ -314,10 +308,11 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
         if(req->gray == 1)
         {
-            sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
+            //sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
+            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
             if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
             {
-                LOG_PRINT(LOG_INFO, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
+                LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
                 status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
                 if(status == MagickFalse)
                 {
@@ -327,7 +322,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 else
                 {
                     got_color = true;
-                    LOG_PRINT(LOG_INFO, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, *img_size);
+                    LOG_PRINT(LOG_DEBUG, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, *img_size);
                     goto convert;
                 }
             }
@@ -346,9 +341,6 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 if(*img_size < CACHE_MAX_SIZE)
                 {
                     set_cache_bin(cache_key, *buff_ptr, *img_size);
-//                    img_format = MagickGetImageFormat(magick_wand);
-//                    sprintf(cache_key, "type:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
-//                    set_cache(cache_key, img_format);
                 }
 
                 goto convert;
@@ -356,10 +348,11 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         }
 
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
-        sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
+        //sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
+        gen_key(cache_key, req->md5, 0);
         if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
         {
-            LOG_PRINT(LOG_INFO, "Hit Orignal Image Cache[Key: %s].", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
             if(status == MagickFalse)
             {
@@ -378,16 +371,13 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                     if(*img_size < CACHE_MAX_SIZE)
                     {
                         set_cache_bin(cache_key, *buff_ptr, *img_size);
-//                        img_format = MagickGetImageFormat(magick_wand);
-//                        sprintf(cache_key, "type:%s:0:0:1:0", req->md5);
-//                        set_cache(cache_key, img_format);
                     }
                 }
             }
         }
         else
         {
-            LOG_PRINT(LOG_INFO, "Not Hit Original Image Cache. Begin to Open it.");
+            LOG_PRINT(LOG_DEBUG, "Not Hit Original Image Cache. Begin to Open it.");
             status = MagickReadImage(magick_wand, orig_path);
             if(status == MagickFalse)
             {
@@ -400,9 +390,6 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 if(*img_size < CACHE_MAX_SIZE)
                 {
                     set_cache_bin(cache_key, *buff_ptr, *img_size);
-//                    img_format = MagickGetImageFormat(magick_wand);
-//                    sprintf(cache_key, "type:%s:0:0:1:0", req->md5);
-//                    set_cache(cache_key, img_format);
                 }
             }
         }
@@ -500,7 +487,7 @@ convert:
         LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
     }
 
-    if(got_color == false || (got_color == true && req->width == 0) )
+    if(got_color == false || (got_color == true && req->width == 0 && req->height == 0) )
     {
         //compress image
         LOG_PRINT(LOG_INFO, "Start to Compress the Image!");
@@ -554,10 +541,9 @@ done:
     if(*img_size < CACHE_MAX_SIZE)
     {
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
-        sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
+        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
         set_cache_bin(cache_key, *buff_ptr, *img_size);
-//        sprintf(cache_key, "type:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-//        set_cache(cache_key, img_format);
     }
 
     result = 1;
@@ -587,4 +573,5 @@ err:
         free(whole_path);
     return result;
 }
+
 

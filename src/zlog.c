@@ -40,14 +40,14 @@ struct log_level_desc{
 };
  
 static struct log_level_desc log_level_descs[] = {
-    { LOG_LEVEL_FATAL,  "FATAL",        L"致命" },
-    { LOG_LEVEL_ALERT,  "ALERT",        L"危急" },
-    { LOG_LEVEL_CRIT,   "CRITICAL",     L"紧急" },
-    { LOG_LEVEL_ERROR,  "ERROR",        L"错误" },
+    { LOG_LEVEL_FATAL,      "FATAL",        L"致命" },
+    { LOG_LEVEL_ALERT,      "ALERT",        L"危急" },
+    { LOG_LEVEL_CRIT,       "CRITICAL",     L"紧急" },
+    { LOG_LEVEL_ERROR,      "ERROR",        L"错误" },
     { LOG_LEVEL_WARNING,    "WARNING",      L"警告" },
-    { LOG_LEVEL_NOTICE, "NOTICE",       L"注意" },
-    { LOG_LEVEL_INFO,   "INFO",         L"消息" },
-    { LOG_LEVEL_DEBUG,  "DEBUG",        L"调试" },
+    { LOG_LEVEL_NOTICE,     "NOTICE",       L"注意" },
+    { LOG_LEVEL_INFO,       "INFO",         L"消息" },
+    { LOG_LEVEL_DEBUG,      "DEBUG",        L"调试" },
 };
  
 static FILE* log_files[MAX_LOGS+1];
@@ -116,7 +116,7 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     va_list args;
     int level;
 
-#ifndef _DEBUG
+#ifndef DEBUG
     if (log_level == LOG_LEVEL_DEBUG)
         return;
 #endif

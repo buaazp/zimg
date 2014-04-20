@@ -1,0 +1,28 @@
+beansdb:
+  listen: 127.0.0.1:22121
+  hash: fnv1a_64
+  distribution: ketama
+  timeout: 400
+  backlog: 1024
+  preconnect: true
+  auto_eject_hosts: true
+  server_retry_timeout: 2000
+  server_failure_limit: 3
+  servers:
+   - 127.0.0.1:7900:1 beansdb1
+   - 127.0.0.1:7901:1 beansdb2
+
+ssdb:
+  listen: 127.0.0.1:22122
+  hash: fnv1a_64
+  distribution: ketama
+  redis: true
+  timeout: 400
+  backlog: 1024
+  preconnect: true
+  auto_eject_hosts: true
+  server_retry_timeout: 2000
+  server_failure_limit: 3
+  servers:
+   - 127.0.0.1:6380:1 ssdb1
+   - 127.0.0.1:6381:1 ssdb2

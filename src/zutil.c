@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include "zutil.h"
 #include "zlog.h"
 
@@ -41,6 +42,7 @@ int mk_dirs(const char *dir);
 int is_md5(char *s);
 static int htoi(char s[]);
 int str_hash(const char *str);
+int gen_key(char *key, char *md5, ...);
 
 // this data is for KMP searching
 static int pi[128];
@@ -365,3 +367,36 @@ int str_hash(const char *str)
     LOG_PRINT(LOG_INFO, "str(3)/4 = %d.", d);
     return d;
 }
+
+
+/**
+ * @brief gen_key Generate storage key from md5 and other args.
+ *
+ * @param key The key string.
+ * @param md5 The md5 string.
+ * @param argc Count of args.
+ * @param ... Args.
+ *
+ * @return Generate result.
+ */
+int gen_key(char *key, char *md5, ...)
+{
+    sprintf(key, "%s", md5);
+    va_list arg_ptr;
+    va_start(arg_ptr, md5);
+    int argc = va_arg(arg_ptr, int);
+    LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
+    int i, argv;
+    for(i = 0; i<argc; i++)
+    {
+        argv = va_arg(arg_ptr, int);
+        sprintf(key, "%s:%d", key, argv);
+        LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
+    }
+    va_end(arg_ptr);
+    LOG_PRINT(LOG_DEBUG, "key: %s", key);
+    return 1;
+}
+
+
+
