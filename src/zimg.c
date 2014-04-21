@@ -31,8 +31,7 @@
 #include "zlog.h"
 #include "zcache.h"
 #include "zutil.h"
-#include "zbeansdb.h"
-#include "zssdb.h"
+#include "zdb.h"
 
 extern struct setting settings;
 
@@ -91,28 +90,16 @@ int save_img(const char *buff, const int len, char *md5)
     LOG_PRINT(LOG_DEBUG, "exist_cache not found. Begin to Save File.");
 
 
-    if(settings.mode == 2)
+    if(settings.mode != 1)
     {
-        if(save_img_beansdb(cache_key, buff, len) == -1)
+        if(save_img_db(cache_key, buff, len) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "save_img_beansdb failed.");
+            LOG_PRINT(LOG_ERROR, "save_img_db failed.");
             goto done;
         }
         else
         {
-            LOG_PRINT(LOG_INFO, "save_img_beansdb succ.");
-            result = 1;
-            goto done;
-        }
-    }
-    else if(settings.mode == 3)
-    {
-        if(save_img_ssdb(cache_key, buff, len) == -1)
-        {
-            goto done;
-        }
-        else
-        {
+            LOG_PRINT(LOG_INFO, "save_img_db succ.");
             result = 1;
             goto done;
         }
