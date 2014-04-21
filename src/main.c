@@ -368,6 +368,7 @@ int main(int argc, char **argv)
 
    
     //init memcached connection...
+    /*
     if(settings.cache_on == true)
     {
         LOG_PRINT(LOG_DEBUG, "Begin to Test Memcached Connection...");
@@ -398,6 +399,7 @@ int main(int argc, char **argv)
     }
     else
         LOG_PRINT(LOG_DEBUG, "Don't use memcached as cache.");
+    */
 
     if(settings.mode == 2)
     {
@@ -430,7 +432,7 @@ int main(int argc, char **argv)
         if(c->err)
         {
             redisFree(c);
-            LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
+            LOG_PRINT(LOG_FATAL, "Connect to ssdb server faile");
             return -1;
         }
         else

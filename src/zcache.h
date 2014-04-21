@@ -23,12 +23,13 @@
 
 #include "zcommon.h"
 
-int exist_cache(memcached_st *memc, const char *key);
+void retry_cache(thr_arg_t *thr_arg);
+int exist_cache(thr_arg_t *thr_arg, const char *key);
 int find_cache(memcached_st *memc, const char *key, char *value);
 int set_cache(memcached_st *memc, const char *key, const char *value);
-int find_cache_bin(memcached_st *memc, const char *key, char **value_ptr, size_t *len);
-int set_cache_bin(memcached_st *memc, const char *key, const char *value, const size_t len);
-int del_cache(memcached_st *memc, const char *key);
+int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len);
+int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len);
+int del_cache(thr_arg_t *thr_arg, const char *key);
 
 #endif
 

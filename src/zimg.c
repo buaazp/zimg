@@ -82,7 +82,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
 
     //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
     gen_key(cache_key, md5sum, 0);
-    if(exist_cache(thr_arg->cache_conn, cache_key) == 1)
+    if(exist_cache(thr_arg, cache_key) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
         result = 1;

@@ -24,22 +24,50 @@
 
 extern struct setting settings;
 
-int exist_cache(memcached_st *memc, const char *key);
+void retry_cache(thr_arg_t *thr_arg);
+int exist_cache(thr_arg_t *thr_arg, const char *key);
 int find_cache(memcached_st *memc, const char *key, char *value);
 int set_cache(memcached_st *memc, const char *key, const char *value);
-int find_cache_bin(memcached_st *memc, const char *key, char **value_ptr, size_t *len);
-int set_cache_bin(memcached_st *memc, const char *key, const char *value, const size_t len);
-int del_cache(memcached_st *memc, const char *key);
+int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len);
+int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len);
+int del_cache(thr_arg_t *thr_arg, const char *key);
+
+
+/**
+ * @brief retry_cache Reconnect to the cache server.
+ *
+ * @param thr_arg Thread arg.
+ */
+void retry_cache(thr_arg_t *thr_arg)
+{
+    if(thr_arg->cache_conn != NULL)
+        memcached_free(thr_arg->cache_conn);
+
+    memcached_st *memc;
+    memc= memcached_create(NULL);
+
+    char mserver[32];
+    sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
+    memcached_server_st *servers = memcached_servers_parse(mserver);
+
+    memcached_server_push(memc, servers);
+    memcached_server_list_free(servers);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+    thr_arg->cache_conn = memc;
+
+    evthr_set_aux(thr_arg->thread, thr_arg);
+}
 
 /**
  * @brief exist_cache Check a key is exist in memcached.
  *
- * @param memc The connection to beansdb.
+ * @param thr_arg The arg of thread.
  * @param key The string of the key.
  *
  * @return 1 for yes and -1 for no.
  */
-int exist_cache(memcached_st *memc, const char *key)
+int exist_cache(thr_arg_t *thr_arg, const char *key)
 {
     int rst = -1;
     if(settings.cache_on == false)
@@ -47,6 +75,7 @@ int exist_cache(memcached_st *memc, const char *key)
 
     size_t valueLen;
     uint32_t  flags;
+    memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
     memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
@@ -55,6 +84,11 @@ int exist_cache(memcached_st *memc, const char *key)
     {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Exist.", key);
         rst = 1;
+    }
+    else if(rc == MEMCACHED_CONNECTION_FAILURE)
+    {
+        LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
+        retry_cache(thr_arg);
     }
     else
     {
@@ -131,6 +165,10 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
         LOG_PRINT(LOG_DEBUG, "Cache Set Successfully. Key[%s] Value: %s", key, value);
         rst = 1;
     }
+    else if(rc == MEMCACHED_CONNECTION_FAILURE)
+    {
+        LOG_PRINT(LOG_WARNING, "Cache Connection Failed!");
+    }
     else
     {
         LOG_PRINT(LOG_WARNING, "Cache Set(Key: %s Value: %s) Failed!", key, value);
@@ -145,7 +183,7 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
 /**
  * @brief find_cache_bin Find a key's BINARY value.
  *
- * @param memc The connection to beansdb.
+ * @param thr_arg The arg of thread.
  * @param key The key you want to find.
  * @param value_ptr It will be alloc and contains the binary value.
  * @param len It will change to the length of the value.
@@ -153,13 +191,14 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
  * @return 1 for success and -1 for fail.
  */
 //int find_cache_bin(const char *key, char **value_ptr, size_t *len)
-int find_cache_bin(memcached_st *memc, const char *key, char **value_ptr, size_t *len)
+int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len)
 {
     int rst = -1;
     if(settings.cache_on == false)
         return rst;
 
     uint32_t  flags;
+    memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
     *value_ptr = memcached_get(memc, key, strlen(key), len, &flags, &rc);
@@ -168,6 +207,11 @@ int find_cache_bin(memcached_st *memc, const char *key, char **value_ptr, size_t
     {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Find Key[%s], Len: %d.", key, *len);
         rst = 1;
+    }
+    else if(rc == MEMCACHED_CONNECTION_FAILURE)
+    {
+        LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
+        retry_cache(thr_arg);
     }
     else if (rc == MEMCACHED_NOTFOUND)
     {
@@ -187,19 +231,20 @@ int find_cache_bin(memcached_st *memc, const char *key, char **value_ptr, size_t
 /**
  * @brief set_cache_bin Set a new BINARY value of a key.
  *
- * @param memc The connection to beansdb.
+ * @param thr_arg The arg of thread.
  * @param key The key.
  * @param value A char * buffer you want to set.
  * @param len The length of the buffer above,
  *
  * @return  1 for success and -1 for fial.
  */
-int set_cache_bin(memcached_st *memc, const char *key, const char *value, const size_t len)
+int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len)
 {
     int rst = -1;
     if(settings.cache_on == false)
         return rst;
 
+    memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
     rc = memcached_set(memc, key, strlen(key), value, len, 0, 0);
@@ -209,6 +254,11 @@ int set_cache_bin(memcached_st *memc, const char *key, const char *value, const 
         LOG_PRINT(LOG_DEBUG, "Binary Cache Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
 		settings.cache_on = true;
+    }
+    else if(rc == MEMCACHED_CONNECTION_FAILURE)
+    {
+        LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
+        retry_cache(thr_arg);
     }
     else
     {
@@ -226,17 +276,18 @@ int set_cache_bin(memcached_st *memc, const char *key, const char *value, const 
 /**
  * @brief del_cache This function delete a key and its value in memcached.
  *
- * @param memc The connection to beansdb.
+ * @param thr_arg The arg of thread.
  * @param key The key.
  *
  * @return  1 for success and -1 for fail.
  */
-int del_cache(memcached_st *memc, const char *key)
+int del_cache(thr_arg_t *thr_arg, const char *key)
 {
     int rst = -1;
     if(settings.cache_on == false)
         return rst;
 
+    memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
     rc = memcached_delete(memc, key, strlen(key), 0);
@@ -245,6 +296,11 @@ int del_cache(memcached_st *memc, const char *key)
     {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Delete Successfully.", key);
         rst = 1;
+    }
+    else if(rc == MEMCACHED_CONNECTION_FAILURE)
+    {
+        LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
+        retry_cache(thr_arg);
     }
     else
     {
