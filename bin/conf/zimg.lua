@@ -6,6 +6,7 @@ port=4869
 thread_num=4
 backlog_num=1024
 max_keepalives=1
+retry=3
 system=io.popen("uname -s"):read("*l")
 
 --cache config

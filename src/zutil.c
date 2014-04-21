@@ -162,7 +162,7 @@ int is_file(const char *filename)
     }
     if(S_ISREG(st.st_mode))
     {
-        LOG_PRINT(LOG_INFO, "File[%s] is A File.", filename);
+        LOG_PRINT(LOG_DEBUG, "File[%s] is A File.", filename);
         return 1;
     }
     else
@@ -192,7 +192,7 @@ int is_img(const char *filename)
     lower[strlen(filename)] = '\0';
     for(i = 0; i < 4; i++)
     {
-        LOG_PRINT(LOG_INFO, "compare %s - %s.", lower, imgType[i]);
+        LOG_PRINT(LOG_DEBUG, "compare %s - %s.", lower, imgType[i]);
         if((tmp = strstr(lower, imgType[i])) == lower)
         {
             isimg = 1;
@@ -220,7 +220,7 @@ int is_dir(const char *path)
     }
     if(S_ISDIR(st.st_mode))
     {
-        LOG_PRINT(LOG_INFO, "Path[%s] is A Dir.", path);
+        LOG_PRINT(LOG_DEBUG, "Path[%s] is A Dir.", path);
         return 1;
     }
     else
@@ -238,14 +238,14 @@ int mk_dir(const char *path)
 {
     if(access(path, 0) == -1)
     {
-        LOG_PRINT(LOG_INFO, "Begin to mk_dir()...");
+        LOG_PRINT(LOG_DEBUG, "Begin to mk_dir()...");
         int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(status == -1)
         {
             LOG_PRINT(LOG_WARNING, "mkdir[%s] Failed!", path);
             return -1;
         }
-        LOG_PRINT(LOG_INFO, "mkdir[%s] sucessfully!", path);
+        LOG_PRINT(LOG_DEBUG, "mkdir[%s] sucessfully!", path);
         return 1;
     }
     else
@@ -359,12 +359,12 @@ int str_hash(const char *str)
     char c[4];
     strncpy(c, str, 3);
     c[3] = '\0';
-    LOG_PRINT(LOG_INFO, "str = %s.", c);
+    LOG_PRINT(LOG_DEBUG, "str = %s.", c);
     //int d = htoi(c);
     int d = strtol(c, NULL, 16);
-    LOG_PRINT(LOG_INFO, "str(3)_to_d = %d.", d);
+    LOG_PRINT(LOG_DEBUG, "str(3)_to_d = %d.", d);
     d = d / 4;
-    LOG_PRINT(LOG_INFO, "str(3)/4 = %d.", d);
+    LOG_PRINT(LOG_DEBUG, "str(3)/4 = %d.", d);
     return d;
 }
 

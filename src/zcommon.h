@@ -27,10 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libmemcached/memcached.h>
+#include <hiredis/hiredis.h>
 #include <stdbool.h>
+#include "libevhtp/evhtp.h"
 
 #ifndef ZIMG_VERSION
-#define ZIMG_VERSION "1.5.0"
+#define ZIMG_VERSION "2.0.0"
 #endif
 
 #define MAX_LINE 1024 
@@ -58,8 +60,15 @@ struct setting{
     int beansdb_port;
     char ssdb_ip[128];
     int ssdb_port;
+    int retry;
 } settings;
 
+typedef struct thr_arg_s {
+    evthr_t *thread;
+    memcached_st *cache_conn;
+    memcached_st *beansdb_conn;
+    redisContext *ssdb_conn;
+} thr_arg_t;
 
 typedef struct zimg_req_s {
     char *md5;
@@ -68,6 +77,7 @@ typedef struct zimg_req_s {
     bool proportion;
     bool gray;
     char *rsp_path;
+    thr_arg_t *thr_arg;
 } zimg_req_t;
 
 char *_init_path;

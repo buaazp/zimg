@@ -35,7 +35,7 @@
 
 extern struct setting settings;
 
-int save_img(const char *buff, const int len, char *md5);
+int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size);
 
@@ -43,17 +43,18 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size);
 /**
  * @brief save_img Save buffer from POST requests
  *
+ * @param thr_arg Thread arg struct.
  * @param buff The char * from POST request
  * @param len The length of buff
  * @param md5 Parsed md5 from url
  *
  * @return 1 for success and -1 for fail
  */
-int save_img(const char *buff, const int len, char *md5)
+int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
 {
     int result = -1;
 
-    LOG_PRINT(LOG_INFO, "Begin to Caculate MD5...");
+    LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5...");
     md5_state_t mdctx;
     md5_byte_t md_value[16];
     char md5sum[33];
@@ -73,7 +74,7 @@ int save_img(const char *buff, const int len, char *md5)
     }
     md5sum[32] = '\0';
     strcpy(md5, md5sum);
-    LOG_PRINT(LOG_INFO, "md5: %s", md5sum);
+    LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
 
     char *cache_key = (char *)malloc(strlen(md5sum) + 32);
     char *save_path = (char *)malloc(512);
@@ -81,7 +82,7 @@ int save_img(const char *buff, const int len, char *md5)
 
     //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
     gen_key(cache_key, md5sum, 0);
-    if(exist_cache(cache_key) == 1)
+    if(exist_cache(thr_arg->cache_conn, cache_key) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
         result = 1;
@@ -92,14 +93,14 @@ int save_img(const char *buff, const int len, char *md5)
 
     if(settings.mode != 1)
     {
-        if(save_img_db(cache_key, buff, len) == -1)
+        if(save_img_db(thr_arg, cache_key, buff, len) == -1)
         {
             LOG_PRINT(LOG_ERROR, "save_img_db failed.");
             goto done;
         }
         else
         {
-            LOG_PRINT(LOG_INFO, "save_img_db succ.");
+            LOG_PRINT(LOG_DEBUG, "save_img_db succ.");
             result = 1;
             goto done;
         }
@@ -110,11 +111,11 @@ int save_img(const char *buff, const int len, char *md5)
     int lvl2 = str_hash(md5sum + 3);
 
     sprintf(save_path, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
-    LOG_PRINT(LOG_INFO, "save_path: %s", save_path);
+    LOG_PRINT(LOG_DEBUG, "save_path: %s", save_path);
 
     if(is_dir(save_path) == 1)
     {
-        LOG_PRINT(LOG_INFO, "Check File Exist. Needn't Save.");
+        LOG_PRINT(LOG_DEBUG, "Check File Exist. Needn't Save.");
         goto cache;
     }
 
@@ -124,9 +125,9 @@ int save_img(const char *buff, const int len, char *md5)
         goto done;
     }
     chdir(_init_path);
-    LOG_PRINT(LOG_INFO, "save_path[%s] Create Finish.", save_path);
+    LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Finish.", save_path);
     sprintf(save_name, "%s/0*0p", save_path);
-    LOG_PRINT(LOG_INFO, "save_name-->: %s", save_name);
+    LOG_PRINT(LOG_DEBUG, "save_name-->: %s", save_name);
     if(new_img(buff, len, save_name) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Save Image[%s] Failed!", save_name);
@@ -138,7 +139,7 @@ cache:
     {
         //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
         gen_key(cache_key, md5sum, 0);
-        set_cache_bin(cache_key, buff, len);
+        set_cache_bin(thr_arg->cache_conn, cache_key, buff, len);
     }
     result = 1;
 
@@ -164,7 +165,7 @@ done:
 int new_img(const char *buff, const size_t len, const char *save_name)
 {
     int result = -1;
-    LOG_PRINT(LOG_INFO, "Start to Storage the New Image...");
+    LOG_PRINT(LOG_DEBUG, "Start to Storage the New Image...");
     int fd = -1;
     int wlen = 0;
 
@@ -192,7 +193,7 @@ int new_img(const char *buff, const size_t len, const char *save_name)
         goto done;
     }
     flock(fd, LOCK_UN | LOCK_NB);
-    LOG_PRINT(LOG_INFO, "Image [%s] Write Successfully!", save_name);
+    LOG_PRINT(LOG_DEBUG, "Image [%s] Write Successfully!", save_name);
     result = 1;
 
 done:
@@ -204,7 +205,9 @@ done:
 }
 
 /* get image method used for zimg servise, such as:
- * http://127.0.0.1:4869/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&p=1&g=1 */
+ * http://127.0.0.1:4869/c6c4949e54afdb0972d323028657a1ef?w=100&h=50&p=1&g=1
+ */
+
 /**
  * @brief get_img The function of getting a image buffer and it's length.
  *
@@ -238,7 +241,8 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     // to gen cache_key like this: img:926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
     //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
     gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-    if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
+    //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
+    if(find_cache_bin(req->thr_arg->cache_conn, cache_key, buff_ptr, img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
         result = 1;
@@ -255,9 +259,9 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     int lvl1 = str_hash(req->md5);
     int lvl2 = str_hash(req->md5 + 3);
     sprintf(whole_path, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, req->md5);
-    LOG_PRINT(LOG_INFO, "docroot: %s", settings.img_path);
-    LOG_PRINT(LOG_INFO, "req->md5: %s", req->md5);
-    LOG_PRINT(LOG_INFO, "whole_path: %s", whole_path);
+    LOG_PRINT(LOG_DEBUG, "docroot: %s", settings.img_path);
+    LOG_PRINT(LOG_DEBUG, "req->md5: %s", req->md5);
+    LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
 
     char name[128];
     if(req->proportion && req->gray)
@@ -271,19 +275,19 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
     orig_path = (char *)malloc(strlen(whole_path) + 6);
     sprintf(orig_path, "%s/0*0p", whole_path);
-    LOG_PRINT(LOG_INFO, "0rig File Path: %s", orig_path);
+    LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
     rsp_path = (char *)malloc(512);
     if(req->width == 0 && req->height == 0 && req->gray == 0)
     {
-        LOG_PRINT(LOG_INFO, "Return original image.");
+        LOG_PRINT(LOG_DEBUG, "Return original image.");
         strcpy(rsp_path, orig_path);
     }
     else
     {
         sprintf(rsp_path, "%s/%s", whole_path, name);
     }
-    LOG_PRINT(LOG_INFO, "Got the rsp_path: %s", rsp_path);
+    LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
 
 
     //status=MagickReadImage(magick_wand, rsp_path);
@@ -297,14 +301,14 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         {
             //sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
             gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-            if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
+            if(find_cache_bin(req->thr_arg->cache_conn, cache_key, buff_ptr, img_size) == 1)
             {
                 LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
                 status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
                 if(status == MagickFalse)
                 {
                     LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
-                    del_cache(cache_key);
+                    del_cache(req->thr_arg->cache_conn, cache_key);
                 }
                 else
                 {
@@ -318,16 +322,16 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             color_path = (char *)malloc(len);
             strncpy(color_path, rsp_path, len);
             color_path[len - 1] = '\0';
-            LOG_PRINT(LOG_INFO, "color_path: %s", color_path);
+            LOG_PRINT(LOG_DEBUG, "color_path: %s", color_path);
             status=MagickReadImage(magick_wand, color_path);
             if(status == MagickTrue)
             {
                 got_color = true;
-                LOG_PRINT(LOG_INFO, "Read Image from Color Image[%s] Succ. Goto Convert.", color_path);
+                LOG_PRINT(LOG_DEBUG, "Read Image from Color Image[%s] Succ. Goto Convert.", color_path);
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
                 }
 
                 goto convert;
@@ -337,7 +341,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         //sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
         gen_key(cache_key, req->md5, 0);
-        if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
+        if(find_cache_bin(req->thr_arg->cache_conn, cache_key, buff_ptr, img_size) == 1)
         {
             LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
@@ -345,7 +349,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             {
                 LOG_PRINT(LOG_WARNING, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 ThrowWandException(magick_wand);
-                del_cache(cache_key);
+                del_cache(req->thr_arg->cache_conn, cache_key);
                 status = MagickReadImage(magick_wand, orig_path);
                 if(status == MagickFalse)
                 {
@@ -357,7 +361,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                     if(*img_size < CACHE_MAX_SIZE)
                     {
-                        set_cache_bin(cache_key, *buff_ptr, *img_size);
+                        set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
                     }
                 }
             }
@@ -376,7 +380,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
                 }
             }
         }
@@ -406,7 +410,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", orig_path);
                 goto err;
             }
-            LOG_PRINT(LOG_INFO, "Resize img succ.");
+            LOG_PRINT(LOG_DEBUG, "Resize img succ.");
         }
         /* this section can caculate the correct rsp_path, but not use, so I note them
            else if(req->gray == true)
@@ -415,8 +419,8 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
            rsp_path[strlen(orig_path)] = 'g';
            rsp_path[strlen(orig_path) + 1] = '\0';
            got_rsp = true;
-           LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original gray image.");
-           LOG_PRINT(LOG_INFO, "Original Gray Image: %s", rsp_path);
+           LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original gray image.");
+           LOG_PRINT(LOG_DEBUG, "Original Gray Image: %s", rsp_path);
            }
            */
         else
@@ -424,7 +428,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             // Note this strcpy because rsp_path is not useful. We needn't to save the new image.
             //strcpy(rsp_path, orig_path);
             got_rsp = true;
-            LOG_PRINT(LOG_INFO, "Args width/height is bigger than real size, return original image.");
+            LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
         }
     }
     else
@@ -442,7 +446,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             LOG_PRINT(LOG_ERROR, "buff_ptr Malloc Failed!");
             goto err;
         }
-        LOG_PRINT(LOG_INFO, "img_size = %d", *img_size);
+        LOG_PRINT(LOG_DEBUG, "img_size = %d", *img_size);
         //*buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
         if((rlen = read(fd, *buff_ptr, *img_size)) == -1)
         {
@@ -464,31 +468,31 @@ convert:
     //gray image
     if(req->gray == true)
     {
-        LOG_PRINT(LOG_INFO, "Start to Remove Color!");
+        LOG_PRINT(LOG_DEBUG, "Start to Remove Color!");
         status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
         if(status == MagickFalse)
         {
             LOG_PRINT(LOG_ERROR, "Image[%s] Remove Color Failed!", orig_path);
             goto err;
         }
-        LOG_PRINT(LOG_INFO, "Image Remove Color Finish!");
+        LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
     }
 
     if(got_color == false || (got_color == true && req->width == 0 && req->height == 0) )
     {
         //compress image
-        LOG_PRINT(LOG_INFO, "Start to Compress the Image!");
+        LOG_PRINT(LOG_DEBUG, "Start to Compress the Image!");
         img_format = MagickGetImageFormat(magick_wand);
-        LOG_PRINT(LOG_INFO, "Image Format is %s", img_format);
+        LOG_PRINT(LOG_DEBUG, "Image Format is %s", img_format);
         if(strcmp(img_format, "JPEG") != 0)
         {
-            LOG_PRINT(LOG_INFO, "Convert Image Format from %s to JPEG.", img_format);
+            LOG_PRINT(LOG_DEBUG, "Convert Image Format from %s to JPEG.", img_format);
             status = MagickSetImageFormat(magick_wand, "JPEG");
             if(status == MagickFalse)
             {
                 LOG_PRINT(LOG_WARNING, "Image[%s] Convert Format Failed!", orig_path);
             }
-            LOG_PRINT(LOG_INFO, "Compress Image with JPEGCompression");
+            LOG_PRINT(LOG_DEBUG, "Compress Image with JPEGCompression");
             status = MagickSetImageCompression(magick_wand, JPEGCompression);
             if(status == MagickFalse)
             {
@@ -496,12 +500,12 @@ convert:
             }
         }
         size_t quality = MagickGetImageCompressionQuality(magick_wand) * 0.75;
-        LOG_PRINT(LOG_INFO, "Image Compression Quality is %u.", quality);
+        LOG_PRINT(LOG_DEBUG, "Image Compression Quality is %u.", quality);
         if(quality == 0)
         {
             quality = 75;
         }
-        LOG_PRINT(LOG_INFO, "Set Compression Quality to 75%.");
+        LOG_PRINT(LOG_DEBUG, "Set Compression Quality to 75%.");
         status = MagickSetImageCompressionQuality(magick_wand, quality);
         if(status == MagickFalse)
         {
@@ -509,7 +513,7 @@ convert:
         }
 
         //strip image EXIF infomation
-        LOG_PRINT(LOG_INFO, "Start to Remove Exif Infomation of the Image...");
+        LOG_PRINT(LOG_DEBUG, "Start to Remove Exif Infomation of the Image...");
         status = MagickStripImage(magick_wand);
         if(status == MagickFalse)
         {
@@ -530,17 +534,17 @@ done:
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-        set_cache_bin(cache_key, *buff_ptr, *img_size);
+        set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
     }
 
     result = 1;
     if(got_rsp == false)
     {
-        LOG_PRINT(LOG_INFO, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
+        LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
         result = 2;
     }
     else
-        LOG_PRINT(LOG_INFO, "Image Needn't to Storage.", rsp_path);
+        LOG_PRINT(LOG_DEBUG, "Image Needn't to Storage.", rsp_path);
 
 err:
     if(fd != -1)

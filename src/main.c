@@ -26,6 +26,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <evhtp-config.h>
 #include "libevhtp/evhtp.h"
 #include "zcommon.h"
 #include "zhttpd.h"
@@ -74,6 +75,7 @@ static void settings_init(void)
     strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
+    settings.retry = 3;
     settings.mode = 1;
     strcpy(settings.ssdb_ip, "127.0.0.1");
     settings.ssdb_port = 6379;
@@ -145,6 +147,11 @@ static int load_conf(const char *conf)
         settings.max_keepalives = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
+    lua_getglobal(L, "retry");
+    if(lua_isnumber(L, -1))
+        settings.retry = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     lua_getglobal(L, "root_path");
     if(lua_isstring(L, -1))
         strcpy(settings.root_path, lua_tostring(L, -1));
@@ -187,7 +194,7 @@ static int load_conf(const char *conf)
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
     //printf("settings.ssdb_port: %d\n", settings.ssdb_port);
-
+    
     lua_close(L);
 
     return 1;
@@ -200,9 +207,62 @@ static int load_conf(const char *conf)
  */
 static void sighandler(int signal) 
 {
-    LOG_PRINT(LOG_INFO, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
+    LOG_PRINT(LOG_DEBUG, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
     kill_server();
 }
+
+void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
+{
+    thr_arg_t *thr_args;
+    thr_args = calloc(1, sizeof(thr_arg_t));
+    thr_args->thread = thread;
+
+    char mserver[32];
+
+    if(settings.cache_on == true)
+    {
+        memcached_st *memc = memcached_create(NULL);
+        sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
+        memcached_server_st *servers = memcached_servers_parse(mserver);
+        memcached_server_push(memc, servers);
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        thr_args->cache_conn = memc;
+        LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
+        memcached_server_list_free(servers);
+    }
+
+    if(settings.mode == 2)
+    {
+        memcached_st *beans = memcached_create(NULL);
+        sprintf(mserver, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
+        memcached_server_st *servers = memcached_servers_parse(mserver);
+        servers = memcached_servers_parse(mserver);
+        memcached_server_push(beans, servers);
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        thr_args->beansdb_conn = beans;
+        LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
+        memcached_server_list_free(servers);
+    }
+    else if(settings.mode == 3)
+    {
+        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+        if(c->err)
+        {
+            redisFree(c);
+            LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
+        }
+        else
+        {
+            thr_args->ssdb_conn = c;
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
+        }
+    }
+
+    evthr_set_aux(thread, thr_args);
+}
+
 
 /**
  * @brief main The entrance of zimg.
@@ -216,7 +276,7 @@ int main(int argc, char **argv)
 {
     int i;
     _init_path = getcwd(NULL, 0);
-    LOG_PRINT(LOG_INFO, "Get init-path: %s", _init_path);
+    LOG_PRINT(LOG_DEBUG, "Get init-path: %s", _init_path);
 
     /* Set signal handlers */
     sigset_t sigset;
@@ -280,17 +340,7 @@ int main(int argc, char **argv)
         }
     }
     //init the Path zimg need to use.
-    LOG_PRINT(LOG_INFO, "Begin to Init the Path zimg Using...");
-//    if(is_dir(settings.root_path) != 1)
-//    {
-//        if(mk_dir(settings.root_path) != 1)
-//        {
-//            LOG_PRINT(LOG_ERROR, "root_path[%s] Create Failed!", settings.root_path);
-//            return -1;
-//        }
-//    }
-//
-//
+    LOG_PRINT(LOG_DEBUG, "Begin to Init the Path zimg Using...");
     //start log module... ./log/zimg.log
     if(settings.log)
     {
@@ -314,13 +364,13 @@ int main(int argc, char **argv)
             return -1;
         }
     }
-    LOG_PRINT(LOG_INFO,"Paths Init Finished.");
+    LOG_PRINT(LOG_DEBUG,"Paths Init Finished.");
 
    
     //init memcached connection...
     if(settings.cache_on == true)
     {
-        LOG_PRINT(LOG_INFO, "Begin to Init Memcached Connection...");
+        LOG_PRINT(LOG_DEBUG, "Begin to Test Memcached Connection...");
         memcached_st *memc;
         memc= memcached_create(NULL);
 
@@ -333,35 +383,76 @@ int main(int argc, char **argv)
         memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
         //使用NO-BLOCK，防止memcache倒掉时挂死          
         memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-        LOG_PRINT(LOG_INFO, "Memcached Connection Init Finished.");
-        if(set_cache("zimg", "1") == -1)
+        LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
+        if(set_cache(memc, "zimg", "1") == -1)
         {
             LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);
             settings.cache_on = false;
         }
         else
         {
-            LOG_PRINT(LOG_INFO, "memcached connection to: %s", mserver);
+            LOG_PRINT(LOG_DEBUG, "memcached connection to: %s", mserver);
             settings.cache_on = true;
         }
         memcached_free(memc);
     }
     else
-        LOG_PRINT(LOG_INFO, "Don't use memcached as cache.");
+        LOG_PRINT(LOG_DEBUG, "Don't use memcached as cache.");
+
+    if(settings.mode == 2)
+    {
+        LOG_PRINT(LOG_DEBUG, "Begin to Test Memcached Connection...");
+        memcached_st *beans = memcached_create(NULL);
+        char mserver[32];
+        sprintf(mserver, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
+        memcached_server_st *servers = memcached_servers_parse(mserver);
+        servers = memcached_servers_parse(mserver);
+        memcached_server_push(beans, servers);
+        memcached_server_list_free(servers);
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
+        if(set_cache(beans, "zimg", "1") == -1)
+        {
+            LOG_PRINT(LOG_FATAL, "beansdb[%s] Connect Failed!", mserver);
+            memcached_free(beans);
+            return -1;
+        }
+        else
+        {
+            LOG_PRINT(LOG_DEBUG, "beansdb connected to: %s", mserver);
+        }
+        memcached_free(beans);
+    }
+    else if(settings.mode == 3)
+    {
+        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+        if(c->err)
+        {
+            redisFree(c);
+            LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
+            return -1;
+        }
+        else
+        {
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
+        }
+    }
+
     //init magickwand
     MagickWandGenesis();
 
     //begin to start httpd...
-    LOG_PRINT(LOG_INFO, "Begin to Start Httpd Server...");
+    LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");
     evbase = event_base_new();
-    evhtp_t  * htp    = evhtp_new(evbase, NULL);
+    evhtp_t *htp = evhtp_new(evbase, NULL);
 
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     //evhtp_set_gencb(htp, echo_cb, NULL);
     evhtp_set_gencb(htp, send_document_cb, NULL);
 #ifndef EVHTP_DISABLE_EVTHR
-    evhtp_use_threads(htp, NULL, settings.num_threads, NULL);
+    evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
 #endif
     evhtp_set_max_keepalive_requests(htp, settings.max_keepalives);
     evhtp_bind_socket(htp, "0.0.0.0", settings.port, settings.backlog);
@@ -383,9 +474,9 @@ int main(int argc, char **argv)
  */
 void kill_server(void)
 {
-    LOG_PRINT(LOG_INFO, "Stopping socket listener event loop.");
+    LOG_PRINT(LOG_DEBUG, "Stopping socket listener event loop.");
     if (event_base_loopexit(evbase, NULL)) {
         LOG_PRINT(LOG_ERROR, "Error shutting down server");
     }
-    LOG_PRINT(LOG_INFO, "Stopping workers.\n");
+    LOG_PRINT(LOG_DEBUG, "Stopping workers.\n");
 }

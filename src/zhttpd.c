@@ -32,6 +32,7 @@
 
 extern struct setting settings;
 
+static evthr_t * get_request_thr(evhtp_request_t *request);
 static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
 static int print_headers(evhtp_header_t * header, void * arg); 
@@ -79,6 +80,16 @@ static const char * method_strmap[] = {
     "UNKNOWN",
 };
 
+static evthr_t * get_request_thr(evhtp_request_t *request)
+{
+    evhtp_connection_t * htpconn;
+    evthr_t            * thread;
+
+    htpconn = evhtp_request_get_connection(request);
+    thread  = htpconn->thread;
+
+    return thread;
+}
 /**
  * @brief guess_type It returns a HTTP type by guessing the file type.
  *
@@ -155,7 +166,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
     if(req_method >= 16)
         req_method = 16;
 
-	LOG_PRINT(LOG_INFO, "Received a %s request for %s", method_strmap[req_method], uri);
+	LOG_PRINT(LOG_DEBUG, "Received a %s request for %s", method_strmap[req_method], uri);
     evbuffer_add_printf(req->buffer_out, "uri : %s\r\n", uri);
     evbuffer_add_printf(req->buffer_out, "query : %s\r\n", req->uri->query_raw);
     evhtp_headers_for_each(req->uri->query, print_headers, req->buffer_out);
@@ -213,10 +224,10 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
         req_method = 16;
-    LOG_PRINT(LOG_INFO, "Method: %d", req_method);
+    LOG_PRINT(LOG_DEBUG, "Method: %d", req_method);
     if(strcmp(method_strmap[req_method], "POST") != 0)
     {
-        LOG_PRINT(LOG_INFO, "Request Method Not Support.");
+        LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
         goto err;
     }
 
@@ -260,7 +271,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         boundary_len = boundary_end-boundary;
     }
 
-    LOG_PRINT(LOG_INFO, "boundary Find. boundary = %s", boundary);
+    LOG_PRINT(LOG_DEBUG, "boundary Find. boundary = %s", boundary);
             
     /* 依靠evbuffer自己实现php处理函数 */
 	evbuf_t *buf;
@@ -277,9 +288,9 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
     while((evblen = evbuffer_get_length(buf)) > 0)
     {
-        LOG_PRINT(LOG_INFO, "evblen = %d", evblen);
+        LOG_PRINT(LOG_DEBUG, "evblen = %d", evblen);
         rmblen = evbuffer_remove(buf, buff, evblen);
-        LOG_PRINT(LOG_INFO, "rmblen = %d", rmblen);
+        LOG_PRINT(LOG_DEBUG, "rmblen = %d", rmblen);
         if(rmblen < 0)
         {
             LOG_PRINT(LOG_ERROR, "evbuffer_remove failed!");
@@ -294,7 +305,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *blankPattern = "\r\n";
     boundaryPattern = (char *)malloc(boundary_len + 4);
     sprintf(boundaryPattern, "\r\n--%s", boundary);
-    LOG_PRINT(LOG_INFO, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
+    LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Content-Disposition Not Found!");
@@ -321,7 +332,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     fileName = (char *)malloc(end + 1);
     memcpy(fileName, buff+start, end);
     fileName[end] = '\0';
-    LOG_PRINT(LOG_INFO, "fileName = %s", fileName);
+    LOG_PRINT(LOG_DEBUG, "fileName = %s", fileName);
 
     char fileType[32];
     if(get_type(fileName, fileType) == -1)
@@ -343,28 +354,43 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
     start += end;
-    LOG_PRINT(LOG_INFO, "start = %d", start);
+    LOG_PRINT(LOG_DEBUG, "start = %d", start);
     if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Not complete!");
         goto err;
     }
     end += start;
-    LOG_PRINT(LOG_INFO, "end = %d", end);
+
+    //by @momoplan: fixed some http tool's post bug.
+    /*
+    if((start = kmp(buff+end, post_size-end, "Content-Transfer-Encoding", strlen("Content-Transfer-Encoding"))) != -1)
+    {
+        start += end;
+        if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
+        {
+             LOG_PRINT(LOG_ERROR, "Image Not complete!");
+             goto err;
+        }
+        end += start;
+    }
+    */
+
+    LOG_PRINT(LOG_DEBUG, "end = %d", end);
     start = end + 4;
-    LOG_PRINT(LOG_INFO, "start = %d", start);
+    LOG_PRINT(LOG_DEBUG, "start = %d", start);
     if((end = kmp(buff+start, post_size-start, boundaryPattern, strlen(boundaryPattern))) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Not complete!");
         goto err;
     }
     end += start;
-    LOG_PRINT(LOG_INFO, "end = %d", end);
+    LOG_PRINT(LOG_DEBUG, "end = %d", end);
     img_size = end - start;
 
 
-    LOG_PRINT(LOG_INFO, "post_size = %d", post_size);
-    LOG_PRINT(LOG_INFO, "img_size = %d", img_size);
+    LOG_PRINT(LOG_DEBUG, "post_size = %d", post_size);
+    LOG_PRINT(LOG_DEBUG, "img_size = %d", img_size);
     if(img_size <= 0)
     {
         LOG_PRINT(LOG_ERROR, "Image Size is Zero!");
@@ -373,8 +399,11 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
     char md5sum[33];
 
-    LOG_PRINT(LOG_INFO, "Begin to Save Image...");
-    if(save_img(buff+start, img_size, md5sum) == -1)
+    LOG_PRINT(LOG_DEBUG, "Begin to Save Image...");
+
+    evthr_t *thread = get_request_thr(req);
+    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
+    if(save_img(thr_arg, buff+start, img_size, md5sum) == -1)
     {
         LOG_PRINT(LOG_ERROR, "Image Save Failed!");
         goto err;
@@ -383,8 +412,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     //libevhtp has bug with uri->authority->hostname, so zimg don't show hostname temporarily.
     //const char *host_name = req->uri->authority->hostname;
     //const int *host_port = req->uri->authority->port;
-    //LOG_PRINT(LOG_INFO, "hostname: %s", req->uri->authority->hostname);
-    //LOG_PRINT(LOG_INFO, "hostport: %d", host_port);
+    //LOG_PRINT(LOG_DEBUG, "hostname: %s", req->uri->authority->hostname);
+    //LOG_PRINT(LOG_DEBUG, "hostport: %d", host_port);
     evbuffer_add_printf(req->buffer_out, 
         "<html>\n<head>\n"
         "<title>Upload Successfully</title>\n"
@@ -400,7 +429,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
-    LOG_PRINT(LOG_INFO, "============post_request_cb() DONE!===============");
+    LOG_PRINT(LOG_DEBUG, "============post_request_cb() DONE!===============");
     goto done;
 
 err:
@@ -409,7 +438,7 @@ err:
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_200);
-    LOG_PRINT(LOG_INFO, "============post_request_cb() ERROR!===============");
+    LOG_PRINT(LOG_DEBUG, "============post_request_cb() ERROR!===============");
 
 done:
     if(fileName)
@@ -437,16 +466,16 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
         req_method = 16;
-    LOG_PRINT(LOG_INFO, "Method: %d", req_method);
+    LOG_PRINT(LOG_DEBUG, "Method: %d", req_method);
     if(strcmp(method_strmap[req_method], "POST") == 0)
     {
-        LOG_PRINT(LOG_INFO, "POST Request.");
+        LOG_PRINT(LOG_DEBUG, "POST Request.");
         post_request_cb(req, NULL);
         return;
     }
 	else if(strcmp(method_strmap[req_method], "GET") != 0)
     {
-        LOG_PRINT(LOG_INFO, "Request Method Not Support.");
+        LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
         goto err;
     }
 
@@ -456,13 +485,13 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	const char *rfull = req->uri->path->full;
 	const char *rpath = req->uri->path->path;
 	const char *rfile= req->uri->path->file;
-	LOG_PRINT(LOG_INFO, "uri->path->full: %s",  rfull);
-	LOG_PRINT(LOG_INFO, "uri->path->path: %s",  rpath);
-	LOG_PRINT(LOG_INFO, "uri->path->file: %s",  rfile);
+	LOG_PRINT(LOG_DEBUG, "uri->path->full: %s",  rfull);
+	LOG_PRINT(LOG_DEBUG, "uri->path->path: %s",  rpath);
+	LOG_PRINT(LOG_DEBUG, "uri->path->file: %s",  rfile);
 
     if(strlen(uri) == 1 && uri[0] == '/')
     {
-        LOG_PRINT(LOG_INFO, "Root Request.");
+        LOG_PRINT(LOG_DEBUG, "Root Request.");
         int fd = -1;
         struct stat st;
         if((fd = open(settings.root_path, O_RDONLY)) == -1)
@@ -489,20 +518,20 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
-        LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
+        LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
         goto done;
     }
 
     if(strstr(uri, "favicon.ico"))
     {
-        LOG_PRINT(LOG_INFO, "favicon.ico Request, Denied.");
+        LOG_PRINT(LOG_DEBUG, "favicon.ico Request, Denied.");
         //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
         goto done;
     }
-	LOG_PRINT(LOG_INFO, "Got a GET request for <%s>",  uri);
+	LOG_PRINT(LOG_DEBUG, "Got a GET request for <%s>",  uri);
 
 	/* Don't allow any ".."s in the path, to avoid exposing stuff outside
 	 * of the docroot.  This test is both overzealous and underzealous:
@@ -516,7 +545,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         strcpy(md5, uri+1);
     else
         strcpy(md5, uri);
-	LOG_PRINT(LOG_INFO, "md5 of request is <%s>",  md5);
+	LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {
         LOG_PRINT(LOG_WARNING, "Url is Not a zimg Request.");
@@ -593,6 +622,11 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req -> proportion = proportion;
     zimg_req -> gray = gray;
 
+    
+    evthr_t *thread = get_request_thr(req);
+    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
+    zimg_req -> thr_arg = thr_arg;
+
     int get_img_rst = -1;
     if(settings.mode == 1)
         get_img_rst = get_img(zimg_req, &buff,  &len);
@@ -606,15 +640,15 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
 
-    LOG_PRINT(LOG_INFO, "get buffer length: %d", len);
+    LOG_PRINT(LOG_DEBUG, "get buffer length: %d", len);
     evbuffer_add(req->buffer_out, buff, len);
 
-    LOG_PRINT(LOG_INFO, "Got the File!");
+    LOG_PRINT(LOG_DEBUG, "Got the File!");
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
-    LOG_PRINT(LOG_INFO, "============send_document_cb() DONE!===============");
+    LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
 
 
     if(get_img_rst == 2)
@@ -632,7 +666,7 @@ err:
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
-    LOG_PRINT(LOG_INFO, "============send_document_cb() ERROR!===============");
+    LOG_PRINT(LOG_DEBUG, "============send_document_cb() ERROR!===============");
 
 done:
 	if(buff)
