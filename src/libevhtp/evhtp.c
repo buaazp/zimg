@@ -20,6 +20,8 @@
 #include <sys/un.h>
 #endif
 
+//#define EVHTP_DISABLE_SSL 1
+
 #include <limits.h>
 
 #include "evhtp.h"

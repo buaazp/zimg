@@ -23,8 +23,7 @@
 #include "zdb.h"
 #include "zlog.h"
 #include "zcache.h"
-//#include <hiredis/hiredis.h>
-#include "hiredis.h"
+#include <hiredis/hiredis.h>
 #include "zutil.h"
 
 extern struct setting settings;

@@ -19,7 +19,6 @@
  */
 
 #include <stdio.h>
-#include <evhtp.h>
 #include <wand/MagickWand.h>
 #include <inttypes.h>
 #include <unistd.h>
@@ -27,6 +26,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include "libevhtp/evhtp.h"
 #include "zcommon.h"
 #include "zhttpd.h"
 #include "zutil.h"

@@ -22,7 +22,7 @@
 #ifndef ZHTTPD_H
 #define ZHTTPD_H
 
-#include <evhtp.h>
+#include "libevhtp/evhtp.h"
 #include "zcommon.h"
 
 void dump_request_cb(evhtp_request_t *req, void *arg);

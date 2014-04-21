@@ -18,6 +18,8 @@
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
 
+//#define EVHTP_DISABLE_SSL 1
+
 #ifndef EVHTP_DISABLE_SSL
 #include <event2/bufferevent_ssl.h>
 #include <openssl/ssl.h>
