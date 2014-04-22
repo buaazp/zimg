@@ -391,7 +391,7 @@ int gen_key(char *key, char *md5, ...)
     {
         argv = va_arg(arg_ptr, int);
         sprintf(key, "%s:%d", key, argv);
-        LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
+        //LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
     }
     va_end(arg_ptr);
     LOG_PRINT(LOG_DEBUG, "key: %s", key);

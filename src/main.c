@@ -18,6 +18,14 @@
  * @date 2013-07-19
  */
 
+#if __APPLE__
+// In Mac OS X 10.5 and later trying to use the daemon function gives a “‘daemon’ is deprecated”
+// error, which prevents compilation because we build with "-Werror".
+// Since this is supposed to be portable cross-platform code, we don't care that daemon is
+// deprecated on Mac OS X 10.5, so we use this preprocessor trick to eliminate the error message.
+#define daemon yes_we_know_that_daemon_is_deprecated_in_os_x_10_5_thankyou
+#endif
+
 #include <stdio.h>
 #include <wand/MagickWand.h>
 #include <inttypes.h>
@@ -33,6 +41,11 @@
 #include "zutil.h"
 #include "zlog.h"
 #include "zcache.h"
+
+#if __APPLE__
+#undef daemon
+extern int daemon(int, int);
+#endif
 
 #define _STR(s) #s   
 #define STR(s) _STR(s)
@@ -61,7 +74,7 @@ void usage(int argc, char **argv)
  */
 static void settings_init(void) 
 {
-    settings.daemon = 0;
+    settings.is_daemon = 0;
     strcpy(settings.root_path, "./www/index.html");
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
@@ -93,9 +106,9 @@ static int load_conf(const char *conf)
         return -1;
     }
 
-    lua_getglobal(L, "daemon"); //stack index: -12
+    lua_getglobal(L, "is_daemon"); //stack index: -12
     if(lua_isnumber(L, -1))
-        settings.daemon = (int)lua_tonumber(L, -1);
+        settings.is_daemon = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "port");
@@ -225,8 +238,10 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
         memcached_server_st *servers = memcached_servers_parse(mserver);
         memcached_server_push(memc, servers);
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
         memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1); 
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
         thr_args->cache_conn = memc;
         LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
         memcached_server_list_free(servers);
@@ -241,6 +256,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         memcached_server_push(beans, servers);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
         thr_args->beansdb_conn = beans;
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
         memcached_server_list_free(servers);
@@ -277,6 +293,8 @@ int main(int argc, char **argv)
     int i;
     _init_path = getcwd(NULL, 0);
     LOG_PRINT(LOG_DEBUG, "Get init-path: %s", _init_path);
+    retry_sleep.tv_sec = 0;
+    retry_sleep.tv_nsec = RETRY_TIME_WAIT;      //1000 ns = 1 us
 
     /* Set signal handlers */
     sigset_t sigset;
@@ -300,7 +318,7 @@ int main(int argc, char **argv)
     for(i=1; i<argc; i++)
     {
         if(strcmp(argv[i], "-d") == 0){
-            settings.daemon = 1;
+            settings.is_daemon = 1;
         }else{
             conf_file = argv[i];
         }
@@ -325,7 +343,7 @@ int main(int argc, char **argv)
     }
 
 
-    if(settings.daemon == 1)
+    if(settings.is_daemon == 1)
     {
         if(daemon(1, 1) < 0)
         {
@@ -381,9 +399,10 @@ int main(int argc, char **argv)
 
         memcached_server_push(memc, servers);
         memcached_server_list_free(servers);
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
-        //使用NO-BLOCK，防止memcache倒掉时挂死          
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
         memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1); 
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
         LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
         if(set_cache(memc, "zimg", "1") == -1)
         {
@@ -413,10 +432,12 @@ int main(int argc, char **argv)
         memcached_server_list_free(servers);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
         if(set_cache(beans, "zimg", "1") == -1)
         {
-            LOG_PRINT(LOG_FATAL, "beansdb[%s] Connect Failed!", mserver);
+            LOG_PRINT(LOG_FATAL, "Beansdb[%s] Connect Failed!", mserver);
+            fprintf(stderr, "Beansdb[%s] Connect Failed!\n", mserver);
             memcached_free(beans);
             return -1;
         }
@@ -433,6 +454,7 @@ int main(int argc, char **argv)
         {
             redisFree(c);
             LOG_PRINT(LOG_FATAL, "Connect to ssdb server faile");
+            fprintf(stderr, "SSDB[%s:%d] Connect Failed!\n", settings.ssdb_ip, settings.ssdb_port);
             return -1;
         }
         else

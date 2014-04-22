@@ -139,7 +139,7 @@ cache:
     {
         //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
         gen_key(cache_key, md5sum, 0);
-        set_cache_bin(thr_arg->cache_conn, cache_key, buff, len);
+        set_cache_bin(thr_arg, cache_key, buff, len);
     }
     result = 1;
 
@@ -242,7 +242,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
     gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
     //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-    if(find_cache_bin(req->thr_arg->cache_conn, cache_key, buff_ptr, img_size) == 1)
+    if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
         result = 1;
@@ -301,14 +301,14 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         {
             //sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
             gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-            if(find_cache_bin(req->thr_arg->cache_conn, cache_key, buff_ptr, img_size) == 1)
+            if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
             {
                 LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
                 status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
                 if(status == MagickFalse)
                 {
                     LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
-                    del_cache(req->thr_arg->cache_conn, cache_key);
+                    del_cache(req->thr_arg, cache_key);
                 }
                 else
                 {
@@ -331,7 +331,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
                 }
 
                 goto convert;
@@ -341,7 +341,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         //sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
         gen_key(cache_key, req->md5, 0);
-        if(find_cache_bin(req->thr_arg->cache_conn, cache_key, buff_ptr, img_size) == 1)
+        if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
         {
             LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
@@ -349,7 +349,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             {
                 LOG_PRINT(LOG_WARNING, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 ThrowWandException(magick_wand);
-                del_cache(req->thr_arg->cache_conn, cache_key);
+                del_cache(req->thr_arg, cache_key);
                 status = MagickReadImage(magick_wand, orig_path);
                 if(status == MagickFalse)
                 {
@@ -361,7 +361,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                     if(*img_size < CACHE_MAX_SIZE)
                     {
-                        set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
+                        set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
                     }
                 }
             }
@@ -380,7 +380,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
                 if(*img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
                 }
             }
         }
@@ -534,7 +534,7 @@ done:
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-        set_cache_bin(req->thr_arg->cache_conn, cache_key, *buff_ptr, *img_size);
+        set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
     }
 
     result = 1;

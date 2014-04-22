@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <libmemcached/memcached.h>
 #include <hiredis/hiredis.h>
 #include <stdbool.h>
@@ -37,11 +38,12 @@
 
 #define MAX_LINE 1024 
 #define CACHE_MAX_SIZE 1024*1024
+#define RETRY_TIME_WAIT 1000
 /* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
 #define NUM_THREADS 4
 
 struct setting{
-    int daemon;
+    int is_daemon;
     char root_path[512];
     char img_path[512];
     char log_name[512];
@@ -81,6 +83,8 @@ typedef struct zimg_req_s {
 } zimg_req_t;
 
 char *_init_path;
+
+struct timespec retry_sleep;
 
 #define LOG_FATAL 0                        /* System is unusable */
 #define LOG_ALERT 1                        /* Action must be taken immediately */

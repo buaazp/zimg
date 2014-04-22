@@ -19,6 +19,7 @@
  * @date 2014-04-21
  */
 
+#include <string.h>
 #include <wand/MagickWand.h>
 #include <hiredis/hiredis.h>
 #include "zdb.h"
@@ -65,16 +66,17 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     bool got_color = false;
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
+    //LOG_PRINT(LOG_DEBUG, "req->thr_arg->cache_conn: %p", req->thr_arg->cache_conn);
 
     //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-    if(req->gray == 1)
-    {
+    //if(req->gray == 1)
+    //{
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-    }
-    else
-    {
-        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-    }
+    //}
+    //else
+    //{
+    //    gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+    //}
     //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
     if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
     {
@@ -85,7 +87,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
     if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
     {
-        LOG_PRINT(LOG_DEBUG, "Get image [%s] from ssdb succ.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db succ.", cache_key);
         if(*img_size < CACHE_MAX_SIZE)
         {
             set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
@@ -95,8 +97,8 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     }
 
     magick_wand = NewMagickWand();
-    if(req->gray == 1)
-    {
+    //if(req->gray == 1)
+    //{
         //sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
         gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
         //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
@@ -118,7 +120,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         }
         if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
         {
-            LOG_PRINT(LOG_DEBUG, "Get color image [%s] from ssdb.", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Get color image [%s] from backend db.", cache_key);
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
             if(status == MagickTrue)
             {
@@ -132,7 +134,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 goto convert;
             }
         }
-    }
+    //}
 
     //sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
     gen_key(cache_key, req->md5, 0);
@@ -145,7 +147,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     {
         if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "Get image [%s] from ssdb failed.", cache_key);
+            LOG_PRINT(LOG_ERROR, "Get image [%s] from backend db failed.", cache_key);
             goto done;
         }
         else if(*img_size < CACHE_MAX_SIZE)
@@ -159,7 +161,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     {
         ThrowWandException(magick_wand);
         del_cache(req->thr_arg, cache_key);
-        LOG_PRINT(LOG_ERROR, "Get image [%s] from ssdb failed.", cache_key);
+        LOG_PRINT(LOG_ERROR, "Read image [%s] from blob failed.", cache_key);
         goto done;
     }
 
@@ -195,8 +197,8 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         else
         {
             LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
-            result = 1;
-            goto done;
+            //result = 1;
+            //goto done;
         }
     }
 
@@ -319,6 +321,8 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
             ret = get_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
         else if(settings.mode == 3 && thr_arg->ssdb_conn != NULL)
             ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
+        if(strchr(cache_key, ':') != NULL)
+            break;
         retry++;
 
         if(ret == -1)
@@ -326,22 +330,12 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
             LOG_PRINT(LOG_DEBUG, "retry[%d]...", retry);
             if(settings.mode == 2)
             {
-                if(thr_arg->beansdb_conn != NULL)
-                    memcached_free(thr_arg->beansdb_conn);
-                char mserver[32];
-                memcached_st *beans = memcached_create(NULL);
-                sprintf(mserver, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
-                memcached_server_st *servers = memcached_servers_parse(mserver);
-                servers = memcached_servers_parse(mserver);
-                memcached_server_push(beans, servers);
-                memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
-                memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-                thr_arg->beansdb_conn = beans;
-                LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
-                memcached_server_list_free(servers);
+                nanosleep(&retry_sleep, NULL);
+                LOG_PRINT(LOG_DEBUG, "beansdb Connection Reconnected.");
             }
             else if(settings.mode == 3)
             {
+                nanosleep(&retry_sleep, NULL);
                 if(thr_arg->ssdb_conn != NULL)
                     redisFree(thr_arg->ssdb_conn);
                 redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
@@ -353,10 +347,10 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
                 else
                 {
                     thr_arg->ssdb_conn = c;
-                    LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
+                  LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
                 }
+                evthr_set_aux(thr_arg->thread, thr_arg);
             }
-            evthr_set_aux(thr_arg->thread, thr_arg);
         }
     }
     return ret;
@@ -381,6 +375,8 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
             ret = save_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
         else if(settings.mode == 3)
             ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
+        if(strchr(cache_key, ':') != NULL)
+            break;
         retry++;
 
         if(ret == -1)
@@ -388,22 +384,12 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
             LOG_PRINT(LOG_DEBUG, "retry[%d]...", retry);
             if(settings.mode == 2)
             {
-                if(thr_arg->beansdb_conn != NULL)
-                    memcached_free(thr_arg->beansdb_conn);
-                char mserver[32];
-                memcached_st *beans = memcached_create(NULL);
-                sprintf(mserver, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
-                memcached_server_st *servers = memcached_servers_parse(mserver);
-                servers = memcached_servers_parse(mserver);
-                memcached_server_push(beans, servers);
-                memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
-                memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-                thr_arg->beansdb_conn = beans;
-                LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
-                memcached_server_list_free(servers);
+                nanosleep(&retry_sleep, NULL);
+                LOG_PRINT(LOG_DEBUG, "beansdb Connection Reconnected.");
             }
             else if(settings.mode == 3)
             {
+                nanosleep(&retry_sleep, NULL);
                 if(thr_arg->ssdb_conn != NULL)
                     redisFree(thr_arg->ssdb_conn);
                 redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
@@ -415,10 +401,10 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
                 else
                 {
                     thr_arg->ssdb_conn = c;
-                    LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
+                  LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
                 }
+                evthr_set_aux(thr_arg->thread, thr_arg);
             }
-            evthr_set_aux(thr_arg->thread, thr_arg);
         }
     }
     return ret;
@@ -436,6 +422,9 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
  */
 int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, const size_t len)
 {
+    if(c == NULL)
+        return -1;
+
     redisReply *r = (redisReply*)redisCommand(c, "SET %s %b", cache_key, buff, len);
     if( NULL == r)
     {
@@ -466,6 +455,9 @@ int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, cons
  */
 int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *len)
 {
+    if(c == NULL)
+        return -1;
+
     redisReply *r = (redisReply*)redisCommand(c, "GET %s", cache_key);
     if( NULL == r)
     {
@@ -502,6 +494,8 @@ int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *le
 int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_t *len)
 {
     int rst = -1;
+    if(memc == NULL)
+        return rst;
 
     uint32_t  flags;
     memcached_return rc;
@@ -541,6 +535,8 @@ int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_
 int save_img_beansdb(memcached_st *memc, const char *key, const char *value, const size_t len)
 {
     int rst = -1;
+    if(memc == NULL)
+        return rst;
 
     memcached_return rc;
 
@@ -553,7 +549,7 @@ int save_img_beansdb(memcached_st *memc, const char *key, const char *value, con
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Binary beansdb Set(Key: %s ) Failed!", key);
+        LOG_PRINT(LOG_WARNING, "Binary beansdb Set Key: [%s] Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
         rst = -1;
@@ -574,6 +570,8 @@ int save_img_beansdb(memcached_st *memc, const char *key, const char *value, con
 int exist_beansdb(memcached_st *memc, const char *key)
 {
     int rst = -1;
+    if(memc == NULL)
+        return rst;
 
     size_t valueLen;
     uint32_t  flags;
@@ -607,6 +605,8 @@ int exist_beansdb(memcached_st *memc, const char *key)
 int find_beansdb(memcached_st *memc, const char *key, char *value)
 {
     int rst = -1;
+    if(memc == NULL)
+        return rst;
 
     size_t valueLen;
     uint32_t  flags;
@@ -648,6 +648,8 @@ int find_beansdb(memcached_st *memc, const char *key, char *value)
 int set_beansdb(memcached_st *memc, const char *key, const char *value)
 {
     int rst = -1;
+    if(memc == NULL)
+        return rst;
 
     memcached_return rc;
 
@@ -680,6 +682,8 @@ int set_beansdb(memcached_st *memc, const char *key, const char *value)
 int del_beansdb(memcached_st *memc, const char *key)
 {
     int rst = -1;
+    if(memc == NULL)
+        return rst;
 
     memcached_return rc;
 
