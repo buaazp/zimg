@@ -7,80 +7,316 @@ mode 1:
 
 test 1:
 Concurrency Level:      300
-Time taken for tests:   5.781 seconds
+Time taken for tests:   5.419 seconds
 Complete requests:      20000
 Failed requests:        0
 Write errors:           0
-Total transferred:      594209709 bytes
-HTML transferred:       592329615 bytes
-Requests per second:    3459.66 [#/sec] (mean)
-Time per request:       86.714 [ms] (mean)
-Time per request:       0.289 [ms] (mean, across all concurrent requests)
-Transfer rate:          100379.03 [Kbytes/sec] received
+Total transferred:      594256938 bytes
+HTML transferred:       592376656 bytes
+Requests per second:    3690.95 [#/sec] (mean)
+Time per request:       81.280 [ms] (mean)
+Time per request:       0.271 [ms] (mean, across all concurrent requests)
+Transfer rate:          107098.16 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0   14 199.7      0    3002
-Processing:    27   72  13.8     66     102
-Waiting:        8   69  14.4     63      99
-Total:         35   86 200.4     66    3094
+Connect:        0    1   2.0      1      23
+Processing:    29   80  38.3     79    3007
+Waiting:       14   75  37.2     76    3002
+Total:         44   81  38.4     79    3029
 
 test 2:
 Concurrency Level:      300
-Time taken for tests:   5.663 seconds
+Time taken for tests:   5.400 seconds
 Complete requests:      20000
 Failed requests:        0
 Write errors:           0
-Total transferred:      594204820 bytes
-HTML transferred:       592324726 bytes
-Requests per second:    3531.39 [#/sec] (mean)
-Time per request:       84.952 [ms] (mean)
-Time per request:       0.283 [ms] (mean, across all concurrent requests)
-Transfer rate:          102459.35 [Kbytes/sec] received
+Total transferred:      594180000 bytes
+HTML transferred:       592300000 bytes
+Requests per second:    3703.97 [#/sec] (mean)
+Time per request:       80.994 [ms] (mean)
+Time per request:       0.270 [ms] (mean, across all concurrent requests)
+Transfer rate:          107462.17 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    9 154.2      1    3002
-Processing:    29   76  56.6     74    3015
-Waiting:        9   72  56.2     71    3007
-Total:         46   84 164.3     74    3094
+Connect:        0    2  30.1      1    3001
+Processing:    23   79  96.9     76    3019
+Waiting:        7   73  95.9     73    3005
+Total:         34   80 101.6     77    3080
 
 
 test 3:
 Concurrency Level:      300
-Time taken for tests:   5.766 seconds
+Time taken for tests:   5.406 seconds
 Complete requests:      20000
 Failed requests:        0
 Write errors:           0
-Total transferred:      594188760 bytes
-HTML transferred:       592308666 bytes
-Requests per second:    3468.79 [#/sec] (mean)
-Time per request:       86.486 [ms] (mean)
-Time per request:       0.288 [ms] (mean, across all concurrent requests)
-Transfer rate:          100640.37 [Kbytes/sec] received
+Total transferred:      594203360 bytes
+HTML transferred:       592323172 bytes
+Requests per second:    3699.53 [#/sec] (mean)
+Time per request:       81.091 [ms] (mean)
+Time per request:       0.270 [ms] (mean, across all concurrent requests)
+Transfer rate:          107337.60 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1  30.0      0    3001
-Processing:    24   85 102.4     80    3091
-Waiting:       13   81 101.7     77    3079
-Total:         42   86 106.9     81    3099
+Connect:        0    2  36.8      1    3002
+Processing:    26   79  68.0     78    3010
+Waiting:       10   74  66.6     75    3003
+Total:         40   80  77.4     79    3083
 
 
-mode 2:
+mode 2 with twemproxy:
 
 test 1:
+Concurrency Level:      300
+Time taken for tests:   5.522 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640569228 bytes
+HTML transferred:       638684058 bytes
+Requests per second:    3621.97 [#/sec] (mean)
+Time per request:       82.828 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113287.19 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  42.5     15    3014
+Processing:    32   66  12.5     66     385
+Waiting:        8   19   4.7     19      69
+Total:         49   82  44.0     82    3084
+
+test 2:
+Concurrency Level:      300
+Time taken for tests:   5.523 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640643040 bytes
+HTML transferred:       638756836 bytes
+Requests per second:    3621.02 [#/sec] (mean)
+Time per request:       82.850 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113270.52 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16   1.9     16      21
+Processing:    39   67   6.4     67     126
+Waiting:        7   20   4.9     19      64
+Total:         55   82   5.3     83     133
+
+test 3:
+Concurrency Level:      300
+Time taken for tests:   5.523 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640596024 bytes
+HTML transferred:       638710666 bytes
+Requests per second:    3621.10 [#/sec] (mean)
+Time per request:       82.848 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113264.69 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16   2.1     16      21
+Processing:    41   67   6.8     67     130
+Waiting:        7   20   5.6     19      70
+Total:         58   82   5.7     83     136
+
+mode 2 without twemproxy:
+
+test 1:
+Concurrency Level:      300
+Time taken for tests:   5.532 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640272944 bytes
+HTML transferred:       638389184 bytes
+Requests per second:    3615.16 [#/sec] (mean)
+Time per request:       82.984 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          113021.92 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  47.5     16    3014
+Processing:    38   66  13.4     66     392
+Waiting:        7   19   6.1     18      74
+Total:         54   82  49.0     82    3085
 
 
 test 2:
+Concurrency Level:      300
+Time taken for tests:   5.520 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640336440 bytes
+HTML transferred:       638452116 bytes
+Requests per second:    3623.07 [#/sec] (mean)
+Time per request:       82.803 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113280.57 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  56.2     16    3017
+Processing:    31   66  11.8     66     389
+Waiting:        7   19   4.4     18      53
+Total:         49   82  57.2     81    3087
+
 
 test 3:
+Concurrency Level:      300
+Time taken for tests:   5.522 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640044292 bytes
+HTML transferred:       638161566 bytes
+Requests per second:    3621.93 [#/sec] (mean)
+Time per request:       82.829 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113193.27 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  42.5     16    3016
+Processing:    32   66  49.2     66    3097
+Waiting:        6   20  47.7     18    3017
+Total:         49   82  64.8     81    3117
 
 
-mode 3:
+mode 3 with twemproxy:
 
 test 1:
+Concurrency Level:      300
+Time taken for tests:   5.513 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640227264 bytes
+HTML transferred:       638343316 bytes
+Requests per second:    3627.84 [#/sec] (mean)
+Time per request:       82.694 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113410.22 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  30.1     16    3015
+Processing:    34   67  57.5     66    3111
+Waiting:        6   20  56.3     18    3020
+Total:         54   82  64.8     81    3127
 
 test 2:
+Concurrency Level:      300
+Time taken for tests:   5.524 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640475140 bytes
+HTML transferred:       638590158 bytes
+Requests per second:    3620.53 [#/sec] (mean)
+Time per request:       82.861 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113225.42 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  30.1     16    3016
+Processing:    32   67  25.7     66    3098
+Waiting:        5   20  21.8     18    3016
+Total:         49   82  39.2     82    3114
 
 test 3:
+Concurrency Level:      300
+Time taken for tests:   5.528 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640790352 bytes
+HTML transferred:       638903866 bytes
+Requests per second:    3617.92 [#/sec] (mean)
+Time per request:       82.921 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113199.62 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  36.8     16    3015
+Processing:    39   66  39.3     66    3108
+Waiting:        7   20  37.1     18    3014
+Total:         53   82  53.6     82    3125
+
+mode 3 without twemproxy:
+
+test 1:
+Concurrency Level:      300
+Time taken for tests:   5.504 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639772880 bytes
+HTML transferred:       637891376 bytes
+Requests per second:    3633.47 [#/sec] (mean)
+Time per request:       82.566 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113505.73 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   17  63.7     16    3016
+Processing:    28   65  44.2     65    3109
+Waiting:        7   19  42.6     18    3016
+Total:         47   82  77.4     81    3130
+
+test 2:
+Concurrency Level:      300
+Time taken for tests:   5.504 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640077724 bytes
+HTML transferred:       638194904 bytes
+Requests per second:    3633.49 [#/sec] (mean)
+Time per request:       82.565 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113560.24 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  30.1     16    3015
+Processing:    29   66  57.5     66    3100
+Waiting:        7   20  56.3     18    3020
+Total:         47   82  64.7     81    3113
+
+test 3:
+Concurrency Level:      300
+Time taken for tests:   5.518 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640542152 bytes
+HTML transferred:       638655478 bytes
+Requests per second:    3624.72 [#/sec] (mean)
+Time per request:       82.765 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113368.47 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  30.1     16    3018
+Processing:    37   66  25.6     66    3115
+Waiting:        9   19  21.6     18    3019
+Total:         50   82  39.2     82    3140
+
+
+
