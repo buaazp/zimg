@@ -149,8 +149,10 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     strftime(tmbuf, sizeof(tmbuf), "%Y/%m/%d %H:%M:%S", localtime(&t));
     fprintf (fp, "%s:%.6d ", tmbuf, (int)tv.tv_usec);
 
+#ifdef DEBUG
     //线程信息
     fprintf(fp, "Thread ID: %lu ", (unsigned long)pthread_self());
+#endif
 
     //等级信息
     fprintf(fp, "[%s] ", log_level_descs[level].endesc);

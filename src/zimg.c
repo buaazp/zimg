@@ -95,7 +95,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     {
         if(save_img_db(thr_arg, cache_key, buff, len) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "save_img_db failed.");
+            LOG_PRINT(LOG_DEBUG, "save_img_db failed.");
             goto done;
         }
         else
@@ -121,7 +121,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
 
     if(mk_dirs(save_path) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "save_path[%s] Create Failed!", save_path);
+        LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Failed!", save_path);
         goto done;
     }
     chdir(_init_path);
@@ -130,7 +130,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     LOG_PRINT(LOG_DEBUG, "save_name-->: %s", save_name);
     if(new_img(buff, len, save_name) == -1)
     {
-        LOG_PRINT(LOG_WARNING, "Save Image[%s] Failed!", save_name);
+        LOG_PRINT(LOG_DEBUG, "Save Image[%s] Failed!", save_name);
         goto done;
     }
 
@@ -171,25 +171,25 @@ int new_img(const char *buff, const size_t len, const char *save_name)
 
     if((fd = open(save_name, O_WRONLY | O_TRUNC | O_CREAT, 00644)) < 0)
     {
-        LOG_PRINT(LOG_ERROR, "fd(%s) open failed!", save_name);
+        LOG_PRINT(LOG_DEBUG, "fd(%s) open failed!", save_name);
         goto done;
     }
 
     if(flock(fd, LOCK_EX | LOCK_NB) == -1)
     {
-        LOG_PRINT(LOG_WARNING, "This fd is Locked by Other thread.");
+        LOG_PRINT(LOG_DEBUG, "This fd is Locked by Other thread.");
         goto done;
     }
 
     wlen = write(fd, buff, len);
     if(wlen == -1)
     {
-        LOG_PRINT(LOG_ERROR, "write(%s) failed!", save_name);
+        LOG_PRINT(LOG_DEBUG, "write(%s) failed!", save_name);
         goto done;
     }
     else if(wlen < len)
     {
-        LOG_PRINT(LOG_ERROR, "Only part of [%s] is been writed.", save_name);
+        LOG_PRINT(LOG_DEBUG, "Only part of [%s] is been writed.", save_name);
         goto done;
     }
     flock(fd, LOCK_UN | LOCK_NB);
@@ -253,7 +253,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     len = strlen(req->md5) + strlen(settings.img_path) + 12;
     if (!(whole_path = malloc(len)))
     {
-        LOG_PRINT(LOG_ERROR, "whole_path malloc failed!");
+        LOG_PRINT(LOG_DEBUG, "whole_path malloc failed!");
         goto err;
     }
     int lvl1 = str_hash(req->md5);
@@ -307,7 +307,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
                 if(status == MagickFalse)
                 {
-                    LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
+                    LOG_PRINT(LOG_DEBUG, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
                     del_cache(req->thr_arg, cache_key);
                 }
                 else
@@ -347,7 +347,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_WARNING, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
+                LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 ThrowWandException(magick_wand);
                 del_cache(req->thr_arg, cache_key);
                 status = MagickReadImage(magick_wand, orig_path);
@@ -407,7 +407,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", orig_path);
+                LOG_PRINT(LOG_DEBUG, "Image[%s] Resize Failed!", orig_path);
                 goto err;
             }
             LOG_PRINT(LOG_DEBUG, "Resize img succ.");
@@ -438,25 +438,25 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         *img_size = f_stat.st_size;
         if(*img_size <= 0)
         {
-            LOG_PRINT(LOG_ERROR, "File[%s] is Empty.", rsp_path);
+            LOG_PRINT(LOG_DEBUG, "File[%s] is Empty.", rsp_path);
             goto err;
         }
         if((*buff_ptr = (char *)malloc(*img_size)) == NULL)
         {
-            LOG_PRINT(LOG_ERROR, "buff_ptr Malloc Failed!");
+            LOG_PRINT(LOG_DEBUG, "buff_ptr Malloc Failed!");
             goto err;
         }
         LOG_PRINT(LOG_DEBUG, "img_size = %d", *img_size);
         //*buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
         if((rlen = read(fd, *buff_ptr, *img_size)) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "File[%s] Read Failed.", rsp_path);
-            LOG_PRINT(LOG_ERROR, "Error: %s.", strerror(errno));
+            LOG_PRINT(LOG_DEBUG, "File[%s] Read Failed.", rsp_path);
+            LOG_PRINT(LOG_DEBUG, "Error: %s.", strerror(errno));
             goto err;
         }
         else if(rlen < *img_size)
         {
-            LOG_PRINT(LOG_ERROR, "File[%s] Read Not Compeletly.", rsp_path);
+            LOG_PRINT(LOG_DEBUG, "File[%s] Read Not Compeletly.", rsp_path);
             goto err;
         }
         goto done;
@@ -472,7 +472,7 @@ convert:
         status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_ERROR, "Image[%s] Remove Color Failed!", orig_path);
+            LOG_PRINT(LOG_DEBUG, "Image[%s] Remove Color Failed!", orig_path);
             goto err;
         }
         LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
@@ -490,13 +490,13 @@ convert:
             status = MagickSetImageFormat(magick_wand, "JPEG");
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_WARNING, "Image[%s] Convert Format Failed!", orig_path);
+                LOG_PRINT(LOG_DEBUG, "Image[%s] Convert Format Failed!", orig_path);
             }
             LOG_PRINT(LOG_DEBUG, "Compress Image with JPEGCompression");
             status = MagickSetImageCompression(magick_wand, JPEGCompression);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_WARNING, "Image[%s] Compression Failed!", orig_path);
+                LOG_PRINT(LOG_DEBUG, "Image[%s] Compression Failed!", orig_path);
             }
         }
         size_t quality = MagickGetImageCompressionQuality(magick_wand) * 0.75;
@@ -509,7 +509,7 @@ convert:
         status = MagickSetImageCompressionQuality(magick_wand, quality);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_WARNING, "Set Compression Quality Failed!");
+            LOG_PRINT(LOG_DEBUG, "Set Compression Quality Failed!");
         }
 
         //strip image EXIF infomation
@@ -517,13 +517,13 @@ convert:
         status = MagickStripImage(magick_wand);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_WARNING, "Remove Exif Infomation of the ImageFailed!");
+            LOG_PRINT(LOG_DEBUG, "Remove Exif Infomation of the ImageFailed!");
         }
     }
     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
     if(*buff_ptr == NULL)
     {
-        LOG_PRINT(LOG_ERROR, "Magick Get Image Blob Failed!");
+        LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
         goto err;
     }
 

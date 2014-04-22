@@ -133,7 +133,7 @@ int get_type(const char *filename, char *type)
     char *flag, *tmp;
     if((flag = strchr(filename, '.')) == 0)
     {
-        LOG_PRINT(LOG_WARNING, "FileName [%s] Has No '.' in It.", filename);
+        LOG_PRINT(LOG_DEBUG, "FileName [%s] Has No '.' in It.", filename);
         return -1;
     }
     while((tmp = strchr(flag + 1, '.')) != 0)
@@ -157,7 +157,7 @@ int is_file(const char *filename)
     struct stat st;
     if(stat(filename, &st)<0)
     {
-        LOG_PRINT(LOG_WARNING, "File[%s] is Not Existed!", filename);
+        LOG_PRINT(LOG_DEBUG, "File[%s] is Not Existed!", filename);
         return -1;
     }
     if(S_ISREG(st.st_mode))
@@ -215,7 +215,7 @@ int is_dir(const char *path)
     struct stat st;
     if(stat(path, &st)<0)
     {
-        LOG_PRINT(LOG_WARNING, "Path[%s] is Not Existed!", path);
+        LOG_PRINT(LOG_DEBUG, "Path[%s] is Not Existed!", path);
         return -1;
     }
     if(S_ISDIR(st.st_mode))
@@ -242,7 +242,7 @@ int mk_dir(const char *path)
         int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if(status == -1)
         {
-            LOG_PRINT(LOG_WARNING, "mkdir[%s] Failed!", path);
+            LOG_PRINT(LOG_DEBUG, "mkdir[%s] Failed!", path);
             return -1;
         }
         LOG_PRINT(LOG_DEBUG, "mkdir[%s] sucessfully!", path);
@@ -250,7 +250,7 @@ int mk_dir(const char *path)
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Path[%s] is Existed!", path);
+        LOG_PRINT(LOG_DEBUG, "Path[%s] is Existed!", path);
         return -1;
     }
 }
@@ -268,7 +268,7 @@ int mk_dirs(const char *dir)
     char *p;
     if (strlen(dir) == 0 || dir == NULL) 
     {
-        LOG_PRINT(LOG_WARNING, "strlen(dir) is 0 or dir is NULL.");
+        LOG_PRINT(LOG_DEBUG, "strlen(dir) is 0 or dir is NULL.");
         return -1;
     }
     memset(tmp, 0, sizeof(tmp));

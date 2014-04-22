@@ -267,7 +267,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         if(c->err)
         {
             redisFree(c);
-            LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
         }
         else
         {
@@ -367,7 +367,7 @@ int main(int argc, char **argv)
         {
             if(mk_dir(log_path) != 1)
             {
-                LOG_PRINT(LOG_ERROR, "log_path[%s] Create Failed!", log_path);
+                LOG_PRINT(LOG_DEBUG, "log_path[%s] Create Failed!", log_path);
                 return -1;
             }
         }
@@ -378,7 +378,7 @@ int main(int argc, char **argv)
     {
         if(mk_dir(settings.img_path) != 1)
         {
-            LOG_PRINT(LOG_ERROR, "img_path[%s] Create Failed!", settings.img_path);
+            LOG_PRINT(LOG_DEBUG, "img_path[%s] Create Failed!", settings.img_path);
             return -1;
         }
     }
@@ -406,7 +406,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
         if(set_cache(memc, "zimg", "1") == -1)
         {
-            LOG_PRINT(LOG_WARNING, "Memcached[%s] Connect Failed!", mserver);
+            LOG_PRINT(LOG_DEBUG, "Memcached[%s] Connect Failed!", mserver);
             settings.cache_on = false;
         }
         else
@@ -436,7 +436,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
         if(set_cache(beans, "zimg", "1") == -1)
         {
-            LOG_PRINT(LOG_FATAL, "Beansdb[%s] Connect Failed!", mserver);
+            LOG_PRINT(LOG_DEBUG, "Beansdb[%s] Connect Failed!", mserver);
             fprintf(stderr, "Beansdb[%s] Connect Failed!\n", mserver);
             memcached_free(beans);
             return -1;
@@ -453,7 +453,7 @@ int main(int argc, char **argv)
         if(c->err)
         {
             redisFree(c);
-            LOG_PRINT(LOG_FATAL, "Connect to ssdb server faile");
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
             fprintf(stderr, "SSDB[%s:%d] Connect Failed!\n", settings.ssdb_ip, settings.ssdb_port);
             return -1;
         }
@@ -468,6 +468,7 @@ int main(int argc, char **argv)
 
     //begin to start httpd...
     LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");
+    LOG_PRINT(LOG_INFO, "zimg started");
     evbase = event_base_new();
     evhtp_t *htp = evhtp_new(evbase, NULL);
 
@@ -500,7 +501,8 @@ void kill_server(void)
 {
     LOG_PRINT(LOG_DEBUG, "Stopping socket listener event loop.");
     if (event_base_loopexit(evbase, NULL)) {
-        LOG_PRINT(LOG_ERROR, "Error shutting down server");
+        LOG_PRINT(LOG_DEBUG, "Error shutting down server");
     }
     LOG_PRINT(LOG_DEBUG, "Stopping workers.\n");
+    LOG_PRINT(LOG_INFO, "zimg stop");
 }

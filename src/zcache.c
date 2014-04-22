@@ -135,7 +135,7 @@ int find_cache(memcached_st *memc, const char *key, char *value)
     }
     else if (rc == MEMCACHED_NOTFOUND)
     {
-        LOG_PRINT(LOG_WARNING, "Cache Key[%s] Not Find!", key);
+        LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Not Find!", key);
         rst = -1;
     }
     else
@@ -175,11 +175,11 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
     }
     else if(rc == MEMCACHED_CONNECTION_FAILURE)
     {
-        LOG_PRINT(LOG_WARNING, "Cache Connection Failed!");
+        LOG_PRINT(LOG_DEBUG, "Cache Connection Failed!");
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Cache Set(Key: %s Value: %s) Failed!", key, value);
+        LOG_PRINT(LOG_DEBUG, "Cache Set(Key: %s Value: %s) Failed!", key, value);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
         rst = -1;
@@ -228,7 +228,7 @@ int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t
     }
     else if (rc == MEMCACHED_NOTFOUND)
     {
-        LOG_PRINT(LOG_WARNING, "Binary Cache Key[%s] Not Find!", key);
+        LOG_PRINT(LOG_DEBUG, "Binary Cache Key[%s] Not Find!", key);
         rst = -1;
     }
     else
@@ -277,7 +277,7 @@ int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const 
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Binary Cache Set Key[%s] Failed!", key);
+        LOG_PRINT(LOG_DEBUG, "Binary Cache Set Key[%s] Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
         rst = -1;
@@ -320,7 +320,7 @@ int del_cache(thr_arg_t *thr_arg, const char *key)
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Cache Key[%s] Delete Failed!", key);
+        LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Delete Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
         rst = -1;

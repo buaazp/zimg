@@ -237,12 +237,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
     if(strstr(content_type, "multipart/form-data") == 0)
     {
-        LOG_PRINT(LOG_ERROR, "POST form error!");
+        LOG_PRINT(LOG_DEBUG, "POST form error!");
+        LOG_PRINT(LOG_ERROR, "fail post parse");
         goto err;
     }
     else if(strstr(content_type, "boundary") == 0)
     {
-        LOG_PRINT(LOG_ERROR, "boundary NOT found!");
+        LOG_PRINT(LOG_DEBUG, "boundary NOT found!");
+        LOG_PRINT(LOG_ERROR, "fail post parse");
         goto err;
     }
 
@@ -256,7 +258,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         boundary_end = strchr(boundary, '"');
         if (!boundary_end) 
         {
-            LOG_PRINT(LOG_ERROR, "Invalid boundary in multipart/form-data POST data");
+            LOG_PRINT(LOG_DEBUG, "Invalid boundary in multipart/form-data POST data");
+            LOG_PRINT(LOG_ERROR, "fail post parse");
             goto err;
         }
     } 
@@ -282,7 +285,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
     if(evbuffer_get_length(buf) <= 0)
     {
-        LOG_PRINT(LOG_ERROR, "Empty Request!");
+        LOG_PRINT(LOG_DEBUG, "Empty Request!");
+        LOG_PRINT(LOG_ERROR, "fail post empty");
         goto err;
     }
 
@@ -293,7 +297,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         LOG_PRINT(LOG_DEBUG, "rmblen = %d", rmblen);
         if(rmblen < 0)
         {
-            LOG_PRINT(LOG_ERROR, "evbuffer_remove failed!");
+            LOG_PRINT(LOG_DEBUG, "evbuffer_remove failed!");
+            LOG_PRINT(LOG_ERROR, "fail post parse");
             goto err;
         }
     }
@@ -308,7 +313,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Content-Disposition Not Found!");
+        LOG_PRINT(LOG_DEBUG, "Content-Disposition Not Found!");
+        LOG_PRINT(LOG_ERROR, "fail post parse");
         goto err;
     }
     start += 9;
@@ -317,7 +323,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         start++;
         if((end = kmp(buff+start, post_size-start, quotePattern, strlen(quotePattern))) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "quote \" Not Found!");
+            LOG_PRINT(LOG_DEBUG, "quote \" Not Found!");
+            LOG_PRINT(LOG_ERROR, "fail post parse");
             goto err;
         }
     }
@@ -325,7 +332,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         if((end = kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "quote \\r\\n Not Found!");
+            LOG_PRINT(LOG_DEBUG, "quote \\r\\n Not Found!");
+            LOG_PRINT(LOG_ERROR, "fail post parse");
             goto err;
         }
     }
@@ -337,12 +345,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     char fileType[32];
     if(get_type(fileName, fileType) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Get Type of File[%s] Failed!", fileName);
+        LOG_PRINT(LOG_DEBUG, "Get Type of File[%s] Failed!", fileName);
+        LOG_PRINT(LOG_ERROR, "fail post type");
         goto err;
     }
     if(is_img(fileType) != 1)
     {
-        LOG_PRINT(LOG_ERROR, "fileType[%s] is Not Supported!", fileType);
+        LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", fileType);
+        LOG_PRINT(LOG_ERROR, "fail post type");
         goto err;
     }
 
@@ -350,38 +360,42 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
     if((start = kmp(buff+end, post_size-end, typePattern, strlen(typePattern))) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Content-Type Not Found!");
+        LOG_PRINT(LOG_DEBUG, "Content-Type Not Found!");
+        LOG_PRINT(LOG_ERROR, "fail post parse");
         goto err;
     }
     start += end;
     LOG_PRINT(LOG_DEBUG, "start = %d", start);
     if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Image Not complete!");
+        LOG_PRINT(LOG_DEBUG, "Image Not complete!");
+        LOG_PRINT(LOG_ERROR, "fail post parse");
         goto err;
     }
     end += start;
 
     //by @momoplan: fixed some http tool's post bug.
     /*
-    if((start = kmp(buff+end, post_size-end, "Content-Transfer-Encoding", strlen("Content-Transfer-Encoding"))) != -1)
-    {
-        start += end;
-        if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
-        {
-             LOG_PRINT(LOG_ERROR, "Image Not complete!");
-             goto err;
-        }
-        end += start;
-    }
-    */
+       if((start = kmp(buff+end, post_size-end, "Content-Transfer-Encoding", strlen("Content-Transfer-Encoding"))) != -1)
+       {
+       start += end;
+       if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
+       {
+       LOG_PRINT(LOG_DEBUG, "Image Not complete!");
+       LOG_PRINT(LOG_ERROR, "fail post parse");
+       goto err;
+       }
+       end += start;
+       }
+       */
 
     LOG_PRINT(LOG_DEBUG, "end = %d", end);
     start = end + 4;
     LOG_PRINT(LOG_DEBUG, "start = %d", start);
     if((end = kmp(buff+start, post_size-start, boundaryPattern, strlen(boundaryPattern))) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Image Not complete!");
+        LOG_PRINT(LOG_DEBUG, "Image Not complete!");
+        LOG_PRINT(LOG_ERROR, "fail post parse");
         goto err;
     }
     end += start;
@@ -393,7 +407,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     LOG_PRINT(LOG_DEBUG, "img_size = %d", img_size);
     if(img_size <= 0)
     {
-        LOG_PRINT(LOG_ERROR, "Image Size is Zero!");
+        LOG_PRINT(LOG_DEBUG, "Image Size is Zero!");
+        LOG_PRINT(LOG_ERROR, "fail post empty");
         goto err;
     }
 
@@ -405,7 +420,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
     if(save_img(thr_arg, buff+start, img_size, md5sum) == -1)
     {
-        LOG_PRINT(LOG_ERROR, "Image Save Failed!");
+        LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
+        LOG_PRINT(LOG_ERROR, "fail post save");
         goto err;
     }
 
@@ -430,6 +446,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() DONE!===============");
+    LOG_PRINT(LOG_INFO, "succ post pic:%s size:%d", md5sum, img_size);
     goto done;
 
 err:
@@ -496,7 +513,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         struct stat st;
         if((fd = open(settings.root_path, O_RDONLY)) == -1)
         {
-            LOG_PRINT(LOG_WARNING, "Root_page Open Failed. Return Default Page.");
+            LOG_PRINT(LOG_DEBUG, "Root_page Open Failed. Return Default Page.");
             evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
         }
         else
@@ -505,7 +522,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             {
                 /* Make sure the length still matches, now that we
                  * opened the file :/ */
-                LOG_PRINT(LOG_WARNING, "Root_page Length fstat Failed. Return Default Page.");
+                LOG_PRINT(LOG_DEBUG, "Root_page Length fstat Failed. Return Default Page.");
                 evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
             }
             else
@@ -548,7 +565,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {
-        LOG_PRINT(LOG_WARNING, "Url is Not a zimg Request.");
+        LOG_PRINT(LOG_DEBUG, "Url is Not a zimg Request.");
+        LOG_PRINT(LOG_ERROR, "refuse url illegal");
         goto err;
     }
 	/* This holds the content we're sending. */
@@ -636,7 +654,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
     if(get_img_rst == -1)
     {
-        LOG_PRINT(LOG_ERROR, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
+        LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
+        LOG_PRINT(LOG_ERROR, "fail pic:%s w:%d h:%d p:%d g:%d", md5, width, height, proportion, gray);
         goto err;
     }
 
@@ -648,6 +667,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
+    LOG_PRINT(LOG_INFO, "succ pic:%s w:%d h:%d p:%d g:%d size:%d", md5, width, height, proportion, gray, len);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
 
 
@@ -655,7 +675,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     {
         if(new_img(buff, len, zimg_req->rsp_path) == -1)
         {
-            LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rsp_path);
+            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", zimg_req->rsp_path);
         }
     }
     goto done;

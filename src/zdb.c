@@ -108,7 +108,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_WARNING, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
+                LOG_PRINT(LOG_DEBUG, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
                 del_cache(req->thr_arg, cache_key);
             }
             else
@@ -147,7 +147,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     {
         if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == -1)
         {
-            LOG_PRINT(LOG_ERROR, "Get image [%s] from backend db failed.", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
             goto done;
         }
         else if(*img_size < CACHE_MAX_SIZE)
@@ -161,7 +161,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     {
         ThrowWandException(magick_wand);
         del_cache(req->thr_arg, cache_key);
-        LOG_PRINT(LOG_ERROR, "Read image [%s] from blob failed.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Read image [%s] from blob failed.", cache_key);
         goto done;
     }
 
@@ -188,7 +188,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_ERROR, "Image[%s] Resize Failed!", cache_key);
+                LOG_PRINT(LOG_DEBUG, "Image[%s] Resize Failed!", cache_key);
                 goto done;
             }
 
@@ -217,13 +217,13 @@ convert:
             status = MagickSetImageFormat(magick_wand, "JPEG");
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_WARNING, "Image[%s] Convert Format Failed!", cache_key);
+                LOG_PRINT(LOG_DEBUG, "Image[%s] Convert Format Failed!", cache_key);
             }
             LOG_PRINT(LOG_DEBUG, "Compress Image with JPEGCompression");
             status = MagickSetImageCompression(magick_wand, JPEGCompression);
             if(status == MagickFalse)
             {
-                LOG_PRINT(LOG_WARNING, "Image[%s] Compression Failed!", cache_key);
+                LOG_PRINT(LOG_DEBUG, "Image[%s] Compression Failed!", cache_key);
             }
         }
         size_t quality = MagickGetImageCompressionQuality(magick_wand) * 0.75;
@@ -236,7 +236,7 @@ convert:
         status = MagickSetImageCompressionQuality(magick_wand, quality);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_WARNING, "Set Compression Quality Failed!");
+            LOG_PRINT(LOG_DEBUG, "Set Compression Quality Failed!");
         }
 
         //strip image EXIF infomation
@@ -244,13 +244,13 @@ convert:
         status = MagickStripImage(magick_wand);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_WARNING, "Remove Exif Infomation of the ImageFailed!");
+            LOG_PRINT(LOG_DEBUG, "Remove Exif Infomation of the ImageFailed!");
         }
 
         *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
         if(*buff_ptr == NULL)
         {
-            LOG_PRINT(LOG_ERROR, "Magick Get Image Blob Failed!");
+            LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
             goto done;
         }
         gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
@@ -268,7 +268,7 @@ convert:
         status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
         if(status == MagickFalse)
         {
-            LOG_PRINT(LOG_ERROR, "Image[%s] Remove Color Failed!", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Image[%s] Remove Color Failed!", cache_key);
             goto done;
         }
         LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
@@ -277,7 +277,7 @@ convert:
         *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
         if(*buff_ptr == NULL)
         {
-            LOG_PRINT(LOG_ERROR, "Magick Get Image Blob Failed!");
+            LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
             goto done;
         }
         //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
@@ -287,6 +287,10 @@ convert:
         {
             set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
         }
+    }
+    if(got_color == false)
+    {
+        LOG_PRINT(LOG_INFO, "succ compress pic:%s", cache_key);
     }
     result = 1;
 
@@ -342,7 +346,7 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
                 if(c->err)
                 {
                     redisFree(c);
-                    LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
+                    LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
                 }
                 else
                 {
@@ -396,7 +400,7 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
                 if(c->err)
                 {
                     redisFree(c);
-                    LOG_PRINT(LOG_ERROR, "Connect to ssdb server faile");
+                    LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
                 }
                 else
                 {
@@ -428,12 +432,12 @@ int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, cons
     redisReply *r = (redisReply*)redisCommand(c, "SET %s %b", cache_key, buff, len);
     if( NULL == r)
     {
-        LOG_PRINT(LOG_ERROR, "Execut ssdb command failure");
+        LOG_PRINT(LOG_DEBUG, "Execut ssdb command failure");
         return -1;
     }
     if( !(r->type == REDIS_REPLY_STATUS && strcasecmp(r->str,"OK")==0))
     {
-        LOG_PRINT(LOG_ERROR, "Failed to execute save [%s] to ssdb.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Failed to execute save [%s] to ssdb.", cache_key);
         freeReplyObject(r);
         return -1;
     }
@@ -461,12 +465,12 @@ int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *le
     redisReply *r = (redisReply*)redisCommand(c, "GET %s", cache_key);
     if( NULL == r)
     {
-        LOG_PRINT(LOG_ERROR, "Execut ssdb command failure");
+        LOG_PRINT(LOG_DEBUG, "Execut ssdb command failure");
         return -1;
     }
     if( r->type != REDIS_REPLY_STRING )
     {
-        LOG_PRINT(LOG_ERROR, "Failed to execute get [%s] from ssdb.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Failed to execute get [%s] from ssdb.", cache_key);
         freeReplyObject(r);
         return -1;
     }
@@ -509,7 +513,7 @@ int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_
     }
     else if (rc == MEMCACHED_NOTFOUND)
     {
-        LOG_PRINT(LOG_WARNING, "Binary Beansdb Key[%s] Not Find!", key);
+        LOG_PRINT(LOG_DEBUG, "Binary Beansdb Key[%s] Not Find!", key);
         rst = -1;
     }
     else
@@ -549,7 +553,7 @@ int save_img_beansdb(memcached_st *memc, const char *key, const char *value, con
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Binary beansdb Set Key: [%s] Failed!", key);
+        LOG_PRINT(LOG_DEBUG, "Binary beansdb Set Key: [%s] Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
         rst = -1;
@@ -623,7 +627,7 @@ int find_beansdb(memcached_st *memc, const char *key, char *value)
     }
     else if (rc == MEMCACHED_NOTFOUND)
     {
-        LOG_PRINT(LOG_WARNING, "Beansdb Key[%s] Not Find!", key);
+        LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Not Find!", key);
         rst = -1;
     }
     else
@@ -662,7 +666,7 @@ int set_beansdb(memcached_st *memc, const char *key, const char *value)
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Beansdb Set(Key: %s Value: %s) Failed!", key, value);
+        LOG_PRINT(LOG_DEBUG, "Beansdb Set(Key: %s Value: %s) Failed!", key, value);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
         rst = -1;
@@ -696,7 +700,7 @@ int del_beansdb(memcached_st *memc, const char *key)
     }
     else
     {
-        LOG_PRINT(LOG_WARNING, "Beansdb Key[%s] Delete Failed!", key);
+        LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Delete Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
         rst = -1;
