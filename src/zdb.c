@@ -69,14 +69,14 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     //LOG_PRINT(LOG_DEBUG, "req->thr_arg->cache_conn: %p", req->thr_arg->cache_conn);
 
     //sprintf(cache_key, "img:%s:%d:%d:%d:%d", req->md5, req->width, req->height, req->proportion, req->gray);
-    //if(req->gray == 1)
-    //{
+    if(req->gray == 1)
+    {
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-    //}
-    //else
-    //{
-    //    gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-    //}
+    }
+    else
+    {
+        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+    }
     //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
     if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
     {
@@ -97,8 +97,8 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     }
 
     magick_wand = NewMagickWand();
-    //if(req->gray == 1)
-    //{
+    if(req->gray == 1)
+    {
         //sprintf(cache_key, "img:%s:%d:%d:%d:0", req->md5, req->width, req->height, req->proportion);
         gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
         //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
@@ -134,7 +134,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 goto convert;
             }
         }
-    //}
+    }
 
     //sprintf(cache_key, "img:%s:0:0:1:0", req->md5);
     gen_key(cache_key, req->md5, 0);
@@ -318,43 +318,30 @@ done:
  */
 int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len)
 {
-    int ret = -1, retry = 0;
-    while(ret == -1 && retry < settings.retry)
-    {
-        if(settings.mode == 2 && thr_arg->beansdb_conn != NULL)
-            ret = get_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
-        else if(settings.mode == 3 && thr_arg->ssdb_conn != NULL)
-            ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
-        if(strchr(cache_key, ':') != NULL)
-            break;
-        retry++;
+    int ret = -1;
 
-        if(ret == -1)
+    if(settings.mode == 2 && thr_arg->beansdb_conn != NULL)
+        ret = get_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
+    else if(settings.mode == 3 && thr_arg->ssdb_conn != NULL)
+        ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
+
+    if(ret == -1 && settings.mode == 3)
+    {
+        if(thr_arg->ssdb_conn != NULL)
+            redisFree(thr_arg->ssdb_conn);
+        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+        if(c->err)
         {
-            LOG_PRINT(LOG_DEBUG, "retry[%d]...", retry);
-            if(settings.mode == 2)
-            {
-                nanosleep(&retry_sleep, NULL);
-                LOG_PRINT(LOG_DEBUG, "beansdb Connection Reconnected.");
-            }
-            else if(settings.mode == 3)
-            {
-                nanosleep(&retry_sleep, NULL);
-                if(thr_arg->ssdb_conn != NULL)
-                    redisFree(thr_arg->ssdb_conn);
-                redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
-                if(c->err)
-                {
-                    redisFree(c);
-                    LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
-                }
-                else
-                {
-                    thr_arg->ssdb_conn = c;
-                  LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
-                }
-                evthr_set_aux(thr_arg->thread, thr_arg);
-            }
+            redisFree(c);
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
+            return ret;
+        }
+        else
+        {
+            thr_arg->ssdb_conn = c;
+            LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
+            ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
+            //evthr_set_aux(thr_arg->thread, thr_arg);
         }
     }
     return ret;
@@ -372,43 +359,29 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
  */
 int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, const size_t len)
 {
-    int ret = -1, retry = 0;
-    while(ret == -1 && retry < settings.retry)
-    {
-        if(settings.mode == 2)
-            ret = save_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
-        else if(settings.mode == 3)
-            ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
-        if(strchr(cache_key, ':') != NULL)
-            break;
-        retry++;
+    int ret = -1;
+    if(settings.mode == 2)
+        ret = save_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
+    else if(settings.mode == 3)
+        ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
 
-        if(ret == -1)
+    if(ret == -1 && settings.mode == 3)
+    {
+        if(thr_arg->ssdb_conn != NULL)
+            redisFree(thr_arg->ssdb_conn);
+        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+        if(c->err)
         {
-            LOG_PRINT(LOG_DEBUG, "retry[%d]...", retry);
-            if(settings.mode == 2)
-            {
-                nanosleep(&retry_sleep, NULL);
-                LOG_PRINT(LOG_DEBUG, "beansdb Connection Reconnected.");
-            }
-            else if(settings.mode == 3)
-            {
-                nanosleep(&retry_sleep, NULL);
-                if(thr_arg->ssdb_conn != NULL)
-                    redisFree(thr_arg->ssdb_conn);
-                redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
-                if(c->err)
-                {
-                    redisFree(c);
-                    LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
-                }
-                else
-                {
-                    thr_arg->ssdb_conn = c;
-                  LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
-                }
-                evthr_set_aux(thr_arg->thread, thr_arg);
-            }
+            redisFree(c);
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
+            return ret;
+        }
+        else
+        {
+            thr_arg->ssdb_conn = c;
+            LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
+            ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
+            //evthr_set_aux(thr_arg->thread, thr_arg);
         }
     }
     return ret;

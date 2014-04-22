@@ -115,8 +115,6 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
 int find_cache(memcached_st *memc, const char *key, char *value)
 {
     int rst = -1;
-    if(settings.cache_on == false)
-        return rst;
     if(memc == NULL)
         return rst;
 
@@ -159,8 +157,6 @@ int find_cache(memcached_st *memc, const char *key, char *value)
 int set_cache(memcached_st *memc, const char *key, const char *value)
 {
     int rst = -1;
-    if(settings.cache_on == false)
-        return rst;
     if(memc == NULL)
         return rst;
 
@@ -268,7 +264,6 @@ int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const 
     {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
-		settings.cache_on = true;
     }
     else if(rc == MEMCACHED_CONNECTION_FAILURE)
     {
