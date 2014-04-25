@@ -321,7 +321,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *typePattern = "Content-Type";
     const char *quotePattern = "\"";
     const char *blankPattern = "\r\n";
-    boundaryPattern = (char *)malloc(boundary_len + 4);
+    boundaryPattern = (char *)malloc(boundary_len + 2);
     //sprintf(boundaryPattern, "\r\n--%s", boundary);
     sprintf(boundaryPattern, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
