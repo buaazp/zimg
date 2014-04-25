@@ -10,7 +10,7 @@ Contact me: zp@buaa.us
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/buaazp/zimg/trend.png)](https://bitdeli.com/free "Bitdeli Badge")  
 
 ### Versions:
-- 04/26/2014 - zimg 2.0.0 Release. *Important milestone for zimg.*
+- 04/26/2014 - zimg 2.0.0 Beta Release. *Important milestone for zimg.*
 - 03/10/2014 - zimg 1.1.0 Release.
 - 08/01/2013 - zimg 1.0.0 Release.
 
@@ -19,13 +19,14 @@ Contact me: zp@buaa.us
 
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO.  
 [imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
-[memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
+[libmemcached](https://github.com/trondn/libmemcached): LibMemcached is designed to provide the greatest number of options to use Memcached.  
 [lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
-#### [Optional] For beansdb backend:  
+#### [Optional] For Storage:  
+[memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [beansdb](https://github.com/douban/beansdb): Beansdb is a distributed key-value storage system designed for large scale online system, aiming for high avaliablility and easy management.  
 [beanseye](https://github.com/douban/beanseye): Beanseye is proxy and monitor for beansdb, written in Go.  
-#### [Optional] For ssdb backend:  
-[ssdb](https://github.com/ideawu/ssdb): SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.  
+[SSDB](https://github.com/ideawu/ssdb): SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.  
+[twemproxy](https://github.com/twitter/twemproxy): Twemproxy is a fast and lightweight proxy for memcached and redis protocol.  
 
 #### Thanks to:  
 > zimg contains libevhtp and libhiredis. You needn't install them now.
@@ -40,19 +41,20 @@ Process resized and grayed image by request parameter.
 Use memcached to improve performance.  
 Multi-thread support for multi-core processor server.  
 Use lua for conf and other functions.  
-Support SSDB mode to save images and backups.  
-**Support beansdb mode to save images into distributed storage backend.**
+**Support beansdb/SSDB mode to save images into distributed storage backends.**
 
 ### In Planning:
 Performance optimization.  
 Security measures.  
 
 ### Documentation:
-There is an architecture design document of zimg v1.0.  
-It is written in Chinese.  
+There is an architecture design document of zimg v1.0. It is written in Chinese.  
 [Architecture Design of zimg](http://zimg.buaa.us/arch_design.html)  
 And this document is to introduce zimg v2.0.  
-[Distributed Image Storage Server: zimg](http://zimg.buaa.us/arch_design_distributed.html)
+[Distributed Image Storage Server: zimg](http://blog.buaa.us/?p=215)  
+The architecture of zimg's storage:  
+
+![architecture_of_zimg_v2](http://ww2.sinaimg.cn/large/4c422e03gw1efpmngazc0j21ik1e6dnk.jpg)
 
 ### Download:
 The source code is licensed under a BSD-like License.  
@@ -75,7 +77,7 @@ cd bin
 --zimg server config
 
 --server config
-daemon=1
+is_daemon=1
 port=4869
 thread_num=4
 backlog_num=1024

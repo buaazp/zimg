@@ -228,12 +228,25 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(strcmp(method_strmap[req_method], "POST") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
+        LOG_PRINT(LOG_ERROR, "fail post method");
         goto err;
     }
 
 
+    if(!evhtp_header_find(req->headers_in, "Content-Length"))
+    {
+        LOG_PRINT(LOG_DEBUG, "Get Content-Length error!");
+        LOG_PRINT(LOG_ERROR, "fail post content-length");
+        goto err;
+    }
     const char *content_len = evhtp_header_find(req->headers_in, "Content-Length");
     post_size = atoi(content_len);
+    if(!evhtp_header_find(req->headers_in, "Content-Type"))
+    {
+        LOG_PRINT(LOG_DEBUG, "Get Content-Type error!");
+        LOG_PRINT(LOG_ERROR, "fail post content-type");
+        goto err;
+    }
     const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
     if(strstr(content_type, "multipart/form-data") == 0)
     {
@@ -309,7 +322,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *quotePattern = "\"";
     const char *blankPattern = "\r\n";
     boundaryPattern = (char *)malloc(boundary_len + 4);
-    sprintf(boundaryPattern, "\r\n--%s", boundary);
+    //sprintf(boundaryPattern, "\r\n--%s", boundary);
+    sprintf(boundaryPattern, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
@@ -454,7 +468,7 @@ err:
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
-    evhtp_send_reply(req, EVHTP_RES_200);
+    evhtp_send_reply(req, EVHTP_RES_SERVERR);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() ERROR!===============");
 
 done:

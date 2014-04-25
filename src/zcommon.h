@@ -105,6 +105,15 @@ struct timespec retry_sleep;
         ##__VA_ARGS__); \
         log_close(log_id); \
     }while(0) 
+
+  #define ThrowWandException(wand) \
+  { \
+      char *description; \
+      ExceptionType severity; \
+      description=MagickGetException(wand,&severity); \
+      LOG_PRINT(LOG_ERROR, "%s %s %lu %s",GetMagickModule(),description); \
+      description=(char *) MagickRelinquishMemory(description); \
+  }
 #else
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
@@ -112,16 +121,7 @@ struct timespec retry_sleep;
         log_printf0(log_id, level, fmt, ##__VA_ARGS__) ; \
         log_close(log_id); \
     }while(0) 
+  #define ThrowWandException(wand) 0
 #endif
  
-
-#define ThrowWandException(wand) \
-{ \
-    char *description; \
-    ExceptionType severity; \
-    description=MagickGetException(wand,&severity); \
-    LOG_PRINT(LOG_ERROR, "%s %s %lu %s",GetMagickModule(),description); \
-    description=(char *) MagickRelinquishMemory(description); \
-}
-
 #endif

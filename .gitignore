@@ -39,3 +39,4 @@ bin/conf/debug.lua
 build/
 src/include/evhtp-config.h
 src/hiredis.c
+results.bin
