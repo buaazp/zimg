@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -23,18 +24,32 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("k: %v v: %v\n", k, vv)
 			}
 		}
-		file, header, err := r.FormFile("filename")
+
+		b1, err := ioutil.ReadAll(r.Body)
+		n1 := len(b1)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		defer file.Close()
-		f, err := os.Create(".gosvr" + header.Filename)
-		defer f.Close()
-		io.Copy(f, file)
+		fmt.Printf("%d bytes:\n%s\n", n1, string(b1))
+
+		/*
+			file, header, err := r.FormFile("filename")
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			defer file.Close()
+
+			f, err := os.Create("gosvr." + header.Filename)
+			defer f.Close()
+			io.Copy(f, file)
+		*/
+
 		w.Header().Add("Content-Type", "text/html")
 		w.WriteHeader(200)
-		fmt.Fprintf(w, "上传文件的大小为: %d\n", file.(Sizer).Size())
+		//fmt.Fprintf(w, "上传文件的大小为: %d</br>\n", file.(Sizer).Size())
+		fmt.Fprintf(w, "HTTP包体的大小为: %d</br>\n", n1)
 		return
 	}
 
@@ -43,7 +58,7 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	html := `
 <form enctype="multipart/form-data" action="http://127.0.0.1:12345/" method="POST">
-    Send this file: <input name="filename" type="file" />
+    Send this file: <input name="file" type="file" />
     <input type="submit" value="Send File" />
 </form>
 `
@@ -73,7 +88,7 @@ func Upload() (err error) {
 	filename := "5f189.jpeg"
 
 	// Create file field
-	fw, err := w.CreateFormFile("filename", filename) //这里的file很重要，必须和服务器端的FormFile一致
+	fw, err := w.CreateFormFile("file", filename) //这里的file很重要，必须和服务器端的FormFile一致
 	if err != nil {
 		fmt.Println("c")
 		return err
