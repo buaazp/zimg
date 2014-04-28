@@ -104,7 +104,7 @@ img_path='./img'
 
 --mode[2]: beansdb mode
 beansdb_ip='127.0.0.1'
-beansdb_port='7905'
+beansdb_port='7900'
 
 --mode[3]: ssdb mode
 ssdb_ip='127.0.0.1'
