@@ -1,0 +1,2553 @@
+zimg storage test:
+
+mode 3 ssdb:
+ab -c 10 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2" 
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   9.430 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639464252 bytes
+HTML transferred:       637584158 bytes
+Requests per second:    2120.96 [#/sec] (mean)
+Time per request:       4.715 [ms] (mean)
+Time per request:       0.471 [ms] (mean, across all concurrent requests)
+Transfer rate:          66224.53 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1  56.1      0    3000
+Processing:     1    3   1.3      3      14
+Waiting:        0    1   1.1      1      12
+Total:          1    5  56.1      3    3004
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.906 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639460440 bytes
+HTML transferred:       637580346 bytes
+Requests per second:    2529.57 [#/sec] (mean)
+Time per request:       3.953 [ms] (mean)
+Time per request:       0.395 [ms] (mean, across all concurrent requests)
+Transfer rate:          78982.54 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:     1    3   1.3      3      15
+Waiting:        0    2   1.2      1      13
+Total:          2    4   1.3      4      15
+
+t3:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.895 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2533.41 [#/sec] (mean)
+Time per request:       3.947 [ms] (mean)
+Time per request:       0.395 [ms] (mean, across all concurrent requests)
+Transfer rate:          79099.71 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:     1    3   1.3      3      16
+Waiting:        0    2   1.2      1      12
+Total:          1    4   1.3      4      16
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.978 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2507.03 [#/sec] (mean)
+Time per request:       3.989 [ms] (mean)
+Time per request:       0.399 [ms] (mean, across all concurrent requests)
+Transfer rate:          78276.23 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       2
+Processing:     1    4   1.3      3      16
+Waiting:        0    2   1.2      1      12
+Total:          1    4   1.4      4      16
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.866 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639466280 bytes
+HTML transferred:       637586092 bytes
+Requests per second:    2542.43 [#/sec] (mean)
+Time per request:       3.933 [ms] (mean)
+Time per request:       0.393 [ms] (mean, across all concurrent requests)
+Transfer rate:          79384.63 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:     1    3   1.4      3      18
+Waiting:        0    2   1.2      1      17
+Total:          2    4   1.4      4      19
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.956 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2513.76 [#/sec] (mean)
+Time per request:       3.978 [ms] (mean)
+Time per request:       0.398 [ms] (mean, across all concurrent requests)
+Transfer rate:          78486.16 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       2
+Processing:     1    4   1.4      3      19
+Waiting:        0    2   1.3      1      17
+Total:          1    4   1.5      4      20
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.968 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639466280 bytes
+HTML transferred:       637586186 bytes
+Requests per second:    2509.93 [#/sec] (mean)
+Time per request:       3.984 [ms] (mean)
+Time per request:       0.398 [ms] (mean, across all concurrent requests)
+Transfer rate:          78369.94 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       2
+Processing:     1    4   1.4      3      17
+Waiting:        0    2   1.2      1      16
+Total:          1    4   1.4      4      18
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.924 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2524.04 [#/sec] (mean)
+Time per request:       3.962 [ms] (mean)
+Time per request:       0.396 [ms] (mean, across all concurrent requests)
+Transfer rate:          78807.31 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:     1    3   1.4      3      16
+Waiting:        0    2   1.2      1      13
+Total:          1    4   1.4      4      16
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   7.980 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639476500 bytes
+HTML transferred:       637596218 bytes
+Requests per second:    2506.23 [#/sec] (mean)
+Time per request:       3.990 [ms] (mean)
+Time per request:       0.399 [ms] (mean, across all concurrent requests)
+Transfer rate:          78255.76 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       2
+Processing:     1    4   1.3      3      18
+Waiting:        0    2   1.2      1      16
+Total:          1    4   1.3      4      19
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   8.005 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2498.48 [#/sec] (mean)
+Time per request:       4.002 [ms] (mean)
+Time per request:       0.400 [ms] (mean, across all concurrent requests)
+Transfer rate:          78009.24 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:     1    4   1.3      3      17
+Waiting:        0    2   1.1      1      15
+Total:          1    4   1.3      4      17
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      10
+Time taken for tests:   8.072 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2477.55 [#/sec] (mean)
+Time per request:       4.036 [ms] (mean)
+Time per request:       0.404 [ms] (mean, across all concurrent requests)
+Transfer rate:          77355.74 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       2
+Processing:     1    4   1.5      3      19
+Waiting:        0    2   1.3      1      17
+Total:          1    4   1.5      4      19
+
+ab -c 20 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.904 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639565116 bytes
+HTML transferred:       637684740 bytes
+Requests per second:    3387.66 [#/sec] (mean)
+Time per request:       5.904 [ms] (mean)
+Time per request:       0.295 [ms] (mean, across all concurrent requests)
+Transfer rate:          105792.59 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.2      5      14
+Waiting:        0    2   1.0      2      11
+Total:          3    6   1.2      6      15
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.904 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639532304 bytes
+HTML transferred:       637651928 bytes
+Requests per second:    3387.59 [#/sec] (mean)
+Time per request:       5.904 [ms] (mean)
+Time per request:       0.295 [ms] (mean, across all concurrent requests)
+Transfer rate:          105784.90 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.2      5      16
+Waiting:        0    2   1.0      2      12
+Total:          3    6   1.3      6      17
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.968 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639503944 bytes
+HTML transferred:       637623756 bytes
+Requests per second:    3351.09 [#/sec] (mean)
+Time per request:       5.968 [ms] (mean)
+Time per request:       0.298 [ms] (mean, across all concurrent requests)
+Transfer rate:          104640.49 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.4      5      16
+Waiting:        0    2   1.1      2      13
+Total:          2    6   1.4      6      17
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.977 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639471972 bytes
+HTML transferred:       637591878 bytes
+Requests per second:    3346.27 [#/sec] (mean)
+Time per request:       5.977 [ms] (mean)
+Time per request:       0.299 [ms] (mean, across all concurrent requests)
+Transfer rate:          104484.61 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.9      5      50
+Waiting:        0    2   1.4      2      48
+Total:          2    6   1.9      6      51
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.915 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639502956 bytes
+HTML transferred:       637622768 bytes
+Requests per second:    3381.19 [#/sec] (mean)
+Time per request:       5.915 [ms] (mean)
+Time per request:       0.296 [ms] (mean, across all concurrent requests)
+Transfer rate:          105580.17 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.3      5      17
+Waiting:        0    2   1.0      2      15
+Total:          3    6   1.3      6      18
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.904 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639482340 bytes
+HTML transferred:       637601964 bytes
+Requests per second:    3387.75 [#/sec] (mean)
+Time per request:       5.904 [ms] (mean)
+Time per request:       0.295 [ms] (mean, across all concurrent requests)
+Transfer rate:          105781.51 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.3      5      17
+Waiting:        0    2   1.0      2      15
+Total:          2    6   1.3      6      18
+
+t7:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.995 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639448760 bytes
+HTML transferred:       637568666 bytes
+Requests per second:    3336.03 [#/sec] (mean)
+Time per request:       5.995 [ms] (mean)
+Time per request:       0.300 [ms] (mean, across all concurrent requests)
+Transfer rate:          104161.28 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.4      5      20
+Waiting:        0    2   1.1      2      17
+Total:          3    6   1.4      6      22
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.990 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    3338.90 [#/sec] (mean)
+Time per request:       5.990 [ms] (mean)
+Time per request:       0.300 [ms] (mean, across all concurrent requests)
+Transfer rate:          104249.23 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.5      5      21
+Waiting:        0    2   1.3      2      18
+Total:          3    6   1.6      6      22
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.967 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639537820 bytes
+HTML transferred:       637657162 bytes
+Requests per second:    3351.70 [#/sec] (mean)
+Time per request:       5.967 [ms] (mean)
+Time per request:       0.298 [ms] (mean, across all concurrent requests)
+Transfer rate:          104665.04 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       4
+Processing:     2    5   1.3      5      17
+Waiting:        0    2   1.0      2      14
+Total:          3    6   1.3      6      19
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.963 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639514460 bytes
+HTML transferred:       637633802 bytes
+Requests per second:    3353.81 [#/sec] (mean)
+Time per request:       5.963 [ms] (mean)
+Time per request:       0.298 [ms] (mean, across all concurrent requests)
+Transfer rate:          104727.03 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.3      5      16
+Waiting:        0    2   1.0      2      12
+Total:          2    6   1.3      6      17
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      20
+Time taken for tests:   5.951 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639477960 bytes
+HTML transferred:       637597772 bytes
+Requests per second:    3360.56 [#/sec] (mean)
+Time per request:       5.951 [ms] (mean)
+Time per request:       0.298 [ms] (mean, across all concurrent requests)
+Transfer rate:          104931.77 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       2
+Processing:     2    5   1.3      5      15
+Waiting:        1    2   1.1      2      12
+Total:          3    6   1.3      6      16
+
+ab -c 30 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.702 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639502780 bytes
+HTML transferred:       637622498 bytes
+Requests per second:    3507.49 [#/sec] (mean)
+Time per request:       8.553 [ms] (mean)
+Time per request:       0.285 [ms] (mean, across all concurrent requests)
+Transfer rate:          109523.76 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     3    7   1.5      7      19
+Waiting:        1    3   1.2      3      14
+Total:          3    9   1.5      8      20
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.655 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639503944 bytes
+HTML transferred:       637623756 bytes
+Requests per second:    3536.45 [#/sec] (mean)
+Time per request:       8.483 [ms] (mean)
+Time per request:       0.283 [ms] (mean, across all concurrent requests)
+Transfer rate:          110428.32 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     3    7   1.4      7      19
+Waiting:        1    3   1.1      3      14
+Total:          4    8   1.4      8      20
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.677 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639575632 bytes
+HTML transferred:       637694880 bytes
+Requests per second:    3523.12 [#/sec] (mean)
+Time per request:       8.515 [ms] (mean)
+Time per request:       0.284 [ms] (mean, across all concurrent requests)
+Transfer rate:          110024.53 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     4    7   1.5      7      23
+Waiting:        1    3   1.2      3      19
+Total:          4    8   1.5      8      24
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.708 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639480880 bytes
+HTML transferred:       637600692 bytes
+Requests per second:    3504.05 [#/sec] (mean)
+Time per request:       8.562 [ms] (mean)
+Time per request:       0.285 [ms] (mean, across all concurrent requests)
+Transfer rate:          109412.82 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     3    7   1.5      7      19
+Waiting:        1    3   1.2      3      12
+Total:          4    9   1.5      8      21
+
+t5:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.683 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639486720 bytes
+HTML transferred:       637606532 bytes
+Requests per second:    3519.42 [#/sec] (mean)
+Time per request:       8.524 [ms] (mean)
+Time per request:       0.284 [ms] (mean, across all concurrent requests)
+Transfer rate:          109893.78 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     4    7   1.5      7      22
+Waiting:        1    3   1.2      3      17
+Total:          4    9   1.5      8      23
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.674 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639559720 bytes
+HTML transferred:       637678968 bytes
+Requests per second:    3524.59 [#/sec] (mean)
+Time per request:       8.512 [ms] (mean)
+Time per request:       0.284 [ms] (mean, across all concurrent requests)
+Transfer rate:          110067.55 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     4    7   1.4      7      18
+Waiting:        1    3   1.2      3      13
+Total:          4    8   1.4      8      19
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.689 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639549352 bytes
+HTML transferred:       637668882 bytes
+Requests per second:    3515.53 [#/sec] (mean)
+Time per request:       8.534 [ms] (mean)
+Time per request:       0.284 [ms] (mean, across all concurrent requests)
+Transfer rate:          109783.06 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       4
+Processing:     2    7   1.6      7      20
+Waiting:        1    3   1.2      3      16
+Total:          4    9   1.6      8      22
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.700 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639486720 bytes
+HTML transferred:       637606532 bytes
+Requests per second:    3508.52 [#/sec] (mean)
+Time per request:       8.551 [ms] (mean)
+Time per request:       0.285 [ms] (mean, across all concurrent requests)
+Transfer rate:          109553.25 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     3    7   1.5      7      21
+Waiting:        1    3   1.2      3      17
+Total:          4    9   1.5      8      23
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.620 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639496792 bytes
+HTML transferred:       637616604 bytes
+Requests per second:    3558.68 [#/sec] (mean)
+Time per request:       8.430 [ms] (mean)
+Time per request:       0.281 [ms] (mean, across all concurrent requests)
+Transfer rate:          111121.34 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     3    7   1.3      7      16
+Waiting:        1    3   1.0      3      11
+Total:          4    8   1.3      8      17
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.654 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    3537.02 [#/sec] (mean)
+Time per request:       8.482 [ms] (mean)
+Time per request:       0.283 [ms] (mean, across all concurrent requests)
+Transfer rate:          110435.13 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     4    7   1.4      7      17
+Waiting:        1    3   1.1      3      12
+Total:          4    8   1.4      8      19
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      30
+Time taken for tests:   5.656 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639546432 bytes
+HTML transferred:       637665774 bytes
+Requests per second:    3536.33 [#/sec] (mean)
+Time per request:       8.483 [ms] (mean)
+Time per request:       0.283 [ms] (mean, across all concurrent requests)
+Transfer rate:          110431.89 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       3
+Processing:     3    7   1.6      7      32
+Waiting:        1    3   1.3      3      27
+Total:          4    8   1.6      8      33
+
+ab -c 40 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.601 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639604832 bytes
+HTML transferred:       637724080 bytes
+Requests per second:    3571.05 [#/sec] (mean)
+Time per request:       11.201 [ms] (mean)
+Time per request:       0.280 [ms] (mean, across all concurrent requests)
+Transfer rate:          111526.40 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.7      9      25
+Waiting:        1    4   1.4      3      17
+Total:          6   11   1.6     11      25
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.596 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639580160 bytes
+HTML transferred:       637699502 bytes
+Requests per second:    3574.22 [#/sec] (mean)
+Time per request:       11.191 [ms] (mean)
+Time per request:       0.280 [ms] (mean, across all concurrent requests)
+Transfer rate:          111621.05 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.6      9      20
+Waiting:        1    4   1.4      3      13
+Total:          6   11   1.6     11      21
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.552 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639683376 bytes
+HTML transferred:       637802436 bytes
+Requests per second:    3602.49 [#/sec] (mean)
+Time per request:       11.103 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112521.99 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.6      9      23
+Waiting:        1    4   1.3      3      17
+Total:          6   11   1.6     11      25
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.548 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639566724 bytes
+HTML transferred:       637686254 bytes
+Requests per second:    3604.85 [#/sec] (mean)
+Time per request:       11.096 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112575.24 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       3
+Processing:     5    9   1.6      9      29
+Waiting:        1    3   1.3      3      23
+Total:          6   11   1.6     11      30
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.564 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639617404 bytes
+HTML transferred:       637736652 bytes
+Requests per second:    3594.50 [#/sec] (mean)
+Time per request:       11.128 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112261.04 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.6      9      21
+Waiting:        1    4   1.3      3      11
+Total:          6   11   1.5     11      21
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.569 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639651552 bytes
+HTML transferred:       637770424 bytes
+Requests per second:    3591.52 [#/sec] (mean)
+Time per request:       11.137 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112174.03 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.5      9      19
+Waiting:        1    4   1.3      3      12
+Total:          6   11   1.5     11      21
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.565 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639562640 bytes
+HTML transferred:       637682076 bytes
+Requests per second:    3594.01 [#/sec] (mean)
+Time per request:       11.130 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112236.10 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       3
+Processing:     5    9   1.6      9      20
+Waiting:        1    4   1.3      3      13
+Total:          6   11   1.5     11      22
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.588 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639639872 bytes
+HTML transferred:       637758932 bytes
+Requests per second:    3579.12 [#/sec] (mean)
+Time per request:       11.176 [ms] (mean)
+Time per request:       0.279 [ms] (mean, across all concurrent requests)
+Transfer rate:          111784.50 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.6      9      21
+Waiting:        1    4   1.3      3      14
+Total:          6   11   1.6     11      22
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.553 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639631112 bytes
+HTML transferred:       637750266 bytes
+Requests per second:    3601.59 [#/sec] (mean)
+Time per request:       11.106 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112484.73 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.5      9      21
+Waiting:        1    3   1.3      3      15
+Total:          6   11   1.5     11      23
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.602 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639591544 bytes
+HTML transferred:       637710886 bytes
+Requests per second:    3570.43 [#/sec] (mean)
+Time per request:       11.203 [ms] (mean)
+Time per request:       0.280 [ms] (mean, across all concurrent requests)
+Transfer rate:          111504.67 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       3
+Processing:     5    9   1.7      9      26
+Waiting:        1    4   1.4      3      19
+Total:          6   11   1.7     11      27
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      40
+Time taken for tests:   5.596 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639687564 bytes
+HTML transferred:       637806624 bytes
+Requests per second:    3573.92 [#/sec] (mean)
+Time per request:       11.192 [ms] (mean)
+Time per request:       0.280 [ms] (mean, across all concurrent requests)
+Transfer rate:          111630.56 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5    9   1.7      9      19
+Waiting:        1    4   1.4      3      14
+Total:          6   11   1.6     11      20
+
+ab -c 50 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.550 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639583080 bytes
+HTML transferred:       637702422 bytes
+Requests per second:    3603.81 [#/sec] (mean)
+Time per request:       13.874 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112545.60 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       4
+Processing:     6   12   1.9     12      28
+Waiting:        1    4   1.5      4      17
+Total:          8   14   1.8     14      30
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.528 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639631260 bytes
+HTML transferred:       637750414 bytes
+Requests per second:    3618.27 [#/sec] (mean)
+Time per request:       13.819 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113005.72 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       4
+Processing:     6   12   1.8     12      26
+Waiting:        1    4   1.5      4      19
+Total:          8   14   1.7     14      28
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.551 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639618768 bytes
+HTML transferred:       637737640 bytes
+Requests per second:    3603.27 [#/sec] (mean)
+Time per request:       13.876 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112535.15 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       6
+Processing:     6   12   2.0     12      32
+Waiting:        1    4   1.6      4      20
+Total:          8   14   1.9     14      34
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.526 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639611984 bytes
+HTML transferred:       637731326 bytes
+Requests per second:    3619.45 [#/sec] (mean)
+Time per request:       13.814 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113039.33 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       6
+Processing:     5   12   1.7     12      25
+Waiting:        1    4   1.4      4      18
+Total:          8   14   1.6     14      28
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.545 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639471972 bytes
+HTML transferred:       637591878 bytes
+Requests per second:    3607.05 [#/sec] (mean)
+Time per request:       13.862 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112627.32 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       4
+Processing:     6   12   1.9     12      28
+Waiting:        1    4   1.5      4      22
+Total:          8   14   1.7     14      30
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.538 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639686740 bytes
+HTML transferred:       637805236 bytes
+Requests per second:    3611.58 [#/sec] (mean)
+Time per request:       13.844 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112806.58 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       5
+Processing:     6   12   1.8     12      26
+Waiting:        1    4   1.5      4      18
+Total:          8   14   1.7     14      28
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.545 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639728784 bytes
+HTML transferred:       637847562 bytes
+Requests per second:    3606.72 [#/sec] (mean)
+Time per request:       13.863 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112662.33 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       5
+Processing:     6   12   1.8     12      26
+Waiting:        1    4   1.5      4      19
+Total:          8   14   1.7     14      27
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.550 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639551852 bytes
+HTML transferred:       637671382 bytes
+Requests per second:    3603.43 [#/sec] (mean)
+Time per request:       13.876 [ms] (mean)
+Time per request:       0.278 [ms] (mean, across all concurrent requests)
+Transfer rate:          112528.49 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       4
+Processing:     6   12   1.9     12      25
+Waiting:        1    4   1.5      4      20
+Total:          8   14   1.8     14      27
+
+t9:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.531 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639539132 bytes
+HTML transferred:       637657816 bytes
+Requests per second:    3615.86 [#/sec] (mean)
+Time per request:       13.828 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112914.37 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       5
+Processing:     5   12   1.8     12      23
+Waiting:        1    4   1.5      4      16
+Total:          8   14   1.7     14      26
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.524 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639734624 bytes
+HTML transferred:       637853402 bytes
+Requests per second:    3620.55 [#/sec] (mean)
+Time per request:       13.810 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113095.24 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       4
+Processing:     6   12   1.7     12      22
+Waiting:        1    4   1.4      4      16
+Total:          8   14   1.6     14      24
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      50
+Time taken for tests:   5.590 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639724700 bytes
+HTML transferred:       637843384 bytes
+Requests per second:    3578.00 [#/sec] (mean)
+Time per request:       13.974 [ms] (mean)
+Time per request:       0.279 [ms] (mean, across all concurrent requests)
+Transfer rate:          111764.44 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       5
+Processing:     5   12   2.1     12      26
+Waiting:        1    4   1.7      4      19
+Total:          7   14   1.9     14      28
+
+ab -c 100 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.499 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639696812 bytes
+HTML transferred:       637815684 bytes
+Requests per second:    3636.80 [#/sec] (mean)
+Time per request:       27.497 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113596.10 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.0      5      10
+Processing:    12   23   2.8     23      45
+Waiting:        2    8   2.4      7      24
+Total:         18   27   2.4     28      45
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.520 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639724700 bytes
+HTML transferred:       637843384 bytes
+Requests per second:    3623.06 [#/sec] (mean)
+Time per request:       27.601 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113171.94 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.1      5      11
+Processing:    11   23   3.1     23      42
+Waiting:        3    8   2.7      8      25
+Total:         17   28   2.7     28      46
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.496 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639664544 bytes
+HTML transferred:       637783604 bytes
+Requests per second:    3639.09 [#/sec] (mean)
+Time per request:       27.479 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113661.96 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.0      5       8
+Processing:    13   23   2.8     23      43
+Waiting:        3    8   2.4      8      24
+Total:         18   27   2.4     28      44
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.500 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639737692 bytes
+HTML transferred:       637856376 bytes
+Requests per second:    3636.69 [#/sec] (mean)
+Time per request:       27.498 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113599.85 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.0      5       8
+Processing:    13   23   2.9     23      46
+Waiting:        2    8   2.4      7      25
+Total:         17   27   2.5     28      48
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.506 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639676372 bytes
+HTML transferred:       637795338 bytes
+Requests per second:    3632.63 [#/sec] (mean)
+Time per request:       27.528 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113462.43 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.0      5       9
+Processing:    12   23   2.9     23      41
+Waiting:        2    8   2.4      7      22
+Total:         17   27   2.5     28      43
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.485 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639778572 bytes
+HTML transferred:       637897068 bytes
+Requests per second:    3646.02 [#/sec] (mean)
+Time per request:       27.427 [ms] (mean)
+Time per request:       0.274 [ms] (mean, across all concurrent requests)
+Transfer rate:          113898.61 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.0      5      10
+Processing:    11   23   2.7     23      40
+Waiting:        2    8   2.2      7      20
+Total:         15   27   2.3     28      42
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.505 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639701340 bytes
+HTML transferred:       637818614 bytes
+Requests per second:    3633.32 [#/sec] (mean)
+Time per request:       27.523 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113488.13 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.1      5       9
+Processing:    11   23   3.0     23      43
+Waiting:        3    8   2.5      7      22
+Total:         16   27   2.5     28      45
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.490 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639715940 bytes
+HTML transferred:       637834718 bytes
+Requests per second:    3643.17 [#/sec] (mean)
+Time per request:       27.449 [ms] (mean)
+Time per request:       0.274 [ms] (mean, across all concurrent requests)
+Transfer rate:          113798.48 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.1      5      10
+Processing:    10   23   2.7     23      40
+Waiting:        3    8   2.2      7      20
+Total:         17   27   2.3     28      42
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.502 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639774192 bytes
+HTML transferred:       637892688 bytes
+Requests per second:    3635.16 [#/sec] (mean)
+Time per request:       27.509 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113558.67 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.1      5       8
+Processing:    12   23   2.9     23      41
+Waiting:        3    8   2.5      7      23
+Total:         16   27   2.5     28      43
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.512 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639600600 bytes
+HTML transferred:       637719754 bytes
+Requests per second:    3628.34 [#/sec] (mean)
+Time per request:       27.561 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113314.94 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.1      5      12
+Processing:     8   23   3.1     23      43
+Waiting:        2    8   2.6      7      21
+Total:         16   27   2.6     28      44
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.487 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639696812 bytes
+HTML transferred:       637815308 bytes
+Requests per second:    3645.28 [#/sec] (mean)
+Time per request:       27.433 [ms] (mean)
+Time per request:       0.274 [ms] (mean, across all concurrent requests)
+Transfer rate:          113861.10 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    5   1.0      5       9
+Processing:    11   23   2.8     23      42
+Waiting:        3    8   2.3      7      22
+Total:         16   27   2.4     28      45
+
+ab -c 200 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2" 
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.505 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640059040 bytes
+HTML transferred:       638176126 bytes
+Requests per second:    3632.87 [#/sec] (mean)
+Time per request:       55.053 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113537.75 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.7     10      15
+Processing:    28   45   4.7     45      83
+Waiting:        6   14   4.0     13      51
+Total:         38   55   4.1     55      84
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.492 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639880920 bytes
+HTML transferred:       637998664 bytes
+Requests per second:    3641.86 [#/sec] (mean)
+Time per request:       54.917 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113786.98 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.7     10      20
+Processing:    26   45   4.8     45      81
+Waiting:        4   14   3.7     13      35
+Total:         31   55   4.0     55      85
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.491 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639842812 bytes
+HTML transferred:       637960838 bytes
+Requests per second:    3642.19 [#/sec] (mean)
+Time per request:       54.912 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113790.54 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.5     10      18
+Processing:    28   44   4.6     45      83
+Waiting:        5   13   3.0     13      40
+Total:         29   55   4.0     55      87
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.495 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640330600 bytes
+HTML transferred:       638445618 bytes
+Requests per second:    3639.66 [#/sec] (mean)
+Time per request:       54.950 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113798.06 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.6     10      19
+Processing:    28   44   4.6     45      81
+Waiting:        5   13   3.1     13      39
+Total:         30   55   4.0     55      85
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.504 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640196280 bytes
+HTML transferred:       638310828 bytes
+Requests per second:    3633.93 [#/sec] (mean)
+Time per request:       55.037 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113595.19 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.5     10      19
+Processing:    28   44   4.9     45      90
+Waiting:        5   13   3.6     13      46
+Total:         39   55   4.2     55      94
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.499 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640521860 bytes
+HTML transferred:       638636878 bytes
+Requests per second:    3637.16 [#/sec] (mean)
+Time per request:       54.988 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113753.97 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.6     10      22
+Processing:    26   44   4.6     45      80
+Waiting:        3   13   2.9     13      33
+Total:         33   55   3.9     55      85
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.494 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640009104 bytes
+HTML transferred:       638126660 bytes
+Requests per second:    3640.22 [#/sec] (mean)
+Time per request:       54.942 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113758.38 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.5     10      19
+Processing:    26   44   4.6     45      82
+Waiting:        6   13   3.0     13      37
+Total:         32   55   3.9     55      87
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.496 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639988664 bytes
+HTML transferred:       638106220 bytes
+Requests per second:    3639.07 [#/sec] (mean)
+Time per request:       54.959 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113719.04 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.7     10      20
+Processing:    21   44   4.7     45      80
+Waiting:        7   13   3.3     13      41
+Total:         31   55   4.0     55      84
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.495 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640239932 bytes
+HTML transferred:       638355796 bytes
+Requests per second:    3639.80 [#/sec] (mean)
+Time per request:       54.948 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113786.30 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.7     10      18
+Processing:    21   45   4.9     45      83
+Waiting:        5   14   3.7     13      41
+Total:         30   55   4.2     55      87
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.494 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640364504 bytes
+HTML transferred:       638478488 bytes
+Requests per second:    3640.12 [#/sec] (mean)
+Time per request:       54.943 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113818.57 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.5     10      18
+Processing:    23   44   4.4     45      82
+Waiting:        6   13   2.9     13      39
+Total:         30   55   3.8     55      86
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      200
+Time taken for tests:   5.495 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640226792 bytes
+HTML transferred:       638342844 bytes
+Requests per second:    3639.40 [#/sec] (mean)
+Time per request:       54.954 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113771.56 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   10   1.7     10      22
+Processing:    23   44   4.7     45      79
+Waiting:        3   13   3.1     13      32
+Total:         30   55   4.0     55      84
+
+ab -c 300 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.512 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      641026872 bytes
+HTML transferred:       639138412 bytes
+Requests per second:    3628.50 [#/sec] (mean)
+Time per request:       82.679 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113572.61 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   17  63.7     15    3019
+Processing:    33   65  23.6     65    3117
+Waiting:        9   19  21.6     18    3018
+Total:         53   82  67.8     81    3142
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.510 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640853132 bytes
+HTML transferred:       638966176 bytes
+Requests per second:    3629.71 [#/sec] (mean)
+Time per request:       82.651 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113579.74 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  21.3     16    3014
+Processing:    39   66  10.3     67     395
+Waiting:       11   19   4.3     18      58
+Total:         54   82  23.3     82    3082
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.515 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640603620 bytes
+HTML transferred:       638718074 bytes
+Requests per second:    3626.25 [#/sec] (mean)
+Time per request:       82.730 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113427.12 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16   2.2     16      26
+Processing:    35   67  39.0     66    3115
+Waiting:        7   19  37.0     18    3019
+Total:         48   82  38.7     82    3131
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.517 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640683772 bytes
+HTML transferred:       638797380 bytes
+Requests per second:    3625.23 [#/sec] (mean)
+Time per request:       82.753 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113409.38 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  47.5     16    3017
+Processing:    39   66  38.9     66    3101
+Waiting:        8   19  37.0     18    3018
+Total:         47   82  61.2     81    3123
+
+t5:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.514 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640556900 bytes
+HTML transferred:       638671636 bytes
+Requests per second:    3627.40 [#/sec] (mean)
+Time per request:       82.704 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113455.01 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  21.3     16    3017
+Processing:    38   66  33.5     66    3110
+Waiting:        6   19  30.3     18    3018
+Total:         45   82  39.4     82    3127
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.511 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640559672 bytes
+HTML transferred:       638674502 bytes
+Requests per second:    3629.21 [#/sec] (mean)
+Time per request:       82.663 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113512.06 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  30.1     16    3016
+Processing:    30   66  11.5     66     389
+Waiting:       12   19   4.5     18      56
+Total:         46   82  31.9     82    3082
+
+t7:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.516 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640349432 bytes
+HTML transferred:       638465108 bytes
+Requests per second:    3625.61 [#/sec] (mean)
+Time per request:       82.745 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113362.26 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  42.5     16    3018
+Processing:    42   66  32.4     66    3111
+Waiting:        9   19  30.3     18    3017
+Total:         55   82  53.2     82    3132
+
+t8:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.519 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      641266460 bytes
+HTML transferred:       639377624 bytes
+Requests per second:    3623.97 [#/sec] (mean)
+Time per request:       82.782 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113473.03 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  36.8     16    3016
+Processing:    33   66  49.2     66    3112
+Waiting:        6   20  47.6     18    3019
+Total:         48   82  61.3     81    3127
+
+t9:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.507 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640489740 bytes
+HTML transferred:       638604570 bytes
+Requests per second:    3631.85 [#/sec] (mean)
+Time per request:       82.602 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113582.23 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  30.1     16    3014
+Processing:    35   66  49.2     66    3114
+Waiting:        9   19  47.6     18    3018
+Total:         48   82  57.5     82    3130
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.513 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640379944 bytes
+HTML transferred:       638493458 bytes
+Requests per second:    3627.88 [#/sec] (mean)
+Time per request:       82.693 [ms] (mean)
+Time per request:       0.276 [ms] (mean, across all concurrent requests)
+Transfer rate:          113438.40 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   17  63.6     16    3016
+Processing:    31   65  24.6     65    3093
+Waiting:        9   19  21.6     18    3012
+Total:         50   82  68.1     81    3117
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      300
+Time taken for tests:   5.509 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      640154264 bytes
+HTML transferred:       638270974 bytes
+Requests per second:    3630.24 [#/sec] (mean)
+Time per request:       82.639 [ms] (mean)
+Time per request:       0.275 [ms] (mean, across all concurrent requests)
+Transfer rate:          113472.27 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   16  42.5     16    3019
+Processing:    31   66  32.5     66    3116
+Waiting:        5   19  30.3     18    3019
+Total:         44   82  53.3     82    3135
+
+ab -c 500 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.542 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639736704 bytes
+HTML transferred:       637855388 bytes
+Requests per second:    3608.81 [#/sec] (mean)
+Time per request:       138.550 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112728.84 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   31 197.5     19    3023
+Processing:    38   94 169.2     79    3611
+Waiting:       11   31 158.9     21    3520
+Total:         54  126 259.0     98    3632
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.531 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639562640 bytes
+HTML transferred:       637682076 bytes
+Requests per second:    3615.89 [#/sec] (mean)
+Time per request:       138.279 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112919.26 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   30 185.9     19    3024
+Processing:    37   95 171.6     80    3612
+Waiting:       11   31 160.6     21    3520
+Total:         54  125 252.2     99    3629
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.541 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639847340 bytes
+HTML transferred:       637965460 bytes
+Requests per second:    3609.37 [#/sec] (mean)
+Time per request:       138.528 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112765.79 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   30 182.2     19    3024
+Processing:    37   97 184.1     79    3614
+Waiting:       11   33 174.4     21    3519
+Total:         55  126 258.2     98    3633
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.536 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639510080 bytes
+HTML transferred:       637628952 bytes
+Requests per second:    3612.75 [#/sec] (mean)
+Time per request:       138.399 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112812.04 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   30 182.2     19    3022
+Processing:     2   95 179.0     80    3405
+Waiting:        1   32 169.5     21    3024
+Total:         51  125 254.6     99    3430
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.542 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639538984 bytes
+HTML transferred:       637658420 bytes
+Requests per second:    3609.06 [#/sec] (mean)
+Time per request:       138.540 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112701.91 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   31 190.6     19    3022
+Processing:    44   95 174.6     79    3430
+Waiting:       10   32 164.3     21    3027
+Total:         55  126 257.9     98    3451
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.540 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639695204 bytes
+HTML transferred:       637813606 bytes
+Requests per second:    3610.41 [#/sec] (mean)
+Time per request:       138.488 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112771.54 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   31 196.3     18    3022
+Processing:    45   95 183.5     78    3409
+Waiting:       12   32 172.2     21    3026
+Total:         61  126 268.8     96    3428
+
+t7:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.534 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639712872 bytes
+HTML transferred:       637831650 bytes
+Requests per second:    3614.13 [#/sec] (mean)
+Time per request:       138.346 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112890.78 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   33 207.5     19    3023
+Processing:    39   93 157.9     79    3620
+Waiting:       10   30 147.5     21    3522
+Total:         51  126 260.0     98    3639
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.531 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639539280 bytes
+HTML transferred:       637657870 bytes
+Requests per second:    3615.76 [#/sec] (mean)
+Time per request:       138.284 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112911.01 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   31 196.3     19    3022
+Processing:    39   95 185.0     78    3614
+Waiting:        9   32 175.1     21    3517
+Total:         49  127 269.3     97    3634
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.536 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639892452 bytes
+HTML transferred:       638010384 bytes
+Requests per second:    3612.67 [#/sec] (mean)
+Time per request:       138.402 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112876.92 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   30 184.6     19    3022
+Processing:    39   97 190.1     79    3637
+Waiting:       10   34 179.8     21    3024
+Total:         56  127 264.5     98    3656
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.550 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639647024 bytes
+HTML transferred:       637765520 bytes
+Requests per second:    3603.81 [#/sec] (mean)
+Time per request:       138.742 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112556.89 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   30 180.9     19    3021
+Processing:    38   97 181.5     80    3392
+Waiting:       11   33 171.0     21    3026
+Total:         53  127 255.5     99    3410
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      500
+Time taken for tests:   5.542 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639499712 bytes
+HTML transferred:       637619430 bytes
+Requests per second:    3609.01 [#/sec] (mean)
+Time per request:       138.542 [ms] (mean)
+Time per request:       0.277 [ms] (mean, across all concurrent requests)
+Transfer rate:          112693.38 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   33 207.5     19    3023
+Processing:    34   94 152.0     80    3401
+Waiting:        9   30 140.8     21    3024
+Total:         53  127 256.4     99    3419
+
+ab -c 1000 -n 20000 "http://10.77.121.138:4869/5f189d8ec57f5a5a0d3dcba47fa797e2"
+t1:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   7.062 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639454600 bytes
+HTML transferred:       637574318 bytes
+Requests per second:    2832.08 [#/sec] (mean)
+Time per request:       353.097 [ms] (mean)
+Time per request:       0.353 [ms] (mean, across all concurrent requests)
+Transfer rate:          88427.23 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   69 385.4     19    3024
+Processing:     1  200 574.5     79    5094
+Waiting:        0  116 550.9     21    4699
+Total:         61  269 690.9     98    6028
+
+t2:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   7.014 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639556356 bytes
+HTML transferred:       637675886 bytes
+Requests per second:    2851.62 [#/sec] (mean)
+Time per request:       350.677 [ms] (mean)
+Time per request:       0.351 [ms] (mean, across all concurrent requests)
+Transfer rate:          89051.49 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   65 368.6     19    3023
+Processing:     1  205 577.3     79    5050
+Waiting:        0  118 540.5     21    4176
+Total:         59  269 684.7     98    6027
+
+t3:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.774 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639513000 bytes
+HTML transferred:       637632342 bytes
+Requests per second:    2952.35 [#/sec] (mean)
+Time per request:       338.713 [ms] (mean)
+Time per request:       0.339 [ms] (mean, across all concurrent requests)
+Transfer rate:          92190.81 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   60 350.4     19    3022
+Processing:     1  201 571.2     80    4553
+Waiting:        0  119 537.6     21    3679
+Total:         53  261 665.4     99    6025
+
+t4:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.779 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639477960 bytes
+HTML transferred:       637597678 bytes
+Requests per second:    2950.45 [#/sec] (mean)
+Time per request:       338.931 [ms] (mean)
+Time per request:       0.339 [ms] (mean, across all concurrent requests)
+Transfer rate:          92126.48 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1   67 378.1     19    3023
+Processing:     2  192 552.1     79    5039
+Waiting:        0  110 521.1     21    4668
+Total:         54  259 668.7     98    6027
+
+t5:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.723 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639447300 bytes
+HTML transferred:       637567018 bytes
+Requests per second:    2975.07 [#/sec] (mean)
+Time per request:       336.126 [ms] (mean)
+Time per request:       0.336 [ms] (mean, across all concurrent requests)
+Transfer rate:          92890.69 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   60 348.6     19    3022
+Processing:     1  194 544.5     80    6003
+Waiting:        0  112 513.9     21    6000
+Total:         55  254 643.0     99    6025
+
+t6:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.802 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639471972 bytes
+HTML transferred:       637591878 bytes
+Requests per second:    2940.10 [#/sec] (mean)
+Time per request:       340.125 [ms] (mean)
+Time per request:       0.340 [ms] (mean, across all concurrent requests)
+Transfer rate:          91802.32 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1   70 389.8     19    3022
+Processing:     2  194 530.9     79    4719
+Waiting:        0  109 502.0     21    4027
+Total:         56  264 657.7     98    6026
+
+t7:
+
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.752 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639485260 bytes
+HTML transferred:       637604884 bytes
+Requests per second:    2961.97 [#/sec] (mean)
+Time per request:       337.614 [ms] (mean)
+Time per request:       0.338 [ms] (mean, across all concurrent requests)
+Transfer rate:          92487.01 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1   60 353.0     18    3022
+Processing:     1  197 554.8     78    6002
+Waiting:        0  115 519.4     20    6000
+Total:         50  257 655.9     96    6028
+
+t8:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.964 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2871.72 [#/sec] (mean)
+Time per request:       348.224 [ms] (mean)
+Time per request:       0.348 [ms] (mean, across all concurrent requests)
+Transfer rate:          89662.64 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   59 346.7     19    3023
+Processing:     1  204 589.4     80    4961
+Waiting:        0  120 554.2     21    4172
+Total:         58  263 679.7     99    6027
+
+t9:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.955 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639440000 bytes
+HTML transferred:       637560000 bytes
+Requests per second:    2875.80 [#/sec] (mean)
+Time per request:       347.730 [ms] (mean)
+Time per request:       0.348 [ms] (mean, across all concurrent requests)
+Transfer rate:          89789.97 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1   64 365.0     19    3022
+Processing:     1  200 570.2     80    4970
+Waiting:        0  115 530.2     21    3655
+Total:         53  264 676.3     99    6027
+
+t10:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.953 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639471972 bytes
+HTML transferred:       637591878 bytes
+Requests per second:    2876.57 [#/sec] (mean)
+Time per request:       347.636 [ms] (mean)
+Time per request:       0.348 [ms] (mean, across all concurrent requests)
+Transfer rate:          89818.75 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   57 339.1     19    3024
+Processing:     1  209 602.9     79    5265
+Waiting:        0  124 567.9     21    5177
+Total:         56  266 690.2     98    6028
+
+t11:
+Document Path:          /5f189d8ec57f5a5a0d3dcba47fa797e2
+Document Length:        31878 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   6.973 seconds
+Complete requests:      20000
+Failed requests:        0
+Write errors:           0
+Total transferred:      639466280 bytes
+HTML transferred:       637585904 bytes
+Requests per second:    2868.23 [#/sec] (mean)
+Time per request:       348.647 [ms] (mean)
+Time per request:       0.349 [ms] (mean, across all concurrent requests)
+Transfer rate:          89557.48 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   62 359.0     19    3023
+Processing:     1  203 560.6     78    6002
+Waiting:        0  117 525.8     20    6001
+Total:         60  265 662.6     97    6026
+
+
