@@ -7,8 +7,6 @@ Homepage: [zimg.buaa.us](http://zimg.buaa.us/)
 Author: [@招牌疯子](http://weibo.com/819880808)  
 Contact me: zp@buaa.us  
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/buaazp/zimg/trend.png)](https://bitdeli.com/free "Bitdeli Badge")  
-
 ### Versions:
 - 04/26/2014 - zimg 2.0.0 Beta Release. *Important milestone for zimg.*
 - 03/10/2014 - zimg 1.1.0 Release.
@@ -48,6 +46,8 @@ Performance optimization.
 Security measures.  
 
 ### Documentation:
+A guide book of zimg:  
+[Guide Book of zimg](http://zimg.buaa.us/guidebook.html)  
 There is an architecture design document of zimg v1.0. It is written in Chinese.  
 [Architecture Design of zimg](http://zimg.buaa.us/arch_design.html)  
 And this document is to introduce zimg v2.0.  
