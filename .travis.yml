@@ -1,3 +1,12 @@
 Language: c
-install: openssl libevent cmake imagemagick libmemcached lua
-script: make
+compiler:
+    - gcc
+    - clang
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y openssl libevent-dev cmake imagemagick lua5.1 libtolua-dev
+    - wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
+    - tar zxvf libmemcached-1.0.18.tar.gz
+    - cd libmemcached-1.0.18 && ./configure && make && sudo make install 
+install:
+    - make

@@ -19,11 +19,22 @@ http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500&h=300
 ### 编译
 zimg目前支持在Linux和Mac OS下运行，你需要安装一些依赖来保证它的编译和运行。  
 如果你使用Mac，以下所有依赖都可以通过brew来安装。  
-如果你使用ubuntu，可以直接执行以下命令，然后再手动安装一个libmemcached即可：
+如果你使用ubuntu，可以使用apt-get来安装所需的依赖：
 
 ````
-sudo apt-get install openssl libevent-dev cmake libpng-dev libjpeg-dev libgif-dev imagemagick lua5.1 libtolua-dev 
+sudo apt-get install openssl libevent-dev cmake imagemagick lua5.1 libtolua-dev
+wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
+tar zxvf libmemcached-1.0.18.tar.gz
+cd libmemcached-1.0.18
+./configure
+make
+sudo make install 
+cd ..
+git clone https://github.com/buaazp/zimg
+cd zimg
+make
 ````
+如果你使用其他的Linux发行版，请依次安装所需的依赖。
 
 #### openssl（可选）
 openssl并非zimg必须的，但是安装它之后可以使libevent开启很多特性，建议安装。
