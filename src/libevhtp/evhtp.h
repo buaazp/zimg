@@ -6,7 +6,7 @@
 #include "evthr.h"
 #endif
 
-#include <htparse.h>
+#include "htparse.h"
 
 #ifndef EVHTP_DISABLE_REGEX
 #include <onigposix.h>
