@@ -17,7 +17,13 @@ http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500&h=300
 由于zimg是采用C写的，跑起来非常快，再加上一些关于图片的优化，它可以用于图片量比较大的网站、公司内部的私有图片存储服务、或者各种APP的图片服务器等用途。后来zimg不断改进，到2.0版本的时候已经可以支持存储量非常大的分布式后端，这使得zimg的应用场景变得更加广泛。如果你有类似的需求，还在被PHP裁图的低效率而困扰，那么可以尝试使用zimg。
 
 ### 编译
-zimg目前支持在Linux和Mac OS下运行，你需要安装一些依赖来保证它的编译和运行。如果你使用Mac，以下所有依赖都可以通过brew来安装。
+zimg目前支持在Linux和Mac OS下运行，你需要安装一些依赖来保证它的编译和运行。  
+如果你使用Mac，以下所有依赖都可以通过brew来安装。  
+如果你使用ubuntu，可以直接执行以下命令，然后再手动安装一个libmemcached即可：
+
+````
+sudo apt-get install openssl libevent-dev cmake libpng-dev libjpeg-dev libgif-dev imagemagick lua5.1 libtolua-dev 
+````
 
 #### openssl（可选）
 openssl并非zimg必须的，但是安装它之后可以使libevent开启很多特性，建议安装。
@@ -25,7 +31,7 @@ openssl并非zimg必须的，但是安装它之后可以使libevent开启很多�
 ````
 wget http://www.openssl.org/source/openssl-1.0.1g.tar.gz 
 tar zxvf  openssl-1.0.1g.tar.gz 
-./config shared --prefix=/usr --openssldir=/usr/ssl 
+./config shared --prefix=/usr/local --openssldir=/usr/ssl 
 make && make install 
 ````
 
@@ -33,7 +39,7 @@ make && make install
 ````
 wget http://cloud.github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz 
 tar zxvf libevent-2.0.17-stable.tar.gz 
-./configure --prefix=/usr 
+./configure --prefix=/usr/local 
 make && make install 
 ````
 
@@ -43,7 +49,7 @@ zimg的编译使用cmake工具2.8以上版本，因此你需要安装它。
 ````
 wget "http://www.cmake.org/files/v2.8/cmake-2.8.10.2.tar.gz"tar xzvf cmake-2.8.10.2.tar.gz 
 cd cmake-2.8.10.2 
-./bootstrap --prefix=/usr 
+./bootstrap --prefix=/usr/local 
 make && make install 
 ````
 
@@ -75,7 +81,7 @@ cd libmemcached-1.0.18
 make &&　make install 
 ````
 
-#### lua
+#### lua & lua-dev
 在安装lua之前你可能需要安装```readline ```和```readline-devel```
 
 ````

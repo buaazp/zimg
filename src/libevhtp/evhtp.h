@@ -3,7 +3,7 @@
 
 #include <evhtp-config.h>
 #ifndef EVHTP_DISABLE_EVTHR
-#include <evthr.h>
+#include "evthr.h"
 #endif
 
 #include <htparse.h>
