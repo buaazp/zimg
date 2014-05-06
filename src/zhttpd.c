@@ -289,7 +289,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
     LOG_PRINT(LOG_DEBUG, "boundary Find. boundary = %s", boundary);
             
-    /* 依靠evbuffer自己实现php处理函数 */
+    // my own muti-part/form parse
 	evbuf_t *buf;
     buf = req->buffer_in;
     buff = (char *)malloc(post_size);
@@ -326,14 +326,15 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *typePattern = "Content-Type";
     const char *quotePattern = "\"";
     const char *blankPattern = "\r\n";
-    boundaryPattern = (char *)malloc(boundary_len + 2);
+    LOG_PRINT(LOG_DEBUG, "boundary = %s boundary_len = %d", boundary, boundary_len);
+    boundaryPattern = (char *)malloc(boundary_len + 3);
     if(boundaryPattern == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
         goto err;
     }
     //sprintf(boundaryPattern, "\r\n--%s", boundary);
-    sprintf(boundaryPattern, "--%s", boundary);
+    snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
