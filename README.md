@@ -7,7 +7,6 @@ Homepage: [zimg.buaa.us](http://zimg.buaa.us/)
 Author: [@招牌疯子](http://weibo.com/819880808)  
 Contact me: zp@buaa.us  
 
-[![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
 - 04/26/2014 - zimg 2.0.0 Beta Release. *Important milestone for zimg.*
