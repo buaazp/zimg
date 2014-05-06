@@ -5,10 +5,7 @@ compiler:
 before_install:
     - sudo apt-get update -qq
 install:
-    - sudo apt-get install -y openssl libevent-dev cmake imagemagick lua5.1 libtolua-dev
-    - wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
-    - tar zxvf libmemcached-1.0.18.tar.gz
-    - cd libmemcached-1.0.18 && ./configure && make && sudo make install 
+    - sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev lua5.1 libtolua-dev
 script:
     - make
 services:

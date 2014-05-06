@@ -22,14 +22,7 @@ zimg目前支持在Linux和Mac OS下运行，你需要安装一些依赖来保�
 如果你使用ubuntu，可以使用apt-get来安装所需的依赖：
 
 ````
-sudo apt-get install openssl libevent-dev cmake imagemagick lua5.1 libtolua-dev
-wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
-tar zxvf libmemcached-1.0.18.tar.gz
-cd libmemcached-1.0.18
-./configure
-make
-sudo make install 
-cd ..
+sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev lua5.1 libtolua-dev
 git clone https://github.com/buaazp/zimg
 cd zimg
 make
