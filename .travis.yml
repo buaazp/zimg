@@ -1,0 +1,3 @@
+Language: c
+install: openssl libevent cmake imagemagick libmemcached lua
+script: make

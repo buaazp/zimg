@@ -182,9 +182,13 @@ int is_img(const char *filename)
 {
     char *imgType[] = {"jpg", "jpeg", "png", "gif"};
     char *lower= (char *)malloc(strlen(filename) + 1);
+    if(lower == NULL)
+    {
+        return -1;
+    }
     char *tmp;
     int i;
-    int isimg = 0;
+    int isimg = -1;
     for(i = 0; i < strlen(filename); i++)
     {
         lower[i] = tolower(filename[i]);

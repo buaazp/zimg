@@ -57,6 +57,11 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 {
     int result = -1;
     char *cache_key = (char *)malloc(strlen(req->md5) + 32);
+    if(cache_key == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "cache_key malloc failed!");
+        return -1;
+    }
     char *img_format = NULL;
     size_t len;
 
@@ -450,6 +455,11 @@ int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *le
 
     *len = r->len;
     *buff = (char *)malloc(r->len);
+    if(buff == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
+        return -1;
+    }
     memcpy(*buff, r->str, r->len);
 
     freeReplyObject(r);

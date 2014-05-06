@@ -77,8 +77,23 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
 
     char *cache_key = (char *)malloc(strlen(md5sum) + 32);
+    if(cache_key == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "cache_key malloc failed!");
+        goto done;
+    }
     char *save_path = (char *)malloc(512);
+    if(save_path == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "save_path malloc failed!");
+        goto done;
+    }
     char *save_name = (char *)malloc(512);
+    if(save_name == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "save_name malloc failed!");
+        goto done;
+    }
 
     //sprintf(cache_key, "img:%s:0:0:1:0", md5sum);
     gen_key(cache_key, md5sum, 0);
@@ -222,6 +237,11 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     int result = -1;
     char *rsp_path = NULL;
     char *cache_key = (char *)malloc(strlen(req->md5) + 32);
+    if(cache_key == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "cache_key malloc failed!");
+        goto err;
+    }
     char *whole_path = NULL;
     char *orig_path = NULL;
     char *color_path = NULL;
@@ -274,10 +294,20 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         sprintf(name, "%d*%d", req->width, req->height);
 
     orig_path = (char *)malloc(strlen(whole_path) + 6);
+    if(orig_path == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "orig_path malloc failed!");
+        goto err;
+    }
     sprintf(orig_path, "%s/0*0p", whole_path);
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
     rsp_path = (char *)malloc(512);
+    if(rsp_path == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "rsp_path  malloc failed!");
+        goto err;
+    }
     if(req->width == 0 && req->height == 0 && req->gray == 0)
     {
         LOG_PRINT(LOG_DEBUG, "Return original image.");
@@ -320,6 +350,11 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
             len = strlen(rsp_path);
             color_path = (char *)malloc(len);
+            if(color_path == NULL)
+            {
+                LOG_PRINT(LOG_DEBUG, "color_path malloc failed!");
+                goto err;
+            }
             strncpy(color_path, rsp_path, len);
             color_path[len - 1] = '\0';
             LOG_PRINT(LOG_DEBUG, "color_path: %s", color_path);

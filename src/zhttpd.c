@@ -293,6 +293,11 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 	evbuf_t *buf;
     buf = req->buffer_in;
     buff = (char *)malloc(post_size);
+    if(buff == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
+        goto err;
+    }
     int rmblen, evblen;
     int img_size = 0;
 
@@ -322,6 +327,11 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *quotePattern = "\"";
     const char *blankPattern = "\r\n";
     boundaryPattern = (char *)malloc(boundary_len + 2);
+    if(boundaryPattern == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
+        goto err;
+    }
     //sprintf(boundaryPattern, "\r\n--%s", boundary);
     sprintf(boundaryPattern, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
@@ -352,6 +362,11 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         }
     }
     fileName = (char *)malloc(end + 1);
+    if(fileName == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "filename malloc failed!");
+        goto err;
+    }
     memcpy(fileName, buff+start, end);
     fileName[end] = '\0';
     LOG_PRINT(LOG_DEBUG, "fileName = %s", fileName);
@@ -572,6 +587,11 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 		goto err;
 
     md5 = (char *)malloc(strlen(uri) + 1);
+    if(md5 == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "md5 malloc failed!");
+        goto err;
+    }
     if(uri[0] == '/')
         strcpy(md5, uri+1);
     else
@@ -648,6 +668,11 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
 
     zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
+    if(zimg_req == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "zimg_req malloc failed!");
+        goto err;
+    }
     zimg_req -> md5 = md5;
     zimg_req -> width = width;
     zimg_req -> height = height;
