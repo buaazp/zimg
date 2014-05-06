@@ -8,6 +8,3 @@ install:
     - sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev lua5.1 libtolua-dev
 script:
     - make
-services:
-    - memcached
-    - redis-server
