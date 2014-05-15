@@ -153,6 +153,7 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
     strcpy(acc, acc_str);
     char *start = acc;
     char *end = strchr(start, ';');
+    end = (end) ? end : start+acc_len;
     while(end)
     {
         char *mode = start;
@@ -165,11 +166,13 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
                 end = strchr(start, ';');
                 continue;
             }
+            (void) memset(this_rule, 0, sizeof(zimg_rule_t));
+            this_rule->deny = (mode[0] == 'd') ? 1 : 0;
             size_t range_len;
             range++;
             range_len = end - range;
 
-            uint all = (range_len == 3 && strcmp(range, "all") == 0);
+            uint all = (range_len == 3 && strstr(range, "all") == range);
 
             if (!all) {
                 int rc;
@@ -179,7 +182,6 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
                     end = strchr(start, ';');
                     continue;
                 }
-                this_rule->deny = (mode[0] == 'd') ? 1 : 0;
             }
 
             zimg_rules_t *rules = (zimg_rules_t *)malloc(sizeof(zimg_rules_t));
@@ -205,9 +207,13 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
 int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
 {
     zimg_rules_t *rules = cf->rules;
+    LOG_PRINT(LOG_DEBUG, "rules: %p", rules);
 
     while(rules)
     {
+        LOG_PRINT(LOG_DEBUG, "addr: %d", addr);
+        LOG_PRINT(LOG_DEBUG, "rules->value->addr: %d", rules->value->addr);
+        LOG_PRINT(LOG_DEBUG, "rules->value->mask: %d", rules->value->mask);
         if ((addr & rules->value->mask) == rules->value->addr) {
             if (rules->value->deny) {
                 return ZIMG_FORBIDDEN;
