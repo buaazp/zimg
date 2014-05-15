@@ -29,6 +29,7 @@
 #include "zutil.h"
 #include "zlog.h"
 #include "zdb.h"
+#include "zaccess.h"
 
 extern struct setting settings;
 
@@ -228,10 +229,41 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(strcmp(method_strmap[req_method], "POST") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
-        LOG_PRINT(LOG_ERROR, "fail post method");
+        LOG_PRINT(LOG_INFO, "refuse post method");
         goto err;
     }
 
+    if(settings.up_access != NULL)
+    {
+        evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
+        struct sockaddr *saddr = ev_conn->saddr;
+
+        struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
+        int acs = zimg_access_inet(settings.up_access, ss->sin_addr.s_addr);
+        LOG_PRINT(LOG_DEBUG, "access check: %d", acs);
+        if(acs != ZIMG_OK)
+        {
+            char address[24];
+            char c_ip[16];
+            char c_port[6];
+            strcpy(c_ip, inet_ntoa(ss->sin_addr));
+            snprintf(c_port, 6, "%u", htons(ss->sin_port));
+            snprintf(address, 24, "%s:%s", c_ip, c_port);
+
+            if(acs == ZIMG_FORBIDDEN)
+            {
+                LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
+                LOG_PRINT(LOG_INFO, "refuse post forbidden %s", address);
+                goto forbidden;
+            }
+            else if(acs == ZIMG_ERROR)
+            {
+                LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
+                LOG_PRINT(LOG_ERROR, "fail post access %s", address);
+                goto err;
+            }
+        }
+    }
 
     if(!evhtp_header_find(req->headers_in, "Content-Length"))
     {
@@ -296,6 +328,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(buff == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
+        LOG_PRINT(LOG_ERROR, "fail malloc buff");
         goto err;
     }
     int rmblen, evblen;
@@ -331,6 +364,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(boundaryPattern == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
+        LOG_PRINT(LOG_ERROR, "fail malloc");
         goto err;
     }
     //sprintf(boundaryPattern, "\r\n--%s", boundary);
@@ -366,6 +400,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(fileName == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "filename malloc failed!");
+        LOG_PRINT(LOG_ERROR, "fail malloc");
         goto err;
     }
     memcpy(fileName, buff+start, end);
@@ -479,6 +514,16 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     LOG_PRINT(LOG_INFO, "succ post pic:%s size:%d", md5sum, img_size);
     goto done;
 
+forbidden:
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
+    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
+    LOG_PRINT(LOG_DEBUG, "============post_request_cb() FORBIDDEN!===============");
+    goto done;
+
+
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
@@ -523,9 +568,42 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	else if(strcmp(method_strmap[req_method], "GET") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
+        LOG_PRINT(LOG_INFO, "refuse method");
         goto err;
     }
 
+    if(settings.down_access != NULL)
+    {
+        evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
+        struct sockaddr *saddr = ev_conn->saddr;
+
+        struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
+        int acs = zimg_access_inet(settings.down_access, ss->sin_addr.s_addr);
+        LOG_PRINT(LOG_DEBUG, "access check: %d", acs);
+
+        if(acs != ZIMG_OK)
+        {
+            char address[24];
+            char c_ip[16];
+            char c_port[6];
+            strcpy(c_ip, inet_ntoa(ss->sin_addr));
+            snprintf(c_port, 6, "%u", htons(ss->sin_port));
+            snprintf(address, 24, "%s:%s", c_ip, c_port);
+
+            if(acs == ZIMG_FORBIDDEN)
+            {
+                LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
+                LOG_PRINT(LOG_INFO, "refuse get forbidden %s", address);
+                goto forbidden;
+            }
+            else if(acs == ZIMG_ERROR)
+            {
+                LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
+                LOG_PRINT(LOG_ERROR, "fail get access %s", address);
+                goto err;
+            }
+        }
+    }
 
 	const char *uri;
 	uri = req->uri->path->full;
@@ -566,6 +644,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
         LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
+        LOG_PRINT(LOG_INFO, "succ root page");
         goto done;
     }
 
@@ -585,12 +664,17 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	 * it forbids aceptable paths like "/this/one..here", but it doesn't
 	 * do anything to prevent symlink following." */
 	if (strstr(uri, ".."))
-		goto err;
+    {
+        LOG_PRINT(LOG_DEBUG, "attempt to upper dir!");
+        LOG_PRINT(LOG_INFO, "refuse directory");
+		goto forbidden;
+    }
 
     md5 = (char *)malloc(strlen(uri) + 1);
     if(md5 == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "md5 malloc failed!");
+        LOG_PRINT(LOG_ERROR, "fail malloc");
         goto err;
     }
     if(uri[0] == '/')
@@ -601,7 +685,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(is_md5(md5) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Url is Not a zimg Request.");
-        LOG_PRINT(LOG_ERROR, "refuse url illegal");
+        LOG_PRINT(LOG_INFO, "refuse url illegal");
         goto err;
     }
 	/* This holds the content we're sending. */
@@ -672,6 +756,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(zimg_req == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "zimg_req malloc failed!");
+        LOG_PRINT(LOG_ERROR, "fail malloc");
         goto err;
     }
     zimg_req -> md5 = md5;
@@ -720,9 +805,16 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
     goto done;
 
+forbidden:
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
+    LOG_PRINT(LOG_DEBUG, "============send_document_cb() FORBIDDEN!===============");
+    goto done;
+
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);

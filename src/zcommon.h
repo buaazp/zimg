@@ -31,6 +31,7 @@
 #include <hiredis/hiredis.h>
 #include <stdbool.h>
 #include "libevhtp/evhtp.h"
+#include "zaccess.h"
 
 #ifndef ZIMG_VERSION
 #define ZIMG_VERSION "2.0.0"
@@ -63,6 +64,8 @@ struct setting{
     char ssdb_ip[128];
     int ssdb_port;
     int retry;
+    zimg_access_conf_t *up_access;
+    zimg_access_conf_t *down_access;
 } settings;
 
 typedef struct thr_arg_s {

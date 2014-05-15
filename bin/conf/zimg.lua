@@ -9,6 +9,10 @@ max_keepalives=1
 retry=3
 system=io.popen("uname -s"):read("*l")
 
+--access config
+download_rule="allow 127.0.1.0/24;allow 10.209.67.182/24;allow 127.0.0.1;deny all"
+upload_rule="allow 127.0.1.0/24;allow 10.209.67.182/24;deny 127.0.0.1;deny all"
+
 --cache config
 cache=1
 mc_ip='127.0.0.1'

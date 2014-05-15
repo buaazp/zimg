@@ -83,12 +83,14 @@ static void settings_init(void)
     settings.port = 4869;
     settings.backlog = 1024;
     settings.num_threads = get_cpu_cores();         /* N workers */
+    settings.retry = 3;
+    settings.up_access = NULL;
+    settings.down_access = NULL;
     settings.log = false;
     settings.cache_on = false;
     strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
-    settings.retry = 3;
     settings.mode = 1;
     strcpy(settings.ssdb_ip, "127.0.0.1");
     settings.ssdb_port = 6379;
@@ -126,6 +128,20 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "system");
     if(lua_isstring(L, -1))
         sprintf(settings.server_name, "%s %s", settings.server_name, lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "upload_rule");
+    if(lua_isstring(L, -1))
+    {
+        settings.up_access = conf_get_rules(lua_tostring(L, -1));
+    }
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "download_rule");
+    if(lua_isstring(L, -1))
+    {
+        settings.down_access = conf_get_rules(lua_tostring(L, -1));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "cache");
@@ -488,6 +504,8 @@ int main(int argc, char **argv)
     evhtp_free(htp);
     event_base_free(evbase);
     MagickWandTerminus();
+    free_access_conf(settings.up_access);
+    free_access_conf(settings.down_access);
 
     fprintf(stdout, "\nByebye!\n");
     return 0;
