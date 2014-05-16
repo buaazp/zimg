@@ -433,20 +433,20 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         height = req->height;
         if(width == 0 && height == 0)
         {
-            LOG_PRINT(LOG_DEBUG, "Read Image from Orig Image[%s] Succ. Goto Convert.", orig_path);
+            LOG_PRINT(LOG_DEBUG, "Image[%s] needn't resize. Goto Convert.", orig_path);
             goto convert;
         }
         float owidth = MagickGetImageWidth(magick_wand);
         float oheight = MagickGetImageHeight(magick_wand);
         if(width <= owidth && height <= oheight)
         {
-            if(req->proportion == 1)
+            //if(req->proportion == 1)
+            if(req->proportion == 1 || (req->proportion == 0 && req->width * req->height == 0))
             {
-                if(req->width != 0 && req->height == 0)
+                if(req->height == 0)
                 {
                     height = width * oheight / owidth;
                 }
-                //else if(height != 0 && width == 0)
                 else
                 {
                     width = height * owidth / oheight;
@@ -513,20 +513,9 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
 
 convert:
-    //gray image
-    if(req->gray == true)
-    {
-        LOG_PRINT(LOG_DEBUG, "Start to Remove Color!");
-        status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
-        if(status == MagickFalse)
-        {
-            LOG_PRINT(LOG_DEBUG, "Image[%s] Remove Color Failed!", orig_path);
-            goto err;
-        }
-        LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
-    }
 
-    if(got_color == false || (got_color == true && req->width == 0 && req->height == 0) )
+    //if(got_color == false || (got_color == true && req->width == 0 && req->height == 0) )
+    if(got_color == false)
     {
         //compress image
         LOG_PRINT(LOG_DEBUG, "Start to Compress the Image!");
@@ -568,6 +557,21 @@ convert:
             LOG_PRINT(LOG_DEBUG, "Remove Exif Infomation of the ImageFailed!");
         }
     }
+
+    //gray image
+    if(req->gray == 1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Start to Remove Color!");
+        status = MagickSetImageColorspace(magick_wand, GRAYColorspace);
+        if(status == MagickFalse)
+        {
+            LOG_PRINT(LOG_DEBUG, "Image[%s] Remove Color Failed!", orig_path);
+            goto err;
+        }
+        LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
+    }
+
+
     *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
     if(*buff_ptr == NULL)
     {

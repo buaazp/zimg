@@ -82,7 +82,14 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     }
     else
     {
-        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        if(req->proportion == 0 && req->width == 0 && req->height == 0)
+        {
+            gen_key(cache_key, req->md5, 0);
+        }
+        else
+        {
+            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        }
     }
     //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
     if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
@@ -170,43 +177,45 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         goto done;
     }
 
-    if(!(req->width == 0 && req->height == 0))
+    if(req->width == 0 && req->height == 0)
     {
-        int width, height;
-        width = req->width;
-        height = req->height;
-        float owidth = MagickGetImageWidth(magick_wand);
-        float oheight = MagickGetImageHeight(magick_wand);
-        if(width <= owidth && height <= oheight)
-        {
-            if(req->proportion == 1)
-            {
-                if(req->width != 0 && req->height == 0)
-                {
-                    height = width * oheight / owidth;
-                }
-                else
-                {
-                    width = height * owidth / oheight;
-                }
-            }
-            status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
-            if(status == MagickFalse)
-            {
-                LOG_PRINT(LOG_DEBUG, "Image[%s] Resize Failed!", cache_key);
-                goto done;
-            }
-
-            LOG_PRINT(LOG_DEBUG, "Resize img succ.");
-        }
-        else
-        {
-            LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
-            //result = 1;
-            //goto done;
-        }
+        LOG_PRINT(LOG_DEBUG, "Image [%s] needn't resize. Goto Convert.", cache_key);
+        goto convert;
     }
 
+    int width, height;
+    width = req->width;
+    height = req->height;
+    float owidth = MagickGetImageWidth(magick_wand);
+    float oheight = MagickGetImageHeight(magick_wand);
+    if(width <= owidth && height <= oheight)
+    {
+        if(req->proportion == 1 || (req->proportion == 0 && req->width * req->height == 0))
+        {
+            if(req->height == 0)
+            {
+                height = width * oheight / owidth;
+            }
+            else
+            {
+                width = height * owidth / oheight;
+            }
+        }
+        status = MagickResizeImage(magick_wand, width, height, LanczosFilter, 1.0);
+        if(status == MagickFalse)
+        {
+            LOG_PRINT(LOG_DEBUG, "Image[%s] Resize Failed!", cache_key);
+            goto done;
+        }
+
+        LOG_PRINT(LOG_DEBUG, "Resize img succ.");
+    }
+    else
+    {
+        LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
+        //result = 1;
+        //goto done;
+    }
 
 convert:
 
@@ -292,10 +301,12 @@ convert:
             set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
         }
     }
+    /*
     if(got_color == false)
     {
         LOG_PRINT(LOG_INFO, "succ compress pic:%s", cache_key);
     }
+    */
     result = 1;
 
 done:
