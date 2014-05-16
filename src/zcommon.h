@@ -42,6 +42,7 @@
 #define RETRY_TIME_WAIT 1000
 /* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
 #define NUM_THREADS 4
+#define CACHE_KEY_SIZE 128
 
 struct setting{
     int is_daemon;
@@ -81,11 +82,9 @@ typedef struct zimg_req_s {
     int height;
     bool proportion;
     bool gray;
-    char *rsp_path;
+    //char *rsp_path;
     thr_arg_t *thr_arg;
 } zimg_req_t;
-
-char *_init_path;
 
 struct timespec retry_sleep;
 

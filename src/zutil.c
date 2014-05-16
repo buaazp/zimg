@@ -141,7 +141,7 @@ int get_type(const char *filename, char *type)
         flag = tmp;
     }
     flag++;
-    sprintf(type, "%s", flag);
+    strncpy(type, flag, 32);
     return 1;
 }
 
@@ -268,34 +268,32 @@ int mk_dir(const char *path)
  */
 int mk_dirs(const char *dir)
 {
-    char tmp[512];
-    char *p;
-    if (strlen(dir) == 0 || dir == NULL) 
+    char tmp[256];
+    strcpy(tmp, dir);
+    int i, len = strlen(tmp);
+    if(tmp[len-1] != '/')
+        strcat(tmp, "/");
+
+    len = strlen(tmp);
+
+    for(i=1; i<len; i++)
     {
-        LOG_PRINT(LOG_DEBUG, "strlen(dir) is 0 or dir is NULL.");
-        return -1;
+        if(tmp[i] == '/')
+        {
+            tmp[i] = 0;
+            if(access(tmp, 0) != 0)
+            {
+                if(mkdir(tmp, 0777) == -1)
+                {
+                    LOG_PRINT(LOG_DEBUG, "mkdir error!");
+                    return -1;
+                }
+            }
+            tmp[i] = '/';
+        }
     }
-    memset(tmp, 0, sizeof(tmp));
-    strncpy(tmp, dir, strlen(dir));
-    if (tmp[0] == '/' && tmp[1]== '/') 
-        p = strchr(tmp + 2, '/'); 
-    else 
-        p = strchr(tmp, '/');
-    if (p) 
-    {
-        *p = '\0';
-        mkdir(tmp,0777);
-        chdir(tmp);
-    } 
-    else 
-    {
-        mkdir(tmp,0777);
-        chdir(tmp);
-        return 1;
-    }
-    mk_dirs(p + 1);
-    return 1;
-}
+    return 0;
+} 
 
 /**
  * @brief is_md5 Check the string is a md5 style.
@@ -385,7 +383,7 @@ int str_hash(const char *str)
  */
 int gen_key(char *key, char *md5, ...)
 {
-    sprintf(key, "%s", md5);
+    snprintf(key, CACHE_KEY_SIZE, "%s", md5);
     va_list arg_ptr;
     va_start(arg_ptr, md5);
     int argc = va_arg(arg_ptr, int);
@@ -394,7 +392,7 @@ int gen_key(char *key, char *md5, ...)
     for(i = 0; i<argc; i++)
     {
         argv = va_arg(arg_ptr, int);
-        sprintf(key, "%s:%d", key, argv);
+        snprintf(key, CACHE_KEY_SIZE, "%s:%d", key, argv);
         //LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
     }
     va_end(arg_ptr);

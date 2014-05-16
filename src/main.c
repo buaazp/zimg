@@ -79,7 +79,7 @@ static void settings_init(void)
     strcpy(settings.img_path, "./img");
     strcpy(settings.log_name, "./log/zimg.log");
     strcpy(settings.version, STR(ZIMG_VERSION));
-    sprintf(settings.server_name, "zimg/%s", settings.version);
+    snprintf(settings.server_name, 128, "zimg/%s", settings.version);
     settings.port = 4869;
     settings.backlog = 1024;
     settings.num_threads = get_cpu_cores();         /* N workers */
@@ -127,7 +127,7 @@ static int load_conf(const char *conf)
 
     lua_getglobal(L, "system");
     if(lua_isstring(L, -1))
-        sprintf(settings.server_name, "%s %s", settings.server_name, lua_tostring(L, -1));
+        snprintf(settings.server_name, 128, "%s %s", settings.server_name, lua_tostring(L, -1));
     lua_pop(L, 1);
 
     lua_getglobal(L, "upload_rule");
@@ -190,6 +190,7 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "img_path");
     if(lua_isstring(L, -1))
         strcpy(settings.img_path, lua_tostring(L, -1));
+    LOG_PRINT(LOG_INFO, "settings.img_path: %s", settings.img_path);
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_name"); //stack index: -1
@@ -251,7 +252,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     if(settings.cache_on == true)
     {
         memcached_st *memc = memcached_create(NULL);
-        sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
+        snprintf(mserver, 32, "%s:%d", settings.cache_ip, settings.cache_port);
         memcached_server_st *servers = memcached_servers_parse(mserver);
         memcached_server_push(memc, servers);
         memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
@@ -266,7 +267,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     if(settings.mode == 2)
     {
         memcached_st *beans = memcached_create(NULL);
-        sprintf(mserver, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
+        snprintf(mserver, 32, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
         memcached_server_st *servers = memcached_servers_parse(mserver);
         servers = memcached_servers_parse(mserver);
         memcached_server_push(beans, servers);
@@ -307,8 +308,6 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 int main(int argc, char **argv)
 {
     int i;
-    _init_path = getcwd(NULL, 0);
-    LOG_PRINT(LOG_DEBUG, "Get init-path: %s", _init_path);
     retry_sleep.tv_sec = 0;
     retry_sleep.tv_nsec = RETRY_TIME_WAIT;      //1000 ns = 1 us
 
@@ -384,6 +383,7 @@ int main(int argc, char **argv)
             if(mk_dir(log_path) != 1)
             {
                 LOG_PRINT(LOG_DEBUG, "log_path[%s] Create Failed!", log_path);
+                fprintf(stderr, "log_path[%s] Create Failed!\n", log_path);
                 return -1;
             }
         }
@@ -395,53 +395,18 @@ int main(int argc, char **argv)
         if(mk_dir(settings.img_path) != 1)
         {
             LOG_PRINT(LOG_DEBUG, "img_path[%s] Create Failed!", settings.img_path);
+            fprintf(stderr, "%s Create Failed!\n", settings.img_path);
             return -1;
         }
     }
     LOG_PRINT(LOG_DEBUG,"Paths Init Finished.");
-
-   
-    //init memcached connection...
-    /*
-    if(settings.cache_on == true)
-    {
-        LOG_PRINT(LOG_DEBUG, "Begin to Test Memcached Connection...");
-        memcached_st *memc;
-        memc= memcached_create(NULL);
-
-        char mserver[32];
-        sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
-        memcached_server_st *servers = memcached_servers_parse(mserver);
-
-        memcached_server_push(memc, servers);
-        memcached_server_list_free(servers);
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1); 
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
-        LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
-        if(set_cache(memc, "zimg", "1") == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "Memcached[%s] Connect Failed!", mserver);
-            settings.cache_on = false;
-        }
-        else
-        {
-            LOG_PRINT(LOG_DEBUG, "memcached connection to: %s", mserver);
-            settings.cache_on = true;
-        }
-        memcached_free(memc);
-    }
-    else
-        LOG_PRINT(LOG_DEBUG, "Don't use memcached as cache.");
-    */
 
     if(settings.mode == 2)
     {
         LOG_PRINT(LOG_DEBUG, "Begin to Test Memcached Connection...");
         memcached_st *beans = memcached_create(NULL);
         char mserver[32];
-        sprintf(mserver, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
+        snprintf(mserver, 32, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
         memcached_server_st *servers = memcached_servers_parse(mserver);
         servers = memcached_servers_parse(mserver);
         memcached_server_push(beans, servers);

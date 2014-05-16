@@ -47,7 +47,7 @@ void retry_cache(thr_arg_t *thr_arg)
     memc= memcached_create(NULL);
 
     char mserver[32];
-    sprintf(mserver, "%s:%d", settings.cache_ip, settings.cache_port);
+    snprintf(mserver, 32, "%s:%d", settings.cache_ip, settings.cache_port);
     memcached_server_st *servers = memcached_servers_parse(mserver);
 
     memcached_server_push(memc, servers);

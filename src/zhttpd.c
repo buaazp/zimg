@@ -367,7 +367,6 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         LOG_PRINT(LOG_ERROR, "fail malloc");
         goto err;
     }
-    //sprintf(boundaryPattern, "\r\n--%s", boundary);
     snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
@@ -796,13 +795,17 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
 
 
+    /*
     if(get_img_rst == 2)
     {
+        LOG_PRINT(LOG_WARNING, "creating new img: %s", zimg_req->rsp_path);
+        sleep(10);
         if(new_img(buff, len, zimg_req->rsp_path) == -1)
         {
-            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", zimg_req->rsp_path);
+            LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rsp_path);
         }
     }
+    */
     goto done;
 
 forbidden:
@@ -827,11 +830,13 @@ done:
     {
         if(zimg_req->md5)
             free(zimg_req->md5);
+        /*
         if(settings.mode == 1)
         {
             if(zimg_req->rsp_path)
                 free(zimg_req->rsp_path);
         }
+        */
         free(zimg_req);
     }
 }
