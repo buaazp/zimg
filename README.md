@@ -7,9 +7,11 @@ Homepage: [zimg.buaa.us](http://zimg.buaa.us/)
 Author: [@招牌疯子](http://weibo.com/819880808)  
 Contact me: zp@buaa.us  
 
-[![Build Status](https://travis-ci.org/buaazp/zimg.svg?branch=master)](https://travis-ci.org/buaazp/zimg)  
+[![Build Status](https://travis-ci.org/buaazp/zimg.svg?branch=master)](https://travis-ci.org/buaazp/zimg)
+[![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
+- 05/18/2014 - zimg 2.1.0 Release.
 - 04/26/2014 - zimg 2.0.0 Beta Release. *Important milestone for zimg.*
 - 03/10/2014 - zimg 1.1.0 Release.
 - 08/01/2013 - zimg 1.0.0 Release.
@@ -41,15 +43,14 @@ Process resized and grayed image by request parameter.
 Use memcached to improve performance.  
 Multi-thread support for multi-core processor server.  
 Use lua for conf and other functions.  
-**Support beansdb/SSDB mode to save images into distributed storage backends.**
+**Support beansdb/SSDB mode to save images into distributed storage backends.**  
+IP access control for uploading and downloading images.  
 
 ### In Planning:
 Performance optimization.  
 Security measures.  
 
 ### Documentation:
-A guide book of zimg:  
-[Guide Book of zimg](http://zimg.buaa.us/guidebook.html)  
 There is an architecture design document of zimg v1.0. It is written in Chinese.  
 [Architecture Design of zimg](http://zimg.buaa.us/arch_design.html)  
 And this document is to introduce zimg v2.0.  
@@ -73,6 +74,10 @@ make
 cd bin  
 ./zimg conf/zimg.lua
 ````
+
+More infomation of building zimg in guide book:
+[Guide Book of zimg](http://zimg.buaa.us/guidebook.html)  
+
 ### Config:
 
 ````
@@ -84,6 +89,14 @@ port=4869
 thread_num=4
 backlog_num=1024
 max_keepalives=1
+retry=3
+system=io.popen("uname -s"):read("*l")
+
+--access config
+--support mask rules like "allow 10.1.121.138/24"
+--note: remove rule can improve performance
+download_rule="allow all"
+upload_rule="allow 127.0.0.1;deny all"
 
 --cache config
 cache=1

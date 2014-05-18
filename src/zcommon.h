@@ -31,6 +31,7 @@
 #include <hiredis/hiredis.h>
 #include <stdbool.h>
 #include "libevhtp/evhtp.h"
+#include "zaccess.h"
 
 #ifndef ZIMG_VERSION
 #define ZIMG_VERSION "2.0.0"
@@ -41,6 +42,7 @@
 #define RETRY_TIME_WAIT 1000
 /* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
 #define NUM_THREADS 4
+#define CACHE_KEY_SIZE 128
 
 struct setting{
     int is_daemon;
@@ -63,6 +65,8 @@ struct setting{
     char ssdb_ip[128];
     int ssdb_port;
     int retry;
+    zimg_access_conf_t *up_access;
+    zimg_access_conf_t *down_access;
 } settings;
 
 typedef struct thr_arg_s {
@@ -76,13 +80,11 @@ typedef struct zimg_req_s {
     char *md5;
     int width;
     int height;
-    bool proportion;
+    int proportion;
     bool gray;
-    char *rsp_path;
+    //char *rsp_path;
     thr_arg_t *thr_arg;
 } zimg_req_t;
-
-char *_init_path;
 
 struct timespec retry_sleep;
 

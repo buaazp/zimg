@@ -18,7 +18,15 @@ http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500&h=300
 
 ### 编译
 zimg目前支持在Linux和Mac OS下运行，你需要安装一些依赖来保证它的编译和运行。  
-如果你使用Mac，以下所有依赖都可以通过brew来安装。  
+如果你使用Mac，以下所有依赖都可以通过brew来安装:
+
+````
+brew install openssl libevent cmake imagemagick libmemcached lua
+git clone https://github.com/buaazp/zimg
+cd zimg
+make
+````
+  
 如果你使用ubuntu，可以使用apt-get来安装所需的依赖：
 
 ````
@@ -27,6 +35,16 @@ git clone https://github.com/buaazp/zimg
 cd zimg
 make
 ````
+
+如果你使用CentOS，可以使用yum来安装所需的依赖：
+
+````
+sudo yum install openssl libevent-devel cmake ImageMagick libmemcached-devel lua lua-devel 
+git clone https://github.com/buaazp/zimg
+cd zimg
+make
+````
+
 如果你使用其他的Linux发行版，请依次安装所需的依赖。
 
 #### openssl（可选）
