@@ -80,7 +80,7 @@ typedef struct zimg_req_s {
     char *md5;
     int width;
     int height;
-    bool proportion;
+    int proportion;
     bool gray;
     //char *rsp_path;
     thr_arg_t *thr_arg;

@@ -11,6 +11,7 @@ Contact me: zp@buaa.us
 [![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
+- 05/18/2014 - zimg 2.1.0 Release.
 - 04/26/2014 - zimg 2.0.0 Beta Release. *Important milestone for zimg.*
 - 03/10/2014 - zimg 1.1.0 Release.
 - 08/01/2013 - zimg 1.0.0 Release.
@@ -42,8 +43,8 @@ Process resized and grayed image by request parameter.
 Use memcached to improve performance.  
 Multi-thread support for multi-core processor server.  
 Use lua for conf and other functions.  
-**Support beansdb/SSDB mode to save images into distributed storage backends.**
-IP access control for uploading and downloading images.
+**Support beansdb/SSDB mode to save images into distributed storage backends.**  
+IP access control for uploading and downloading images.  
 
 ### In Planning:
 Performance optimization.  

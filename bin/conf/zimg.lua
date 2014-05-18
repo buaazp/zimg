@@ -10,8 +10,10 @@ retry=3
 system=io.popen("uname -s"):read("*l")
 
 --access config
-download_rule="allow 127.0.0.1;allow 10.209.67.182/32;deny all"
-upload_rule="allow 127.0.0.1;allow 10.209.67.182/32;deny all"
+--support mask rules like "allow 10.1.121.138/24"
+--NOTE: remove rule can improve performance
+--download_rule="allow all;;deny all"
+upload_rule="allow 127.0.0.1;deny all"
 
 --cache config
 cache=1
