@@ -1,3 +1,24 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+/**
+ * @file zaccess.h
+ * @brief header file of zaccess.c
+ * @author 招牌疯子 zp@buaa.us
+ * @version 2.1.0
+ * @date 2014-05-19
+ */
+
+
 #ifndef ZACCESS_H
 #define ZACCESS_H
 
