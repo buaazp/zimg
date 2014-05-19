@@ -222,6 +222,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     char *boundaryPattern = NULL;
     char *buff = NULL;
 
+    evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
+    struct sockaddr *saddr = ev_conn->saddr;
+    struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
+    char address[24], c_ip[16], c_port[6];
+    strcpy(c_ip, inet_ntoa(ss->sin_addr));
+    snprintf(c_port, 6, "%u", htons(ss->sin_port));
+    snprintf(address, 24, "%s:%s", c_ip, c_port);
+
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
         req_method = 16;
@@ -229,46 +237,32 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(strcmp(method_strmap[req_method], "POST") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
-        LOG_PRINT(LOG_INFO, "refuse post method");
+        LOG_PRINT(LOG_INFO, "%s refuse post method", address);
         goto err;
     }
 
     if(settings.up_access != NULL)
     {
-        evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
-        struct sockaddr *saddr = ev_conn->saddr;
-
-        struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
         int acs = zimg_access_inet(settings.up_access, ss->sin_addr.s_addr);
         LOG_PRINT(LOG_DEBUG, "access check: %d", acs);
-        if(acs != ZIMG_OK)
+        if(acs == ZIMG_FORBIDDEN)
         {
-            char address[24];
-            char c_ip[16];
-            char c_port[6];
-            strcpy(c_ip, inet_ntoa(ss->sin_addr));
-            snprintf(c_port, 6, "%u", htons(ss->sin_port));
-            snprintf(address, 24, "%s:%s", c_ip, c_port);
-
-            if(acs == ZIMG_FORBIDDEN)
-            {
-                LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
-                LOG_PRINT(LOG_INFO, "refuse post forbidden %s", address);
-                goto forbidden;
-            }
-            else if(acs == ZIMG_ERROR)
-            {
-                LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
-                LOG_PRINT(LOG_ERROR, "fail post access %s", address);
-                goto err;
-            }
+            LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
+            LOG_PRINT(LOG_INFO, "%s refuse post forbidden", address);
+            goto forbidden;
+        }
+        else if(acs == ZIMG_ERROR)
+        {
+            LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
+            LOG_PRINT(LOG_ERROR, "%s fail post access %s", address);
+            goto err;
         }
     }
 
     if(!evhtp_header_find(req->headers_in, "Content-Length"))
     {
         LOG_PRINT(LOG_DEBUG, "Get Content-Length error!");
-        LOG_PRINT(LOG_ERROR, "fail post content-length");
+        LOG_PRINT(LOG_ERROR, "%s fail post content-length", address);
         goto err;
     }
     const char *content_len = evhtp_header_find(req->headers_in, "Content-Length");
@@ -276,20 +270,20 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(!evhtp_header_find(req->headers_in, "Content-Type"))
     {
         LOG_PRINT(LOG_DEBUG, "Get Content-Type error!");
-        LOG_PRINT(LOG_ERROR, "fail post content-type");
+        LOG_PRINT(LOG_ERROR, "%s fail post content-type", address);
         goto err;
     }
     const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
     if(strstr(content_type, "multipart/form-data") == 0)
     {
         LOG_PRINT(LOG_DEBUG, "POST form error!");
-        LOG_PRINT(LOG_ERROR, "fail post parse");
+        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
         goto err;
     }
     else if(strstr(content_type, "boundary") == 0)
     {
         LOG_PRINT(LOG_DEBUG, "boundary NOT found!");
-        LOG_PRINT(LOG_ERROR, "fail post parse");
+        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
         goto err;
     }
 
@@ -304,7 +298,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         if (!boundary_end) 
         {
             LOG_PRINT(LOG_DEBUG, "Invalid boundary in multipart/form-data POST data");
-            LOG_PRINT(LOG_ERROR, "fail post parse");
+            LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
             goto err;
         }
     } 
@@ -328,7 +322,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(buff == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
-        LOG_PRINT(LOG_ERROR, "fail malloc buff");
+        LOG_PRINT(LOG_ERROR, "%s fail malloc buff", address);
         goto err;
     }
     int rmblen, evblen;
@@ -337,7 +331,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(evbuffer_get_length(buf) <= 0)
     {
         LOG_PRINT(LOG_DEBUG, "Empty Request!");
-        LOG_PRINT(LOG_ERROR, "fail post empty");
+        LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
         goto err;
     }
 
@@ -349,7 +343,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         if(rmblen < 0)
         {
             LOG_PRINT(LOG_DEBUG, "evbuffer_remove failed!");
-            LOG_PRINT(LOG_ERROR, "fail post parse");
+            LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
             goto err;
         }
     }
@@ -364,7 +358,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(boundaryPattern == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
-        LOG_PRINT(LOG_ERROR, "fail malloc");
+        LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
         goto err;
     }
     snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
@@ -372,7 +366,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Content-Disposition Not Found!");
-        LOG_PRINT(LOG_ERROR, "fail post parse");
+        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
         goto err;
     }
     start += 9;
@@ -382,7 +376,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         if((end = kmp(buff+start, post_size-start, quotePattern, strlen(quotePattern))) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "quote \" Not Found!");
-            LOG_PRINT(LOG_ERROR, "fail post parse");
+            LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
             goto err;
         }
     }
@@ -391,7 +385,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         if((end = kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "quote \\r\\n Not Found!");
-            LOG_PRINT(LOG_ERROR, "fail post parse");
+            LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
             goto err;
         }
     }
@@ -399,7 +393,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(fileName == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "filename malloc failed!");
-        LOG_PRINT(LOG_ERROR, "fail malloc");
+        LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
         goto err;
     }
     memcpy(fileName, buff+start, end);
@@ -410,13 +404,13 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(get_type(fileName, fileType) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Get Type of File[%s] Failed!", fileName);
-        LOG_PRINT(LOG_ERROR, "fail post type");
+        LOG_PRINT(LOG_ERROR, "%s fail post type", address);
         goto err;
     }
     if(is_img(fileType) != 1)
     {
         LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", fileType);
-        LOG_PRINT(LOG_ERROR, "fail post type");
+        LOG_PRINT(LOG_ERROR, "%s fail post type", address);
         goto err;
     }
 
@@ -425,7 +419,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if((start = kmp(buff+end, post_size-end, typePattern, strlen(typePattern))) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Content-Type Not Found!");
-        LOG_PRINT(LOG_ERROR, "fail post parse");
+        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
         goto err;
     }
     start += end;
@@ -433,7 +427,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image Not complete!");
-        LOG_PRINT(LOG_ERROR, "fail post parse");
+        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
         goto err;
     }
     end += start;
@@ -446,7 +440,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
        if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
        {
        LOG_PRINT(LOG_DEBUG, "Image Not complete!");
-       LOG_PRINT(LOG_ERROR, "fail post parse");
+       LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
        goto err;
        }
        end += start;
@@ -459,7 +453,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if((end = kmp(buff+start, post_size-start, boundaryPattern, strlen(boundaryPattern))) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image Not complete!");
-        LOG_PRINT(LOG_ERROR, "fail post parse");
+        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
         goto err;
     }
     end += start;
@@ -472,7 +466,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(img_size <= 0)
     {
         LOG_PRINT(LOG_DEBUG, "Image Size is Zero!");
-        LOG_PRINT(LOG_ERROR, "fail post empty");
+        LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
         goto err;
     }
 
@@ -485,7 +479,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(save_img(thr_arg, buff+start, img_size, md5sum) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
-        LOG_PRINT(LOG_ERROR, "fail post save");
+        LOG_PRINT(LOG_ERROR, "%s fail post save", address);
         goto err;
     }
 
@@ -510,7 +504,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() DONE!===============");
-    LOG_PRINT(LOG_INFO, "succ post pic:%s size:%d", md5sum, img_size);
+    LOG_PRINT(LOG_INFO, "%s succ post pic:%s size:%d", address, md5sum, img_size);
     goto done;
 
 forbidden:
@@ -554,6 +548,14 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req_t *zimg_req = NULL;
 	char *buff = NULL;
 
+    evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
+    struct sockaddr *saddr = ev_conn->saddr;
+    struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
+    char address[24], c_ip[16], c_port[6];
+    strcpy(c_ip, inet_ntoa(ss->sin_addr));
+    snprintf(c_port, 6, "%u", htons(ss->sin_port));
+    snprintf(address, 24, "%s:%s", c_ip, c_port);
+
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
         req_method = 16;
@@ -567,40 +569,26 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	else if(strcmp(method_strmap[req_method], "GET") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
-        LOG_PRINT(LOG_INFO, "refuse method");
+        LOG_PRINT(LOG_INFO, "%s refuse method", address);
         goto err;
     }
 
     if(settings.down_access != NULL)
     {
-        evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
-        struct sockaddr *saddr = ev_conn->saddr;
-
-        struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
         int acs = zimg_access_inet(settings.down_access, ss->sin_addr.s_addr);
         LOG_PRINT(LOG_DEBUG, "access check: %d", acs);
 
-        if(acs != ZIMG_OK)
+        if(acs == ZIMG_FORBIDDEN)
         {
-            char address[24];
-            char c_ip[16];
-            char c_port[6];
-            strcpy(c_ip, inet_ntoa(ss->sin_addr));
-            snprintf(c_port, 6, "%u", htons(ss->sin_port));
-            snprintf(address, 24, "%s:%s", c_ip, c_port);
-
-            if(acs == ZIMG_FORBIDDEN)
-            {
-                LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
-                LOG_PRINT(LOG_INFO, "refuse get forbidden %s", address);
-                goto forbidden;
-            }
-            else if(acs == ZIMG_ERROR)
-            {
-                LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
-                LOG_PRINT(LOG_ERROR, "fail get access %s", address);
-                goto err;
-            }
+            LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
+            LOG_PRINT(LOG_INFO, "%s refuse get forbidden", address);
+            goto forbidden;
+        }
+        else if(acs == ZIMG_ERROR)
+        {
+            LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
+            LOG_PRINT(LOG_ERROR, "%s fail get access", address);
+            goto err;
         }
     }
 
@@ -643,7 +631,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
         LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
-        LOG_PRINT(LOG_INFO, "succ root page");
+        LOG_PRINT(LOG_INFO, "%s succ root page", address);
         goto done;
     }
 
@@ -665,7 +653,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 	if (strstr(uri, ".."))
     {
         LOG_PRINT(LOG_DEBUG, "attempt to upper dir!");
-        LOG_PRINT(LOG_INFO, "refuse directory");
+        LOG_PRINT(LOG_INFO, "%s refuse directory", address);
 		goto forbidden;
     }
 
@@ -673,7 +661,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(md5 == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "md5 malloc failed!");
-        LOG_PRINT(LOG_ERROR, "fail malloc");
+        LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
         goto err;
     }
     if(uri[0] == '/')
@@ -684,7 +672,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(is_md5(md5) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Url is Not a zimg Request.");
-        LOG_PRINT(LOG_INFO, "refuse url illegal");
+        LOG_PRINT(LOG_INFO, "%s refuse url illegal", address);
         goto err;
     }
 	/* This holds the content we're sending. */
@@ -755,7 +743,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(zimg_req == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "zimg_req malloc failed!");
-        LOG_PRINT(LOG_ERROR, "fail malloc");
+        LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
         goto err;
     }
     zimg_req -> md5 = md5;
@@ -779,7 +767,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(get_img_rst == -1)
     {
         LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
-        LOG_PRINT(LOG_ERROR, "fail pic:%s w:%d h:%d p:%d g:%d", md5, width, height, proportion, gray);
+        LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d", address, md5, width, height, proportion, gray);
         goto err;
     }
 
@@ -791,21 +779,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
-    LOG_PRINT(LOG_INFO, "succ pic:%s w:%d h:%d p:%d g:%d size:%d", md5, width, height, proportion, gray, len);
+    LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d size:%d", address, md5, width, height, proportion, gray, len);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
-
-
-    /*
-    if(get_img_rst == 2)
-    {
-        LOG_PRINT(LOG_WARNING, "creating new img: %s", zimg_req->rsp_path);
-        sleep(10);
-        if(new_img(buff, len, zimg_req->rsp_path) == -1)
-        {
-            LOG_PRINT(LOG_WARNING, "New Image[%s] Save Failed!", zimg_req->rsp_path);
-        }
-    }
-    */
     goto done;
 
 forbidden:
@@ -830,13 +805,6 @@ done:
     {
         if(zimg_req->md5)
             free(zimg_req->md5);
-        /*
-        if(settings.mode == 1)
-        {
-            if(zimg_req->rsp_path)
-                free(zimg_req->rsp_path);
-        }
-        */
         free(zimg_req);
     }
 }

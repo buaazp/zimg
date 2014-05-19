@@ -1,3 +1,24 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+/**
+ * @file zaccess.c
+ * @brief IP access control module in zimg
+ * @author 招牌疯子 zp@buaa.us
+ * @version 2.1.0
+ * @date 2014-05-19
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +33,14 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str);
 int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr);
 void free_access_conf(zimg_access_conf_t *cf);
 
+/**
+ * @brief zimg_atoi convert string to int
+ *
+ * @param line ipnut string
+ * @param n string length
+ *
+ * @return int
+ */
 static int zimg_atoi(u_char *line, size_t n)
 {
     int value;
@@ -36,6 +65,15 @@ static int zimg_atoi(u_char *line, size_t n)
     }
 }
 
+/**
+ * @brief zimg_strlchr find char in string
+ *
+ * @param p input string
+ * @param last end of the string
+ * @param c the char to find
+ *
+ * @return postion of char, NULL for not found
+ */
 static u_char * zimg_strlchr(u_char *p, u_char *last, u_char c)
 {
     while (p < last) {
@@ -51,6 +89,14 @@ static u_char * zimg_strlchr(u_char *p, u_char *last, u_char c)
 }
 
 //transfer "10.77.121.137" to in_addr_t
+/**
+ * @brief zimg_inet_addr convert string to in_addr_t
+ *
+ * @param text input text
+ * @param len text length
+ *
+ * @return in_addr_t
+ */
 static in_addr_t zimg_inet_addr(u_char *text, size_t len)
 {
     u_char *p, c;
@@ -85,6 +131,15 @@ static in_addr_t zimg_inet_addr(u_char *text, size_t len)
     return INADDR_NONE;
 }
 
+/**
+ * @brief stor convert string to zimg rule
+ *
+ * @param text input text
+ * @param text_len text length
+ * @param rule zimg rule
+ *
+ * @return 0 for succ and -1 for failed
+ */
 static int stor(u_char *text, size_t text_len, zimg_rule_t *rule)
 {
     u_char *addr, *mask, *last;
@@ -135,6 +190,13 @@ static int stor(u_char *text, size_t text_len, zimg_rule_t *rule)
     return ZIMG_OK;
 }
 
+/**
+ * @brief conf_get_rules read rules from conf
+ *
+ * @param acc_str rules string
+ *
+ * @return zimg conf
+ */
 zimg_access_conf_t * conf_get_rules(const char *acc_str)
 {
     if(acc_str == NULL)
@@ -204,6 +266,14 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
 }
 
 //judge request by conf
+/**
+ * @brief zimg_access_inet judge ip by conf
+ *
+ * @param cf zimg access conf
+ * @param addr address of request
+ *
+ * @return 0 for allow and -1 for forbidden
+ */
 int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
 {
     zimg_rules_t *rules = cf->rules;
@@ -227,6 +297,11 @@ int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
 }
 
 
+/**
+ * @brief free_access_conf release conf
+ *
+ * @param cf the conf to free
+ */
 void free_access_conf(zimg_access_conf_t *cf)
 {
     if(cf == NULL)
