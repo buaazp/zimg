@@ -8,3 +8,5 @@ install:
     - sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev
 script:
     - make
+    - cd bin
+    - ./zimg conf/zimg.lua
