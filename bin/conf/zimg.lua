@@ -12,7 +12,7 @@ system=io.popen("uname -s"):read("*l")
 --access config
 --support mask rules like "allow 10.1.121.138/24"
 --NOTE: remove rule can improve performance
---download_rule="allow all;;deny all"
+--download_rule="allow all"
 upload_rule="allow 127.0.0.1;deny all"
 
 --cache config
