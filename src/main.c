@@ -31,6 +31,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
 #include "lua/lua.h"
 #include "lua/lualib.h"
 #include "lua/lauxlib.h"

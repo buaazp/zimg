@@ -66,7 +66,7 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     */
     char cache_key[CACHE_KEY_SIZE];
     char *img_format = NULL;
-    size_t len;
+    //size_t len;
 
     MagickBooleanType status;
     MagickWand *magick_wand = NULL;

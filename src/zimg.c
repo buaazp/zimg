@@ -245,7 +245,7 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     char cache_key[CACHE_KEY_SIZE];
     //char *color_path = NULL;
     char *img_format = NULL;
-    size_t len;
+    //size_t len;
     int fd = -1;
     struct stat f_stat;
 
