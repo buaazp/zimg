@@ -212,7 +212,7 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
     {
         return NULL;
     }
-    strcpy(acc, acc_str);
+    strncpy(acc, acc_str, acc_len);
     char *start = acc;
     char *end = strchr(start, ';');
     end = (end) ? end : start+acc_len;

@@ -190,7 +190,7 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "img_path");
     if(lua_isstring(L, -1))
         strcpy(settings.img_path, lua_tostring(L, -1));
-    LOG_PRINT(LOG_INFO, "settings.img_path: %s", settings.img_path);
+    LOG_PRINT(LOG_DEBUG, "settings.img_path: %s", settings.img_path);
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_name"); //stack index: -1
