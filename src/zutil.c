@@ -39,6 +39,7 @@ int is_img(const char *filename);
 int is_dir(const char *path);
 int mk_dir(const char *path);
 int mk_dirs(const char *dir);
+int mk_dirf(const char *filename);
 int is_md5(char *s);
 static int htoi(char s[]);
 int str_hash(const char *str);
@@ -243,7 +244,7 @@ int mk_dir(const char *path)
     if(access(path, 0) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Begin to mk_dir()...");
-        int status = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int status = mkdir(path, 0755);
         if(status == -1)
         {
             LOG_PRINT(LOG_DEBUG, "mkdir[%s] Failed!", path);
@@ -283,17 +284,47 @@ int mk_dirs(const char *dir)
             tmp[i] = 0;
             if(access(tmp, 0) != 0)
             {
-                if(mkdir(tmp, 0777) == -1)
+                if(mkdir(tmp, 0755) == -1)
                 {
-                    LOG_PRINT(LOG_DEBUG, "mkdir error!");
+                    fprintf(stderr, "mk_dirs: tmp=%s\n", tmp);
                     return -1;
                 }
             }
             tmp[i] = '/';
         }
     }
-    return 0;
+    return 1;
 } 
+
+/**
+ * @brief mk_dirf Mkdirs for a full path filename
+ *
+ * @param filename the full path filename
+ *
+ * @return 1 for succ and -1 for fail
+ */
+int mk_dirf(const char *filename)
+{
+    int ret = 1;
+    if(access(filename, 0) == 0)
+        return ret;
+    size_t len = strlen(filename);
+    char str[256];
+    strncpy(str, filename, len);
+    str[len] = '\0';
+    char *end = str;
+    char *start = strchr(end, '/');
+    while(start){
+        end = start + 1;
+        start = strchr(end, '/');
+    }
+    if(end != str)
+    {
+        str[end-str] = '\0';
+        ret = mk_dirs(str);
+    }
+    return ret;
+}
 
 /**
  * @brief is_md5 Check the string is a md5 style.

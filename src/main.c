@@ -31,7 +31,6 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <signal.h>
-#include <string.h>
 #include "lua/lua.h"
 #include "lua/lualib.h"
 #include "lua/lauxlib.h"
@@ -186,7 +185,6 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "img_path");
     if(lua_isstring(L, -1))
         strcpy(settings.img_path, lua_tostring(L, -1));
-    LOG_PRINT(LOG_DEBUG, "settings.img_path: %s", settings.img_path);
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_name"); //stack index: -1
@@ -367,26 +365,20 @@ int main(int argc, char **argv)
         }
     }
     //init the Path zimg need to use.
-    LOG_PRINT(LOG_DEBUG, "Begin to Init the Path zimg Using...");
     //start log module... ./log/zimg.log
     if(settings.log)
     {
-        const char *log_path = "./log";
-        if(is_dir(log_path) != 1)
+        if(mk_dirf(settings.log_name) != 1)
         {
-            if(mk_dir(log_path) != 1)
-            {
-                LOG_PRINT(LOG_DEBUG, "log_path[%s] Create Failed!", log_path);
-                fprintf(stderr, "log_path[%s] Create Failed!\n", log_path);
-                return -1;
-            }
+            fprintf(stderr, "%s log path create failed!\n", settings.log_name);
+            return -1;
         }
         log_init();
     }
 
     if(is_dir(settings.img_path) != 1)
     {
-        if(mk_dir(settings.img_path) != 1)
+        if(mk_dirs(settings.img_path) != 1)
         {
             LOG_PRINT(LOG_DEBUG, "img_path[%s] Create Failed!", settings.img_path);
             fprintf(stderr, "%s Create Failed!\n", settings.img_path);
