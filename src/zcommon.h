@@ -34,7 +34,7 @@
 #include "zaccess.h"
 
 #ifndef ZIMG_VERSION
-#define ZIMG_VERSION "2.0.0"
+#define ZIMG_VERSION "2.1.1"
 #endif
 
 #define MAX_LINE 1024 
@@ -82,7 +82,6 @@ typedef struct zimg_req_s {
     int height;
     int proportion;
     bool gray;
-    //char *rsp_path;
     thr_arg_t *thr_arg;
 } zimg_req_t;
 
@@ -119,9 +118,11 @@ struct timespec retry_sleep;
 #else
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
-        int log_id = log_open(settings.log_name, "a"); \
-        log_printf0(log_id, level, fmt, ##__VA_ARGS__) ; \
-        log_close(log_id); \
+        if (level < LOG_DEBUG) { \
+            int log_id = log_open(settings.log_name, "a"); \
+            log_printf0(log_id, level, fmt, ##__VA_ARGS__) ; \
+            log_close(log_id); \
+        } \
     }while(0) 
   #define ThrowWandException(wand) 0
 #endif

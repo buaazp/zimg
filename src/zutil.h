@@ -33,6 +33,7 @@ int is_img(const char *filename);
 int is_dir(const char *path);
 int mk_dir(const char *path);
 int mk_dirs(const char *dir);
+int mk_dirf(const char *filename);
 int is_md5(char *s);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);

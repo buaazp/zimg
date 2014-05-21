@@ -32,7 +32,6 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...);
 void log_flush(int log_id);
 void log_close(int log_id);
 
-/* 日志记录 */
 struct log_level_desc{
     enum LOG_LEVEL  level;
     char*           endesc;
@@ -61,7 +60,6 @@ static int log_valid(int log_id)
     return 1;
 }
  
-/* 初始化日志模块 */
 void log_init()
 {
     int i;
@@ -73,7 +71,6 @@ void log_init()
     }
 }
  
-/* 打开用户日志文件 */
 int log_open(const char *path, const char* mode)
 {
     if(settings.log == false)
@@ -103,7 +100,6 @@ int log_open(const char *path, const char* mode)
 }
 
 
-/* 写入日志文件 */
 void log_printf0(int log_id, int log_level, const char *fmt, ...)
 {
     if(settings.log == false)
@@ -116,11 +112,12 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     va_list args;
     int level;
 
+/*
 #ifndef DEBUG
     if (log_level == LOG_LEVEL_DEBUG)
         return;
 #endif
- 
+*/
 
     if (!log_valid(log_id))
         fp = stdout;
@@ -141,7 +138,6 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     else
         level = log_level;
  
-    //时间信息
     t = time(NULL);
     struct timeval tv;
     gettimeofday(&tv , NULL);
@@ -150,19 +146,15 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
     fprintf (fp, "%s:%.6d ", tmbuf, (int)tv.tv_usec);
 
 #ifdef DEBUG
-    //线程信息
     fprintf(fp, "Thread ID: %lu ", (unsigned long)pthread_self());
 #endif
 
-    //等级信息
     fprintf(fp, "[%s] ", log_level_descs[level].endesc);
  
-    //正文信息
     va_start(args, fmt);
     vfprintf(fp, fmt, args);
     va_end(args);
  
-    //换行符
     p = fmt + strlen(fmt) - 1;
     if (*p != '\n')
         fputc('\n', fp);
@@ -170,14 +162,11 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
 
     if (log_valid(log_id))
     {
-        //缓冲区数据写入文件流
         fflush(fp);
-
         spin_unlock(&log_locks[log_id]);
     }
 }
  
-/* 将缓冲区数据写入文件 */
 void log_flush(int log_id)
 {
     if (!log_valid(log_id))
@@ -191,7 +180,6 @@ void log_flush(int log_id)
     spin_unlock(&log_locks[log_id]);
 }
  
-/* 关闭日志文件 */
 void log_close(int log_id)
 {
     if (!log_valid(log_id))

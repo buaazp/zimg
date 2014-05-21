@@ -354,14 +354,16 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     const char *quotePattern = "\"";
     const char *blankPattern = "\r\n";
     LOG_PRINT(LOG_DEBUG, "boundary = %s boundary_len = %d", boundary, boundary_len);
-    boundaryPattern = (char *)malloc(boundary_len + 3);
+    //boundaryPattern = (char *)malloc(boundary_len + 3);
+    boundaryPattern = (char *)malloc(boundary_len + 4);
     if(boundaryPattern == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
         LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
         goto err;
     }
-    snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
+    snprintf(boundaryPattern, boundary_len + 4, "\r\n--%s", boundary);
+    //snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
     if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
     {

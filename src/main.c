@@ -117,13 +117,11 @@ static int load_conf(const char *conf)
     if(lua_isnumber(L, -1))
         settings.port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    //printf("settings.port: %d\n", settings.port);
 
     lua_getglobal(L, "thread_num");
     if(lua_isnumber(L, -1))
         settings.num_threads = (int)lua_tonumber(L, -1);         /* N workers */
     lua_pop(L, 1);
-    //printf("settings.num_threads: %d\n", settings.num_threads);
 
     lua_getglobal(L, "system");
     if(lua_isstring(L, -1))
@@ -148,13 +146,11 @@ static int load_conf(const char *conf)
     if(lua_isnumber(L, -1))
         settings.cache_on = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    //printf("settings.cache_on: %d\n", settings.cache_on);
 
     lua_getglobal(L, "mc_ip");
     if(lua_isstring(L, -1))
         strcpy(settings.cache_ip, lua_tostring(L, -1));
     lua_pop(L, 1);
-    //printf("settings.cache_ip: %s\n", settings.cache_ip);
 
     lua_getglobal(L, "mc_port");
     if(lua_isnumber(L, -1))
@@ -185,12 +181,10 @@ static int load_conf(const char *conf)
     if(lua_isstring(L, -1))
         strcpy(settings.root_path, lua_tostring(L, -1));
     lua_pop(L, 1);
-    //printf("settings.root_path: %s\n", settings.root_path);
 
     lua_getglobal(L, "img_path");
     if(lua_isstring(L, -1))
         strcpy(settings.img_path, lua_tostring(L, -1));
-    LOG_PRINT(LOG_DEBUG, "settings.img_path: %s", settings.img_path);
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_name"); //stack index: -1
@@ -217,13 +211,11 @@ static int load_conf(const char *conf)
     if(lua_isstring(L, -1))
         strcpy(settings.ssdb_ip, lua_tostring(L, -1));
     lua_pop(L, 1);
-    //printf("settings.ssdb_ip: %s\n", settings.ssdb_ip);
 
     lua_getglobal(L, "ssdb_port");
     if(lua_isnumber(L, -1))
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    //printf("settings.ssdb_port: %d\n", settings.ssdb_port);
     
     lua_close(L);
 
@@ -373,26 +365,20 @@ int main(int argc, char **argv)
         }
     }
     //init the Path zimg need to use.
-    LOG_PRINT(LOG_DEBUG, "Begin to Init the Path zimg Using...");
     //start log module... ./log/zimg.log
     if(settings.log)
     {
-        const char *log_path = "./log";
-        if(is_dir(log_path) != 1)
+        if(mk_dirf(settings.log_name) != 1)
         {
-            if(mk_dir(log_path) != 1)
-            {
-                LOG_PRINT(LOG_DEBUG, "log_path[%s] Create Failed!", log_path);
-                fprintf(stderr, "log_path[%s] Create Failed!\n", log_path);
-                return -1;
-            }
+            fprintf(stderr, "%s log path create failed!\n", settings.log_name);
+            return -1;
         }
         log_init();
     }
 
     if(is_dir(settings.img_path) != 1)
     {
-        if(mk_dir(settings.img_path) != 1)
+        if(mk_dirs(settings.img_path) != 1)
         {
             LOG_PRINT(LOG_DEBUG, "img_path[%s] Create Failed!", settings.img_path);
             fprintf(stderr, "%s Create Failed!\n", settings.img_path);
