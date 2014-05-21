@@ -225,10 +225,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
-    char address[24], c_ip[16], c_port[6];
-    strcpy(c_ip, inet_ntoa(ss->sin_addr));
-    snprintf(c_port, 6, "%u", htons(ss->sin_port));
-    snprintf(address, 24, "%s:%s", c_ip, c_port);
+    char address[16];
+    strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
@@ -497,11 +495,10 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         "<body>\n"
         "<h1>MD5: %s</h1>\n"
         "Image upload successfully! You can get this image via this address:<br/><br/>\n"
-        "http://yourhostname:%d/%s?w=width&h=height&g=isgray\n"
+        "http://yourhostname:%d/%s?w=width&h=height&p=proportion&g=isgray\n"
         "</body>\n</html>\n",
         md5sum, settings.port, md5sum
         );
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
@@ -511,7 +508,6 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
 forbidden:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
@@ -521,7 +517,6 @@ forbidden:
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_SERVERR);
@@ -553,10 +548,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
-    char address[24], c_ip[16], c_port[6];
-    strcpy(c_ip, inet_ntoa(ss->sin_addr));
-    snprintf(c_port, 6, "%u", htons(ss->sin_port));
-    snprintf(address, 24, "%s:%s", c_ip, c_port);
+    char address[16];
+    strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)

@@ -21,7 +21,7 @@ zimg目前支持在Linux和Mac OS下运行，你需要安装一些依赖来保�
 如果你使用Mac，以下所有依赖都可以通过brew来安装:
 
 ````
-brew install openssl libevent cmake imagemagick libmemcached lua
+brew install openssl libevent cmake imagemagick libmemcached
 git clone https://github.com/buaazp/zimg
 cd zimg
 make
@@ -30,7 +30,7 @@ make
 如果你使用ubuntu，可以使用apt-get来安装所需的依赖：
 
 ````
-sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev lua5.1 libtolua-dev
+sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev
 git clone https://github.com/buaazp/zimg
 cd zimg
 make
@@ -39,7 +39,7 @@ make
 如果你使用CentOS，可以使用yum来安装所需的依赖：
 
 ````
-sudo yum install openssl libevent-devel cmake ImageMagick libmemcached-devel lua lua-devel 
+sudo yum install openssl libevent-devel cmake ImageMagick libmemcached-devel
 git clone https://github.com/buaazp/zimg
 cd zimg
 make
@@ -76,13 +76,7 @@ make && make install
 ````
 
 #### imagemagick
-在安装imagemagick之前需要安装几个基础图片库，不同平台的名字可能略有不同，请依据自己的系统进行安装：
-
-````
-libjpeg libjpeg-devel libpng libpng-devel libgif libgif-devel
-````
-
-装完之后安装imagemagick
+当前版本zimg的图片处理部分依赖于imagemagick库。
 
 ````
 wget http://www.imagemagick.org/download/ImageMagick-6.8.9-0.tar.gz
@@ -101,17 +95,6 @@ tar zxvf libmemcached-1.0.18.tar.gz
 cd libmemcached-1.0.18
 ./configure -prefix=/usr/local --with-memcached 
 make &&　make install 
-````
-
-#### lua & lua-dev
-在安装lua之前你可能需要安装```readline ```和```readline-devel```
-
-````
-wget http://www.lua.org/ftp/lua-5.1.5.tar.gz  
-tar zxvf lua-5.1.5.tar.gz  
-cd lua-5.1.5  
-make linux  
-make install
 ````
 
 #### memcached（可选）
@@ -218,9 +201,17 @@ port=4869
 thread_num=4
 backlog_num=1024
 max_keepalives=1
+retry=3
+system=io.popen("uname -s"):read("*l")
+
+--access config
+--support mask rules like "allow 10.1.121.138/24"
+--NOTE: remove rule can improve performance
+--download_rule="allow all"
+--upload_rule="allow 127.0.0.1;deny all"
 
 --cache config
-cache=1
+cache=0
 mc_ip='127.0.0.1'
 mc_port=11211
 
@@ -240,11 +231,11 @@ img_path='./img'
 
 --mode[2]: beansdb mode
 beansdb_ip='127.0.0.1'
-beansdb_port='22121'
+beansdb_port='7900'
 
 --mode[3]: ssdb mode
 ssdb_ip='127.0.0.1'
-ssdb_port='22122'
+ssdb_port='8888'
 ````
 
 然后启动zimg：
@@ -255,6 +246,9 @@ cd bin
 ````
 
 ### 使用
+
+#### 上传
+
 zimg启动之后就可以开始上传和下载图片了，上传方式有两种：
 
 第一种是通过浏览器上传，启动zimg后的默认地址就是一个简单的图片上传页：
@@ -264,11 +258,11 @@ http://127.0.0.1:4869/
 ````
 大约是这个样子的：
 
-![index.html](http://ww3.sinaimg.cn/large/4c422e03gw1eg3c74v7qbj20e704vjro.jpg)
+![index.html](http://ww4.sinaimg.cn/large/4c422e03gw1egm25nxf4yj20hg08lmxt.jpg)
 
 上传成功之后会以HTML的格式返回该图片的MD5：
 
-![upload_succ](http://ww4.sinaimg.cn/large/4c422e03gw1eg3c73pkkaj20mc04lt9o.jpg)
+![upload_succ](http://ww2.sinaimg.cn/large/4c422e03gw1egm259ewj8j20qq08lmyp.jpg)
 
 第二种是通过其他工具来发送POST请求上传图片，注意此上传请求是form表单类型，比如使用curl工具来上传时命令如下：
 
@@ -276,10 +270,13 @@ http://127.0.0.1:4869/
 curl -F "blob=@testup.jpeg;type=image/jpeg" "http://127.0.0.1:4869/upload"
 ````
 
+#### 下载
+
 上传成功之后就可以通过不同的参数来获取图片了：
 
 ````
 http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e
+http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?p=0
 http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500
 http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500&h=300
 http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500&h=300&p=0
@@ -289,7 +286,31 @@ http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?w=500&h=300&p=1&g=1
 其组成格式为：
 zimg服务器IP + 端口 / 图片MD5 （? + 长 + 宽 + 等比例 + 灰化）
 
-你可以在自己的APP或网页里嵌入自己需要的URL以获取不同的图片，不同分辨率的图片第一次拉取时会实时生成，之后就会从缓存或后端中获取，无需再次压缩。
+**注意：**URL + MD5这种不加任何参数的裸请求，获取到的并非原始图片，而是经过压缩后体积大幅度缩小的图片，如果你想获取原始图片需要在这个请求之后专门加一个`p=0`参数，如下：
+
+```http://127.0.0.1:4869/1f08c55a7ca155565f638b5a61e99a3e?p=0```
+
+
+你可以在自己的APP或网页里嵌入自己需要的URL以获取不同的图片，不同分辨率的图片第一次拉取时会实时生成，之后就会从缓存或后端存储中获取，无需再次压缩。
+
+#### 权限控制
+
+由于zimg目前没有基于帐号的权限控制体系，某些应用场景下，你可能希望通过IP来限制上传和下载，你可以通过修改配置文件中access config部分来实现该功能。  
+为了提高性能，默认配置文件中将这两行注释掉了，去掉注释并修改为你需要的规则即可。  
+
+````
+download_rule="allow all"
+upload_rule="allow 127.0.0.1;deny all"
+````
+
+如果你有用过Nginx，那么上面的配置规则就非常熟悉了，你可以添加任意条数的规则，也可以使用子网掩码来控制IP范围，例如：
+
+````
+download_rule="allow 10.77.121.137;allow 10.72.30.100/24;allow 127.0.0.1;deny all"
+upload_rule="allow 127.0.0.1;deny all"
+````
+
+如果不是必须，请注释掉访问规则以提高系统性能。
 
 ### 尾声
 需要提醒的是，zimg并没有经过大型线上应用的检验，更不是微博图床所采用的方案，它只适用于小型的图床服务，难免会有bug存在。不过源码并不复杂，如果你需要的功能zimg不支持，可以很轻易地进行修改使用。
