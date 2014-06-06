@@ -26,18 +26,21 @@
 #include <unistd.h>
 #include <errno.h>
 #include <wand/MagickWand.h>
+#include "webimg/webimg2.h"
 #include "zimg.h"
 #include "zmd5.h"
 #include "zlog.h"
 #include "zcache.h"
 #include "zutil.h"
 #include "zdb.h"
+#include "zscale.h"
 
 extern struct setting settings;
 
 int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size);
+int get_img2(zimg_req_t *req, char **buff_ptr, size_t *img_size);
 
 
 /**
@@ -589,7 +592,7 @@ done:
     }
 
     result = 1;
-    if(got_rsp == false)
+    if(settings.save_new == 1 && got_rsp == false)
     {
         LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
         //result = 2;
@@ -615,4 +618,186 @@ err:
     return result;
 }
 
+
+int get_img2(zimg_req_t *req, char **buff_ptr, size_t *img_size)
+{
+    int result = -1;
+    char cache_key[CACHE_KEY_SIZE];
+    int fd = -1;
+    struct stat f_stat;
+
+    bool got_rsp = true;
+
+    LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
+
+    // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
+    gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+    if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
+        result = 1;
+        goto err;
+    }
+    LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
+
+    char whole_path[512];
+    int lvl1 = str_hash(req->md5);
+    int lvl2 = str_hash(req->md5 + 3);
+    snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, req->md5);
+    LOG_PRINT(LOG_DEBUG, "docroot: %s", settings.img_path);
+    LOG_PRINT(LOG_DEBUG, "req->md5: %s", req->md5);
+    LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
+
+    char name[128];
+    if(req->proportion && req->gray)
+        snprintf(name, 128, "%d*%dpg", req->width, req->height);
+    else if(req->proportion && !req->gray)
+        snprintf(name, 128, "%d*%dp", req->width, req->height);
+    else if(!req->proportion && req->gray)
+        snprintf(name, 128, "%d*%dg", req->width, req->height);
+    else
+        snprintf(name, 128, "%d*%d", req->width, req->height);
+
+    char orig_path[512];
+    snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
+    LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
+
+    char rsp_path[512];
+    if(req->width == 0 && req->height == 0 && req->proportion == 0 && req->gray == 0)
+    {
+        LOG_PRINT(LOG_DEBUG, "Return original image.");
+        strncpy(rsp_path, orig_path, 512);
+    }
+    else
+    {
+        snprintf(rsp_path, 512, "%s/%s", whole_path, name);
+    }
+    LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
+
+    if((fd = open(rsp_path, O_RDONLY)) == -1)
+    {
+        struct image *im = wi_new_image();
+        if (im == NULL) return -1;
+        got_rsp = false;
+        int ret;
+        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
+        gen_key(cache_key, req->md5, 0);
+        if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+        {
+            LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
+
+            ret = wi_read_blob(im, *buff_ptr, *img_size);
+            if (ret != WI_OK)
+            {
+                LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
+                del_cache(req->thr_arg, cache_key);
+                ret = wi_read_file(im, orig_path);
+                if (ret != WI_OK)
+                {
+                    goto err;
+                }
+                else
+                {
+                    uint8_t *data = wi_get_blob(im, img_size);
+                    if (data == NULL) {
+                        goto err;
+                    }
+                    if(*img_size < CACHE_MAX_SIZE)
+                    {
+                        set_cache_bin(req->thr_arg, cache_key, (const char *)data, *img_size);
+                    }
+                }
+            }
+        }
+        else
+        {
+            LOG_PRINT(LOG_DEBUG, "Not Hit Original Image Cache. Begin to Open it.");
+            ret = wi_read_file(im, orig_path);
+            if (ret != WI_OK)
+            {
+                goto err;
+            }
+            else
+            {
+                uint8_t *data = wi_get_blob(im, img_size);
+                if (data == NULL) {
+                    goto err;
+                }
+                if(*img_size < CACHE_MAX_SIZE)
+                {
+                    set_cache_bin(req->thr_arg, cache_key, (const char *)data, *img_size);
+                }
+            }
+        }
+
+        ret = convert(im, req);
+        if(ret == -1) goto err;
+
+        uint8_t *data = wi_get_blob(im, img_size);
+        if (data == NULL) {
+            goto err;
+        }
+        if((*buff_ptr = (char *)malloc(*img_size)) == NULL)
+        {
+            LOG_PRINT(LOG_DEBUG, "buff_ptr Malloc Failed!");
+            goto err;
+        }
+        memcpy(*buff_ptr, data, *img_size);
+        wi_free_image(im);
+    }
+    else
+    {
+        fstat(fd, &f_stat);
+        size_t rlen = 0;
+        *img_size = f_stat.st_size;
+        if(*img_size <= 0)
+        {
+            LOG_PRINT(LOG_DEBUG, "File[%s] is Empty.", rsp_path);
+            goto err;
+        }
+        if((*buff_ptr = (char *)malloc(*img_size)) == NULL)
+        {
+            LOG_PRINT(LOG_DEBUG, "buff_ptr Malloc Failed!");
+            goto err;
+        }
+        LOG_PRINT(LOG_DEBUG, "img_size = %d", *img_size);
+        if((rlen = read(fd, *buff_ptr, *img_size)) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "File[%s] Read Failed.", rsp_path);
+            LOG_PRINT(LOG_DEBUG, "Error: %s.", strerror(errno));
+            goto err;
+        }
+        else if(rlen < *img_size)
+        {
+            LOG_PRINT(LOG_DEBUG, "File[%s] Read Not Compeletly.", rsp_path);
+            goto err;
+        }
+    }
+
+done:
+    if(*img_size < CACHE_MAX_SIZE)
+    {
+        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
+        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+        set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+    }
+
+    result = 1;
+    if(settings.save_new == 1 && got_rsp == false)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
+        if(new_img(*buff_ptr, *img_size, rsp_path) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
+            LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
+        }
+    }
+    else
+        LOG_PRINT(LOG_DEBUG, "Image Needn't to Storage.", rsp_path);
+
+err:
+    if(fd != -1)
+        close(fd);
+    return result;
+}
 

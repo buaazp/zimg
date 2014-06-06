@@ -2,6 +2,9 @@ Language: c
 compiler:
     - gcc
     - clang
+branches:
+    only:
+        - master
 before_install:
     - sudo apt-get update -qq
 install:

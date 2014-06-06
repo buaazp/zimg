@@ -268,7 +268,10 @@ convert:
             goto done;
         }
         gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-        save_img_db(req->thr_arg, cache_key, *buff_ptr, *img_size);
+        if(settings.save_new == 1)
+        {
+            save_img_db(req->thr_arg, cache_key, *buff_ptr, *img_size);
+        }
         if(*img_size < CACHE_MAX_SIZE)
         {
             set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
@@ -295,7 +298,10 @@ convert:
             goto done;
         }
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-        save_img_db(req->thr_arg, cache_key, *buff_ptr, *img_size);
+        if(settings.save_new == 1)
+        {
+            save_img_db(req->thr_arg, cache_key, *buff_ptr, *img_size);
+        }
         if(*img_size < CACHE_MAX_SIZE)
         {
             set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);

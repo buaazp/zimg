@@ -92,6 +92,7 @@ static void settings_init(void)
     settings.cache_port = 11211;
     settings.max_keepalives = 1;
     settings.mode = 1;
+    settings.save_new = 1;
     strcpy(settings.ssdb_ip, "127.0.0.1");
     settings.ssdb_port = 6379;
     strcpy(settings.beansdb_ip, "127.0.0.1");
@@ -195,6 +196,11 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "mode");
     if(lua_isnumber(L, -1))
         settings.mode = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "save_new");
+    if(lua_isnumber(L, -1))
+        settings.save_new = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "beansdb_ip");

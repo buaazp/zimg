@@ -60,6 +60,7 @@ struct setting{
     int cache_port;
     uint64_t max_keepalives;
     int mode;
+    int save_new;
     char beansdb_ip[128];
     int beansdb_port;
     char ssdb_ip[128];
