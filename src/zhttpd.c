@@ -755,7 +755,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     int get_img_rst = -1;
     if(settings.mode == 1)
         //get_img_rst = get_img(zimg_req, &buff,  &len);
-        get_img_rst = get_img2(zimg_req, &buff,  &len);
+        get_img_rst = get_img2(zimg_req, req);
     else
         get_img_rst = get_img_mode_db(zimg_req, &buff,  &len);
 
@@ -767,8 +767,15 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
 
+    if(settings.mode == 1)
+    {
+        len = evbuffer_get_length(req->buffer_out);
+    }
+    else
+    {
+        evbuffer_add(req->buffer_out, buff, len);
+    }
     LOG_PRINT(LOG_DEBUG, "get buffer length: %d", len);
-    evbuffer_add(req->buffer_out, buff, len);
 
     LOG_PRINT(LOG_DEBUG, "Got the File!");
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
