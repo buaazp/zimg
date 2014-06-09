@@ -6,11 +6,7 @@
 #include "webimg/webimg2.h"
 #include "zlog.h"
 #include "zcommon.h"
-
-#define WAP_QUALITY				70
-#define THUMB_QUALITY			85
-#define QUALITY_90				90
-#define QUALITY_95				95
+#include "zscale.h"
 
 static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows);
 int convert(struct image *im, zimg_req_t *req);
@@ -65,13 +61,13 @@ static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows)
     if (arg_cols != 0)
     {
         cols = arg_cols;
-        if (im->cols < cols) return 0;
+        if (im->cols < cols) return 1;
         rows = 0;
     }
     else
     {
         rows = arg_rows;
-        if (im->rows < rows) return 0;
+        if (im->rows < rows) return 1;
         cols = 0;
     }
 
@@ -82,11 +78,12 @@ static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows)
 
 int convert(struct image *im, zimg_req_t *req)
 {
+    int result;
 	int ret;
 
     LOG_PRINT(LOG_INFO, "proportion(im, %d, %d)", req->width, req->height);
-    ret = proportion(im, req->width, req->height);
-	if (ret != WI_OK) return -1;
+    result = proportion(im, req->width, req->height);
+	if (result == -1) return -1;
 
 	/* set quality */
 	if (im->quality > WAP_QUALITY) {
@@ -95,15 +92,13 @@ int convert(struct image *im, zimg_req_t *req)
 	}
 
 	/* set format */
-	ret = WI_OK;
-	
 	if (strncmp(im->format, "GIF", 3) != 0) {
         LOG_PRINT(LOG_INFO, "wi_set_format(im, %s)", "JPEG");
         ret = wi_set_format(im, "JPEG");
         if (ret != WI_OK) return -1;
 	}
 
-    LOG_PRINT(LOG_INFO, "convert(im, req) OK");
-	return 0;
+    LOG_PRINT(LOG_INFO, "convert(im, req) %d", result);
+	return result;
 }
 

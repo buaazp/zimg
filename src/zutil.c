@@ -392,12 +392,12 @@ int str_hash(const char *str)
     char c[4];
     strncpy(c, str, 3);
     c[3] = '\0';
-    LOG_PRINT(LOG_DEBUG, "str = %s.", c);
+    //LOG_PRINT(LOG_DEBUG, "str = %s.", c);
     //int d = htoi(c);
     int d = strtol(c, NULL, 16);
-    LOG_PRINT(LOG_DEBUG, "str(3)_to_d = %d.", d);
+    //LOG_PRINT(LOG_DEBUG, "str(3)_to_d = %d.", d);
     d = d / 4;
-    LOG_PRINT(LOG_DEBUG, "str(3)/4 = %d.", d);
+    //LOG_PRINT(LOG_DEBUG, "str(3)/4 = %d.", d);
     return d;
 }
 
@@ -418,7 +418,7 @@ int gen_key(char *key, char *md5, ...)
     va_list arg_ptr;
     va_start(arg_ptr, md5);
     int argc = va_arg(arg_ptr, int);
-    LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
+    //LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
     int i, argv;
     for(i = 0; i<argc; i++)
     {
@@ -427,7 +427,7 @@ int gen_key(char *key, char *md5, ...)
         //LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
     }
     va_end(arg_ptr);
-    LOG_PRINT(LOG_DEBUG, "key: %s", key);
+    //LOG_PRINT(LOG_DEBUG, "key: %s", key);
     return 1;
 }
 

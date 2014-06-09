@@ -78,33 +78,9 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     md5sum[32] = '\0';
     strcpy(md5, md5sum);
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
-
-    /*
-    char *cache_key = (char *)malloc(strlen(md5sum) + 32);
-    if(cache_key == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "cache_key malloc failed!");
-        goto done;
-    }
-    char *save_path = (char *)malloc(512);
-    if(save_path == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "save_path malloc failed!");
-        goto done;
-    }
-    */
     char cache_key[CACHE_KEY_SIZE];
     char save_path[512];
     char save_name[512];
-    /*
-    char *save_name = (char *)malloc(512);
-    if(save_name == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "save_name malloc failed!");
-        goto done;
-    }
-    */
-
     gen_key(cache_key, md5sum, 0);
     if(exist_cache(thr_arg, cache_key) == 1)
     {
@@ -539,11 +515,11 @@ convert:
                 LOG_PRINT(LOG_DEBUG, "Image[%s] Compression Failed!", orig_path);
             }
         }
-        size_t quality = MagickGetImageCompressionQuality(magick_wand) * 0.75;
+        size_t quality = MagickGetImageCompressionQuality(magick_wand);
         LOG_PRINT(LOG_DEBUG, "Image Compression Quality is %u.", quality);
-        if(quality == 0)
+        if(quality > WAP_QUALITY)
         {
-            quality = 75;
+            quality = WAP_QUALITY;
         }
         LOG_PRINT(LOG_DEBUG, "Set Compression Quality to 75%.");
         status = MagickSetImageCompressionQuality(magick_wand, quality);
@@ -629,17 +605,16 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     struct image *im = NULL;
     size_t len = 0;
 
-    bool got_rsp = true;
+    bool is_new = true;
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+    gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
     if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
-        result = 1;
-        goto err;
+        goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
 
@@ -652,12 +627,8 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
 
     char name[128];
-    if(req->proportion && req->gray)
-        snprintf(name, 128, "%d*%dpg", req->width, req->height);
-    else if(req->proportion && !req->gray)
+    if(req->proportion)
         snprintf(name, 128, "%d*%dp", req->width, req->height);
-    else if(!req->proportion && req->gray)
-        snprintf(name, 128, "%d*%dg", req->width, req->height);
     else
         snprintf(name, 128, "%d*%d", req->width, req->height);
 
@@ -666,7 +637,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
     char rsp_path[512];
-    if(req->width == 0 && req->height == 0 && req->proportion == 0 && req->gray == 0)
+    if(req->width == 0 && req->height == 0 && req->proportion == 0)
     {
         LOG_PRINT(LOG_DEBUG, "Return original image.");
         strncpy(rsp_path, orig_path, 512);
@@ -680,8 +651,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     if((fd = open(rsp_path, O_RDONLY)) == -1)
     {
         im = wi_new_image();
-        if (im == NULL) return -1;
-        got_rsp = false;
+        if (im == NULL) goto err;
         int ret;
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         gen_key(cache_key, req->md5, 0);
@@ -739,6 +709,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
         ret = convert(im, req);
         if(ret == -1) goto err;
+        if(ret == WI_OK) is_new = false;
 
         buff = (char *)wi_get_blob(im, &len);
         if (buff == NULL) {
@@ -775,19 +746,18 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         }
     }
 
-done:
     if(len < CACHE_MAX_SIZE)
     {
-        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
         set_cache_bin(req->thr_arg, cache_key, buff, len);
     }
 
+
+done:
     result = evbuffer_add(request->buffer_out, buff, len);
     if(result != -1)
     {
-        result = 1;
-        if(settings.save_new == 1 && got_rsp == false)
+        if(settings.save_new == 1 && is_new == false)
         {
             LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
             if(new_img(buff, len, rsp_path) == -1)
@@ -797,7 +767,8 @@ done:
             }
         }
         else
-            LOG_PRINT(LOG_DEBUG, "Image Needn't to Storage.", rsp_path);
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);
+        result = 1;
     }
 
 err:

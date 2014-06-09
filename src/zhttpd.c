@@ -757,7 +757,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         //get_img_rst = get_img(zimg_req, &buff,  &len);
         get_img_rst = get_img2(zimg_req, req);
     else
-        get_img_rst = get_img_mode_db(zimg_req, &buff,  &len);
+        //get_img_rst = get_img_mode_db(zimg_req, req);
+        get_img_rst = get_img_mode_db2(zimg_req, req);
 
 
     if(get_img_rst == -1)
@@ -767,14 +768,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
 
-    if(settings.mode == 1)
-    {
-        len = evbuffer_get_length(req->buffer_out);
-    }
-    else
-    {
-        evbuffer_add(req->buffer_out, buff, len);
-    }
+    len = evbuffer_get_length(req->buffer_out);
     LOG_PRINT(LOG_DEBUG, "get buffer length: %d", len);
 
     LOG_PRINT(LOG_DEBUG, "Got the File!");
