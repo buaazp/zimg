@@ -39,7 +39,7 @@ extern struct setting settings;
 
 int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
-int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size);
+int get_img(zimg_req_t *req, evhtp_request_t *request);
 int get_img2(zimg_req_t *req, evhtp_request_t *request);
 
 
@@ -209,24 +209,15 @@ done:
  *
  * @return 1 for success and -1 for fail.
  */
-int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
+int get_img(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
-    //char *rsp_path = NULL;
-    /*
-    char *cache_key = (char *)malloc(strlen(req->md5) + 32);
-    if(cache_key == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "cache_key malloc failed!");
-        goto err;
-    }
-    */
     char cache_key[CACHE_KEY_SIZE];
-    //char *color_path = NULL;
     char *img_format = NULL;
-    //size_t len;
     int fd = -1;
     struct stat f_stat;
+    char *buff_ptr;
+    size_t img_size;
 
     MagickBooleanType status;
     MagickWand *magick_wand = NULL;
@@ -238,23 +229,13 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
     gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-    //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-    if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
-        result = 1;
-        goto err;
+        goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
 
-    /*
-    len = strlen(req->md5) + strlen(settings.img_path) + 12;
-    if (!(whole_path = malloc(len)))
-    {
-        LOG_PRINT(LOG_DEBUG, "whole_path malloc failed!");
-        goto err;
-    }
-    */
     char whole_path[512];
     int lvl1 = str_hash(req->md5);
     int lvl2 = str_hash(req->md5 + 3);
@@ -273,26 +254,16 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     else
         snprintf(name, 128, "%d*%d", req->width, req->height);
 
-    /*
-    orig_path = (char *)malloc(strlen(whole_path) + 6);
-    if(orig_path == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "orig_path malloc failed!");
-        goto err;
-    }
-    */
+    char color_name[128];
+    if(req->proportion)
+        snprintf(color_name, 128, "%d*%dp", req->width, req->height);
+    else
+        snprintf(color_name, 128, "%d*%d", req->width, req->height);
+
     char orig_path[512];
     snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
-    /*
-    rsp_path = (char *)malloc(512);
-    if(rsp_path == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "rsp_path  malloc failed!");
-        goto err;
-    }
-    */
     char rsp_path[512];
     if(req->width == 0 && req->height == 0 && req->proportion == 0 && req->gray == 0)
     {
@@ -305,10 +276,12 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     }
     LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
 
+    char color_path[512];
+    snprintf(color_path, 512, "%s/%s", whole_path, color_name);
+
 
     //status=MagickReadImage(magick_wand, rsp_path);
     if((fd = open(rsp_path, O_RDONLY)) == -1)
-        //if(status == MagickFalse)
     {
         magick_wand = NewMagickWand();
         got_rsp = false;
@@ -316,10 +289,12 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         if(req->gray == 1)
         {
             gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-            if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+            if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
             {
-                LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
-                status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+                LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, img_size);
+                status = MagickReadImageBlob(magick_wand, buff_ptr, img_size);
+                free(buff_ptr);
+                buff_ptr = NULL;
                 if(status == MagickFalse)
                 {
                     LOG_PRINT(LOG_DEBUG, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
@@ -328,34 +303,23 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 else
                 {
                     got_color = true;
-                    LOG_PRINT(LOG_DEBUG, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, *img_size);
+                    LOG_PRINT(LOG_DEBUG, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, img_size);
                     goto convert;
                 }
             }
 
-            /*
-            len = strlen(rsp_path);
-            color_path = (char *)malloc(len);
-            if(color_path == NULL)
-            {
-                LOG_PRINT(LOG_DEBUG, "color_path malloc failed!");
-                goto err;
-            }
-            strncpy(color_path, rsp_path, len);
-            color_path[len - 1] = '\0';
-            LOG_PRINT(LOG_DEBUG, "color_path: %s", color_path);
             status=MagickReadImage(magick_wand, color_path);
-            */
-            status=MagickReadImage(magick_wand, rsp_path);
             if(status == MagickTrue)
             {
                 got_color = true;
                 LOG_PRINT(LOG_DEBUG, "Read Image from Color Image[%s] Succ. Goto Convert.", rsp_path);
-                *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-                if(*img_size < CACHE_MAX_SIZE)
+                buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+                if(img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                 }
+                free(buff_ptr);
+                buff_ptr = NULL;
 
                 goto convert;
             }
@@ -363,10 +327,12 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
 
         // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
         gen_key(cache_key, req->md5, 0);
-        if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+        if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
         {
             LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
-            status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+            status = MagickReadImageBlob(magick_wand, buff_ptr, img_size);
+            free(buff_ptr);
+            buff_ptr = NULL;
             if(status == MagickFalse)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
@@ -380,11 +346,13 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
                 }
                 else
                 {
-                    *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-                    if(*img_size < CACHE_MAX_SIZE)
+                    buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+                    if(img_size < CACHE_MAX_SIZE)
                     {
-                        set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+                        set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                     }
+                    free(buff_ptr);
+                    buff_ptr = NULL;
                 }
             }
         }
@@ -399,11 +367,13 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             }
             else
             {
-                *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-                if(*img_size < CACHE_MAX_SIZE)
+                buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+                if(img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                 }
+                free(buff_ptr);
+                buff_ptr = NULL;
             }
         }
 
@@ -419,7 +389,6 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         float oheight = MagickGetImageHeight(magick_wand);
         if(width <= owidth && height <= oheight)
         {
-            //if(req->proportion == 1)
             if(req->proportion == 1 || (req->proportion == 0 && req->width * req->height == 0))
             {
                 if(req->height == 0)
@@ -439,21 +408,9 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             }
             LOG_PRINT(LOG_DEBUG, "Resize img succ.");
         }
-        /* this section can caculate the correct rsp_path, but not use, so I note them
-           else if(req->gray == true)
-           {
-           strcpy(rsp_path, orig_path);
-           rsp_path[strlen(orig_path)] = 'g';
-           rsp_path[strlen(orig_path) + 1] = '\0';
-           got_rsp = true;
-           LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original gray image.");
-           LOG_PRINT(LOG_DEBUG, "Original Gray Image: %s", rsp_path);
-           }
-           */
         else
         {
             // Note this strcpy because rsp_path is not useful. We needn't to save the new image.
-            //strcpy(rsp_path, orig_path);
             got_rsp = true;
             LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
         }
@@ -462,38 +419,38 @@ int get_img(zimg_req_t *req, char **buff_ptr, size_t *img_size)
     {
         fstat(fd, &f_stat);
         size_t rlen = 0;
-        *img_size = f_stat.st_size;
-        if(*img_size <= 0)
+        img_size = f_stat.st_size;
+        if(img_size <= 0)
         {
             LOG_PRINT(LOG_DEBUG, "File[%s] is Empty.", rsp_path);
             goto err;
         }
-        if((*buff_ptr = (char *)malloc(*img_size)) == NULL)
+        if((buff_ptr = (char *)malloc(img_size)) == NULL)
         {
             LOG_PRINT(LOG_DEBUG, "buff_ptr Malloc Failed!");
             goto err;
         }
-        LOG_PRINT(LOG_DEBUG, "img_size = %d", *img_size);
-        //*buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-        if((rlen = read(fd, *buff_ptr, *img_size)) == -1)
+        LOG_PRINT(LOG_DEBUG, "img_size = %d", img_size);
+        if((rlen = read(fd, buff_ptr, img_size)) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "File[%s] Read Failed.", rsp_path);
             LOG_PRINT(LOG_DEBUG, "Error: %s.", strerror(errno));
             goto err;
         }
-        else if(rlen < *img_size)
+        else if(rlen < img_size)
         {
             LOG_PRINT(LOG_DEBUG, "File[%s] Read Not Compeletly.", rsp_path);
             goto err;
         }
+        if(img_size < CACHE_MAX_SIZE)
+        {
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
+        }
         goto done;
     }
 
-
-
 convert:
 
-    //if(got_color == false || (got_color == true && req->width == 0 && req->height == 0) )
     if(got_color == false)
     {
         //compress image
@@ -535,6 +492,36 @@ convert:
         {
             LOG_PRINT(LOG_DEBUG, "Remove Exif Infomation of the ImageFailed!");
         }
+
+        buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+        if(buff_ptr == NULL)
+        {
+            LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
+            goto err;
+        }
+        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        if(img_size < CACHE_MAX_SIZE)
+        {
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
+        }
+        if(settings.save_new == 1 && got_rsp == false)
+        {
+            LOG_PRINT(LOG_DEBUG, "Color Image[%s] is Not Existed. Begin to Save it.", color_path);
+            if(new_img(buff_ptr, img_size, color_path) == -1)
+            {
+                LOG_PRINT(LOG_DEBUG, "Color Image[%s] Save Failed!", color_path);
+                LOG_PRINT(LOG_WARNING, "fail save %s", color_path);
+            }
+        }
+        if(req->gray == 1)
+        {
+            free(buff_ptr);
+            buff_ptr = NULL;
+        }
+        else
+        {
+            goto done;
+        }
     }
 
     //gray image
@@ -548,49 +535,48 @@ convert:
             goto err;
         }
         LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
+
+        buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+        if(buff_ptr == NULL)
+        {
+            LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
+            goto err;
+        }
+        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+        if(img_size < CACHE_MAX_SIZE)
+        {
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
+        }
+        if(settings.save_new == 1 && got_rsp == false)
+        {
+            if(new_img(buff_ptr, img_size, rsp_path) == -1)
+            {
+                LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
+                LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
+            }
+        }
+        else
+            LOG_PRINT(LOG_DEBUG, "Image Needn't to Storage.", rsp_path);
     }
-
-
-    *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-    if(*buff_ptr == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
-        goto err;
-    }
-
 
 done:
-    if(*img_size < CACHE_MAX_SIZE)
+    result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
+    if(result != -1)
     {
-        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
-        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-        set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+        result = 1;
     }
-
-    result = 1;
-    if(settings.save_new == 1 && got_rsp == false)
-    {
-        LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
-        //result = 2;
-        if(new_img(*buff_ptr, *img_size, rsp_path) == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
-            LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
-        }
-    }
-    else
-        LOG_PRINT(LOG_DEBUG, "Image Needn't to Storage.", rsp_path);
 
 err:
     if(fd != -1)
         close(fd);
-    //req->rsp_path = rsp_path;
     if(magick_wand)
     {
         magick_wand=DestroyMagickWand(magick_wand);
     }
     if(img_format)
         free(img_format);
+    if(buff_ptr)
+        free(buff_ptr);
     return result;
 }
 
