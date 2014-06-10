@@ -29,7 +29,7 @@
 
 extern struct setting settings;
 
-int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size);
+int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request);
 
 int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len);
 int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, const size_t len);
@@ -44,6 +44,7 @@ int find_beansdb(memcached_st *memc, const char *key, char *value);
 int set_beansdb(memcached_st *memc, const char *key, const char *value);
 int del_beansdb(memcached_st *memc, const char *key);
 
+
 /**
  * @brief get_img_mode_db Get image from db mode backend.
  *
@@ -53,28 +54,21 @@ int del_beansdb(memcached_st *memc, const char *key);
  *
  * @return 1 for success and -1 for failed
  */
-int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
+int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
-    /*
-    char *cache_key = (char *)malloc(strlen(req->md5) + 32);
-    if(cache_key == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "cache_key malloc failed!");
-        return -1;
-    }
-    */
     char cache_key[CACHE_KEY_SIZE];
     char *img_format = NULL;
-    //size_t len;
+    char *buff_ptr;
+    size_t img_size;
 
     MagickBooleanType status;
     MagickWand *magick_wand = NULL;
 
+    bool got_rsp = true;
     bool got_color = false;
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
-    //LOG_PRINT(LOG_DEBUG, "req->thr_arg->cache_conn: %p", req->thr_arg->cache_conn);
 
     if(req->gray == 1)
     {
@@ -91,34 +85,33 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
         }
     }
-    //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-    if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
-        result = 1;
         goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
-    if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+    if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db succ.", cache_key);
-        if(*img_size < CACHE_MAX_SIZE)
+        if(img_size < CACHE_MAX_SIZE)
         {
-            set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
         }
-        result = 1;
         goto done;
     }
 
     magick_wand = NewMagickWand();
+    got_rsp = false;
     if(req->gray == 1)
     {
         gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-        //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-        if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+        if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
         {
-            LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, *img_size);
-            status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+            LOG_PRINT(LOG_DEBUG, "Hit Color Image Cache[Key: %s, len: %d].", cache_key, img_size);
+            status = MagickReadImageBlob(magick_wand, buff_ptr, img_size);
+            free(buff_ptr);
+            buff_ptr = NULL;
             if(status == MagickFalse)
             {
                 LOG_PRINT(LOG_DEBUG, "Color Image Cache[Key: %s] is Bad. Remove.", cache_key);
@@ -127,54 +120,56 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
             else
             {
                 got_color = true;
-                LOG_PRINT(LOG_DEBUG, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, *img_size);
+                LOG_PRINT(LOG_DEBUG, "Read Image from Color Image Cache[Key: %s, len: %d] Succ. Goto Convert.", cache_key, img_size);
                 goto convert;
             }
         }
-        if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+        if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
         {
             LOG_PRINT(LOG_DEBUG, "Get color image [%s] from backend db.", cache_key);
-            status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+            status = MagickReadImageBlob(magick_wand, buff_ptr, img_size);
             if(status == MagickTrue)
             {
                 got_color = true;
                 LOG_PRINT(LOG_DEBUG, "Read Image from Color Image[%s] Succ. Goto Convert.", cache_key);
-                *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-                if(*img_size < CACHE_MAX_SIZE)
+                if(img_size < CACHE_MAX_SIZE)
                 {
-                    set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+                    set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                 }
+                free(buff_ptr);
+                buff_ptr = NULL;
                 goto convert;
             }
         }
     }
 
     gen_key(cache_key, req->md5, 0);
-    //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-    if(find_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size) == 1)
+    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
     }
     else
     {
-        if(get_img_db(req->thr_arg, cache_key, buff_ptr, img_size) == -1)
+        if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
-            goto done;
+            goto err;
         }
-        else if(*img_size < CACHE_MAX_SIZE)
+        else if(img_size < CACHE_MAX_SIZE)
         {
-            set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
         }
     }
 
-    status = MagickReadImageBlob(magick_wand, *buff_ptr, *img_size);
+    status = MagickReadImageBlob(magick_wand, buff_ptr, img_size);
+    free(buff_ptr);
+    buff_ptr = NULL;
     if(status == MagickFalse)
     {
         ThrowWandException(magick_wand);
         del_cache(req->thr_arg, cache_key);
         LOG_PRINT(LOG_DEBUG, "Read image [%s] from blob failed.", cache_key);
-        goto done;
+        goto err;
     }
 
     if(req->width == 0 && req->height == 0)
@@ -205,16 +200,15 @@ int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size)
         if(status == MagickFalse)
         {
             LOG_PRINT(LOG_DEBUG, "Image[%s] Resize Failed!", cache_key);
-            goto done;
+            goto err;
         }
 
         LOG_PRINT(LOG_DEBUG, "Resize img succ.");
     }
     else
     {
+        got_rsp = true;
         LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
-        //result = 1;
-        //goto done;
     }
 
 convert:
@@ -240,11 +234,11 @@ convert:
                 LOG_PRINT(LOG_DEBUG, "Image[%s] Compression Failed!", cache_key);
             }
         }
-        size_t quality = MagickGetImageCompressionQuality(magick_wand) * 0.75;
+        size_t quality = MagickGetImageCompressionQuality(magick_wand);
         LOG_PRINT(LOG_DEBUG, "Image Compression Quality is %u.", quality);
-        if(quality == 0)
+        if(quality > WAP_QUALITY)
         {
-            quality = 75;
+            quality = WAP_QUALITY;
         }
         LOG_PRINT(LOG_DEBUG, "Set Compression Quality to 75%.");
         status = MagickSetImageCompressionQuality(magick_wand, quality);
@@ -261,17 +255,29 @@ convert:
             LOG_PRINT(LOG_DEBUG, "Remove Exif Infomation of the ImageFailed!");
         }
 
-        *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-        if(*buff_ptr == NULL)
+        buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+        if(buff_ptr == NULL)
         {
             LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
-            goto done;
+            goto err;
         }
         gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-        save_img_db(req->thr_arg, cache_key, *buff_ptr, *img_size);
-        if(*img_size < CACHE_MAX_SIZE)
+        if(got_rsp == false)
         {
-            set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+            save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
+        }
+        if(img_size < CACHE_MAX_SIZE)
+        {
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
+        }
+        if(req->gray == 1)
+        {
+            free(buff_ptr);
+            buff_ptr = NULL;
+        }
+        else
+        {
+            goto done;
         }
     } 
 
@@ -283,39 +289,44 @@ convert:
         if(status == MagickFalse)
         {
             LOG_PRINT(LOG_DEBUG, "Image[%s] Remove Color Failed!", cache_key);
-            goto done;
+            goto err;
         }
         LOG_PRINT(LOG_DEBUG, "Image Remove Color Finish!");
 
 
-        *buff_ptr = (char *)MagickGetImageBlob(magick_wand, img_size);
-        if(*buff_ptr == NULL)
+        buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
+        if(buff_ptr == NULL)
         {
             LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
-            goto done;
+            goto err;
         }
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-        save_img_db(req->thr_arg, cache_key, *buff_ptr, *img_size);
-        if(*img_size < CACHE_MAX_SIZE)
+        if(got_rsp == false)
         {
-            set_cache_bin(req->thr_arg, cache_key, *buff_ptr, *img_size);
+            save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
+        }
+        if(img_size < CACHE_MAX_SIZE)
+        {
+            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
         }
     }
-    /*
-    if(got_color == false)
-    {
-        LOG_PRINT(LOG_INFO, "succ compress pic:%s", cache_key);
-    }
-    */
-    result = 1;
 
 done:
+    result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
+    if(result != -1)
+    {
+        result = 1;
+    }
+
+err:
     if(magick_wand)
     {
         magick_wand=DestroyMagickWand(magick_wand);
     }
     if(img_format)
         free(img_format);
+    if(buff_ptr)
+        free(buff_ptr);
     return result;
 }
 
@@ -699,3 +710,4 @@ int del_beansdb(memcached_st *memc, const char *key)
 
     return rst;
 }
+

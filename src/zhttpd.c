@@ -225,10 +225,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
-    char address[24], c_ip[16], c_port[6];
-    strcpy(c_ip, inet_ntoa(ss->sin_addr));
-    snprintf(c_port, 6, "%u", htons(ss->sin_port));
-    snprintf(address, 24, "%s:%s", c_ip, c_port);
+    char address[16];
+    strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
@@ -553,10 +551,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
-    char address[24], c_ip[16], c_port[6];
-    strcpy(c_ip, inet_ntoa(ss->sin_addr));
-    snprintf(c_port, 6, "%u", htons(ss->sin_port));
-    snprintf(address, 24, "%s:%s", c_ip, c_port);
+    char address[16];
+    strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
@@ -761,9 +757,11 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
     int get_img_rst = -1;
     if(settings.mode == 1)
-        get_img_rst = get_img(zimg_req, &buff,  &len);
+        get_img_rst = get_img(zimg_req, req);
+        //get_img_rst = get_img2(zimg_req, req);
     else
-        get_img_rst = get_img_mode_db(zimg_req, &buff,  &len);
+        get_img_rst = get_img_mode_db(zimg_req, req);
+        //get_img_rst = get_img_mode_db2(zimg_req, req);
 
 
     if(get_img_rst == -1)
@@ -773,8 +771,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
 
+    len = evbuffer_get_length(req->buffer_out);
     LOG_PRINT(LOG_DEBUG, "get buffer length: %d", len);
-    evbuffer_add(req->buffer_out, buff, len);
 
     LOG_PRINT(LOG_DEBUG, "Got the File!");
     //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));

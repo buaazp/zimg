@@ -25,7 +25,7 @@
 
 #include "zcommon.h"
 
-int get_img_mode_db(zimg_req_t *req, char **buff_ptr, size_t *img_size);
+int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request);
 
 int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len);
 int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, const size_t len);
