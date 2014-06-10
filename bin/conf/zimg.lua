@@ -9,6 +9,11 @@ max_keepalives=1
 retry=3
 system=io.popen("uname -s"):read("*l")
 
+
+--header config
+headers="Cache-Control:max-age=7776000"
+etag=1
+
 --access config
 --support mask rules like "allow 10.1.121.138/24"
 --NOTE: remove rule can improve performance

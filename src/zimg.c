@@ -78,6 +78,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     md5sum[32] = '\0';
     strcpy(md5, md5sum);
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
+
     char cache_key[CACHE_KEY_SIZE];
     char save_path[512];
     char save_name[512];
@@ -560,6 +561,49 @@ convert:
     }
 
 done:
+    if(settings.etag == 1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5...");
+        md5_state_t mdctx;
+        md5_byte_t md_value[16];
+        char *md5sum = (char *)malloc(33);
+        int i;
+        int h, l;
+        md5_init(&mdctx);
+        md5_append(&mdctx, (const unsigned char*)(buff_ptr), img_size);
+        md5_finish(&mdctx, md_value);
+
+        for(i=0; i<16; ++i)
+        {
+            h = md_value[i] & 0xf0;
+            h >>= 4;
+            l = md_value[i] & 0x0f;
+            md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
+            md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
+        }
+        md5sum[32] = '\0';
+        LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
+        const char *etag_var = evhtp_header_find(request->headers_in, "If-None-Match");
+        LOG_PRINT(LOG_DEBUG, "If-None-Match: %s", etag_var);
+        if(etag_var == NULL)
+        {
+            evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
+        }
+        else
+        {
+            if(strncmp(md5sum, etag_var, 32) == 0)
+            {
+                result = 2;
+                free(md5sum);
+                goto err;
+            }
+            else
+            {
+                evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
+            }
+        }
+        free(md5sum);
+    }
     result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
     if(result != -1)
     {

@@ -29,9 +29,9 @@
 #include <sys/time.h>
 #include <libmemcached/memcached.h>
 #include <hiredis/hiredis.h>
-#include <stdbool.h>
 #include "libevhtp/evhtp.h"
 #include "zaccess.h"
+#include "zhttpd.h"
 
 #ifndef ZIMG_VERSION
 #define ZIMG_VERSION "2.1.1"
@@ -46,28 +46,30 @@
 
 struct setting{
     int is_daemon;
-    char root_path[512];
-    char img_path[512];
-    char log_name[512];
+    int port;
+    int num_threads;
+    int backlog;
+    int max_keepalives;
+    int retry;
     char version[128];
     char server_name[128];
-    int port;
-    int backlog;
-    int num_threads;
-    bool log;
-    bool cache_on;
+    zimg_headers_conf_t *headers;
+    int etag;
+    zimg_access_conf_t *up_access;
+    zimg_access_conf_t *down_access;
+    int cache_on;
     char cache_ip[128];
     int cache_port;
-    uint64_t max_keepalives;
+    int log;
+    char log_name[512];
+    char root_path[512];
     int mode;
     int save_new;
+    char img_path[512];
     char beansdb_ip[128];
     int beansdb_port;
     char ssdb_ip[128];
     int ssdb_port;
-    int retry;
-    zimg_access_conf_t *up_access;
-    zimg_access_conf_t *down_access;
 } settings;
 
 typedef struct thr_arg_s {
@@ -82,7 +84,7 @@ typedef struct zimg_req_s {
     int width;
     int height;
     int proportion;
-    bool gray;
+    int gray;
     thr_arg_t *thr_arg;
 } zimg_req_t;
 

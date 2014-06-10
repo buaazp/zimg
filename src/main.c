@@ -75,28 +75,30 @@ void usage(int argc, char **argv)
 static void settings_init(void) 
 {
     settings.is_daemon = 0;
-    strcpy(settings.root_path, "./www/index.html");
-    strcpy(settings.img_path, "./img");
-    strcpy(settings.log_name, "./log/zimg.log");
+    settings.port = 4869;
+    settings.num_threads = get_cpu_cores();         /* N workers */
+    settings.backlog = 1024;
+    settings.max_keepalives = 1;
+    settings.retry = 3;
     strcpy(settings.version, STR(ZIMG_VERSION));
     snprintf(settings.server_name, 128, "zimg/%s", settings.version);
-    settings.port = 4869;
-    settings.backlog = 1024;
-    settings.num_threads = get_cpu_cores();         /* N workers */
-    settings.retry = 3;
+    settings.headers = NULL;
+    settings.etag = 0;
     settings.up_access = NULL;
     settings.down_access = NULL;
-    settings.log = false;
-    settings.cache_on = false;
+    settings.cache_on = 0;
     strcpy(settings.cache_ip, "127.0.0.1");
     settings.cache_port = 11211;
-    settings.max_keepalives = 1;
+    settings.log = 0;
+    strcpy(settings.log_name, "./log/zimg.log");
+    strcpy(settings.root_path, "./www/index.html");
     settings.mode = 1;
     settings.save_new = 1;
-    strcpy(settings.ssdb_ip, "127.0.0.1");
-    settings.ssdb_port = 6379;
+    strcpy(settings.img_path, "./img");
     strcpy(settings.beansdb_ip, "127.0.0.1");
     settings.beansdb_port = 7905;
+    strcpy(settings.ssdb_ip, "127.0.0.1");
+    settings.ssdb_port = 6379;
 }
 
 static int load_conf(const char *conf)
@@ -124,9 +126,36 @@ static int load_conf(const char *conf)
         settings.num_threads = (int)lua_tonumber(L, -1);         /* N workers */
     lua_pop(L, 1);
 
+    lua_getglobal(L, "backlog_num");
+    if(lua_isnumber(L, -1))
+        settings.backlog = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "max_keepalives");
+    if(lua_isnumber(L, -1))
+        settings.max_keepalives = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "retry");
+    if(lua_isnumber(L, -1))
+        settings.retry = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     lua_getglobal(L, "system");
     if(lua_isstring(L, -1))
         snprintf(settings.server_name, 128, "%s %s", settings.server_name, lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "headers");
+    if(lua_isstring(L, -1))
+    {
+        settings.headers = conf_get_headers(lua_tostring(L, -1));
+    }
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "etag");
+    if(lua_isnumber(L, -1))
+        settings.etag = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "upload_rule");
@@ -163,34 +192,14 @@ static int load_conf(const char *conf)
         settings.log = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
-    lua_getglobal(L, "backlog_num");
-    if(lua_isnumber(L, -1))
-        settings.backlog = (int)lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "max_keepalives");
-    if(lua_isnumber(L, -1))
-        settings.max_keepalives = (int)lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "retry");
-    if(lua_isnumber(L, -1))
-        settings.retry = (int)lua_tonumber(L, -1);
+    lua_getglobal(L, "log_name"); //stack index: -1
+    if(lua_isstring(L, -1))
+        strcpy(settings.log_name, lua_tostring(L, -1));
     lua_pop(L, 1);
 
     lua_getglobal(L, "root_path");
     if(lua_isstring(L, -1))
         strcpy(settings.root_path, lua_tostring(L, -1));
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "img_path");
-    if(lua_isstring(L, -1))
-        strcpy(settings.img_path, lua_tostring(L, -1));
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "log_name"); //stack index: -1
-    if(lua_isstring(L, -1))
-        strcpy(settings.log_name, lua_tostring(L, -1));
     lua_pop(L, 1);
 
     lua_getglobal(L, "mode");
@@ -201,6 +210,11 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "save_new");
     if(lua_isnumber(L, -1))
         settings.save_new = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "img_path");
+    if(lua_isstring(L, -1))
+        strcpy(settings.img_path, lua_tostring(L, -1));
     lua_pop(L, 1);
 
     lua_getglobal(L, "beansdb_ip");
@@ -461,6 +475,7 @@ int main(int argc, char **argv)
     evhtp_free(htp);
     event_base_free(evbase);
     MagickWandTerminus();
+    free_headers_conf(settings.headers);
     free_access_conf(settings.up_access);
     free_access_conf(settings.down_access);
 

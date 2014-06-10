@@ -23,8 +23,26 @@
 #define ZHTTPD_H
 
 #include "libevhtp/evhtp.h"
-#include "zcommon.h"
 
+typedef struct zimg_headers_s zimg_headers_t;
+
+typedef struct {
+    char key[128];
+    char value[512];
+} zimg_header_t;
+
+struct zimg_headers_s {
+    zimg_header_t *value;
+    zimg_headers_t *next;
+};
+
+typedef struct {
+    uint n;
+    zimg_headers_t *headers;
+} zimg_headers_conf_t;
+
+zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
+void free_headers_conf(zimg_headers_conf_t *hcf);
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);

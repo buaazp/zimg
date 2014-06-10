@@ -33,6 +33,9 @@
 
 extern struct setting settings;
 
+zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
+static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
+void free_headers_conf(zimg_headers_conf_t *hcf);
 static evthr_t * get_request_thr(evhtp_request_t *request);
 static const char * guess_type(const char *type);
 static const char * guess_content_type(const char *path);
@@ -80,6 +83,99 @@ static const char * method_strmap[] = {
     "PATCH",
     "UNKNOWN",
 };
+
+zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
+{
+    if(hdr_str == NULL)
+        return NULL;
+    zimg_headers_conf_t *hdrconf = (zimg_headers_conf_t *)malloc(sizeof(zimg_headers_conf_t));
+    if(hdrconf == NULL)
+        return NULL;
+    hdrconf->n = 0;
+    hdrconf->headers = NULL;
+    size_t hdr_len = strlen(hdr_str); 
+    char *hdr = (char *)malloc(hdr_len);
+    if(hdr == NULL)
+    {
+        return NULL;
+    }
+    strncpy(hdr, hdr_str, hdr_len);
+    char *start = hdr;
+    char *end = strchr(start, ';');
+    end = (end) ? end : hdr+hdr_len;
+    while(start <= end)
+    {
+        char *key = start;
+        char *value = strchr(key, ':');
+        size_t key_len = value - key;
+        if (value)
+        {
+            zimg_header_t *this_header = (zimg_header_t *)malloc(sizeof(zimg_header_t));
+            if (this_header == NULL) {
+                start = end + 1;
+                end = strchr(start, ';');
+                end = (end) ? end : hdr+hdr_len;
+                continue;
+            }
+            (void) memset(this_header, 0, sizeof(zimg_header_t));
+            size_t value_len;
+            value++;
+            value_len = end - value;
+
+            strncpy(this_header->key, key, key_len);
+            strncpy(this_header->value, value, value_len);
+
+            zimg_headers_t *headers = (zimg_headers_t *)malloc(sizeof(zimg_headers_t));
+            if (headers == NULL) {
+                start = end + 1;
+                end = strchr(start, ';');
+                end = (end) ? end : hdr+hdr_len;
+                continue;
+            }
+
+            headers->value = this_header;
+            headers->next = hdrconf->headers;
+            hdrconf->headers = headers;
+            hdrconf->n++;
+        }
+        start = end + 1;
+        end = strchr(start, ';');
+        end = (end) ? end : hdr+hdr_len;
+    }
+    free(hdr);
+    return hdrconf;
+}
+
+static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf)
+{
+    if(hcf == NULL) return -1;
+    zimg_headers_t *headers = hcf->headers;
+    LOG_PRINT(LOG_DEBUG, "headers: %d", hcf->n);
+
+    while(headers)
+    {
+        LOG_PRINT(LOG_DEBUG, "header->key: %s", headers->value->key);
+        LOG_PRINT(LOG_DEBUG, "header->value: %s", headers->value->value);
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new(headers->value->key, headers->value->value, 0, 0));
+        headers = headers->next;
+    }
+    return 1;
+}
+
+void free_headers_conf(zimg_headers_conf_t *hcf)
+{
+    if(hcf == NULL)
+        return;
+    zimg_headers_t *headers = hcf->headers;
+    while(headers)
+    {
+        hcf->headers = headers->next;
+        free(headers->value);
+        free(headers);
+        headers = hcf->headers;
+    }
+    free(hcf);
+}
 
 static evthr_t * get_request_thr(evhtp_request_t *request)
 {
@@ -621,7 +717,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             }
         }
         evbuffer_add_printf(req->buffer_out, "<html>\n </html>\n");
-        //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
@@ -633,9 +728,9 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(strstr(uri, "favicon.ico"))
     {
         LOG_PRINT(LOG_DEBUG, "favicon.ico Request, Denied.");
-        //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+        zimg_headers_add(req, settings.headers);
         evhtp_send_reply(req, EVHTP_RES_OK);
         goto done;
     }
@@ -767,14 +862,20 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d", address, md5, width, height, proportion, gray);
         goto err;
     }
+    if(get_img_rst == 2)
+    {
+        LOG_PRINT(LOG_DEBUG, "Etag Matched Return 304 EVHTP_RES_NOTMOD.");
+        evhtp_send_reply(req, EVHTP_RES_NOTMOD);
+        goto done;
+    }
 
     len = evbuffer_get_length(req->buffer_out);
     LOG_PRINT(LOG_DEBUG, "get buffer length: %d", len);
 
     LOG_PRINT(LOG_DEBUG, "Got the File!");
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
+    zimg_headers_add(req, settings.headers);
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d size:%d", address, md5, width, height, proportion, gray, len);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
