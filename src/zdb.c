@@ -22,12 +22,10 @@
 #include <string.h>
 #include <wand/MagickWand.h>
 #include <hiredis/hiredis.h>
-#include "webimg/webimg2.h"
 #include "zdb.h"
 #include "zlog.h"
 #include "zcache.h"
 #include "zutil.h"
-#include "zscale.h"
 
 extern struct setting settings;
 
@@ -45,8 +43,6 @@ int exist_beansdb(memcached_st *memc, const char *key);
 int find_beansdb(memcached_st *memc, const char *key, char *value);
 int set_beansdb(memcached_st *memc, const char *key, const char *value);
 int del_beansdb(memcached_st *memc, const char *key);
-
-int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request);
 
 /**
  * @brief get_img_mode_db Get image from db mode backend.
@@ -720,109 +716,3 @@ int del_beansdb(memcached_st *memc, const char *key)
     return rst;
 }
 
-int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
-{
-    int result = -1;
-    char cache_key[CACHE_KEY_SIZE];
-    char *buff_ptr = NULL;
-    size_t img_size;
-    struct image *im = NULL;
-    bool is_new = true;
-
-    LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
-
-    if(req->proportion == 0 && req->width == 0 && req->height == 0)
-    {
-        gen_key(cache_key, req->md5, 0);
-    }
-    else
-    {
-        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-    }
-
-    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
-        goto done;
-    }
-    LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
-    if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db succ.", cache_key);
-        if(img_size < CACHE_MAX_SIZE)
-        {
-            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
-        }
-        goto done;
-    }
-
-    im = wi_new_image();
-    if (im == NULL) goto err;
-
-    gen_key(cache_key, req->md5, 0);
-    //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
-    }
-    else
-    {
-        if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
-            goto err;
-        }
-        else if(img_size < CACHE_MAX_SIZE)
-        {
-            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
-        }
-    }
-
-    result = wi_read_blob(im, buff_ptr, img_size);
-    if (result != WI_OK)
-    {
-        LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
-        goto err;
-    }
-    result = convert(im, req);
-    if(result == -1) goto err;
-    if(result == WI_OK) is_new = false;
-
-    buff_ptr = (char *)wi_get_blob(im, &img_size);
-    if (buff_ptr == NULL) {
-        LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
-        goto err;
-    }
-
-    gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-    if(img_size < CACHE_MAX_SIZE)
-    {
-        set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
-    }
-
-done:
-    if(settings.etag == 1)
-    {
-        result = zimg_etag_set(request, buff_ptr, img_size);
-        if(result == 2)
-            goto err;
-    }
-    result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
-    if(result != -1)
-    {
-        if(settings.save_new == 1 && is_new == false)
-        {
-            save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
-        }
-        else
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);
-        result = 1;
-    }
-
-err:
-    if(im != NULL)
-        wi_free_image(im);
-    else if(buff_ptr != NULL)
-        free(buff_ptr);
-    return result;
-}

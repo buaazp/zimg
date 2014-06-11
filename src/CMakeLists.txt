@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(zimg)
 
-set(PROJECT_MAJOR_VERSION 3)
-set(PROJECT_MINOR_VERSION 0)
+set(PROJECT_MAJOR_VERSION 2)
+set(PROJECT_MINOR_VERSION 3)
 set(PROJECT_PATCH_VERSION 0)
 
 set (PROJECT_VERSION ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
@@ -107,11 +107,6 @@ endif()
 
 find_package (ImageMagick COMPONENTS MagickWand REQUIRED)
 find_package (LibMemcached REQUIRED)
-find_package (JPEG REQUIRED)
-find_package (GIF REQUIRED)
-find_package (PNG REQUIRED)
-find_package (WebP REQUIRED)
-
 
 if (NOT OPENSSL_FOUND)
 	message ("Diabling SSL")
@@ -128,10 +123,6 @@ include_directories(
 	${LIBEVENT_INCLUDE_DIR}
     ${LIBMEMCACHED_INCLUDE_DIRS}
     ${ImageMagick_INCLUDE_DIRS}
-    ${JPEG_INCLUDE_DIRS}
-    ${GIF_INCLUDE_DIRS}
-    ${PNG_INCLUDE_DIRS}
-    ${WEBP_INCLUDE_DIRS}
 )
 
 set(ZIMG_EXTERNAL_LIBS
@@ -141,10 +132,6 @@ set(ZIMG_EXTERNAL_LIBS
     ${OPENSSL_LIBRARIES}
     ${ImageMagick_MagickWand_LIBRARY}
     ${LIBMEMCACHED_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${GIF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${WEBP_LIBRARIES}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

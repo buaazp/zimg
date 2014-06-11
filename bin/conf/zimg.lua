@@ -9,8 +9,7 @@ max_keepalives=1
 retry=3
 system=io.popen("uname -s"):read("*l")
 
-
---header config
+--localcache config
 headers="Cache-Control:max-age=7776000"
 etag=1
 

@@ -11,6 +11,7 @@ Contact me: zp@buaa.us
 [![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
+- 06/11/2014 - zimg 2.3.0 Release. Supported browser cache feature.
 - 06/10/2014 - zimg 2.2.0 Release. Fixed memory leak in imagemagick.
 - 05/18/2014 - zimg 2.1.0 Release. Added IP access control module.
 - 04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.
@@ -93,14 +94,18 @@ max_keepalives=1
 retry=3
 system=io.popen("uname -s"):read("*l")
 
+--localcache config
+headers="Cache-Control:max-age=7776000"
+etag=1
+
 --access config
 --support mask rules like "allow 10.1.121.138/24"
---note: remove rule can improve performance
-download_rule="allow all"
+--NOTE: remove rule can improve performance
 upload_rule="allow 127.0.0.1;deny all"
+download_rule="allow all"
 
 --cache config
-cache=1
+cache=0
 mc_ip='127.0.0.1'
 mc_port=11211
 
@@ -114,6 +119,7 @@ root_path='./www/index.html'
 --storage config
 --zimg support 3 ways for storage images
 mode=1
+save_new=1
 
 --mode[1]: local disk mode
 img_path='./img'

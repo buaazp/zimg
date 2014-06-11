@@ -40,6 +40,4 @@ int find_beansdb(memcached_st *memc, const char *key, char *value);
 int set_beansdb(memcached_st *memc, const char *key, const char *value);
 int del_beansdb(memcached_st *memc, const char *key);
 
-int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request);
-
 #endif

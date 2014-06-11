@@ -204,11 +204,15 @@ max_keepalives=1
 retry=3
 system=io.popen("uname -s"):read("*l")
 
+--localcache config
+headers="Cache-Control:max-age=7776000"
+etag=1
+
 --access config
 --support mask rules like "allow 10.1.121.138/24"
 --NOTE: remove rule can improve performance
---download_rule="allow all"
---upload_rule="allow 127.0.0.1;deny all"
+upload_rule="allow 127.0.0.1;deny all"
+download_rule="allow all"
 
 --cache config
 cache=0
@@ -225,6 +229,7 @@ root_path='./www/index.html'
 --storage config
 --zimg support 3 ways for storage images
 mode=1
+save_new=1
 
 --mode[1]: local disk mode
 img_path='./img'
@@ -293,6 +298,8 @@ zimg服务器IP + 端口 / 图片MD5 （? + 长 + 宽 + 等比例 + 灰化）
 
 你可以在自己的APP或网页里嵌入自己需要的URL以获取不同的图片，不同分辨率的图片第一次拉取时会实时生成，之后就会从缓存或后端存储中获取，无需再次压缩。
 
+为了满足更多用户的需求，zimg新增了一个`save_new`配置项来控制裁剪过的图片是否进行持久存储，默认开启。如果设置`save_new=1`开启了此功能，对于通过参数裁剪产生的新图片将存储于你选择的后端中，提高下次访问的速度，同时降低服务器的运算压力，但是会导致存储容量增大，这是一个典型的空间换时间的问题，是否启用可依据具体业务需求决定。
+
 #### 权限控制
 
 由于zimg目前没有基于帐号的权限控制体系，某些应用场景下，你可能希望通过IP来限制上传和下载，你可以通过修改配置文件中access config部分来实现该功能。  
@@ -311,6 +318,33 @@ upload_rule="allow 127.0.0.1;deny all"
 ````
 
 如果不是必须，请注释掉访问规则以提高系统性能。
+
+#### 客户端缓存控制
+
+为了减少网络流量的传输，提高图片加载速度，zimg在v2.3版本中引入了客户端缓存控制功能，目前支持两种方式的缓存配置：Cache-Control和Etag，并且这两种方式可同时生效，互相不冲突。
+
+如果对于HTTP标准中规定的浏览器缓存策略的具体内容不是很熟悉，建议读者查询相关文档，此处仅展示zimg中如何进行设置。
+
+在zimg的配置文件中新增了以下两个配置项：
+
+````
+--localcache config
+headers="Cache-Control:max-age=7776000"
+etag=1
+````
+其中headers的作用是zimg服务器返回给客户端时需要附带的HTTP header信息，此处设置了Cache-Control之后浏览器就可以依据此信息来达到缓存图片的目的，max-age的值是图片缓存期限，单位是秒，默认为90天，你可根据自己的需要进行配置。
+
+同理，如果你有其他header需要发给客户端进行交互，也可在此进行设置，比如：
+
+````
+headers="Allow-Format:jpeg/png/gif;Client-Version:1.0"
+````
+header配置数量并无限制，用`;`进行分割，唯一需要注意的是，zimg根据`;`和`:`来截取header的key和value，所以自定义header的key和value中都不能有这两个字符。
+
+第二个配置项etag决定是否启用Etag header来控制浏览器缓存，开启此功能后，zimg返回给浏览器的图片中附带了Etag信息，当下一次浏览器发来图片请求时，如果该图片内容没有发生变化，则直接返回`304 Not Modified`给客户端，包体内不含任何数据，浏览器/客户端中仍然可以正确地展示该图片。图片内容是否发生变化无需再由开发者写代码来判断，直接使用即可。
+
+对于不同的浏览器，处理Cache-Control的策略不尽相同，配合使用Etag之后，将大幅度地降低传输流量，
+
 
 ### 尾声
 需要提醒的是，zimg并没有经过大型线上应用的检验，更不是微博图床所采用的方案，它只适用于小型的图床服务，难免会有bug存在。不过源码并不复杂，如果你需要的功能zimg不支持，可以很轻易地进行修改使用。

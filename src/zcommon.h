@@ -34,12 +34,13 @@
 #include "zhttpd.h"
 
 #ifndef ZIMG_VERSION
-#define ZIMG_VERSION "3.0.0"
+#define ZIMG_VERSION "2.3.0"
 #endif
 
 #define MAX_LINE 1024 
 #define CACHE_MAX_SIZE 1024*1024
 #define RETRY_TIME_WAIT 1000
+#define WAP_QUALITY 70
 /* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
 #define NUM_THREADS 4
 #define CACHE_KEY_SIZE 128
