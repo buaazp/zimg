@@ -20,15 +20,18 @@
  */
 
 #include <sys/syscall.h>
-#include <ctype.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <ctype.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <errno.h>
 #include "zutil.h"
 #include "zlog.h"
 
 //functions list
+int bind_check(int port);
 pid_t gettid();
 int get_cpu_cores();
 static void kmp_init(const char *pattern, int pattern_size);
@@ -47,6 +50,30 @@ int gen_key(char *key, char *md5, ...);
 
 // this data is for KMP searching
 static int pi[128];
+
+int bind_check(int port)
+{
+    int mysocket, ret = -1;
+    struct sockaddr_in my_addr;
+    if((mysocket = socket(AF_INET, SOCK_STREAM,0)) < 0)
+    {
+        return ret;
+    }
+    bzero(&my_addr,sizeof(my_addr));
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(port);
+    my_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    if(connect(mysocket, (const struct sockaddr *)&my_addr, sizeof(my_addr)) < 0)
+    {
+        if(errno == ECONNREFUSED)
+        {
+            ret = 1;
+        }
+    }
+    close(mysocket);
+    return ret;
+}
 
 pid_t gettid()
 {

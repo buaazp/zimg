@@ -315,6 +315,12 @@ convert:
     }
 
 done:
+    if(settings.etag == 1)
+    {
+        result = zimg_etag_set(request, buff_ptr, img_size);
+        if(result == 2)
+            goto err;
+    }
     result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
     if(result != -1)
     {
@@ -795,6 +801,12 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     }
 
 done:
+    if(settings.etag == 1)
+    {
+        result = zimg_etag_set(request, buff_ptr, img_size);
+        if(result == 2)
+            goto err;
+    }
     result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
     if(result != -1)
     {

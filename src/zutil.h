@@ -24,6 +24,7 @@
 
 #include "zcommon.h"
 
+int bind_check(int port);
 pid_t gettid();
 int get_cpu_cores();
 int kmp(const char *matcher, int mlen, const char *pattern, int plen);

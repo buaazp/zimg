@@ -41,6 +41,7 @@ typedef struct {
     zimg_headers_t *headers;
 } zimg_headers_conf_t;
 
+int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 void free_headers_conf(zimg_headers_conf_t *hcf);
 void dump_request_cb(evhtp_request_t *req, void *arg);

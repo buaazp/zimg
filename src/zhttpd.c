@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include "zhttpd.h"
 #include "zimg.h"
+#include "zmd5.h"
 #include "zutil.h"
 #include "zlog.h"
 #include "zdb.h"
@@ -33,6 +34,7 @@
 
 extern struct setting settings;
 
+int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
 void free_headers_conf(zimg_headers_conf_t *hcf);
@@ -84,6 +86,50 @@ static const char * method_strmap[] = {
     "UNKNOWN",
 };
 
+int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
+{
+    int result = 1;
+    LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5...");
+    md5_state_t mdctx;
+    md5_byte_t md_value[16];
+    char *md5sum = (char *)malloc(33);
+    int i;
+    int h, l;
+    md5_init(&mdctx);
+    md5_append(&mdctx, (const unsigned char*)(buff), len);
+    md5_finish(&mdctx, md_value);
+
+    for(i=0; i<16; ++i)
+    {
+        h = md_value[i] & 0xf0;
+        h >>= 4;
+        l = md_value[i] & 0x0f;
+        md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
+        md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
+    }
+    md5sum[32] = '\0';
+    LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
+    const char *etag_var = evhtp_header_find(request->headers_in, "If-None-Match");
+    LOG_PRINT(LOG_DEBUG, "If-None-Match: %s", etag_var);
+    if(etag_var == NULL)
+    {
+        evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
+    }
+    else
+    {
+        if(strncmp(md5sum, etag_var, 32) == 0)
+        {
+            result = 2;
+        }
+        else
+        {
+            evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
+        }
+    }
+    free(md5sum);
+    return result;
+}
+
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
 {
     if(hdr_str == NULL)
@@ -100,11 +146,11 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
         return NULL;
     }
     strncpy(hdr, hdr_str, hdr_len);
-    char *start = hdr;
-    char *end = strchr(start, ';');
-    end = (end) ? end : hdr+hdr_len;
-    while(start <= end)
+    char *start = hdr, *end;
+    while(start <= hdr+hdr_len)
     {
+        end = strchr(start, ';');
+        end = (end) ? end : hdr+hdr_len;
         char *key = start;
         char *value = strchr(key, ':');
         size_t key_len = value - key;
@@ -113,8 +159,6 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
             zimg_header_t *this_header = (zimg_header_t *)malloc(sizeof(zimg_header_t));
             if (this_header == NULL) {
                 start = end + 1;
-                end = strchr(start, ';');
-                end = (end) ? end : hdr+hdr_len;
                 continue;
             }
             (void) memset(this_header, 0, sizeof(zimg_header_t));
@@ -128,8 +172,6 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
             zimg_headers_t *headers = (zimg_headers_t *)malloc(sizeof(zimg_headers_t));
             if (headers == NULL) {
                 start = end + 1;
-                end = strchr(start, ';');
-                end = (end) ? end : hdr+hdr_len;
                 continue;
             }
 
@@ -139,8 +181,6 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
             hdrconf->n++;
         }
         start = end + 1;
-        end = strchr(start, ';');
-        end = (end) ? end : hdr+hdr_len;
     }
     free(hdr);
     return hdrconf;
@@ -865,6 +905,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(get_img_rst == 2)
     {
         LOG_PRINT(LOG_DEBUG, "Etag Matched Return 304 EVHTP_RES_NOTMOD.");
+        LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d", address, md5, width, height, proportion, gray);
         evhtp_send_reply(req, EVHTP_RES_NOTMOD);
         goto done;
     }

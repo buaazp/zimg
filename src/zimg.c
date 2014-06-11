@@ -34,6 +34,7 @@
 #include "zutil.h"
 #include "zdb.h"
 #include "zscale.h"
+#include "zhttpd.h"
 
 extern struct setting settings;
 
@@ -563,46 +564,9 @@ convert:
 done:
     if(settings.etag == 1)
     {
-        LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5...");
-        md5_state_t mdctx;
-        md5_byte_t md_value[16];
-        char *md5sum = (char *)malloc(33);
-        int i;
-        int h, l;
-        md5_init(&mdctx);
-        md5_append(&mdctx, (const unsigned char*)(buff_ptr), img_size);
-        md5_finish(&mdctx, md_value);
-
-        for(i=0; i<16; ++i)
-        {
-            h = md_value[i] & 0xf0;
-            h >>= 4;
-            l = md_value[i] & 0x0f;
-            md5sum[i * 2] = (char)((h >= 0x0 && h <= 0x9) ? (h + 0x30) : (h + 0x57));
-            md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
-        }
-        md5sum[32] = '\0';
-        LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
-        const char *etag_var = evhtp_header_find(request->headers_in, "If-None-Match");
-        LOG_PRINT(LOG_DEBUG, "If-None-Match: %s", etag_var);
-        if(etag_var == NULL)
-        {
-            evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
-        }
-        else
-        {
-            if(strncmp(md5sum, etag_var, 32) == 0)
-            {
-                result = 2;
-                free(md5sum);
-                goto err;
-            }
-            else
-            {
-                evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
-            }
-        }
-        free(md5sum);
+        result = zimg_etag_set(request, buff_ptr, img_size);
+        if(result == 2)
+            goto err;
     }
     result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
     if(result != -1)
@@ -776,6 +740,18 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         }
     }
 
+    if(settings.save_new == 1 && is_new == false)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
+        if(new_img(buff, len, rsp_path) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
+            LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
+        }
+    }
+    else
+        LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);
+
     if(len < CACHE_MAX_SIZE)
     {
         gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
@@ -784,20 +760,15 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
 
 done:
+    if(settings.etag == 1)
+    {
+        result = zimg_etag_set(request, buff, len);
+        if(result == 2)
+            goto err;
+    }
     result = evbuffer_add(request->buffer_out, buff, len);
     if(result != -1)
     {
-        if(settings.save_new == 1 && is_new == false)
-        {
-            LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
-            if(new_img(buff, len, rsp_path) == -1)
-            {
-                LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
-                LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
-            }
-        }
-        else
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);
         result = 1;
     }
 

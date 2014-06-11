@@ -369,6 +369,11 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    if(bind_check(settings.port) == -1)
+    {
+        fprintf(stderr, "Port %d bind failed!\n", settings.port);
+        return -1;
+    }
 
     if(settings.is_daemon == 1)
     {
