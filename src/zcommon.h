@@ -34,7 +34,7 @@
 #include "zhttpd.h"
 
 #ifndef ZIMG_VERSION
-#define ZIMG_VERSION "2.1.1"
+#define ZIMG_VERSION "3.0.0"
 #endif
 
 #define MAX_LINE 1024 
