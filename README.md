@@ -11,7 +11,7 @@ Contact me: zp@buaa.us
 [![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
-- 06/11/2014 - zimg 2.3.0 Release. Supported browser cache feature.
+- 06/15/2014 - zimg 2.3.0 Release. Supported browser cache feature.
 - 06/10/2014 - zimg 2.2.0 Release. Fixed memory leak in imagemagick.
 - 05/18/2014 - zimg 2.1.0 Release. Added IP access control module.
 - 04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.
