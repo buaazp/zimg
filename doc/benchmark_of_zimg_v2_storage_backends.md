@@ -1,5 +1,7 @@
 ## benchmark of zimg v2 storage backends
 
+[@招牌疯子](http://weibo.com/819880808)
+
 这个测试是为了检验zimg采用不同存储后端时读取数据时的性能差异，以便根据测试数据选择最佳的存储方案。
 
 #### 测试方案
@@ -12,7 +14,7 @@
 
 测试机为中等配置的服务器：  
 
-````
+```
 CPU: Intel(R) Xeon(R) CPU E5-2620 @ 2.00GHz, 12 Cores  
 Memory: 32GB  
 OS: CentOS release 5.8  
@@ -20,7 +22,7 @@ Disk:
   buffered disk reads: 156.39 MB/sec
   cached reads: 11024.11 MB/sec
 zimg: version 2.0.0 Beta
-````
+```
 
 #### 测试结果
 
