@@ -19,6 +19,9 @@
  * @date 2013-07-19
  */
 
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/time.h>
 #include <stdarg.h>
 #include "zlog.h"
@@ -28,6 +31,7 @@ extern struct setting settings;
 static int log_valid(int log_id);
 void log_init();
 int log_open(const char *path, const char* mode);
+void log_handler(const char *msg);
 void log_printf0(int log_id, int log_level, const char *fmt, ...);
 void log_flush(int log_id);
 void log_close(int log_id);
@@ -73,7 +77,7 @@ void log_init()
  
 int log_open(const char *path, const char* mode)
 {
-    if(settings.log == false)
+    if(settings.log == 0)
         return -1;
 
     int i;
@@ -99,10 +103,29 @@ int log_open(const char *path, const char* mode)
     return LOG_INVALID;
 }
 
+/* Log a fixed message without printf-alike capabilities, in a way that is
+ * safe to call from a signal handler.
+ *
+ * We actually use this only for signals that are not fatal from the point
+ * of view of Redis. Signals that are going to kill the server anyway and
+ * where we need printf-alike features are served by redisLog(). */
+void log_handler(const char *msg)
+{
+    int fd, log_id;
+    int log_to_stdout = settings.log == 0;
+
+    fd = log_to_stdout ? STDOUT_FILENO :
+        open(settings.log_name, O_APPEND|O_CREAT|O_WRONLY, 0644);
+    if (fd == -1) return;
+    if (write(fd,msg,strlen(msg)) == -1) goto err;
+    if (write(fd,"\n",1) == -1) goto err;
+err:
+    if (!log_to_stdout) close(fd);
+}
 
 void log_printf0(int log_id, int log_level, const char *fmt, ...)
 {
-    if(settings.log == false)
+    if(settings.log == 0)
         return;
 
     FILE *fp;

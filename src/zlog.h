@@ -45,6 +45,7 @@ enum LOG_LEVEL{
 
 void log_init();
 int log_open(const char *path, const char* mode);
+void log_handler(const char *msg);
 void log_printf0(int log_id, int level, const char *fmt, ...);
 void log_flush(int log_id);
 void log_close(int log_id);

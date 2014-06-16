@@ -249,7 +249,12 @@ static int load_conf(const char *conf)
  */
 static void sighandler(int signal) 
 {
-    LOG_PRINT(LOG_DEBUG, "Received signal %d: %s.  Shutting down.", signal, strsignal(signal));
+    char msg[128];
+    msg[0] = '\0';
+    strcat(msg, "Received signal ");
+    strcat(msg, strsignal(signal));
+    strcat(msg, ". Shutting down.");
+    log_handler(msg);
     kill_server();
 }
 
