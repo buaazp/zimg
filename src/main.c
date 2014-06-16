@@ -251,11 +251,11 @@ static void sighandler(int signal)
 {
     char msg[128];
     msg[0] = '\0';
-    strcat(msg, "Received signal ");
+    strcat(msg, "[INFO] shutdown signal ");
     strcat(msg, strsignal(signal));
-    strcat(msg, ". Shutting down.");
     log_handler(msg);
-    kill_server();
+    fprintf(stdout, "\nbye bye!\n");
+    exit(1);
 }
 
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
@@ -489,7 +489,7 @@ int main(int argc, char **argv)
     free_access_conf(settings.up_access);
     free_access_conf(settings.down_access);
 
-    fprintf(stdout, "\nByebye!\n");
+    //fprintf(stdout, "\nByebye!\n");
     return 0;
 }
 
@@ -499,10 +499,8 @@ int main(int argc, char **argv)
  */
 void kill_server(void)
 {
-    LOG_PRINT(LOG_DEBUG, "Stopping socket listener event loop.");
     if (event_base_loopexit(evbase, NULL)) {
         LOG_PRINT(LOG_DEBUG, "Error shutting down server");
     }
-    LOG_PRINT(LOG_DEBUG, "Stopping workers.\n");
     LOG_PRINT(LOG_INFO, "zimg stop");
 }
