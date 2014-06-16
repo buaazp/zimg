@@ -27,6 +27,7 @@
 #endif
 
 #include <stdio.h>
+#include <fcntl.h>
 #include <wand/MagickWand.h>
 #include <inttypes.h>
 #include <unistd.h>
@@ -254,8 +255,9 @@ static void sighandler(int signal)
     strcat(msg, "[INFO] shutdown signal ");
     strcat(msg, strsignal(signal));
     log_handler(msg);
-    fprintf(stdout, "\nbye bye!\n");
-    exit(1);
+    write(STDOUT_FILENO, "\nbye bye!\n", 10);
+
+    _exit(1);
 }
 
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
