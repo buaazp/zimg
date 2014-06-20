@@ -4,6 +4,8 @@
 #include "webimg2.h"
 #include "internal.h"
 
+#include "../zlog.h"
+
 static void calc_sample_table(uint32_t *table, uint32_t s, uint32_t d)
 {
 	uint32_t *ptr = table;
@@ -28,6 +30,7 @@ static inline void scale_box_rgb_first_line
 	uint32_t r, g, b;
 	uint32_t *tp = line;
 	uint8_t *sp = src;
+    uint8_t gray;
 
 	j = 0;
 	for (i=0; i<d; i++) {
@@ -37,9 +40,9 @@ static inline void scale_box_rgb_first_line
 		b = *sp++;
 		j++;
 		for (; j<tbl[i]; j++) {
-			r += *sp++;
-			g += *sp++;
-			b += *sp++;
+            r += *sp++;
+            g += *sp++;
+            b += *sp++;
 		}
 		*tp++ = r;
 		*tp++ = g;
@@ -54,6 +57,7 @@ static inline void scale_box_rgb_line
 	uint32_t r, g, b;
 	uint32_t *tp = line;
 	uint8_t *sp = src;
+    uint8_t gray;
 
 	j = 0;
 	for (i=0; i<d; i++) {
@@ -63,9 +67,9 @@ static inline void scale_box_rgb_line
 		b = *sp++;
 		j++;
 		for (; j<tbl[i]; j++) {
-			r += *sp++;
-			g += *sp++;
-			b += *sp++;
+            r += *sp++;
+            g += *sp++;
+            b += *sp++;
 		}
 		*tp++ += r;
 		*tp++ += g;
@@ -84,7 +88,7 @@ int scaledown_box_rgb(struct image *src, struct image *dst)
     //buaazp: maybe memory leak here? xtbl=NULL but ytbl!=NULL
 	if (xtbl == NULL) return -1;
     //buaazp: this section doesn't work?
-	if (xtbl == NULL) {
+	if (ytbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -205,7 +209,7 @@ int scaledown_box_rgba(struct image *src, struct image *dst)
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
 	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (xtbl == NULL) {
+	if (ytbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -275,7 +279,7 @@ static inline void scale_box_gray_first_line
 		for (; j<tbl[i]; j++) {
 			l += *sp++;
 		}
-		*tp++ = l;
+		*tp++ += l;
 	}
 }
 
@@ -303,12 +307,12 @@ static inline void scale_box_gray_line
 int scaledown_box_gray(struct image *src, struct image *dst)
 {
 	uint32_t *tmpline;
-	uint32_t * xtbl, *ytbl;
+	uint32_t *xtbl, *ytbl;
 
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
 	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (xtbl == NULL) {
+	if (ytbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -417,6 +421,52 @@ int wi_scale(struct image *im, uint32_t cols, uint32_t rows)
 
 	image_free_data(im);
 	memcpy(im, &dst, sizeof(struct image));
+
+	im->converted = 1;
+
+	return 0;
+}
+
+int wi_gray(struct image *im)
+{
+    LOG_PRINT(LOG_INFO, "wi_gray()");
+      
+	int ret = WI_OK, i, j;
+    uint8_t r, g, b, gray, *ptr;
+
+	ret = load_image(im);
+	if (ret != WI_OK) return WI_E_LOADER_LOAD;
+
+	im->colorspace = CS_GRAYSCALE;
+    for (i=0; i<im->rows; i++) {
+        ptr = im->row[i];
+        for (j=0; j<im->cols; j++) {
+            /* grayscale 
+            gray = *ptr++ * 28; 
+            gray += *ptr++ * 151;
+            gray += *ptr++ * 77; 
+            gray = (gray >> 8) & 0xff;
+            *sptr = (uint8_t)((gray));
+            */
+            r = ptr[0]; 
+            g = ptr[1];
+            b = ptr[2]; 
+            gray = (r+g+b) / 3;
+            im->row[i][j] = gray;
+            ptr += 3;
+        }   
+    } 
+    //ret = image_alloc_data(im);
+	size_t rowlen = im->cols * get_components(im);
+	for (i=0; i<im->rows; i++) {
+		im->row[i] = im->data + i * rowlen;
+	}
+	//im->colorspace = CS_RGB;
+
+    if (im->colorspace == CS_RGB)
+        LOG_PRINT(LOG_INFO, "im->colorspace = CS_RGB");
+    if (im->colorspace == CS_GRAYSCALE)
+        LOG_PRINT(LOG_INFO, "im->colorspace = CS_GRAYSCALE");
 
 	im->converted = 1;
 

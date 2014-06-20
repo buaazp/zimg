@@ -98,6 +98,7 @@ static inline void wi_set_free
 
 int wi_set_format(struct image *im, char *fmt);
 void wi_set_quality(struct image *im, uint32_t quality);
+int wi_gray(struct image *im);
 
 static inline int wi_is_valid_size(uint32_t width, uint32_t height)
 {

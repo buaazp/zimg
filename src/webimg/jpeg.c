@@ -9,6 +9,8 @@
 #include "webimg2.h"
 #include "internal.h"
 
+#include "../zlog.h"
+
 //#define MAX_COMPONENTS			4
 #define WI_JPEG_QUALITY			85 
 #define MIN_OUTBUFF_LEN			8192
@@ -177,6 +179,8 @@ int wi_jpeg_init_read(struct image *im)
 	rewind_blob(&im->in_buf);
 
 	wi_jpeg_blob_src(&arg->jinfo, im);
+    LOG_PRINT(LOG_INFO, "[init_read_blob]arg->jinfo->jpeg_color_space = %d", arg->jinfo.jpeg_color_space);
+    LOG_PRINT(LOG_INFO, "[init_read_blob]arg->jinfo->out_color_space = %d", arg->jinfo.out_color_space);
 
 	im->load_arg = arg;
 
@@ -312,10 +316,13 @@ int wi_jpeg_read_img_info(struct image *im)/*{{{*/
 	im->cols		= jinfo->image_width;
 	im->rows		= jinfo->image_height;
 
+    LOG_PRINT(LOG_INFO, "[read_info]jinfo->jpeg_color_space = %d", jinfo->jpeg_color_space);
 	if (jinfo->out_color_space == JCS_RGB) {
 		im->colorspace = CS_RGB;
+        LOG_PRINT(LOG_INFO, "[read_info]im->colorspace = CS_RGB");
 	} else if (jinfo->out_color_space == JCS_GRAYSCALE) {
 		im->colorspace = CS_GRAYSCALE;
+        LOG_PRINT(LOG_INFO, "[read_info]im->colorspace = CS_GRAYSCALE");
 	} else if (jinfo->out_color_space == JCS_CMYK) {
 		im->colorspace = CS_CMYK;
 	} else {
@@ -323,6 +330,7 @@ int wi_jpeg_read_img_info(struct image *im)/*{{{*/
 	}
 
 	comps = jinfo->output_components;
+    LOG_PRINT(LOG_INFO, "[read_info]jinfo->output_components = %d", jinfo->output_components);
 	if (comps > MAX_COMPONENTS) {
 		return -1;
 	}
@@ -344,6 +352,42 @@ int wi_jpeg_resample(struct image *im, int num, int denom)
 
 	arg->jinfo.scale_num = num;
 	arg->jinfo.scale_denom = denom;
+
+	return 0;
+}
+
+static int wi_jpeg_rgb_to_gray(struct image *im)
+{
+    LOG_PRINT(LOG_INFO, "wi_jpeg_rgb_to_gray()...");
+	int i, pixs;
+	uint8_t r, g, b, *s, *d;
+	struct wi_jpeg_arg *arg = im->load_arg;
+
+	s = d = im->data;
+	pixs = im->rows * im->cols;
+
+	for (i=0; i<pixs/3; i++) {
+		r = *s;
+        s++;
+		g = *s;
+        s++;
+		b = *s;
+        s++;
+		*d = (r + g + b) / 3;
+        //LOG_PRINT(LOG_INFO, "%d/%d : r = %d g = %d b = %d d = %d", i, pixs, r, g, b, *d);
+        d++;
+        //s += 3;
+	}
+
+	s = im->data;
+	pixs = im->cols;
+	for (i=0; i<im->rows; i++) {
+		im->row[i] = s;
+		s += pixs;
+	}
+
+	im->colorspace = CS_GRAYSCALE;
+	arg->components = 1;
 
 	return 0;
 }
@@ -381,17 +425,36 @@ static int wi_jpeg_cmyk_to_rgb(struct image *im)
 	return 0;
 }
 
+
 int wi_jpeg_load_image(struct image *im)
 {
 	int i, ret;
 	struct wi_jpeg_arg *arg;
 	struct jpeg_decompress_struct *jinfo;
 
-	if (im->loaded) return 0;
+	if (im->loaded)
+    {
+        LOG_PRINT(LOG_INFO, "loaded!");
+        return 0;
+    }
 
 	/* start decompress image */
 	arg = im->load_arg;
 	jinfo = &arg->jinfo;
+    /*
+    jinfo->out_color_components = 1;
+    jinfo->output_components = 1;
+    LOG_PRINT(LOG_INFO, "arg->components = %d", arg->components);
+    LOG_PRINT(LOG_INFO, "jinfo->num_components = %d", jinfo->num_components);
+    LOG_PRINT(LOG_INFO, "jinfo->jpeg_color_space = %d", jinfo->jpeg_color_space);
+    LOG_PRINT(LOG_INFO, "jinfo->out_color_space = %d", jinfo->out_color_space);
+    LOG_PRINT(LOG_INFO, "jinfo->out_color_components = %d", jinfo->out_color_components);
+    LOG_PRINT(LOG_INFO, "jinfo->output_components = %d", jinfo->output_components);
+    LOG_PRINT(LOG_INFO, "jinfo->image_width = %d", jinfo->image_width);
+    LOG_PRINT(LOG_INFO, "jinfo->image_height = %d", jinfo->image_height);
+    LOG_PRINT(LOG_INFO, "jinfo->output_width = %d", jinfo->output_width);
+    LOG_PRINT(LOG_INFO, "jinfo->output_height = %d", jinfo->output_height);
+    */
 
 	/* set jpeg error handler */
 	if (sigsetjmp(arg->jerr.setjmp_buffer, 1)) {
@@ -399,7 +462,15 @@ int wi_jpeg_load_image(struct image *im)
 		return -1;
 	}
 
+    LOG_PRINT(LOG_INFO, "jinfo->jpeg_color_space = %d", jinfo->jpeg_color_space);
+    LOG_PRINT(LOG_INFO, "jinfo->out_color_space = %d", jinfo->out_color_space);
+    LOG_PRINT(LOG_INFO, "jinfo->output_width = %d", jinfo->output_width);
+    LOG_PRINT(LOG_INFO, "jinfo->output_height = %d", jinfo->output_height);
 	jpeg_start_decompress(jinfo);
+    LOG_PRINT(LOG_INFO, "jinfo->jpeg_color_space = %d", jinfo->jpeg_color_space);
+    LOG_PRINT(LOG_INFO, "jinfo->out_color_space = %d", jinfo->out_color_space);
+    LOG_PRINT(LOG_INFO, "jinfo->output_width = %d", jinfo->output_width);
+    LOG_PRINT(LOG_INFO, "jinfo->output_height = %d", jinfo->output_height);
 	im->cols = jinfo->output_width;
 	im->rows = jinfo->output_height;
 
@@ -411,6 +482,7 @@ int wi_jpeg_load_image(struct image *im)
 	}
 
 	if (im->colorspace == CS_CMYK) wi_jpeg_cmyk_to_rgb(im);
+	//if (im->colorspace == CS_GRAYSCALE) wi_jpeg_rgb_to_gray(im);
 
 	im->loaded = 1;
 

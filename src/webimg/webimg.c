@@ -8,6 +8,8 @@
 #include "webimg2.h"
 #include "internal.h"
 
+#include "../zlog.h"
+
 #define default_malloc_args		NULL
 #define default_realloc_args	NULL
 #define default_free_args		NULL
@@ -339,6 +341,7 @@ static inline int wi_save(struct image *im)
 
 	ret = load_image(im);
 	if (ret != WI_OK) return WI_E_LOADER_LOAD;
+
 	return im->sv->save(im);
 }
 
@@ -412,3 +415,4 @@ void wi_set_quality(struct image *im, uint32_t quality)
 	}
 	return;
 }
+

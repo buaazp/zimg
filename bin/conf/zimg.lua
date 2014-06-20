@@ -1,7 +1,7 @@
 --zimg server config
 
 --server config
-is_daemon=1
+is_daemon=0
 port=4869
 thread_num=4
 backlog_num=1024
@@ -12,7 +12,7 @@ system=io.popen("uname -s"):read("*l")
 
 --header config
 headers="Cache-Control:max-age=7776000"
-etag=1
+etag=0
 
 --access config
 --support mask rules like "allow 10.1.121.138/24"
@@ -35,7 +35,7 @@ root_path='./www/index.html'
 --storage config
 --zimg support 3 ways for storage images
 mode=1
-save_new=1
+save_new=0
 
 --mode[1]: local disk mode
 img_path='./img'

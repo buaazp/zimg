@@ -81,24 +81,32 @@ int convert(struct image *im, zimg_req_t *req)
     int result;
 	int ret;
 
-    LOG_PRINT(LOG_INFO, "proportion(im, %d, %d)", req->width, req->height);
+    /* set gray */
+    if (req->gray && im->colorspace != CS_GRAYSCALE) {
+        LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
+        result = wi_gray(im);
+        if (result == -1) return -1;
+    }
+
+    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d)", req->width, req->height);
     result = proportion(im, req->width, req->height);
+    //result = 1;
 	if (result == -1) return -1;
 
 	/* set quality */
 	if (im->quality > WAP_QUALITY) {
-        LOG_PRINT(LOG_INFO, "wi_set_quality(im, %d)", WAP_QUALITY);
+        LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", WAP_QUALITY);
 		wi_set_quality(im, WAP_QUALITY);
 	}
 
 	/* set format */
 	if (strncmp(im->format, "GIF", 3) != 0) {
-        LOG_PRINT(LOG_INFO, "wi_set_format(im, %s)", "JPEG");
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", "JPEG");
         ret = wi_set_format(im, "JPEG");
         if (ret != WI_OK) return -1;
 	}
 
-    LOG_PRINT(LOG_INFO, "convert(im, req) %d", result);
+    LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);
 	return result;
 }
 
