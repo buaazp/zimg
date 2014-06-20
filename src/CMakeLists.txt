@@ -132,6 +132,7 @@ set(ZIMG_EXTERNAL_LIBS
     ${OPENSSL_LIBRARIES}
     ${ImageMagick_MagickWand_LIBRARY}
     ${LIBMEMCACHED_LIBRARIES}
+    " -lm -ldl"
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
