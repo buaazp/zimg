@@ -145,6 +145,7 @@ set(ZIMG_EXTERNAL_LIBS
     ${GIF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${WEBP_LIBRARIES}
+    "-lm -ldl"
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

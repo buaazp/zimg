@@ -144,7 +144,11 @@ static int load_conf(const char *conf)
 
     lua_getglobal(L, "system");
     if(lua_isstring(L, -1))
-        snprintf(settings.server_name, 128, "%s %s", settings.server_name, lua_tostring(L, -1));
+    {
+        char tmp[128];
+        snprintf(tmp, 128, "%s %s", settings.server_name, lua_tostring(L, -1));
+        snprintf(settings.server_name, 128, "%s", tmp);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "headers");
