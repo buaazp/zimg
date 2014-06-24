@@ -427,48 +427,7 @@ int wi_scale(struct image *im, uint32_t cols, uint32_t rows)
 	return 0;
 }
 
-int wi_gray(struct image *im)
-{
-    LOG_PRINT(LOG_INFO, "wi_gray()");
-      
-	int ret = WI_OK, i, j;
-    uint8_t r, g, b, gray, *ptr;
 
-	ret = load_image(im);
-	if (ret != WI_OK) return WI_E_LOADER_LOAD;
 
-	im->colorspace = CS_GRAYSCALE;
-    for (i=0; i<im->rows; i++) {
-        ptr = im->row[i];
-        for (j=0; j<im->cols; j++) {
-            /* grayscale 
-            gray = *ptr++ * 28; 
-            gray += *ptr++ * 151;
-            gray += *ptr++ * 77; 
-            gray = (gray >> 8) & 0xff;
-            *sptr = (uint8_t)((gray));
-            */
-            r = ptr[0]; 
-            g = ptr[1];
-            b = ptr[2]; 
-            gray = (r+g+b) / 3;
-            im->row[i][j] = gray;
-            ptr += 3;
-        }   
-    } 
-    //ret = image_alloc_data(im);
-	size_t rowlen = im->cols * get_components(im);
-	for (i=0; i<im->rows; i++) {
-		im->row[i] = im->data + i * rowlen;
-	}
-	//im->colorspace = CS_RGB;
 
-    if (im->colorspace == CS_RGB)
-        LOG_PRINT(LOG_INFO, "im->colorspace = CS_RGB");
-    if (im->colorspace == CS_GRAYSCALE)
-        LOG_PRINT(LOG_INFO, "im->colorspace = CS_GRAYSCALE");
 
-	im->converted = 1;
-
-	return 0;
-}

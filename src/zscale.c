@@ -81,17 +81,17 @@ int convert(struct image *im, zimg_req_t *req)
     int result;
 	int ret;
 
+    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d)", req->width, req->height);
+    result = proportion(im, req->width, req->height);
+    //result = 1;
+	if (result == -1) return -1;
+
     /* set gray */
     if (req->gray && im->colorspace != CS_GRAYSCALE) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
         result = wi_gray(im);
         if (result == -1) return -1;
     }
-
-    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d)", req->width, req->height);
-    result = proportion(im, req->width, req->height);
-    //result = 1;
-	if (result == -1) return -1;
 
 	/* set quality */
 	if (im->quality > WAP_QUALITY) {

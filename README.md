@@ -11,6 +11,8 @@ Contact me: zp@buaa.us
 [![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
+- 08/01/2014 - zimg 3.0.0 Release. High performence image process library.
+- 06/15/2014 - zimg 2.3.0 Release. Added broswer cache control.
 - 06/10/2014 - zimg 2.2.0 Release. Fixed memory leak in imagemagick.
 - 05/18/2014 - zimg 2.1.0 Release. Added IP access control module.
 - 04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.
@@ -21,7 +23,6 @@ Contact me: zp@buaa.us
 > We stand on the shoulders of giants.  
 
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO.  
-[imagemagick](http://www.imagemagick.org/script/magick-wand.php): A software suite to create, edit, compose, or convert bitmap images.  
 [libmemcached](https://github.com/trondn/libmemcached): LibMemcached is designed to provide the greatest number of options to use Memcached.  
 [lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
 #### [Optional] For Storage:  
@@ -34,6 +35,7 @@ Contact me: zp@buaa.us
 #### Thanks to:  
 > zimg contains libevhtp and libhiredis. You needn't install them now.
 
+[webimg](http://webimg.org): A software suite to create, edit, compose, or convert bitmap images. Developed by SINA imgbed group.  
 [libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API.  
 [hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
 
@@ -46,6 +48,8 @@ Multi-thread support for multi-core processor server.
 Use lua for conf and other functions.  
 **Support beansdb/SSDB mode to save images into distributed storage backends.**  
 IP access control for uploading and downloading images.  
+Broswer and client cache control.  
+**Support high performence image process library webimg.**  
 
 ### In Planning:
 Performance optimization.  
@@ -55,7 +59,7 @@ Security measures.
 There is an architecture design document of zimg v1.0. It is written in Chinese.  
 [Architecture Design of zimg](http://zimg.buaa.us/arch_design.html)  
 And this document is to introduce zimg v2.0.  
-[Distributed Image Storage Server: zimg](http://blog.buaa.us/?p=215)  
+[Distributed Image Storage Server: zimg](http://blog.buaa.us/zimg-v2-release/)  
 The architecture of zimg's storage:  
 
 ![architecture_of_zimg_v2](http://ww2.sinaimg.cn/large/4c422e03gw1efpmngazc0j21ik1e6dnk.jpg)
@@ -92,6 +96,10 @@ backlog_num=1024
 max_keepalives=1
 retry=3
 system=io.popen("uname -s"):read("*l")
+
+--header config
+headers="Cache-Control:max-age=7776000"
+etag=1
 
 --access config
 --support mask rules like "allow 10.1.121.138/24"
