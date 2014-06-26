@@ -727,7 +727,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     char *buff_ptr = NULL;
     size_t img_size;
     struct image *im = NULL;
-    bool is_new = true;
+    bool to_save = true;
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
@@ -743,6 +743,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
+        to_save = false;
         goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
@@ -753,6 +754,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
         {
             set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
         }
+        to_save = false;
         goto done;
     }
 
@@ -786,7 +788,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     }
     result = convert(im, req);
     if(result == -1) goto err;
-    if(result == WI_OK) is_new = false;
+    if(result == 1) to_save = false;
 
     buff_ptr = (char *)wi_get_blob(im, &img_size);
     if (buff_ptr == NULL) {
@@ -810,7 +812,7 @@ done:
     result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
     if(result != -1)
     {
-        if(settings.save_new == 1 && is_new == false)
+        if(settings.save_new == 1 && to_save == true)
         {
             save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
         }

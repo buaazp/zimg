@@ -9,7 +9,7 @@
 #define QUALITY_90				90
 #define QUALITY_95				95
 
-static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows);
+static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows);
 int convert(struct image *im, zimg_req_t *req);
 
 #endif

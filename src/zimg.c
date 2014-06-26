@@ -599,7 +599,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     struct image *im = NULL;
     size_t len = 0;
 
-    bool is_new = true;
+    bool to_save = true;
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
@@ -608,6 +608,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
+        to_save = false;
         goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
@@ -707,7 +708,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
         ret = convert(im, req);
         if(ret == -1) goto err;
-        if(ret == WI_OK) is_new = false;
+        if(ret == 1) to_save = false;
 
         //char *dpath = "./test_crop.jpg";
         //ret = wi_save_file(im, dpath);
@@ -721,6 +722,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     }
     else
     {
+        to_save = false;
         fstat(fd, &f_stat);
         size_t rlen = 0;
         len = f_stat.st_size;
@@ -748,7 +750,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         }
     }
 
-    if(settings.save_new == 1 && is_new == false)
+    if(settings.save_new == 1 && to_save == true)
     {
         LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
         if(new_img(buff, len, rsp_path) == -1)

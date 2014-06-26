@@ -8,7 +8,7 @@
 #include "zcommon.h"
 #include "zscale.h"
 
-static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows);
+static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows);
 int convert(struct image *im, zimg_req_t *req);
 
 
@@ -16,10 +16,10 @@ int convert(struct image *im, zimg_req_t *req);
  * 
  * sample URLs:
  * http://127.0.0.1:4869/md5?w=300
- * http://127.0.0.1:4869/md5?w=200&h=300
+ * http://127.0.0.1:4869/md5?w=200&h=300&p=0
+ * http://127.0.0.1:4869/md5?w=200&h=300&p=2
+ * http://127.0.0.1:4869/md5?x=0&y=0&w=100&h=100
  * http://127.0.0.1:4869/md5?t=square
- * http://127.0.0.1:4869/md5?t=square&s=200
- * http://127.0.0.1:4869/md5?t=crop&x=0&y=0&w=100&h=100
  * http://127.0.0.1:4869/md5?t=maxwidth
  * http://127.0.0.1:4869/md5?t=maxsize
  *
@@ -51,47 +51,66 @@ static int square(struct image *im, uint32_t size)
 	return 0;
 }
 
-static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows)
+static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows)
 {
 	int ret;
-    uint32_t cols, rows;
 
-    if (arg_cols == 0 && arg_rows == 0) return 0;
-
-    if (arg_cols != 0)
+    if(p_type == 1)
     {
-        cols = arg_cols;
-        if (im->cols < cols) return 1;
-        rows = 0;
+        if (cols > 0)
+        {
+            rows = round(((double)cols / im->cols) * im->rows);
+        }
+        else
+        {
+            cols = round(((double)rows / im->rows) * im->cols);
+        }
+        LOG_PRINT(LOG_INFO, "p=1, wi_scale(im, %d, %d)", cols, rows);
+        ret = wi_scale(im, cols, rows);
     }
-    else
+    else if (p_type == 0)
     {
-        rows = arg_rows;
-        if (im->rows < rows) return 1;
-        cols = 0;
+        if (cols == 0) cols = im->cols;
+        if (rows == 0) rows = im->rows;
+        LOG_PRINT(LOG_INFO, "p=0, wi_scale(im, %d, %d)", cols, rows);
+        ret = wi_scale(im, cols, rows);
+    }
+    else if (p_type == 2)
+    {
+        uint32_t x, y;
+        if (cols == 0) cols = im->cols;
+        if (rows == 0) rows = im->rows;
+        x = (uint32_t)floor((im->cols - cols) / 2.0);
+        y = (uint32_t)floor((im->rows - rows) / 2.0);
+        LOG_PRINT(LOG_INFO, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+        ret = wi_crop(im, x, y, cols, rows);
     }
 
-    LOG_PRINT(LOG_DEBUG, "wi_scale(im, %d, %d)", cols, rows);
-	ret = wi_scale(im, cols, rows);
-
-	return (ret == WI_OK) ? 0 : -1;
+	return ret;
 }
 
 int convert(struct image *im, zimg_req_t *req)
 {
-    int result;
-	int ret;
+    int result = 0, ret;
+    uint32_t cols = req->width, rows = req->height;
+    if (cols == 0 && rows == 0) goto grayscale;
+    if (im->cols < cols || im->rows < rows) {
+        result = 1;
+        goto grayscale;
+    }
 
+    /* crop and scale */
+    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
+    ret = proportion(im, req->proportion, cols, rows);
+    if (ret != WI_OK) return -1;
+
+grayscale:
     /* set gray */
     if (req->gray && im->colorspace != CS_GRAYSCALE) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
-        result = wi_gray(im);
-        if (result == -1) return -1;
+        ret = wi_gray(im);
+        if (ret != WI_OK) return -1;
     }
-
-    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d)", req->width, req->height);
-    result = proportion(im, req->width, req->height);
-	if (result == -1) return -1;
 
 	/* set quality */
 	if (im->quality > WAP_QUALITY) {

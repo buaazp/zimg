@@ -77,12 +77,12 @@ static inline void scale_box_rgb_line
 int scaledown_box_rgb(struct image *src, struct image *dst)
 {
 	uint32_t *tmpline;
-	uint32_t * xtbl, *ytbl;
+	uint32_t *xtbl, *ytbl;
 
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
-	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (xtbl == NULL) {
+	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
+	if (ytbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -198,12 +198,12 @@ static inline void scale_box_rgba_line
 int scaledown_box_rgba(struct image *src, struct image *dst)
 {
 	uint32_t *tmpline;
-	uint32_t * xtbl, *ytbl;
+	uint32_t *xtbl, *ytbl;
 
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
-	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (xtbl == NULL) {
+	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
+	if (ytbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -301,12 +301,12 @@ static inline void scale_box_gray_line
 int scaledown_box_gray(struct image *src, struct image *dst)
 {
 	uint32_t *tmpline;
-	uint32_t * xtbl, *ytbl;
+	uint32_t *xtbl, *ytbl;
 
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
-	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (xtbl == NULL) {
+	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
+	if (ytbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -364,15 +364,8 @@ int wi_scale(struct image *im, uint32_t cols, uint32_t rows)
 	struct image dst;
 
 	if (cols == 0 && rows == 0) return -1;
-	if (cols > 0 && rows > 0) return -1;
-
-	if (cols > 0) {
-		rows = round(((double)cols / im->cols) * im->rows);
-		if (cols >= im->cols) return 0;
-	} else {
-		cols = round(((double)rows / im->rows) * im->cols);
-		if (rows >= im->rows) return 0;
-	}
+	//if (cols > 0 && rows > 0) return -1;
+    if (cols > im->cols || rows > im->rows) return 0;
 
 	/* pre resample */
 #ifdef PRERESAMPLE
