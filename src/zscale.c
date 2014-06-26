@@ -71,8 +71,9 @@ static int proportion(struct image *im, uint32_t arg_cols, uint32_t arg_rows)
         cols = 0;
     }
 
-    LOG_PRINT(LOG_INFO, "wi_scale(im, %d, %d)", cols, rows);
+    LOG_PRINT(LOG_DEBUG, "wi_scale(im, %d, %d)", cols, rows);
 	ret = wi_scale(im, cols, rows);
+
 	return (ret == WI_OK) ? 0 : -1;
 }
 
@@ -81,17 +82,16 @@ int convert(struct image *im, zimg_req_t *req)
     int result;
 	int ret;
 
-    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d)", req->width, req->height);
-    result = proportion(im, req->width, req->height);
-    //result = 1;
-	if (result == -1) return -1;
-
     /* set gray */
     if (req->gray && im->colorspace != CS_GRAYSCALE) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
         result = wi_gray(im);
         if (result == -1) return -1;
     }
+
+    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d)", req->width, req->height);
+    result = proportion(im, req->width, req->height);
+	if (result == -1) return -1;
 
 	/* set quality */
 	if (im->quality > WAP_QUALITY) {

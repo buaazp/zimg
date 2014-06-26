@@ -10,7 +10,7 @@
 #include "internal.h"
 
 //#define MAX_COMPONENTS			4
-#define WI_JPEG_QUALITY			85
+#define WI_JPEG_QUALITY			85 
 #define MIN_OUTBUFF_LEN			8192
 #define JPEG_MAGIC				"\377\330\377"
 
@@ -163,7 +163,7 @@ int wi_jpeg_init_read(struct image *im)
 		arg->comp_info[i].component_id	= i;
 		arg->comp_info[i].h_samp_factor	= 1;
 		arg->comp_info[i].v_samp_factor	= 1;
-	}
+	}   
 	arg->components = MAX_COMPONENTS;
 
 	wi_jpeg_set_error_handler((j_common_ptr)&arg->jinfo, &arg->jerr);
@@ -177,6 +177,8 @@ int wi_jpeg_init_read(struct image *im)
 	rewind_blob(&im->in_buf);
 
 	wi_jpeg_blob_src(&arg->jinfo, im);
+
+	im->load_arg = arg;
 
 	return 0;
 }
@@ -346,35 +348,6 @@ int wi_jpeg_resample(struct image *im, int num, int denom)
 	return 0;
 }
 
-static int wi_jpeg_rgb_to_gray(struct image *im)
-{
-	int i, pixs;
-	uint8_t r, g, b, *s, *d;
-	struct wi_jpeg_arg *arg = im->load_arg;
-
-	s = d = im->data;
-	pixs = im->rows * im->cols;
-
-	for (i=0; i<pixs/3; i++) {
-		r = *s++;
-		g = *s++;
-		b = *s++;
-		*d++ = (r + g + b) / 3;
-	}
-
-	s = im->data;
-	pixs = im->cols;
-	for (i=0; i<im->rows; i++) {
-		im->row[i] = s;
-		s += pixs;
-	}
-
-	im->colorspace = CS_GRAYSCALE;
-	arg->components = 1;
-
-	return 0;
-}
-
 /**
  * CMYK -> RGB
  * http://sourceforge.net/p/libjpeg-turbo/patches/15/
@@ -408,17 +381,13 @@ static int wi_jpeg_cmyk_to_rgb(struct image *im)
 	return 0;
 }
 
-
 int wi_jpeg_load_image(struct image *im)
 {
 	int i, ret;
 	struct wi_jpeg_arg *arg;
 	struct jpeg_decompress_struct *jinfo;
 
-	if (im->loaded)
-    {
-        return 0;
-    }
+	if (im->loaded) return 0;
 
 	/* start decompress image */
 	arg = im->load_arg;

@@ -701,9 +701,17 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             }
         }
 
+        //char *spath = "./test.jpg";
+        //ret = wi_save_file(im, spath);
+        //if (ret != WI_OK) return -1;
+
         ret = convert(im, req);
         if(ret == -1) goto err;
         if(ret == WI_OK) is_new = false;
+
+        //char *dpath = "./test_crop.jpg";
+        //ret = wi_save_file(im, dpath);
+        //if (ret != WI_OK) return -1;
 
         buff = (char *)wi_get_blob(im, &len);
         if (buff == NULL) {

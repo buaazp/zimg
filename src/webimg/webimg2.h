@@ -97,8 +97,8 @@ static inline void wi_set_free
 }
 
 int wi_set_format(struct image *im, char *fmt);
-void wi_set_quality(struct image *im, uint32_t quality);
 int wi_gray(struct image *im);
+void wi_set_quality(struct image *im, uint32_t quality);
 
 static inline int wi_is_valid_size(uint32_t width, uint32_t height)
 {
@@ -110,7 +110,6 @@ struct image * wi_new_image();
 void wi_free_image(struct image *);
 int wi_init_image(struct image *);
 void wi_destroy_image(struct image *);
-int wi_clone_image(struct image *src, struct image *dst);
 
 int wi_read_file(struct image *im, char *path);
 int wi_read_blob(struct image *im, void *blob, size_t len);

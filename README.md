@@ -24,7 +24,6 @@ Contact me: zp@buaa.us
 
 [libevent](https://github.com/libevent/libevent): Provides a sophisticated framework for buffered network IO.  
 [libmemcached](https://github.com/trondn/libmemcached): LibMemcached is designed to provide the greatest number of options to use Memcached.  
-[lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
 #### [Optional] For Storage:  
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [beansdb](https://github.com/douban/beansdb): Beansdb is a distributed key-value storage system designed for large scale online system, aiming for high avaliablility and easy management.  
@@ -33,10 +32,11 @@ Contact me: zp@buaa.us
 [twemproxy](https://github.com/twitter/twemproxy): Twemproxy is a fast and lightweight proxy for memcached and redis protocol.  
 
 #### Thanks to:  
-> zimg contains libevhtp and libhiredis. You needn't install them now.
+> zimg contains these libraries. You needn't install them now.
 
 [webimg](http://webimg.org): A software suite to create, edit, compose, or convert bitmap images. Developed by SINA imgbed group.  
 [libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API.  
+[lua](http://www.lua.org/): Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  
 [hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
 
 ### Supplying:

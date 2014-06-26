@@ -38,13 +38,10 @@ int wi_set_format(struct image *im, char *fmt)
 
 	sv = choose_saver(fmt);
 	if (sv) {
-
+		im->format = fmt;
 		if (im->sv == sv) return WI_OK;
-
 		im->sv = sv;
-		im->format = sv->name;
 		im->converted = 1;
-
 		return WI_OK;
 	}
 	return WI_E_UNKNOW_FORMAT;
@@ -283,53 +280,14 @@ static int write_file(const char *path, struct blob *buf)
 int wi_read_file(struct image *im, char *path)
 {
 	int ret;
-
+	
 	ret = read_file(im, path, &im->in_buf);
 	if (ret != 0) {
 		return WI_E_READ_FILE;
 	}
 
-    //buaazp: read_file() has set im->in_buf, wi_read_blob() maybe reused.
 	ret = wi_read_blob(im, im->in_buf.data, im->in_buf.len);
 	return ret;
-}
-
-int wi_clone_image(struct image *src, struct image *dst)
-{
-	int ret;
-	size_t rlen, size;
-
-	memcpy(dst, src, sizeof(struct image));
-	dst->file = 0;
-
-	/* init loader */
-	if (dst->ld != NULL && dst->ld->init != NULL) {
-		ret = dst->ld->init(dst);
-		if (ret != 0) {
-			return WI_E_LOADER_INIT;
-		}
-	}
-
-	ret = dst->ld->read_info(dst);
-	if (ret != 0) {
-		return WI_E_LOADER_INIT;
-	}
-
-	if (!dst->loaded) {
-		return WI_OK;
-	}
-
-	/* copy img data */
-	ret = image_alloc_data(dst);
-	if (ret != 0) {
-		return WI_E_LOADER_LOAD;
-	}
-
-	rlen = dst->cols * get_components(dst);
-	size = (rlen * sizeof(uint8_t)) * dst->rows;
-	memcpy(dst->data, src->data, size);
-
-	return WI_OK;
 }
 
 static inline int wi_save(struct image *im)
@@ -339,7 +297,6 @@ static inline int wi_save(struct image *im)
 
 	ret = load_image(im);
 	if (ret != WI_OK) return WI_E_LOADER_LOAD;
-
 	return im->sv->save(im);
 }
 
@@ -405,10 +362,7 @@ int wi_crop
 void wi_set_quality(struct image *im, uint32_t quality)
 {
 	if (quality < 100) {
-		if (im->quality != quality
-				&& (strncmp(im->format, "JPEG", 4) == 0)) {
-			im->converted = 1;
-		}
+		if (im->quality != quality) im->converted = 1;
 		im->quality = quality;
 	}
 	return;
@@ -416,19 +370,19 @@ void wi_set_quality(struct image *im, uint32_t quality)
 
 int wi_gray(struct image *im)
 {
-     int ret = WI_OK, i, j;
-     struct image dst;
+    int ret = WI_OK, i, j;
+    struct image dst;
     uint8_t r, g, b, *ptr;
     uint16_t gray;
 
-     ret = load_image(im);
-     if (ret != WI_OK) return WI_E_LOADER_LOAD;
+    ret = load_image(im);
+    if (ret != WI_OK) return WI_E_LOADER_LOAD;
 
-     memcpy(&dst, im, sizeof(struct image));
-     dst.colorspace = CS_GRAYSCALE;
+    memcpy(&dst, im, sizeof(struct image));
+    dst.colorspace = CS_GRAYSCALE;
 
-     ret = image_alloc_data(&dst);
-     if (ret != 0) return -1;
+    ret = image_alloc_data(&dst);
+    if (ret != 0) return -1;
 
     uint8_t *sptr = dst.data;
     for (i=0; i<im->rows; i++) {
@@ -443,14 +397,15 @@ int wi_gray(struct image *im)
         }
     }
     int components = get_components(&dst);
-     size_t rowlen = dst.cols * components;
-     for (i=0; i<dst.rows; i++) {
-          dst.row[i] = dst.data + i * rowlen;
-     }
+    size_t rowlen = dst.cols * components;
+    for (i=0; i<dst.rows; i++) {
+        dst.row[i] = dst.data + i * rowlen;
+    }
 
-     image_free_data(im);
-     memcpy(im, &dst, sizeof(struct image));
-     im->converted = 1;
+    image_free_data(im);
+    memcpy(im, &dst, sizeof(struct image));
+    im->converted = 1;
 
-     return 0;
+    return 0;
 }
+

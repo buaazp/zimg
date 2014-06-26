@@ -4,8 +4,6 @@
 #include "webimg2.h"
 #include "internal.h"
 
-#include "../zlog.h"
-
 static void calc_sample_table(uint32_t *table, uint32_t s, uint32_t d)
 {
 	uint32_t *ptr = table;
@@ -30,7 +28,6 @@ static inline void scale_box_rgb_first_line
 	uint32_t r, g, b;
 	uint32_t *tp = line;
 	uint8_t *sp = src;
-    uint8_t gray;
 
 	j = 0;
 	for (i=0; i<d; i++) {
@@ -40,9 +37,9 @@ static inline void scale_box_rgb_first_line
 		b = *sp++;
 		j++;
 		for (; j<tbl[i]; j++) {
-            r += *sp++;
-            g += *sp++;
-            b += *sp++;
+			r += *sp++;
+			g += *sp++;
+			b += *sp++;
 		}
 		*tp++ = r;
 		*tp++ = g;
@@ -57,7 +54,6 @@ static inline void scale_box_rgb_line
 	uint32_t r, g, b;
 	uint32_t *tp = line;
 	uint8_t *sp = src;
-    uint8_t gray;
 
 	j = 0;
 	for (i=0; i<d; i++) {
@@ -67,9 +63,9 @@ static inline void scale_box_rgb_line
 		b = *sp++;
 		j++;
 		for (; j<tbl[i]; j++) {
-            r += *sp++;
-            g += *sp++;
-            b += *sp++;
+			r += *sp++;
+			g += *sp++;
+			b += *sp++;
 		}
 		*tp++ += r;
 		*tp++ += g;
@@ -85,10 +81,8 @@ int scaledown_box_rgb(struct image *src, struct image *dst)
 
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
 	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
-    //buaazp: maybe memory leak here? xtbl=NULL but ytbl!=NULL
 	if (xtbl == NULL) return -1;
-    //buaazp: this section doesn't work?
-	if (ytbl == NULL) {
+	if (xtbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -209,7 +203,7 @@ int scaledown_box_rgba(struct image *src, struct image *dst)
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
 	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (ytbl == NULL) {
+	if (xtbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -279,7 +273,7 @@ static inline void scale_box_gray_first_line
 		for (; j<tbl[i]; j++) {
 			l += *sp++;
 		}
-		*tp++ += l;
+		*tp++ = l;
 	}
 }
 
@@ -307,12 +301,12 @@ static inline void scale_box_gray_line
 int scaledown_box_gray(struct image *src, struct image *dst)
 {
 	uint32_t *tmpline;
-	uint32_t *xtbl, *ytbl;
+	uint32_t * xtbl, *ytbl;
 
 	xtbl = MALLOC(dst, sizeof(uint32_t) * dst->cols);
 	ytbl = MALLOC(dst, sizeof(uint32_t) * dst->rows);
 	if (xtbl == NULL) return -1;
-	if (ytbl == NULL) {
+	if (xtbl == NULL) {
 		FREE(dst, xtbl);
 		return -1;
 	}
@@ -426,8 +420,3 @@ int wi_scale(struct image *im, uint32_t cols, uint32_t rows)
 
 	return 0;
 }
-
-
-
-
-

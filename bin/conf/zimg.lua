@@ -1,7 +1,7 @@
 --zimg server config
 
 --server config
-is_daemon=0
+is_daemon=1
 port=4869
 thread_num=4
 backlog_num=1024
@@ -11,7 +11,7 @@ system=io.popen("uname -s"):read("*l")
 
 
 --header config
-headers="Cache-Control:max-age=7776000"
+--headers="Cache-Control:max-age=7776000"
 etag=0
 
 --access config
