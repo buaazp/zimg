@@ -9,6 +9,7 @@
 #include "zscale.h"
 
 static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows);
+static int crop(struct image *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows);
 int convert(struct image *im, zimg_req_t *req);
 
 
@@ -65,14 +66,14 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
         {
             cols = round(((double)rows / im->rows) * im->cols);
         }
-        LOG_PRINT(LOG_INFO, "p=1, wi_scale(im, %d, %d)", cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
         ret = wi_scale(im, cols, rows);
     }
     else if (p_type == 0)
     {
         if (cols == 0) cols = im->cols;
         if (rows == 0) rows = im->rows;
-        LOG_PRINT(LOG_INFO, "p=0, wi_scale(im, %d, %d)", cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d)", cols, rows);
         ret = wi_scale(im, cols, rows);
     }
     else if (p_type == 2)
@@ -82,17 +83,28 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
         if (rows == 0) rows = im->rows;
         x = (uint32_t)floor((im->cols - cols) / 2.0);
         y = (uint32_t)floor((im->rows - rows) / 2.0);
-        LOG_PRINT(LOG_INFO, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
         ret = wi_crop(im, x, y, cols, rows);
     }
 
 	return ret;
 }
 
+static int crop(struct image *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows)
+{
+    int ret;
+    if (x >= im->cols || y >= im->rows) return -1;
+    if (cols == 0 || im->cols < x + cols) cols = im->cols - x;
+    if (rows == 0 || im->rows < y + rows) rows = im->rows - y;
+    LOG_PRINT(LOG_DEBUG, "wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+    ret = wi_crop(im, x, y, cols, rows);
+    return ret;
+}
+
 int convert(struct image *im, zimg_req_t *req)
 {
     int result = 0, ret;
-    uint32_t cols = req->width, rows = req->height;
+    uint32_t x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (cols == 0 && rows == 0) goto grayscale;
     if (im->cols < cols || im->rows < rows) {
         result = 1;
@@ -100,9 +112,15 @@ int convert(struct image *im, zimg_req_t *req)
     }
 
     /* crop and scale */
-    LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
-    ret = proportion(im, req->proportion, cols, rows);
-    if (ret != WI_OK) return -1;
+    if (x == 0 && y == 0) {
+        LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
+        ret = proportion(im, req->proportion, cols, rows);
+        if (ret != WI_OK) return -1;
+    } else {
+        LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+        ret = crop(im, x, y, cols, rows);
+        if (ret != WI_OK) return -1;
+    }
 
 grayscale:
     /* set gray */

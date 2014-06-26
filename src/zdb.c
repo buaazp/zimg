@@ -731,13 +731,13 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
-    if(req->proportion == 0 && req->width == 0 && req->height == 0)
+    if(req->proportion == 0 && req->width == 0 && req->height == 0 && req->gray == 0)
     {
         gen_key(cache_key, req->md5, 0);
     }
     else
     {
-        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        gen_key(cache_key, req->md5, 6, req->width, req->height, req->proportion, req->gray, req->x, req->y);
     }
 
     if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
@@ -762,12 +762,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     if (im == NULL) goto err;
 
     gen_key(cache_key, req->md5, 0);
-    //if(find_cache_bin(cache_key, buff_ptr, img_size) == 1)
-    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
-    }
-    else
+    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == -1)
     {
         if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == -1)
         {
@@ -796,7 +791,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
 
-    gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+    gen_key(cache_key, req->md5, 6, req->width, req->height, req->proportion, req->gray, req->x, req->y);
     if(img_size < CACHE_MAX_SIZE)
     {
         set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
@@ -814,10 +809,9 @@ done:
     {
         if(settings.save_new == 1 && to_save == true)
         {
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", cache_key);
             save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
         }
-        else
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);
         result = 1;
     }
 

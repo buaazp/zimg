@@ -807,7 +807,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
 	/* This holds the content we're sending. */
 
-    int width, height, proportion, gray;
+    int width, height, proportion, gray, x, y;
     evhtp_kvs_t *params;
     params = req->uri->query;
     if(!params)
@@ -816,6 +816,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         height = 0;
         proportion = 1;
         gray = 0;
+        x = 0;
+        y = 0;
     }
     else
     {
@@ -852,6 +854,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         {
             width = atoi(str_w);
             height = atoi(str_h);
+
             const char *str_p = evhtp_kv_find(params, "p");
             const char *str_g = evhtp_kv_find(params, "g");
             if(str_p)
@@ -866,6 +869,11 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             }
             else
                 gray = 0;
+
+            const char *str_x = evhtp_kv_find(params, "x");
+            const char *str_y = evhtp_kv_find(params, "y");
+            x = (str_x) ? atoi(str_x) : 0;
+            y = (str_y) ? atoi(str_y) : 0;
         }
     }
 
@@ -881,6 +889,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req -> height = height;
     zimg_req -> proportion = proportion;
     zimg_req -> gray = gray;
+    zimg_req -> x = x;
+    zimg_req -> y = y;
 
     
     evthr_t *thread = get_request_thr(req);
@@ -905,7 +915,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(get_img_rst == 2)
     {
         LOG_PRINT(LOG_DEBUG, "Etag Matched Return 304 EVHTP_RES_NOTMOD.");
-        LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d", address, md5, width, height, proportion, gray);
+        LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d", address, md5, width, height, proportion, gray, x, y);
         evhtp_send_reply(req, EVHTP_RES_NOTMOD);
         goto done;
     }
@@ -918,7 +928,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     zimg_headers_add(req, settings.headers);
     evhtp_send_reply(req, EVHTP_RES_OK);
-    LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d size:%d", address, md5, width, height, proportion, gray, len);
+    LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d size:%d", address, md5, width, height, proportion, gray, x, y, len);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
     goto done;
 

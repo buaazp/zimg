@@ -230,7 +230,21 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+    if(req->gray == 1)
+    {
+        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+    }
+    else
+    {
+        if(req->proportion == 0 && req->width == 0 && req->height == 0)
+        {
+            gen_key(cache_key, req->md5, 0);
+        }
+        else
+        {
+            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        }
+    }
     if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
@@ -588,7 +602,6 @@ err:
     return result;
 }
 
-
 int get_img2(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
@@ -604,7 +617,21 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+    if(req->gray == 1)
+    {
+        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+    }
+    else
+    {
+        if(req->proportion == 0 && req->width == 0 && req->height == 0)
+        {
+            gen_key(cache_key, req->md5, 0);
+        }
+        else
+        {
+            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        }
+    }
     if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
@@ -622,8 +649,12 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
 
     char name[128];
-    if(req->proportion)
+    if(req->proportion && req->gray)
+        snprintf(name, 128, "%d*%dpg", req->width, req->height);
+    else if(req->proportion && !req->gray)
         snprintf(name, 128, "%d*%dp", req->width, req->height);
+    else if(!req->proportion && req->gray)
+        snprintf(name, 128, "%d*%dg", req->width, req->height);
     else
         snprintf(name, 128, "%d*%d", req->width, req->height);
 
@@ -764,7 +795,14 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
     if(len < CACHE_MAX_SIZE)
     {
-        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+        if(req->gray == 1)
+        {
+            gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+        }
+        else
+        {
+            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
+        }
         set_cache_bin(req->thr_arg, cache_key, buff, len);
     }
 

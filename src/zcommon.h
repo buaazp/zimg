@@ -85,6 +85,8 @@ typedef struct zimg_req_s {
     int height;
     int proportion;
     int gray;
+    int x;
+    int y;
     thr_arg_t *thr_arg;
 } zimg_req_t;
 
