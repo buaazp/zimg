@@ -30,7 +30,7 @@ make
 如果你使用ubuntu，可以使用apt-get来安装所需的依赖：
 
 ```
-sudo apt-get install openssl libevent-dev cmake imagemagick libmemcached-dev
+sudo apt-get install openssl libevent-dev cmake libmagickwand-dev libmemcached-dev
 git clone https://github.com/buaazp/zimg
 cd zimg
 make
@@ -39,13 +39,37 @@ make
 如果你使用CentOS，可以使用yum来安装所需的依赖：
 
 ```
-sudo yum install openssl libevent-devel cmake ImageMagick libmemcached-devel
+sudo yum install openssl libevent-devel cmake ImageMagick-devel libmemcached-devel
 git clone https://github.com/buaazp/zimg
 cd zimg
 make
 ```
 
 如果你使用其他的Linux发行版，请依次安装所需的依赖。
+
+**常见编译错误一：**
+
+编译直接失败，提示找不到imagemagick
+
+```
+Could NOT find ImageMagick (missing: ImageMagick_MagickWand_LIBRARY) (found
+version "6.8.7-2")
+```
+
+需要特别注意的是，zimg用到`libmagickwand`进行图片处理，因此Linux发行版中需要安装的是imagemagick的开发包，名字为`libmagickwand-dev`或者`ImageMagick-devel`，如果只安装一个`imagemagick`是不够的。
+
+附：[CSDN问答](http://ask.csdn.net/questions/62307#answer_12864)
+
+**常见编译错误二：**
+
+上传成功之后根据返回的URL打开，没有图片，log中报如下错误
+
+```
+[ERROR] zimg.c:362 get_img() no decode delegate for this image format `JPEG' @ error/constitute.c/ReadImage/501
+```
+这是因为imagemagick缺少相应格式的解码器，需要单独安装对应的图片解码库，详情在此：
+
+附：[no decode delegate for this image format `JPEG'](http://www.imagemagick.org/discourse-server/viewtopic.php?f=1&t=12366)
 
 #### openssl（可选）
 openssl并非zimg必须的，但是安装它之后可以使libevent开启很多特性，建议安装。

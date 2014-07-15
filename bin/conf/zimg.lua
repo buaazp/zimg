@@ -32,6 +32,12 @@ log_name='./log/zimg.log'
 --htdoc config
 root_path='./www/index.html'
 
+--image format config
+--0.keep intact
+--1.JPEG
+--2.webp
+format=1
+
 --storage config
 --zimg support 3 ways for storage images
 mode=1

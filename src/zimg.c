@@ -650,9 +650,9 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
     char name[128];
     if(req->proportion && req->gray)
-        snprintf(name, 128, "%d*%dpg", req->width, req->height);
+        snprintf(name, 128, "%d*%dp%dg", req->width, req->height, req->proportion);
     else if(req->proportion && !req->gray)
-        snprintf(name, 128, "%d*%dp", req->width, req->height);
+        snprintf(name, 128, "%d*%dp%d", req->width, req->height, req->proportion);
     else if(!req->proportion && req->gray)
         snprintf(name, 128, "%d*%dg", req->width, req->height);
     else
@@ -781,6 +781,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         }
     }
 
+    LOG_PRINT(LOG_INFO, "New Image Name: [%s]", rsp_path);
     if(settings.save_new == 1 && to_save == true)
     {
         LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
