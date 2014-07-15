@@ -66,34 +66,36 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
         {
             cols = round(((double)rows / im->rows) * im->cols);
         }
-        LOG_PRINT(LOG_INFO, "p=1, wi_scale(im, %d, %d)", cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
         ret = wi_scale(im, cols, rows);
     }
     else if (p_type == 2)
     {
         uint32_t x = 0, y = 0, s_cols, s_rows;
+        double cols_rate = (double)cols / im->cols;
+        double rows_rate = (double)rows / im->rows;
 
-        if (im->cols < im->rows)
+        if (cols_rate > rows_rate)
         {
             s_cols = cols;
-            s_rows = round(((double)cols / im->cols) * im->rows);
+            s_rows = round(cols_rate * im->rows);
             y = (uint32_t)floor((s_rows - rows) / 2.0);
         }
         else
         {
-            s_cols = round(((double)rows / im->rows) * im->cols);
+            s_cols = round(rows_rate * im->cols);
             s_rows = rows;
             x = (uint32_t)floor((s_cols - cols) / 2.0);
         }
-        LOG_PRINT(LOG_INFO, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
+        LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
         ret = wi_scale(im, s_cols, s_rows);
 
-        LOG_PRINT(LOG_INFO, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
         ret = wi_crop(im, x, y, cols, rows);
     }
     else if (p_type == 0)
     {
-        LOG_PRINT(LOG_INFO, "p=0, wi_scale(im, %d, %d)", cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d)", cols, rows);
         ret = wi_scale(im, cols, rows);
     }
     else if (p_type == 3)
@@ -101,7 +103,7 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
         uint32_t x, y;
         x = (uint32_t)floor((im->cols - cols) / 2.0);
         y = (uint32_t)floor((im->rows - rows) / 2.0);
-        LOG_PRINT(LOG_INFO, "p=3, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=3, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
         ret = wi_crop(im, x, y, cols, rows);
     }
 
@@ -155,11 +157,11 @@ grayscale:
 	}
 
 	/* set format */
-	if (strncmp(im->format, "GIF", 3) != 0) {
-        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", "JPEG");
-        ret = wi_set_format(im, "JPEG");
+	if (strncmp(im->format, "GIF", 3) != 0 && settings.dst_format[0] != '\0') {
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", settings.dst_format);
+        ret = wi_set_format(im, settings.dst_format);
         if (ret != WI_OK) return -1;
-	}
+    }
 
     LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);
 	return result;

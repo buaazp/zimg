@@ -63,6 +63,7 @@ struct setting{
     int log;
     char log_name[512];
     char root_path[512];
+    char dst_format[16];
     int mode;
     int save_new;
     char img_path[512];

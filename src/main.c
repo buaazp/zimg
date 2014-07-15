@@ -93,6 +93,7 @@ static void settings_init(void)
     settings.log = 0;
     strcpy(settings.log_name, "./log/zimg.log");
     strcpy(settings.root_path, "./www/index.html");
+    strcpy(settings.dst_format, "JPEG");
     settings.mode = 1;
     settings.save_new = 1;
     strcpy(settings.img_path, "./img");
@@ -206,6 +207,22 @@ static int load_conf(const char *conf)
     if(lua_isstring(L, -1))
         strcpy(settings.root_path, lua_tostring(L, -1));
     lua_pop(L, 1);
+
+    int format = 1;
+    lua_getglobal(L, "format");
+    if(lua_isnumber(L, -1))
+        format = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    //LOG_PRINT(LOG_INFO, "format = %d", format);
+    if (format == 2) {
+        strcpy(settings.dst_format, "WEBP");
+    } else if (format == 0) {
+        settings.dst_format[0] = '\0';
+    }
+    //if (settings.dst_format[0] != '\0')
+    //    LOG_PRINT(LOG_INFO, "settings.format = %s", settings.dst_format);
+    //else
+    //    LOG_PRINT(LOG_INFO, "settings.format = nil");
 
     lua_getglobal(L, "mode");
     if(lua_isnumber(L, -1))

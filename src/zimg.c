@@ -650,13 +650,33 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
     char name[128];
     if(req->proportion && req->gray)
-        snprintf(name, 128, "%d*%dp%dg", req->width, req->height, req->proportion);
+    {
+        if(req->x != 0 || req->y != 0)
+            snprintf(name, 128, "%d*%d_p%d_g_%d*%d", req->width, req->height, req->proportion, req->x, req->y);
+        else
+            snprintf(name, 128, "%d*%d_p%d_g", req->width, req->height, req->proportion);
+    }
     else if(req->proportion && !req->gray)
-        snprintf(name, 128, "%d*%dp%d", req->width, req->height, req->proportion);
+    {
+        if(req->x != 0 || req->y != 0)
+            snprintf(name, 128, "%d*%d_p%d_%d*%d", req->width, req->height, req->proportion, req->x, req->y);
+        else
+            snprintf(name, 128, "%d*%d_p%d", req->width, req->height, req->proportion);
+    }
     else if(!req->proportion && req->gray)
-        snprintf(name, 128, "%d*%dg", req->width, req->height);
+    {
+        if(req->x != 0 || req->y != 0)
+            snprintf(name, 128, "%d*%d_g_%d*%d", req->width, req->height, req->x, req->y);
+        else
+            snprintf(name, 128, "%d*%d_g", req->width, req->height);
+    }
     else
-        snprintf(name, 128, "%d*%d", req->width, req->height);
+    {
+        if(req->x != 0 || req->y != 0)
+            snprintf(name, 128, "%d*%d_%d*%d", req->width, req->height, req->x, req->y);
+        else
+            snprintf(name, 128, "%d*%d", req->width, req->height);
+    }
 
     char orig_path[512];
     snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
@@ -781,7 +801,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         }
     }
 
-    LOG_PRINT(LOG_INFO, "New Image Name: [%s]", rsp_path);
+    //LOG_PRINT(LOG_INFO, "New Image[%s]", rsp_path);
     if(settings.save_new == 1 && to_save == true)
     {
         LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
