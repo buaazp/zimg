@@ -297,7 +297,7 @@ int mk_dir(const char *path)
 int mk_dirs(const char *dir)
 {
     char tmp[256];
-    strcpy(tmp, dir);
+    strlcpy(tmp, dir, sizeof(tmp));
     int i, len = strlen(tmp);
     if(tmp[len-1] != '/')
         strcat(tmp, "/");

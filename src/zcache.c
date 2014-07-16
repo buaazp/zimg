@@ -127,7 +127,7 @@ int find_cache(memcached_st *memc, const char *key, char *value)
     if (rc == MEMCACHED_SUCCESS) 
     {
         LOG_PRINT(LOG_DEBUG, "Cache Find Key[%s] Value: %s", key, pvalue);
-        strcpy(value, pvalue);
+        strlcpy(value, pvalue, sizeof(value));
         free(pvalue);
         rst = 1;
     }

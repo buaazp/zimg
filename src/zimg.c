@@ -77,7 +77,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
         md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
     }
     md5sum[32] = '\0';
-    strcpy(md5, md5sum);
+    strlcpy(md5, md5sum, 33);
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
 
     char cache_key[CACHE_KEY_SIZE];
@@ -426,7 +426,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         }
         else
         {
-            // Note this strcpy because rsp_path is not useful. We needn't to save the new image.
+            // Note this because rsp_path is not useful. We needn't to save the new image.
             got_rsp = true;
             LOG_PRINT(LOG_DEBUG, "Args width/height is bigger than real size, return original image.");
         }

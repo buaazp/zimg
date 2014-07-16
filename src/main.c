@@ -81,25 +81,25 @@ static void settings_init(void)
     settings.backlog = 1024;
     settings.max_keepalives = 1;
     settings.retry = 3;
-    strcpy(settings.version, STR(ZIMG_VERSION));
+    strlcpy(settings.version, STR(ZIMG_VERSION), sizeof(settings.version));
     snprintf(settings.server_name, 128, "zimg/%s", settings.version);
     settings.headers = NULL;
     settings.etag = 0;
     settings.up_access = NULL;
     settings.down_access = NULL;
     settings.cache_on = 0;
-    strcpy(settings.cache_ip, "127.0.0.1");
+    strlcpy(settings.cache_ip, "127.0.0.1", sizeof(settings.cache_ip));
     settings.cache_port = 11211;
     settings.log = 0;
-    strcpy(settings.log_name, "./log/zimg.log");
-    strcpy(settings.root_path, "./www/index.html");
-    strcpy(settings.dst_format, "JPEG");
+    strlcpy(settings.log_name, "./log/zimg.log", sizeof(settings.log_name));
+    strlcpy(settings.root_path, "./www/index.html", sizeof(settings.root_path));
+    strlcpy(settings.dst_format, "JPEG", sizeof(settings.dst_format));
     settings.mode = 1;
     settings.save_new = 1;
-    strcpy(settings.img_path, "./img");
-    strcpy(settings.beansdb_ip, "127.0.0.1");
+    strlcpy(settings.img_path, "./img", sizeof(settings.img_path));
+    strlcpy(settings.beansdb_ip, "127.0.0.1", sizeof(settings.beansdb_ip));
     settings.beansdb_port = 7905;
-    strcpy(settings.ssdb_ip, "127.0.0.1");
+    strlcpy(settings.ssdb_ip, "127.0.0.1", sizeof(settings.ssdb_ip));
     settings.ssdb_port = 6379;
 }
 
@@ -185,7 +185,7 @@ static int load_conf(const char *conf)
 
     lua_getglobal(L, "mc_ip");
     if(lua_isstring(L, -1))
-        strcpy(settings.cache_ip, lua_tostring(L, -1));
+        strlcpy(settings.cache_ip, lua_tostring(L, -1), sizeof(settings.cache_ip));
     lua_pop(L, 1);
 
     lua_getglobal(L, "mc_port");
@@ -200,12 +200,12 @@ static int load_conf(const char *conf)
 
     lua_getglobal(L, "log_name"); //stack index: -1
     if(lua_isstring(L, -1))
-        strcpy(settings.log_name, lua_tostring(L, -1));
+        strlcpy(settings.log_name, lua_tostring(L, -1), sizeof(settings.log_name));
     lua_pop(L, 1);
 
     lua_getglobal(L, "root_path");
     if(lua_isstring(L, -1))
-        strcpy(settings.root_path, lua_tostring(L, -1));
+        strlcpy(settings.root_path, lua_tostring(L, -1), sizeof(settings.root_path));
     lua_pop(L, 1);
 
     int format = 1;
@@ -215,7 +215,7 @@ static int load_conf(const char *conf)
     lua_pop(L, 1);
     //LOG_PRINT(LOG_INFO, "format = %d", format);
     if (format == 2) {
-        strcpy(settings.dst_format, "WEBP");
+        strlcpy(settings.dst_format, "WEBP", sizeof(settings.dst_format));
     } else if (format == 0) {
         settings.dst_format[0] = '\0';
     }
@@ -236,12 +236,12 @@ static int load_conf(const char *conf)
 
     lua_getglobal(L, "img_path");
     if(lua_isstring(L, -1))
-        strcpy(settings.img_path, lua_tostring(L, -1));
+        strlcpy(settings.img_path, lua_tostring(L, -1), sizeof(settings.img_path));
     lua_pop(L, 1);
 
     lua_getglobal(L, "beansdb_ip");
     if(lua_isstring(L, -1))
-        strcpy(settings.beansdb_ip, lua_tostring(L, -1));
+        strlcpy(settings.beansdb_ip, lua_tostring(L, -1), sizeof(settings.beansdb_ip));
     lua_pop(L, 1);
 
     lua_getglobal(L, "beansdb_port");
@@ -251,7 +251,7 @@ static int load_conf(const char *conf)
 
     lua_getglobal(L, "ssdb_ip");
     if(lua_isstring(L, -1))
-        strcpy(settings.ssdb_ip, lua_tostring(L, -1));
+        strlcpy(settings.ssdb_ip, lua_tostring(L, -1), sizeof(settings.ssdb_ip));
     lua_pop(L, 1);
 
     lua_getglobal(L, "ssdb_port");

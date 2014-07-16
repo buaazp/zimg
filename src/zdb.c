@@ -619,6 +619,7 @@ int exist_beansdb(memcached_st *memc, const char *key)
  */
 int find_beansdb(memcached_st *memc, const char *key, char *value)
 {
+    //LOG_PRINT(LOG_INFO, "Beansdb Find Key[%s] Value Size: %d", key, sizeof(value));
     int rst = -1;
     if(memc == NULL)
         return rst;
@@ -632,7 +633,7 @@ int find_beansdb(memcached_st *memc, const char *key, char *value)
     if (rc == MEMCACHED_SUCCESS) 
     {
         LOG_PRINT(LOG_DEBUG, "Beansdb Find Key[%s] Value: %s", key, pvalue);
-        strcpy(value, pvalue);
+        strlcpy(value, pvalue, sizeof(value));
         free(pvalue);
         rst = 1;
     }
