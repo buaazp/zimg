@@ -649,17 +649,23 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
 
     char name[128];
+    if(req->x != 0 || req->y != 0)
+        req->proportion = 1;
+
+    snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d", req->width, req->height, req->proportion, req->gray, req->x, req->y);
+
+    /*
     if(req->proportion && req->gray)
     {
         if(req->x != 0 || req->y != 0)
-            snprintf(name, 128, "%d*%d_p%d_g_%d*%d", req->width, req->height, req->proportion, req->x, req->y);
+            snprintf(name, 128, "%d*%d_g_%d*%d", req->width, req->height, req->x, req->y);
         else
             snprintf(name, 128, "%d*%d_p%d_g", req->width, req->height, req->proportion);
     }
     else if(req->proportion && !req->gray)
     {
         if(req->x != 0 || req->y != 0)
-            snprintf(name, 128, "%d*%d_p%d_%d*%d", req->width, req->height, req->proportion, req->x, req->y);
+            snprintf(name, 128, "%d*%d_%d*%d", req->width, req->height, req->x, req->y);
         else
             snprintf(name, 128, "%d*%d_p%d", req->width, req->height, req->proportion);
     }
@@ -677,6 +683,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         else
             snprintf(name, 128, "%d*%d", req->width, req->height);
     }
+    */
 
     char orig_path[512];
     snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
@@ -692,7 +699,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     {
         snprintf(rsp_path, 512, "%s/%s", whole_path, name);
     }
-    LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
+    LOG_PRINT(LOG_INFO, "Got the rsp_path: %s", rsp_path);
 
     if((fd = open(rsp_path, O_RDONLY)) == -1)
     {

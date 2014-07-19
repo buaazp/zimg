@@ -32,6 +32,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
 #include "lua/lua.h"
 #include "lua/lualib.h"
 #include "lua/lauxlib.h"
@@ -273,8 +274,8 @@ static void sighandler(int signal)
 {
     char msg[128];
     msg[0] = '\0';
-    strcat(msg, "----/--/-- --:--:--:------ [INFO] shutdown signal ");
-    strcat(msg, strsignal(signal));
+    str_lcat(msg, "----/--/-- --:--:--:------ [INFO] signal Terminal received zimg shutting down", sizeof(msg));
+    //str_lcat(msg, strsignal(signal));
     log_handler(msg);
     write(STDOUT_FILENO, "\nbye bye!\n", 10);
 

@@ -732,6 +732,9 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
+    if(req->x != 0 || req->y != 0)
+        req->proportion = 1;
+
     if(req->proportion == 0 && req->width == 0 && req->height == 0 && req->gray == 0)
     {
         gen_key(cache_key, req->md5, 0);
