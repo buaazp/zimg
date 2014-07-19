@@ -111,7 +111,7 @@ find_package (JPEG REQUIRED)
 find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
 find_package (WebP REQUIRED)
-
+#find_package (LibM REQUIRED)
 
 if (NOT OPENSSL_FOUND)
 	message ("Diabling SSL")
@@ -145,6 +145,8 @@ set(ZIMG_EXTERNAL_LIBS
     ${GIF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${WEBP_LIBRARIES}
+    "m"
+    "dl"
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

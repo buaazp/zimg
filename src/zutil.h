@@ -39,5 +39,7 @@ int is_md5(char *s);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);
 
+size_t str_lcat(char *dst, const char *src, size_t size);
+size_t str_lcpy(char *dst, const char *src, size_t size);
 
 #endif

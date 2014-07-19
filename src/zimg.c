@@ -77,7 +77,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
         md5sum[i * 2 + 1] = (char)((l >= 0x0 && l <= 0x9) ? (l + 0x30) : (l + 0x57));
     }
     md5sum[32] = '\0';
-    strlcpy(md5, md5sum, 33);
+    str_lcpy(md5, md5sum, 33);
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
 
     char cache_key[CACHE_KEY_SIZE];

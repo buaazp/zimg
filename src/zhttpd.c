@@ -796,9 +796,9 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
     if(uri[0] == '/')
-        strlcpy(md5, uri+1, md5_len);
+        str_lcpy(md5, uri+1, md5_len);
     else
-        strlcpy(md5, uri, md5_len);
+        str_lcpy(md5, uri, md5_len);
 	LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {

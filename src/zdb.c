@@ -633,7 +633,7 @@ int find_beansdb(memcached_st *memc, const char *key, char *value)
     if (rc == MEMCACHED_SUCCESS) 
     {
         LOG_PRINT(LOG_DEBUG, "Beansdb Find Key[%s] Value: %s", key, pvalue);
-        strlcpy(value, pvalue, sizeof(value));
+        str_lcpy(value, pvalue, sizeof(value));
         free(pvalue);
         rst = 1;
     }
