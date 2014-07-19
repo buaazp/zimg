@@ -151,10 +151,17 @@ grayscale:
     }
 
 	/* set quality */
-	if (im->quality > WAP_QUALITY) {
-        LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", WAP_QUALITY);
-		wi_set_quality(im, WAP_QUALITY);
-	}
+    if (req->quality > 0 && req->quality <= 100) {
+        if (im->quality > req->quality) {
+            LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
+            wi_set_quality(im, req->quality);
+        }
+    } else {
+        if (im->quality > settings.quality) {
+            LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", settings.quality);
+            wi_set_quality(im, settings.quality);
+        }
+    }
 
 	/* set format */
 	if (strncmp(im->format, "GIF", 3) != 0 && settings.dst_format[0] != '\0') {

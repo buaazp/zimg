@@ -95,6 +95,7 @@ static void settings_init(void)
     str_lcpy(settings.log_name, "./log/zimg.log", sizeof(settings.log_name));
     str_lcpy(settings.root_path, "./www/index.html", sizeof(settings.root_path));
     str_lcpy(settings.dst_format, "JPEG", sizeof(settings.dst_format));
+    settings.quality = 75;
     settings.mode = 1;
     settings.save_new = 1;
     str_lcpy(settings.img_path, "./img", sizeof(settings.img_path));
@@ -220,10 +221,11 @@ static int load_conf(const char *conf)
     } else if (format == 0) {
         settings.dst_format[0] = '\0';
     }
-    //if (settings.dst_format[0] != '\0')
-    //    LOG_PRINT(LOG_INFO, "settings.format = %s", settings.dst_format);
-    //else
-    //    LOG_PRINT(LOG_INFO, "settings.format = nil");
+
+    lua_getglobal(L, "quality");
+    if(lua_isnumber(L, -1))
+        settings.quality = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
 
     lua_getglobal(L, "mode");
     if(lua_isnumber(L, -1))

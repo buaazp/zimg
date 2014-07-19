@@ -64,6 +64,7 @@ struct setting{
     char log_name[512];
     char root_path[512];
     char dst_format[16];
+    int quality;
     int mode;
     int save_new;
     char img_path[512];
@@ -88,6 +89,7 @@ typedef struct zimg_req_s {
     int gray;
     int x;
     int y;
+    int quality;
     thr_arg_t *thr_arg;
 } zimg_req_t;
 

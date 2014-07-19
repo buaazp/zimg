@@ -92,7 +92,7 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
     LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5...");
     md5_state_t mdctx;
     md5_byte_t md_value[16];
-    char *md5sum = (char *)malloc(33);
+    char md5sum[33];
     int i;
     int h, l;
     md5_init(&mdctx);
@@ -109,11 +109,12 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
     }
     md5sum[32] = '\0';
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
+
     const char *etag_var = evhtp_header_find(request->headers_in, "If-None-Match");
     LOG_PRINT(LOG_DEBUG, "If-None-Match: %s", etag_var);
     if(etag_var == NULL)
     {
-        evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
+        evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 1));
     }
     else
     {
@@ -123,10 +124,9 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
         }
         else
         {
-            evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 0));
+            evhtp_headers_add_header(request->headers_out, evhtp_header_new("Etag", md5sum, 0, 1));
         }
     }
-    free(md5sum);
     return result;
 }
 
@@ -194,9 +194,7 @@ static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf)
 
     while(headers)
     {
-        LOG_PRINT(LOG_DEBUG, "header->key: %s", headers->value->key);
-        LOG_PRINT(LOG_DEBUG, "header->value: %s", headers->value->value);
-        evhtp_headers_add_header(req->headers_out, evhtp_header_new(headers->value->key, headers->value->value, 0, 0));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new(headers->value->key, headers->value->value, 1, 1));
         headers = headers->next;
     }
     return 1;
@@ -321,8 +319,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 	}
 	puts(">>>");
 
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
@@ -336,8 +333,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 void echo_cb(evhtp_request_t *req, void *arg)
 {
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>zimg works!</h1></body></html>");
-    //evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", "zimg/1.0.0 (Unix) (OpenSUSE/Linux)", 0, 0));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
@@ -635,7 +631,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         "</body>\n</html>\n",
         md5sum, settings.port, md5sum
         );
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() DONE!===============");
@@ -644,7 +640,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 
 forbidden:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() FORBIDDEN!===============");
@@ -653,7 +649,7 @@ forbidden:
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_SERVERR);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() ERROR!===============");
@@ -757,7 +753,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             }
         }
         evbuffer_add_printf(req->buffer_out, "<html>\n </html>\n");
-        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
         LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
@@ -768,7 +764,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(strstr(uri, "favicon.ico"))
     {
         LOG_PRINT(LOG_DEBUG, "favicon.ico Request, Denied.");
-        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         zimg_headers_add(req, settings.headers);
         evhtp_send_reply(req, EVHTP_RES_OK);
@@ -808,7 +804,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
 	/* This holds the content we're sending. */
 
-    int width, height, proportion, gray, x, y;
+    int width, height, proportion, gray, x, y, quality;
     evhtp_kvs_t *params;
     params = req->uri->query;
     if(!params)
@@ -819,6 +815,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         gray = 0;
         x = 0;
         y = 0;
+        quality = 0;
     }
     else
     {
@@ -845,7 +842,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
                 "</body>\n</html>\n"
                 );
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
             evhtp_send_reply(req, EVHTP_RES_OK);
             LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
@@ -873,8 +870,10 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
             const char *str_x = evhtp_kv_find(params, "x");
             const char *str_y = evhtp_kv_find(params, "y");
+            const char *str_q = evhtp_kv_find(params, "q");
             x = (str_x) ? atoi(str_x) : 0;
             y = (str_y) ? atoi(str_y) : 0;
+            quality = (str_q) ? atoi(str_q) : 0;
         }
     }
 
@@ -892,6 +891,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req -> gray = gray;
     zimg_req -> x = x;
     zimg_req -> y = y;
+    zimg_req -> quality = quality;
 
     
     evthr_t *thread = get_request_thr(req);
@@ -910,13 +910,15 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(get_img_rst == -1)
     {
         LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
-        LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d", address, md5, width, height, proportion, gray);
+        LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
+            address, md5, width, height, proportion, gray, x, y, quality); 
         goto err;
     }
     if(get_img_rst == 2)
     {
         LOG_PRINT(LOG_DEBUG, "Etag Matched Return 304 EVHTP_RES_NOTMOD.");
-        LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d", address, md5, width, height, proportion, gray, x, y);
+        LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
+            address, md5, width, height, proportion, gray, x, y, quality); 
         evhtp_send_reply(req, EVHTP_RES_NOTMOD);
         goto done;
     }
@@ -925,17 +927,19 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     LOG_PRINT(LOG_DEBUG, "get buffer length: %d", len);
 
     LOG_PRINT(LOG_DEBUG, "Got the File!");
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     zimg_headers_add(req, settings.headers);
     evhtp_send_reply(req, EVHTP_RES_OK);
-    LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d size:%d", address, md5, width, height, proportion, gray, x, y, len);
+    LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d size:%d", 
+            address, md5, width, height, proportion, gray, x, y, quality, 
+            len);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
     goto done;
 
 forbidden:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() FORBIDDEN!===============");
@@ -943,7 +947,7 @@ forbidden:
 
 err:
     evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() ERROR!===============");

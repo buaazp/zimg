@@ -4,10 +4,7 @@
 
 #include "zcommon.h"
 
-#define WAP_QUALITY				70
-#define THUMB_QUALITY			85
-#define QUALITY_90				90
-#define QUALITY_95				95
+#define WAP_QUALITY				75
 
 int convert(struct image *im, zimg_req_t *req);
 

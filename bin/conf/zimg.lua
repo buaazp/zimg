@@ -7,12 +7,11 @@ thread_num=4
 backlog_num=1024
 max_keepalives=1
 retry=3
-system=io.popen("uname -s"):read("*l")
-
+system=io.popen("uname -sn"):read("*l")
 
 --header config
 --headers="Cache-Control:max-age=7776000"
-etag=0
+--etag=1
 
 --access config
 --support mask rules like "allow 10.1.121.138/24"
@@ -33,10 +32,11 @@ log_name='./log/zimg.log'
 root_path='./www/index.html'
 
 --image format config
---0.keep intact
---1.JPEG
---2.webp
+--value: 0.keep intact 1.JPEG 2.webp
 format=1
+--image compress quality config
+--value: 1~100(default: 75)
+quality=75
 
 --storage config
 --zimg support 3 ways for storage images

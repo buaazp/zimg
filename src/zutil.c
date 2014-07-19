@@ -523,7 +523,7 @@ int gen_key(char *key, char *md5, ...)
         //LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
     }
     va_end(arg_ptr);
-    //LOG_PRINT(LOG_DEBUG, "key: %s", key);
+    LOG_PRINT(LOG_DEBUG, "key: %s", key);
     return 1;
 }
 

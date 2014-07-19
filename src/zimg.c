@@ -617,21 +617,18 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    if(req->gray == 1)
+    if(req->x != 0 || req->y != 0)
+        req->proportion = 1;
+
+    if(req->proportion == 0 && req->width == 0 && req->height == 0)
     {
-        gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
+        gen_key(cache_key, req->md5, 0);
     }
     else
     {
-        if(req->proportion == 0 && req->width == 0 && req->height == 0)
-        {
-            gen_key(cache_key, req->md5, 0);
-        }
-        else
-        {
-            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-        }
+        gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
     }
+
     if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
@@ -649,41 +646,11 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
 
     char name[128];
-    if(req->x != 0 || req->y != 0)
-        req->proportion = 1;
-
-    snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d", req->width, req->height, req->proportion, req->gray, req->x, req->y);
-
-    /*
-    if(req->proportion && req->gray)
-    {
-        if(req->x != 0 || req->y != 0)
-            snprintf(name, 128, "%d*%d_g_%d*%d", req->width, req->height, req->x, req->y);
-        else
-            snprintf(name, 128, "%d*%d_p%d_g", req->width, req->height, req->proportion);
-    }
-    else if(req->proportion && !req->gray)
-    {
-        if(req->x != 0 || req->y != 0)
-            snprintf(name, 128, "%d*%d_%d*%d", req->width, req->height, req->x, req->y);
-        else
-            snprintf(name, 128, "%d*%d_p%d", req->width, req->height, req->proportion);
-    }
-    else if(!req->proportion && req->gray)
-    {
-        if(req->x != 0 || req->y != 0)
-            snprintf(name, 128, "%d*%d_g_%d*%d", req->width, req->height, req->x, req->y);
-        else
-            snprintf(name, 128, "%d*%d_g", req->width, req->height);
-    }
-    else
-    {
-        if(req->x != 0 || req->y != 0)
-            snprintf(name, 128, "%d*%d_%d*%d", req->width, req->height, req->x, req->y);
-        else
-            snprintf(name, 128, "%d*%d", req->width, req->height);
-    }
-    */
+    snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_q%d", req->width, req->height,
+            req->proportion, 
+            req->gray, 
+            req->x, req->y, 
+            req->quality);
 
     char orig_path[512];
     snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
@@ -699,14 +666,14 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     {
         snprintf(rsp_path, 512, "%s/%s", whole_path, name);
     }
-    LOG_PRINT(LOG_INFO, "Got the rsp_path: %s", rsp_path);
+    LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
 
     if((fd = open(rsp_path, O_RDONLY)) == -1)
     {
         im = wi_new_image();
         if (im == NULL) goto err;
         int ret;
-        // to gen cache_key like this: rsp_path-/926ee2f570dc50b2575e35a6712b08ce
+
         gen_key(cache_key, req->md5, 0);
         if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
         {
@@ -760,17 +727,9 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             }
         }
 
-        //char *spath = "./test.jpg";
-        //ret = wi_save_file(im, spath);
-        //if (ret != WI_OK) return -1;
-
         ret = convert(im, req);
         if(ret == -1) goto err;
         if(ret == 1) to_save = false;
-
-        //char *dpath = "./test_crop.jpg";
-        //ret = wi_save_file(im, dpath);
-        //if (ret != WI_OK) return -1;
 
         buff = (char *)wi_get_blob(im, &len);
         if (buff == NULL) {
@@ -823,14 +782,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
     if(len < CACHE_MAX_SIZE)
     {
-        if(req->gray == 1)
-        {
-            gen_key(cache_key, req->md5, 4, req->width, req->height, req->proportion, req->gray);
-        }
-        else
-        {
-            gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-        }
+        gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
         set_cache_bin(req->thr_arg, cache_key, buff, len);
     }
 
