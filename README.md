@@ -72,20 +72,20 @@ All versions on [Github](https://github.com/buaazp/zimg).
 
 You should build dependences above and make sure the beansdb, beanseye or ssdb backend is working well.   
  
-````
+```
 git clone https://github.com/buaazp/zimg
 cd zimg   
 make  
 cd bin  
 ./zimg conf/zimg.lua
-````
+```
 
 More infomation of building zimg in guide book:
 [Guide Book of zimg](http://zimg.buaa.us/guidebook.html)  
 
 ### Config:
 
-````
+```
 --zimg server config
 
 --server config
@@ -134,7 +134,7 @@ beansdb_port='7900'
 ssdb_ip='127.0.0.1'
 ssdb_port='8888'
 
-````
+```
 
 ### Feedback:
 If you have any question, please submit comment here or mention me on [Weibo](http://weibo.com/819880808).  

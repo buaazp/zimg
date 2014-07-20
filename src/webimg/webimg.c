@@ -368,6 +368,7 @@ void wi_set_quality(struct image *im, uint32_t quality)
 	return;
 }
 
+/*
 int wi_gray(struct image *im)
 {
     int ret = WI_OK, i, j;
@@ -406,6 +407,37 @@ int wi_gray(struct image *im)
     memcpy(im, &dst, sizeof(struct image));
     im->converted = 1;
 
+    return 0;
+}
+
+*/
+
+int wi_gray(struct image *im)
+{
+    int ret = WI_OK, i, j;
+    uint16_t gray;
+    uint8_t *ptr, *sptr = im->data;
+
+    ret = load_image(im);
+    if (ret != WI_OK) return WI_E_LOADER_LOAD;
+
+    im->colorspace = CS_GRAYSCALE;
+    for (i=0; i<im->rows; i++) {
+        ptr = im->row[i];
+        for (j=0; j<im->cols; j++) {
+            gray = *ptr++ * 28;
+            gray += *ptr++ * 151;
+            gray += *ptr++ * 77;
+            gray = (gray >> 8) & 0xff;
+            *sptr++ = (uint8_t)((gray));
+        }
+    }
+    size_t rowlen = im->cols * get_components(im);
+    for (i=0; i<im->rows; i++) {
+        im->row[i] = im->data + i * rowlen;
+    }
+
+    im->converted = 1;
     return 0;
 }
 
