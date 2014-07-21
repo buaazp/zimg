@@ -20,6 +20,7 @@
 
 
 #include "zcache.h"
+#include "zutil.h"
 #include "zlog.h"
 
 extern struct setting settings;

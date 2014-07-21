@@ -43,6 +43,7 @@
 /* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
 #define NUM_THREADS 4
 #define CACHE_KEY_SIZE 128
+#define PATH_MAX_SIZE 512
 
 struct setting{
     int is_daemon;

@@ -46,6 +46,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void send_document_cb(evhtp_request_t *req, void *arg);
+void admin_request_cb(evhtp_request_t *req, void *arg);
 
 static const struct table_entry {
 	const char *extension;
@@ -639,7 +640,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     goto done;
 
 forbidden:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
@@ -648,7 +649,7 @@ forbidden:
 
 
 err:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body><html>"); 
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body></html>"); 
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_SERVERR);
@@ -721,12 +722,12 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
 	const char *uri;
 	uri = req->uri->path->full;
-	const char *rfull = req->uri->path->full;
-	const char *rpath = req->uri->path->path;
-	const char *rfile= req->uri->path->file;
-	LOG_PRINT(LOG_DEBUG, "uri->path->full: %s",  rfull);
-	LOG_PRINT(LOG_DEBUG, "uri->path->path: %s",  rpath);
-	LOG_PRINT(LOG_DEBUG, "uri->path->file: %s",  rfile);
+	//const char *rfull = req->uri->path->full;
+	//const char *rpath = req->uri->path->path;
+	//const char *rfile= req->uri->path->file;
+	//LOG_PRINT(LOG_DEBUG, "uri->path->full: %s",  rfull);
+	//LOG_PRINT(LOG_DEBUG, "uri->path->path: %s",  rpath);
+	//LOG_PRINT(LOG_DEBUG, "uri->path->file: %s",  rfile);
 
     if(strlen(uri) == 1 && uri[0] == '/')
     {
@@ -752,7 +753,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
                 evbuffer_add_file(req->buffer_out, fd, 0, st.st_size);
             }
         }
-        evbuffer_add_printf(req->buffer_out, "<html>\n </html>\n");
+        //evbuffer_add_printf(req->buffer_out, "<html>\n </html>\n");
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
@@ -938,7 +939,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     goto done;
 
 forbidden:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body><html>"); 
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
@@ -961,5 +962,191 @@ done:
             free(zimg_req->md5);
         free(zimg_req);
     }
+}
+
+// remove a image http://127.0.0.1:4869/admin?md5=5f189d8ec57f5a5a0d3dcba47fa797e2&t=1
+void admin_request_cb(evhtp_request_t *req, void *arg)
+{
+    char md5[33];
+
+    evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
+    struct sockaddr *saddr = ev_conn->saddr;
+    struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
+    char address[16];
+    strncpy(address, inet_ntoa(ss->sin_addr), 16);
+
+    int req_method = evhtp_request_get_method(req);
+    if(req_method >= 16)
+        req_method = 16;
+    LOG_PRINT(LOG_DEBUG, "Method: %d", req_method);
+    if(strcmp(method_strmap[req_method], "POST") == 0)
+    {
+        LOG_PRINT(LOG_DEBUG, "POST Request.");
+        post_request_cb(req, NULL);
+        return;
+    }
+	else if(strcmp(method_strmap[req_method], "GET") != 0)
+    {
+        LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
+        LOG_PRINT(LOG_INFO, "%s refuse method", address);
+        goto err;
+    }
+
+    if(settings.down_access != NULL)
+    {
+        //TODO: use admin_access
+        int acs = zimg_access_inet(settings.down_access, ss->sin_addr.s_addr);
+        LOG_PRINT(LOG_DEBUG, "access check: %d", acs);
+
+        if(acs == ZIMG_FORBIDDEN)
+        {
+            LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
+            LOG_PRINT(LOG_INFO, "%s refuse get forbidden", address);
+            goto forbidden;
+        }
+        else if(acs == ZIMG_ERROR)
+        {
+            LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
+            LOG_PRINT(LOG_ERROR, "%s fail get access", address);
+            goto err;
+        }
+    }
+
+	const char *uri;
+	uri = req->uri->path->full;
+
+    if(strstr(uri, "favicon.ico"))
+    {
+        LOG_PRINT(LOG_DEBUG, "favicon.ico Request, Denied.");
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+        zimg_headers_add(req, settings.headers);
+        evhtp_send_reply(req, EVHTP_RES_OK);
+        return;
+    }
+
+	LOG_PRINT(LOG_DEBUG, "Got a Admin request for <%s>",  uri);
+    int t;
+    evhtp_kvs_t *params;
+    params = req->uri->query;
+    if(!params)
+    {
+        LOG_PRINT(LOG_DEBUG, "Admin Root Request.");
+        int fd = -1;
+        struct stat st;
+        //TODO: use admin_path
+        if((fd = open(settings.root_path, O_RDONLY)) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "Admin_page Open Failed. Return Default Page.");
+            evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
+        }
+        else
+        {
+            if (fstat(fd, &st) < 0)
+            {
+                /* Make sure the length still matches, now that we
+                 * opened the file :/ */
+                LOG_PRINT(LOG_DEBUG, "Root_page Length fstat Failed. Return Default Page.");
+                evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
+            }
+            else
+            {
+                evbuffer_add_file(req->buffer_out, fd, 0, st.st_size);
+            }
+        }
+        //evbuffer_add_printf(req->buffer_out, "<html>\n </html>\n");
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+        evhtp_send_reply(req, EVHTP_RES_OK);
+        LOG_PRINT(LOG_DEBUG, "============admin_request_cb() DONE!===============");
+        LOG_PRINT(LOG_INFO, "%s succ admin root page", address);
+        return;
+    }
+    else
+    {
+        const char *str_md5, *str_t;
+        str_md5 = evhtp_kv_find(params, "md5");
+        if(str_md5 == NULL)
+        {
+            LOG_PRINT(LOG_DEBUG, "md5() = NULL return");
+            goto err;
+        }
+
+        str_lcpy(md5, str_md5, sizeof(md5));
+        if(is_md5(md5) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "Admin Request MD5 Error.");
+            LOG_PRINT(LOG_INFO, "%s refuse admin url illegal", address);
+            goto err;
+        }
+        str_t = evhtp_kv_find(params, "t");
+        LOG_PRINT(LOG_DEBUG, "md5() = %s; t() = %s;", str_md5, str_t);
+        t = (str_t) ? atoi(str_t) : 0;
+    }
+
+    evthr_t *thread = get_request_thr(req);
+    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
+
+    int admin_img_rst = -1;
+    if(settings.mode == 1)
+        admin_img_rst = admin_img(md5, t);
+    else
+        admin_img_rst = admin_img_mode_db(thr_arg, md5, t);
+
+    char admin_str[512];
+    if(admin_img_rst == -1)
+    {
+        snprintf(admin_str, sizeof(admin_str),
+            "<html><body><h1>Admin Command Failed!</h1> \
+            <br>MD5: %s</br> \
+            <br>Command Type: %d</br> \
+            <br>Command Failed.</br> \
+            </body></html>",
+            md5, t);
+        LOG_PRINT(LOG_ERROR, "%s fail admin pic:%s t:%d", address, md5, t); 
+    }
+    else if(admin_img_rst == 2)
+    {
+        snprintf(admin_str, sizeof(admin_str),
+            "<html><body><h1>Admin Command Failed!</h1> \
+            <br>MD5: %s</br> \
+            <br>Command Type: %d</br> \
+            <br>Image Not Found.</br> \
+            </body></html>",
+            md5, t);
+        LOG_PRINT(LOG_ERROR, "%s 404 admin pic:%s t:%d", address, md5, t); 
+    }
+    else
+    {
+        snprintf(admin_str, sizeof(admin_str),
+            "<html><body><h1>Admin Command Successful!</h1> \
+            <br>MD5: %s</br> \
+            <br>Command Type: %d</br> \
+            </body></html>",
+            md5, t);
+        LOG_PRINT(LOG_INFO, "%s succ admin pic:%s t:%d", address, md5, t); 
+    }
+    evbuffer_add_printf(req->buffer_out, admin_str); 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_OK);
+    LOG_PRINT(LOG_DEBUG, "============admin_request_cb() DONE!===============");
+    return;
+
+forbidden:
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
+    LOG_PRINT(LOG_DEBUG, "============admin_request_cb() FORBIDDEN!===============");
+    return;
+
+err:
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>404 Not Found!</h1></body></html>");
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
+    LOG_PRINT(LOG_DEBUG, "============admin_request_cb() ERROR!===============");
+    return;
 }
 

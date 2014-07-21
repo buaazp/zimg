@@ -111,7 +111,7 @@ int log_open(const char *path, const char* mode)
  * where we need printf-alike features are served by redisLog(). */
 void log_handler(const char *msg)
 {
-    int fd, log_id;
+    int fd;
     int log_to_stdout = settings.log == 0;
 
     fd = log_to_stdout ? STDOUT_FILENO :

@@ -416,10 +416,10 @@ int wi_gray(struct image *im)
 {
     int ret = WI_OK, i, j;
     uint16_t gray;
-    uint8_t *ptr, *sptr = im->data;
 
     ret = load_image(im);
     if (ret != WI_OK) return WI_E_LOADER_LOAD;
+    uint8_t *ptr, *sptr = im->data;
 
     im->colorspace = CS_GRAYSCALE;
     for (i=0; i<im->rows; i++) {

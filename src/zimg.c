@@ -42,6 +42,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, evhtp_request_t *request);
 int get_img2(zimg_req_t *req, evhtp_request_t *request);
+int admin_img(const char *md5, int t);
 
 
 /**
@@ -616,6 +617,19 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
+    int lvl1 = str_hash(req->md5);
+    int lvl2 = str_hash(req->md5 + 3);
+
+    char whole_path[512];
+    snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, req->md5);
+    LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
+    
+    if(is_dir(whole_path) == -1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image %s is not existed!", req->md5);
+        goto err;
+    }
+
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
     if(req->x != 0 || req->y != 0)
         req->proportion = 1;
@@ -637,13 +651,9 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
 
-    char whole_path[512];
-    int lvl1 = str_hash(req->md5);
-    int lvl2 = str_hash(req->md5 + 3);
-    snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, req->md5);
-    LOG_PRINT(LOG_DEBUG, "docroot: %s", settings.img_path);
-    LOG_PRINT(LOG_DEBUG, "req->md5: %s", req->md5);
-    LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
+    char orig_path[512];
+    snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
+    LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
     char name[128];
     snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_q%d", req->width, req->height,
@@ -652,7 +662,6 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             req->x, req->y, 
             req->quality);
 
-    char orig_path[512];
     snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
@@ -807,6 +816,35 @@ err:
         wi_free_image(im);
     else if(buff != NULL)
         free(buff);
+    return result;
+}
+
+int admin_img(const char *md5, int t)
+{
+    int result = -1;
+
+    LOG_PRINT(LOG_DEBUG, "amdin_img() start processing admin request...");
+    char whole_path[512];
+    int lvl1 = str_hash(md5);
+    int lvl2 = str_hash(md5 + 3);
+    snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5);
+    LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
+
+    if(is_dir(whole_path) == -1)
+    {
+        LOG_PRINT(LOG_DEBUG, "path: %s is not exist!", whole_path);
+        return 2;
+    }
+
+    if(t == 1)
+    {
+        if(delete_file(whole_path) != -1)
+            result = 1;
+        else
+        {
+            LOG_PRINT(LOG_DEBUG, "delete path: %s failed!", whole_path);
+        }
+    }
     return result;
 }
 

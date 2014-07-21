@@ -8,6 +8,7 @@
 #include "zcommon.h"
 #include "zscale.h"
 
+static int square(struct image *im, uint32_t size);
 static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows);
 static int crop(struct image *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows);
 int convert(struct image *im, zimg_req_t *req);
@@ -54,7 +55,7 @@ static int square(struct image *im, uint32_t size)
 
 static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows)
 {
-	int ret;
+	int ret = -1;
 
     if(p_type == 1 || cols == 0 || rows == 0)
     {
@@ -138,7 +139,7 @@ int convert(struct image *im, zimg_req_t *req)
         if (ret != WI_OK) return -1;
     } else {
         LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
-        ret = crop(im, x, y, cols, rows);
+        int ret = crop(im, x, y, cols, rows);
         if (ret != WI_OK) return -1;
     }
 

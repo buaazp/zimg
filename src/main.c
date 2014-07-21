@@ -497,6 +497,7 @@ int main(int argc, char **argv)
 
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
+    evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);
     //evhtp_set_gencb(htp, echo_cb, NULL);
     evhtp_set_gencb(htp, send_document_cb, NULL);
 #ifndef EVHTP_DISABLE_EVTHR

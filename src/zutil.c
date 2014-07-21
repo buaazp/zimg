@@ -24,6 +24,7 @@
 #include <sys/socket.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <errno.h>
@@ -42,9 +43,12 @@ int get_type(const char *filename, char *type);
 int is_file(const char *filename);
 int is_img(const char *filename);
 int is_dir(const char *path);
+int is_special_dir(const char *path);
+void get_file_path(const char *path, const char *file_name, char *file_path);
 int mk_dir(const char *path);
 int mk_dirs(const char *dir);
 int mk_dirf(const char *filename);
+int delete_file(const char *path);
 int is_md5(char *s);
 static int htoi(char s[]);
 int str_hash(const char *str);
@@ -326,6 +330,25 @@ int is_dir(const char *path)
         return -1;
 }
 
+//判断是否是特殊目录
+int is_special_dir(const char *path)
+{
+    if(strcmp(path, ".") == 0 || strcmp(path, "..") == 0)
+        return 1;
+    else
+        return -1;
+}
+
+//生成完整的文件路径
+void get_file_path(const char *path, const char *file_name, char *file_path)
+{
+    strcpy(file_path, path);
+    if(file_path[strlen(path) - 1] != '/')
+        str_lcat(file_path, "/", PATH_MAX_SIZE);
+    str_lcat(file_path, file_name, PATH_MAX_SIZE);
+}
+
+
 /**
  * @brief mk_dir It create a new directory with the path input.
  *
@@ -417,6 +440,37 @@ int mk_dirf(const char *filename)
         str[end-str] = '\0';
         ret = mk_dirs(str);
     }
+    return ret;
+}
+
+int delete_file(const char *path)
+{
+    DIR *dir;
+    struct dirent *dir_info;
+    char file_path[PATH_MAX_SIZE];
+    int ret = -1;
+    if(is_file(path) == 1)
+    {   
+        remove(path);
+        ret = 1;
+    }   
+    if(is_dir(path) == 1)
+    {   
+        if((dir = opendir(path)) == NULL)
+            return ret; 
+        ret = 1;
+        while((dir_info = readdir(dir)) != NULL)
+        {   
+            get_file_path(path, dir_info->d_name, file_path);
+            if(is_special_dir(dir_info->d_name) == 1)
+                continue;
+            ret = delete_file(file_path);
+            if(ret == -1) 
+                break;
+        }   
+        if(ret == 1)
+            ret = rmdir(path);
+    }   
     return ret;
 }
 
