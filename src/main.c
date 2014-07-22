@@ -52,7 +52,6 @@ extern int daemon(int, int);
 #define _STR(s) #s   
 #define STR(s) _STR(s)
 
-extern struct setting settings;
 evbase_t *evbase;
 
 void usage(int argc, char **argv);

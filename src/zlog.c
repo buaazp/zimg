@@ -26,8 +26,6 @@
 #include <stdarg.h>
 #include "zlog.h"
 
-extern struct setting settings;
-
 static int log_valid(int log_id);
 void log_init();
 int log_open(const char *path, const char* mode);

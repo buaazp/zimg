@@ -29,8 +29,6 @@
 #include "zutil.h"
 #include "zscale.h"
 
-extern struct setting settings;
-
 int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request);
 int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request);
 

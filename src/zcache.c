@@ -23,8 +23,6 @@
 #include "zutil.h"
 #include "zlog.h"
 
-extern struct setting settings;
-
 void retry_cache(thr_arg_t *thr_arg);
 int exist_cache(thr_arg_t *thr_arg, const char *key);
 int find_cache(memcached_st *memc, const char *key, char *value);

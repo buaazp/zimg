@@ -32,8 +32,6 @@
 #include "zdb.h"
 #include "zaccess.h"
 
-extern struct setting settings;
-
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
@@ -1037,7 +1035,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
         if((fd = open(settings.admin_path, O_RDONLY)) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "Admin_page Open Failed. Return Default Page.");
-            evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
+            evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg Admin!</h1>\n</body>\n</html>\n");
         }
         else
         {
