@@ -34,6 +34,7 @@ static int square(struct image *im, uint32_t size)
 	int ret;
 	uint32_t x, y, cols;
 
+
 	if (im->cols > im->rows) {
 		cols = im->rows;
 		y = 0;
@@ -44,10 +45,12 @@ static int square(struct image *im, uint32_t size)
 		y = (uint32_t)floor((im->rows - im->cols) / 2.0);
 	}
 
+    if(size > cols) size = cols;
+
 	ret = wi_crop(im, x, y, cols, cols);
 	if (ret != WI_OK) return -1;
 
-	ret = wi_scale(im, size, 0);
+	ret = wi_scale(im, size, size);
 	if (ret != WI_OK) return -1;
 
 	return 0;
@@ -59,16 +62,25 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
 
     if(p_type == 1 || cols == 0 || rows == 0)
     {
-        if (cols > 0)
+        if (p_type == 4)
         {
-            rows = round(((double)cols / im->cols) * im->rows);
+            cols = cols + rows;
+            LOG_PRINT(LOG_DEBUG, "p=4, square(im, %d)", cols);
+            ret = square(im, cols);
         }
         else
         {
-            cols = round(((double)rows / im->rows) * im->cols);
+            if (cols > 0)
+            {
+                rows = round(((double)cols / im->cols) * im->rows);
+            }
+            else
+            {
+                cols = round(((double)rows / im->rows) * im->cols);
+            }
+            LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
+            ret = wi_scale(im, cols, rows);
         }
-        LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
-        ret = wi_scale(im, cols, rows);
     }
     else if (p_type == 2)
     {
