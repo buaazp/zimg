@@ -746,8 +746,6 @@ int exist_beansdb(memcached_st *memc, const char *key)
     if(memc == NULL)
         return rst;
 
-    size_t valueLen;
-    uint32_t  flags;
     memcached_return rc;
 
     //memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);

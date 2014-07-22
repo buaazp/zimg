@@ -76,8 +76,6 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
     if(thr_arg->cache_conn == NULL)
         return rst;
 
-    size_t valueLen;
-    uint32_t  flags;
     memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 

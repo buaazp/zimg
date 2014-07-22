@@ -239,7 +239,8 @@ int wi_gif_output_tb(GifFileType *gif, const GifByteType *data, int size)
 #define BITS_PER_PRIM_COLOR 5
 #define MAX_PRIM_COLOR      0x1f
 
-static int SortRGBAxis = 3;
+//buaazp: maybe wrong here
+static int SortRGBAxis = 2;
 
 typedef struct QuantizedColorType {
     GifByteType RGB[3];
