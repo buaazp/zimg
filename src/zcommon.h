@@ -58,12 +58,14 @@ struct setting{
     int etag;
     zimg_access_conf_t *up_access;
     zimg_access_conf_t *down_access;
+    zimg_access_conf_t *admin_access;
     int cache_on;
     char cache_ip[128];
     int cache_port;
     int log;
     char log_name[512];
     char root_path[512];
+    char admin_path[512];
     char dst_format[16];
     int quality;
     int mode;

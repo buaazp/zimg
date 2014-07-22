@@ -273,6 +273,11 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
 int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
 {
     zimg_rules_t *rules = cf->rules;
+    if(rules == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "rules nil");
+        return ZIMG_OK;
+    }
     LOG_PRINT(LOG_DEBUG, "rules: %p", rules);
 
     while(rules)
@@ -282,6 +287,7 @@ int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
         LOG_PRINT(LOG_DEBUG, "rules->value->mask: %d", rules->value->mask);
         if ((addr & rules->value->mask) == rules->value->addr) {
             if (rules->value->deny) {
+                //LOG_PRINT(LOG_INFO, "deny");
                 return ZIMG_FORBIDDEN;
             }
             return ZIMG_OK;

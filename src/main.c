@@ -88,12 +88,14 @@ static void settings_init(void)
     settings.etag = 0;
     settings.up_access = NULL;
     settings.down_access = NULL;
+    settings.admin_access = NULL;
     settings.cache_on = 0;
     str_lcpy(settings.cache_ip, "127.0.0.1", sizeof(settings.cache_ip));
     settings.cache_port = 11211;
     settings.log = 0;
     str_lcpy(settings.log_name, "./log/zimg.log", sizeof(settings.log_name));
     str_lcpy(settings.root_path, "./www/index.html", sizeof(settings.root_path));
+    str_lcpy(settings.admin_path, "./www/admin.html", sizeof(settings.admin_path));
     str_lcpy(settings.dst_format, "JPEG", sizeof(settings.dst_format));
     settings.quality = 75;
     settings.mode = 1;
@@ -180,6 +182,13 @@ static int load_conf(const char *conf)
     }
     lua_pop(L, 1);
 
+    lua_getglobal(L, "admin_rule");
+    if(lua_isstring(L, -1))
+    {
+        settings.admin_access = conf_get_rules(lua_tostring(L, -1));
+    }
+    lua_pop(L, 1);
+
     lua_getglobal(L, "cache");
     if(lua_isnumber(L, -1))
         settings.cache_on = (int)lua_tonumber(L, -1);
@@ -208,6 +217,11 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "root_path");
     if(lua_isstring(L, -1))
         str_lcpy(settings.root_path, lua_tostring(L, -1), sizeof(settings.root_path));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "admin_path");
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.admin_path, lua_tostring(L, -1), sizeof(settings.admin_path));
     lua_pop(L, 1);
 
     int format = 1;
@@ -515,6 +529,7 @@ int main(int argc, char **argv)
     free_headers_conf(settings.headers);
     free_access_conf(settings.up_access);
     free_access_conf(settings.down_access);
+    free_access_conf(settings.admin_access);
 
     //fprintf(stdout, "\nByebye!\n");
     return 0;

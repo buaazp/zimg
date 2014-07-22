@@ -46,9 +46,11 @@ int admin_img_mode_db(thr_arg_t *thr_arg, char *md5, int t);
 
 int exist_db(thr_arg_t *thr_arg, const char *cache_key);
 int exist_beansdb(memcached_st *memc, const char *key);
+int exist_ssdb(redisContext* c, const char *cache_key);
 
 int del_db(thr_arg_t *thr_arg, const char *cache_key);
 int del_beansdb(memcached_st *memc, const char *key);
+int del_ssdb(redisContext* c, const char *cache_key);
 
 int find_beansdb(memcached_st *memc, const char *key, char *value);
 int set_beansdb(memcached_st *memc, const char *key, const char *value);
@@ -722,8 +724,7 @@ int exist_db(thr_arg_t *thr_arg, const char *cache_key)
     }
     else if(settings.mode == 3)
     {
-        //TODO: exist_ssdb
-        if(exist_beansdb(thr_arg->beansdb_conn, cache_key) == 1)
+        if(exist_ssdb(thr_arg->ssdb_conn, cache_key) == 1)
             result = 1;
         else
         {
@@ -751,19 +752,37 @@ int exist_beansdb(memcached_st *memc, const char *key)
     uint32_t  flags;
     memcached_return rc;
 
-    memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    //memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    rc = memcached_exist(memc, key, strlen(key));
 
     if (rc == MEMCACHED_SUCCESS) 
     {
-        LOG_PRINT(LOG_INFO, "Beansdb Key[%s] Exist.", key);
+        LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Exist.", key);
         rst = 1;
     }
     else
     {
         const char *str_rc = memcached_strerror(memc, rc);
-        LOG_PRINT(LOG_INFO, "Beansdb Result: %s", str_rc);
+        LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
     }
 
+    return rst;
+}
+
+int exist_ssdb(redisContext* c, const char *cache_key)
+{
+    int rst = -1;
+    if(c == NULL)
+        return rst;
+
+    redisReply *r = (redisReply*)redisCommand(c, "EXISTS %s", cache_key);
+    if (r && r->type != REDIS_REPLY_NIL && r->type == REDIS_REPLY_INTEGER && r->integer == 1)
+    {
+        LOG_PRINT(LOG_DEBUG, "ssdb key %s exist %d", cache_key, r->integer);
+        rst = 1;
+    }
+    
+    freeReplyObject(r);
     return rst;
 }
 
@@ -781,8 +800,7 @@ int del_db(thr_arg_t *thr_arg, const char *cache_key)
     }
     else if(settings.mode == 3)
     {
-        //TODO: use del_ssdb
-        if(del_beansdb(thr_arg->beansdb_conn, cache_key) == -1)
+        if(del_ssdb(thr_arg->ssdb_conn, cache_key) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "delete key: %s failed!", cache_key);
         }
@@ -825,6 +843,24 @@ int del_beansdb(memcached_st *memc, const char *key)
 
     return rst;
 }
+
+int del_ssdb(redisContext* c, const char *cache_key)
+{
+    int rst = -1;
+    if(c == NULL)
+        return rst;
+
+    redisReply *r = (redisReply*)redisCommand(c, "DEL %s", cache_key);
+    if (r && r->type != REDIS_REPLY_NIL && r->type == REDIS_REPLY_INTEGER && r->integer == 1)
+    {
+        LOG_PRINT(LOG_DEBUG, "ssdb key %s deleted %d", cache_key, r->integer);
+        rst = 1;
+    }
+    
+    freeReplyObject(r);
+    return rst;
+}
+
 
 
 /**

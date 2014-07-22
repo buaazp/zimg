@@ -83,7 +83,8 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
     memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
-    memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    //memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    rc = memcached_exist(memc, key, strlen(key));
 
     if (rc == MEMCACHED_SUCCESS) 
     {

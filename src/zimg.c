@@ -85,6 +85,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     char save_path[512];
     char save_name[512];
     gen_key(cache_key, md5sum, 0);
+    /*
     if(exist_cache(thr_arg, cache_key) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
@@ -92,10 +93,19 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
         goto done;
     }
     LOG_PRINT(LOG_DEBUG, "exist_cache not found. Begin to Save File.");
-
+    */
 
     if(settings.mode != 1)
     {
+        if(exist_db(thr_arg, cache_key) == 1)
+        {
+            LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
+            result = 1;
+            goto done;
+        }
+        LOG_PRINT(LOG_DEBUG, "exist_db not found. Begin to Save File.");
+
+
         if(save_img_db(thr_arg, cache_key, buff, len) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "save_img_db failed.");
@@ -139,7 +149,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
 cache:
     if(len < CACHE_MAX_SIZE)
     {
-        gen_key(cache_key, md5sum, 0);
+        //gen_key(cache_key, md5sum, 0);
         set_cache_bin(thr_arg, cache_key, buff, len);
     }
     result = 1;

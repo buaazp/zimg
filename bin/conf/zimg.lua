@@ -16,8 +16,9 @@ system=io.popen("uname -sn"):read("*l")
 --access config
 --support mask rules like "allow 10.1.121.138/24"
 --NOTE: remove rule can improve performance
---upload_rule="allow 127.0.0.1;deny all"
+--upload_rule="allow all"
 --download_rule="allow all"
+admin_rule="allow 127.0.0.1"
 
 --cache config
 cache=0
@@ -30,6 +31,7 @@ log_name='./log/zimg.log'
 
 --htdoc config
 root_path='./www/index.html'
+admin_path='./www/admin.html'
 
 --image format config
 --value: 0.keep intact 1.JPEG 2.webp

@@ -40,9 +40,11 @@ int admin_img_mode_db(thr_arg_t *thr_arg, char *md5, int t);
 
 int exist_db(thr_arg_t *thr_arg, const char *cache_key);
 int exist_beansdb(memcached_st *memc, const char *key);
+int exist_ssdb(redisContext* c, const char *cache_key);
 
 int del_db(thr_arg_t *thr_arg, const char *cache_key);
 int del_beansdb(memcached_st *memc, const char *key);
+int del_ssdb(redisContext* c, const char *cache_key);
 
 int find_beansdb(memcached_st *memc, const char *key, char *value);
 int set_beansdb(memcached_st *memc, const char *key, const char *value);

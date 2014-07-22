@@ -992,22 +992,21 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
 
-    if(settings.down_access != NULL)
+    if(settings.admin_access != NULL)
     {
-        //TODO: use admin_access
-        int acs = zimg_access_inet(settings.down_access, ss->sin_addr.s_addr);
+        int acs = zimg_access_inet(settings.admin_access, ss->sin_addr.s_addr);
         LOG_PRINT(LOG_DEBUG, "access check: %d", acs);
 
         if(acs == ZIMG_FORBIDDEN)
         {
             LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
-            LOG_PRINT(LOG_INFO, "%s refuse get forbidden", address);
+            LOG_PRINT(LOG_INFO, "%s refuse admin forbidden", address);
             goto forbidden;
         }
         else if(acs == ZIMG_ERROR)
         {
             LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
-            LOG_PRINT(LOG_ERROR, "%s fail get access", address);
+            LOG_PRINT(LOG_ERROR, "%s fail admin access", address);
             goto err;
         }
     }
@@ -1035,7 +1034,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
         int fd = -1;
         struct stat st;
         //TODO: use admin_path
-        if((fd = open(settings.root_path, O_RDONLY)) == -1)
+        if((fd = open(settings.admin_path, O_RDONLY)) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "Admin_page Open Failed. Return Default Page.");
             evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
@@ -1047,7 +1046,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
                 /* Make sure the length still matches, now that we
                  * opened the file :/ */
                 LOG_PRINT(LOG_DEBUG, "Root_page Length fstat Failed. Return Default Page.");
-                evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg World!</h1>\n</body>\n</html>\n");
+                evbuffer_add_printf(req->buffer_out, "<html>\n<body>\n<h1>\nWelcome To zimg Admin!</h1>\n</body>\n</html>\n");
             }
             else
             {
@@ -1093,10 +1092,9 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     else
         admin_img_rst = admin_img_mode_db(thr_arg, md5, t);
 
-    char admin_str[512];
     if(admin_img_rst == -1)
     {
-        snprintf(admin_str, sizeof(admin_str),
+        evbuffer_add_printf(req->buffer_out, 
             "<html><body><h1>Admin Command Failed!</h1> \
             <br>MD5: %s</br> \
             <br>Command Type: %d</br> \
@@ -1107,7 +1105,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     }
     else if(admin_img_rst == 2)
     {
-        snprintf(admin_str, sizeof(admin_str),
+        evbuffer_add_printf(req->buffer_out, 
             "<html><body><h1>Admin Command Failed!</h1> \
             <br>MD5: %s</br> \
             <br>Command Type: %d</br> \
@@ -1118,7 +1116,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     }
     else
     {
-        snprintf(admin_str, sizeof(admin_str),
+        evbuffer_add_printf(req->buffer_out, 
             "<html><body><h1>Admin Command Successful!</h1> \
             <br>MD5: %s</br> \
             <br>Command Type: %d</br> \
@@ -1126,7 +1124,6 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
             md5, t);
         LOG_PRINT(LOG_INFO, "%s succ admin pic:%s t:%d", address, md5, t); 
     }
-    evbuffer_add_printf(req->buffer_out, admin_str); 
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
