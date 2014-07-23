@@ -883,15 +883,21 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     if(get_img_rst == -1)
     {
         LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Failed!", zimg_req->md5);
-        LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
-            address, md5, width, height, proportion, gray, x, y, quality); 
+        if(type)
+            LOG_PRINT(LOG_ERROR, "%s fail pic:%s t:%s", address, md5, type);
+        else
+            LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
+                address, md5, width, height, proportion, gray, x, y, quality); 
         goto err;
     }
     if(get_img_rst == 2)
     {
         LOG_PRINT(LOG_DEBUG, "Etag Matched Return 304 EVHTP_RES_NOTMOD.");
-        LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
-            address, md5, width, height, proportion, gray, x, y, quality); 
+        if(type)
+            LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s t:%s", address, md5, type);
+        else
+            LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
+                address, md5, width, height, proportion, gray, x, y, quality); 
         evhtp_send_reply(req, EVHTP_RES_NOTMOD);
         goto done;
     }
@@ -904,9 +910,12 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
     zimg_headers_add(req, settings.headers);
     evhtp_send_reply(req, EVHTP_RES_OK);
-    LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d size:%d", 
-            address, md5, width, height, proportion, gray, x, y, quality, 
-            len);
+    if(type)
+        LOG_PRINT(LOG_INFO, "%s succ pic:%s t:%s size:%d", address, md5, type, len); 
+    else
+        LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d size:%d", 
+                address, md5, width, height, proportion, gray, x, y, quality, 
+                len);
     LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
     goto done;
 
