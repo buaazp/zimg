@@ -803,6 +803,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
 	/* This holds the content we're sending. */
 
+    char *type;
     int width, height, proportion, gray, x, y, quality;
     evhtp_kvs_t *params;
     params = req->uri->query;
@@ -815,64 +816,36 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         x = 0;
         y = 0;
         quality = 0;
+        type = NULL;
     }
     else
     {
-        const char *str_w, *str_h;
-        str_w = evhtp_kv_find(params, "w");
-        if(str_w == NULL)
-        {
-            str_w = "0";
-        }
-        str_h = evhtp_kv_find(params, "h");
-        if(str_h == NULL)
-        {
-            str_h = "0";
-        }
-        LOG_PRINT(LOG_DEBUG, "w() = %s; h() = %s;", str_w, str_h);
-        if(strcmp(str_w, "g") == 0 && strcmp(str_h, "w") == 0)
-        {
-            LOG_PRINT(LOG_DEBUG, "Love is Eternal.");
-            evbuffer_add_printf(req->buffer_out, "<html>\n <head>\n"
-                "  <title>Love is Eternal</title>\n"
-                " </head>\n"
-                " <body>\n"
-                "  <h1>Single1024</h1>\n"
-                "Since 2008-12-22, there left no room in my heart for another one.</br>\n"
-                "</body>\n</html>\n"
-                );
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
-            evhtp_send_reply(req, EVHTP_RES_OK);
-            LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
-            goto done;
-        }
-        else
-        {
-            width = atoi(str_w);
-            height = atoi(str_h);
+        const char *str_w = evhtp_kv_find(params, "w");
+        const char *str_h = evhtp_kv_find(params, "h");
+        width = (str_w) ? atoi(str_w) : 0;
+        height = (str_h) ? atoi(str_h) : 0;
 
-            const char *str_p = evhtp_kv_find(params, "p");
-            const char *str_g = evhtp_kv_find(params, "g");
-            if(str_p)
-            {
-                proportion = atoi(str_p);
-            }
-            else
-                proportion = 1;
-            if(str_g)
-            {
-                gray = atoi(str_g);
-            }
-            else
-                gray = 0;
+        const char *str_p = evhtp_kv_find(params, "p");
+        const char *str_g = evhtp_kv_find(params, "g");
+        proportion = (str_p) ? atoi(str_p) : 1;
+        gray = (str_g) ? atoi(str_g) : 0;
 
-            const char *str_x = evhtp_kv_find(params, "x");
-            const char *str_y = evhtp_kv_find(params, "y");
-            const char *str_q = evhtp_kv_find(params, "q");
-            x = (str_x) ? atoi(str_x) : 0;
-            y = (str_y) ? atoi(str_y) : 0;
-            quality = (str_q) ? atoi(str_q) : 0;
+        const char *str_x = evhtp_kv_find(params, "x");
+        const char *str_y = evhtp_kv_find(params, "y");
+        x = (str_x) ? atoi(str_x) : 0;
+        y = (str_y) ? atoi(str_y) : 0;
+
+        const char *str_q = evhtp_kv_find(params, "q");
+        quality = (str_q) ? atoi(str_q) : 0;
+
+        const char *str_t = evhtp_kv_find(params, "t");
+        if(str_t)
+        {
+            size_t type_len = strlen(str_t) + 1;
+            type = (char *)malloc(type_len);
+            if(type != NULL)
+                str_lcpy(type, str_t, type_len);
+            LOG_PRINT(LOG_INFO, "type = %s", type);
         }
     }
 
@@ -884,6 +857,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
     zimg_req -> md5 = md5;
+    zimg_req -> type = type;
     zimg_req -> width = width;
     zimg_req -> height = height;
     zimg_req -> proportion = proportion;
@@ -956,8 +930,8 @@ done:
 		free(buff);
     if(zimg_req)
     {
-        if(zimg_req->md5)
-            free(zimg_req->md5);
+        free(zimg_req->md5);
+        free(zimg_req->type);
         free(zimg_req);
     }
 }

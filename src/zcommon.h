@@ -86,6 +86,7 @@ typedef struct thr_arg_s {
 
 typedef struct zimg_req_s {
     char *md5;
+    char *type;
     int width;
     int height;
     int proportion;

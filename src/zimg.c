@@ -35,6 +35,7 @@
 #include "zdb.h"
 #include "zscale.h"
 #include "zhttpd.h"
+#include "zlscale.h"
 
 int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
@@ -639,16 +640,23 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     }
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    if(req->x != 0 || req->y != 0)
-        req->proportion = 1;
-
-    if(req->proportion == 0 && req->width == 0 && req->height == 0)
+    if(req->type != NULL)
     {
-        gen_key(cache_key, req->md5, 0);
+        gen_key(cache_key, req->md5, 1, req->type);
     }
     else
     {
-        gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
+        if(req->x != 0 || req->y != 0)
+            req->proportion = 1;
+
+        if(req->proportion == 0 && req->width == 0 && req->height == 0)
+        {
+            gen_key(cache_key, req->md5, 0);
+        }
+        else
+        {
+            gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
+        }
     }
 
     if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
@@ -660,30 +668,35 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
 
     char orig_path[512];
-    snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
-    LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
-
-    char name[128];
-    snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_q%d", req->width, req->height,
-            req->proportion, 
-            req->gray, 
-            req->x, req->y, 
-            req->quality);
-
-    snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
+    snprintf(orig_path, 512, "%s/0*0", whole_path);
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
     char rsp_path[512];
-    if(req->width == 0 && req->height == 0 && req->proportion == 0)
-    {
-        LOG_PRINT(LOG_DEBUG, "Return original image.");
-        strncpy(rsp_path, orig_path, 512);
-    }
+    if(req->type != NULL)
+        snprintf(rsp_path, 512, "%s/t_%s", whole_path, req->type);
     else
     {
-        snprintf(rsp_path, 512, "%s/%s", whole_path, name);
+        char name[128];
+        snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_q%d", req->width, req->height,
+                req->proportion, 
+                req->gray, 
+                req->x, req->y, 
+                req->quality);
+
+        snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
+        LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
+
+        if(req->width == 0 && req->height == 0 && req->proportion == 0)
+        {
+            LOG_PRINT(LOG_DEBUG, "Return original image.");
+            strncpy(rsp_path, orig_path, 512);
+        }
+        else
+        {
+            snprintf(rsp_path, 512, "%s/%s", whole_path, name);
+        }
     }
-    LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
+    LOG_PRINT(LOG_INFO, "Got the rsp_path: %s", rsp_path);
 
     if((fd = open(rsp_path, O_RDONLY)) == -1)
     {
@@ -744,7 +757,10 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             }
         }
 
-        ret = convert(im, req);
+        if(req->type != NULL)
+            ret = lua_convert(im, req->type);
+        else
+            ret = convert(im, req);
         if(ret == -1) goto err;
         if(ret == 1) to_save = false;
 
@@ -799,7 +815,10 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
 
     if(len < CACHE_MAX_SIZE)
     {
-        gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
+        if(req->type != NULL)
+            gen_key(cache_key, req->md5, 1, req->type);
+        else
+            gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
         set_cache_bin(req->thr_arg, cache_key, buff, len);
     }
 
