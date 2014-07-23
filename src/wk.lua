@@ -239,8 +239,9 @@ type_list = {
 		quality			    = WAP_QUALITY,
 		format				= CF_WEBP,
 	},
-	crop = {
+	crop200 = {
 		type				= CT_CROP,
+        size                = 200,
 		quality			    = QUALITY_90,
 	},
 }
@@ -254,7 +255,7 @@ function square(size)
     local im_rows = webimg.rows()
     print("im_cols: " .. im_cols)
     print("im_rows: " .. im_rows)
-    if(im_cols > im_rows) then
+    if im_cols > im_rows then
         cols = im_rows
         y = 0
         x = math.ceil((im_cols - im_rows)/2)
@@ -267,48 +268,210 @@ function square(size)
     print("y: " .. y)
 
     ret = webimg.wi_crop(x, y, cols, cols)
-    if (ret ~= WI_OK) then
+    if ret ~= WI_OK then
         return TS_FAILED
     end
 
     ret = webimg.scale(size, size)
     print("webimg.scale() ret = " .. ret)
-    if (ret ~= WI_OK) then
+    if ret ~= WI_OK then
         print("webimg.scale() failed")
         return TS_FAILED
     end
-    print("webimg.scale() succ")
 
+    print("webimg.scale() succ")
     return TS_OK
 end
 
+function max_width(arg)
+    print("max_width()...")
+    local ret, ratio, cols, rows 
+    local im_cols = webimg.cols()
+    local im_rows = webimg.rows()
+    print("im_cols: " .. im_cols)
+    print("arg.size: " .. arg.size)
+    if im_cols <= arg.size then
+        print("im_cols <= arg.size return.")
+        return TS_OK
+    end
+
+    cols = arg.size
+    print("cols = " .. cols)
+    if arg.ratio then
+        ratio = im_cols / im_rows
+        if ratio < arg.ratio then
+            cols = im_cols
+            rows = math.ceil(cols / arg.ratio)
+            if rows > im_rows then
+                rows = im_rows
+            end
+            ret = webimg.crop(0, 0, cols, rows)
+            if ret ~= WI_OK then
+                return TS_FAILED
+            end
+        else
+            cols = math.min(arg.size, im_cols)
+            rows = im_rows
+
+            ret = webimg.crop(0, 0, cols, rows)
+            if ret == WI_OK then
+                return TS_OK
+            else
+                return TS_FAILED
+            end
+        end
+    else
+        rows = math.ceil((cols / im_cols) * im_rows);
+        ret = webimg.scale(cols, rows)
+        print("webimg.scale(" .. cols .. ", " .. rows .. ") done.")
+        if ret == WI_OK then
+            return TS_OK
+        else
+            return TS_FAILED
+        end
+    end
+end
+
+function max_size(arg)
+    print("max_size()...")
+    local ret, ratio, rows, cols
+    local im_cols = webimg.cols(im)
+    local im_rows = webimg.rows(im)
+
+    if im_cols <= arg.size and im_rows <= arg.size then
+        return TS_OK
+    end
+
+    if arg.ratio then
+        ratio = im_cols / im_rows
+        print("ratio = " .. ratio)
+        if im_cols < (arg.size * arg.ratio) and ratio < arg.ratio then
+            cols = im_cols
+            rows = math.min(im_rows, arg.size)
+
+            ret = webimg.crop(0, 0, cols, rows)
+            if (ret == WI_OK) then
+                return TS_OK 
+            else
+                return TS_FAILED
+            end
+        end
+        if im_rows < (arg.size * arg.ratio) and ratio > (1.0 / arg.ratio) then
+            rows = im_rows
+            cols = math.min(im_cols, arg.size)
+
+            ret = webimg.crop(0, 0, cols, rows)
+            if (ret == WI_OK) then
+                return TS_OK
+            else
+                return TS_FAILED
+            end
+        end
+
+        if im_cols > im_rows and ratio > (1.0 / arg.ratio) then
+            rows = im_rows
+            cols = rows / arg.ratio
+            if (cols > im_cols) then
+                cols = im_cols
+            end
+
+            ret = webimg.crop(0, 0, cols, rows)
+            if (ret ~= WI_OK) then
+                return TS_FAILED
+            end
+        elseif ratio < arg.ratio then
+            cols = im_cols
+            rows = cols / arg.ratio
+            if (rows > im_rows) then
+                rows = im_rows
+            end
+            ret = webimg.crop(0, 0, cols, rows)
+            if (ret ~= WI_OK) then
+                return TS_FAILED
+            end
+        end
+    end
+
+    if im_cols > im_rows then
+        cols = arg.size
+        rows = math.ceil((cols / im_cols) * im_rows);
+    else
+        rows = arg.size
+        cols = math.ceil((rows / im_rows) * im_cols);
+    end
+    print("cols = " .. cols .. " rows = ".. rows)
+
+    ret = webimg.scale(cols, rows)
+    if ret == WI_OK then
+        return TS_OK
+    else
+        return TS_FAILED
+    end
+end
+
 function proportion(arg)
-    --print("proportion()...")
+    print("proportion()...")
 	local ret, ratio, cols, rows
     local im_cols = webimg.cols()
     local im_rows = webimg.rows()
 
 	ratio = im_cols / im_rows
-	if (arg.ratio ~= nil and ratio > arg.ratio) then
+	if arg.ratio and ratio > arg.ratio then
 		cols = arg.cols
-		if (im_cols < cols) then
+		if im_cols < cols then
             return TS_OK
         end
-		rows = 0
+        rows = math.ceil((cols / im_cols) * im_rows);
 	else
 		rows = arg.rows
-		if (im_rows < rows) then
+		if im_rows < rows then
             return TS_OK
         end
-		cols = 0
+        cols = math.ceil((rows / im_rows) * im_cols);
     end
 
+    print("cols = " .. cols .. " rows = ".. rows)
 	ret = webimg.scale(cols, rows)
-	if (ret == WI_OK) then
+	if ret == WI_OK then
         return TS_OK
     else
         return TS_FAILED
     end
+end
+
+function crop(arg)
+    print("crop()...")
+    local ret, x, y, cols, rows
+    local im_cols = webimg.cols()
+    local im_rows = webimg.rows()
+
+    if arg.cols then
+        cols = arg.cols
+    else
+        cols = arg.size
+    end
+    if arg.rows then
+        rows = arg.rows
+    else
+        rows = arg.size
+    end
+
+    if cols > im_cols then
+        cols = im_cols
+    end
+    if rows > im_rows then
+        rows = im_rows
+    end
+
+    x = math.ceil((im_cols - cols) / 2.0);
+    y = math.ceil((im_rows - rows) / 2.0);
+
+    ret = webimg.crop(x, y, cols, rows)
+    print("webimg.crop(" .. x .. y .. cols .. rows .. ")")
+    if ret ~= WI_OK then
+        return TS_FAILED
+    end
+    return TS_OK
 end
 
 local code = TS_FAILED
@@ -316,42 +479,52 @@ local rtype = request.pull()
 print("rtype:" .. rtype)
 
 local arg = type_list[rtype]
-if (arg ~= nil) then
-    local ret
+if arg then
+    local ret = -1
     print("arg.type = " .. arg.type)
-    print("arg.size = " .. arg.size)
     local switch = {
-        [CT_SQUARE]         = function()    ret = square(arg.size)      end,
-        [CT_PROPORTION]     = function()    ret = proportion(arg)       end,
-        [CT_NONE]           = function()    ret = TS_OK                 end,
+        [CT_SQUARE]         = function()    ret = square(arg.size)     end,
+        [CT_MAX_WIDTH]      = function()    ret = max_width(arg)       end,
+        [CT_MAX_SIZE]       = function()    ret = max_size(arg)        end,
+        [CT_PROPORTION]     = function()    ret = proportion(arg)      end,
+        [CT_CROP]           = function()    ret = crop(arg)            end,
+        [CT_NONE]           = function()    ret = TS_OK                end,
     }
     print("start scale image...")
     local action = switch[arg.type]
-    if (action ~= nil) then
+    if action then
         action()
-        if (ret ~= TS_OK) then
-            print("scale image failed.")
-        else
-            if (webimg.quality() > arg.quality) then
+        if ret == TS_OK then
+            if arg.quality and webimg.quality() > arg.quality then
                 webimg.wi_set_quality(arg.quality)
-                print("webimg.wi_set_quality(im, " .. arg.quality .. ")")
+                print("webimg.wi_set_quality(" .. arg.quality .. ")")
             end
 
-            print("webimg.format(im) = " .. webimg.format(im))
-            if (string.find(webimg.format(), "GIF") ~= nil) then
-                if (arg.format ~= nil and arg.format == CF_WEBP) then
-                    print("arg.format = " .. arg.format)
+            local format = webimg.format()
+            print("webimg.format() = " .. format)
+            if not string.find(format, "GIF") then
+                print("not GIF, change")
+                if arg.format and arg.format == CF_WEBP then
+                    print("arg.format = WEBP")
                     ret = webimg.wi_set_format("WEBP")
                 else
-                    print("arg.format = " .. arg.format)
+                    print("arg.format = JPEG")
                     ret = webimg.wi_set_format("JPEG")
                 end
+            else
+                print("GIF, donot change")
             end
 
             code = ret
             print("code = " .. code)
+        else
+            print("scale image failed.")
         end
+    else
+        print("action = nil")
     end
+else
+    print("arg = nil")
 end
 
 request.push(code)

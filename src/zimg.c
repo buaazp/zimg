@@ -98,7 +98,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     {
         if(exist_db(thr_arg, cache_key) == 1)
         {
-            LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
+            LOG_PRINT(LOG_INFO, "File Exist, Needn't Save.");
             result = 1;
             goto done;
         }

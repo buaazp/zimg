@@ -1,6 +1,6 @@
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
+#include "lua/lua.h"
+#include "lua/lualib.h"
+#include "lua/lauxlib.h"
 
 #include "zcommon.h"
 #include "zlog.h"
@@ -93,6 +93,7 @@ static int set_wi_format (lua_State *L) {
     const char *format = lua_tostring(L, 1);
     
     int ret = wi_set_format(img, (char *)format);
+    LOG_PRINT(LOG_INFO, "set_wi_format: %s ret = %d", format, ret);
     lua_pushnumber(L, ret);
     return 1;
 }

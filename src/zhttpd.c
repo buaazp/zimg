@@ -803,7 +803,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
 	/* This holds the content we're sending. */
 
-    char *type;
+    char *type = NULL;
     int width, height, proportion, gray, x, y, quality;
     evhtp_kvs_t *params;
     params = req->uri->query;
@@ -816,7 +816,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         x = 0;
         y = 0;
         quality = 0;
-        type = NULL;
     }
     else
     {

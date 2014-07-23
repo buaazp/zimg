@@ -756,6 +756,7 @@ int exist_db(thr_arg_t *thr_arg, const char *cache_key)
  */
 int exist_beansdb(memcached_st *memc, const char *key)
 {
+    /*
     int rst = -1;
     if(memc == NULL)
         return rst;
@@ -764,6 +765,29 @@ int exist_beansdb(memcached_st *memc, const char *key)
 
     //memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
     rc = memcached_exist(memc, key, strlen(key));
+
+    if (rc == MEMCACHED_SUCCESS) 
+    {
+        LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Exist.", key);
+        rst = 1;
+    }
+    else
+    {
+        const char *str_rc = memcached_strerror(memc, rc);
+        LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
+    }
+
+    return rst;
+    */
+    int rst = -1;
+    if(memc == NULL)
+        return rst;
+
+    size_t valueLen;
+    uint32_t flags;
+    memcached_return rc;
+
+    memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
 
     if (rc == MEMCACHED_SUCCESS) 
     {
