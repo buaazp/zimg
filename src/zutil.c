@@ -264,8 +264,7 @@ int is_file(const char *filename)
         LOG_PRINT(LOG_DEBUG, "File[%s] is A File.", filename);
         return 1;
     }
-    else
-        return -1;
+    return -1;
 }
 
 

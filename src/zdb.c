@@ -363,7 +363,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
 
-    if(req->type != NULL)
+    if(settings.script_on == 1 && req->type != NULL)
     {
         gen_key(cache_key, req->md5, 1, req->type);
     }
@@ -419,7 +419,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
         LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
         goto err;
     }
-    if(req->type != NULL)
+    if(settings.script_on == 1 && req->type != NULL)
         result = lua_convert(im, req->type);
     else
         result = convert(im, req);
@@ -432,7 +432,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
 
-    if(req->type != NULL)
+    if(settings.script_on == 1 && req->type != NULL)
         gen_key(cache_key, req->md5, 1, req->type);
     else
         gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
@@ -451,11 +451,18 @@ done:
     result = evbuffer_add(request->buffer_out, buff_ptr, img_size);
     if(result != -1)
     {
-        if(settings.save_new == 1 && to_save == true)
+        if(settings.save_new != 0 && to_save == true)
         {
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", cache_key);
-            save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
+            if(settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
+            {
+                LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", cache_key);
+                save_img_db(req->thr_arg, cache_key, buff_ptr, img_size);
+            }
+            else
+                LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);
         }
+        else
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);
         result = 1;
     }
 

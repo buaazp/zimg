@@ -75,9 +75,6 @@ void log_init()
  
 int log_open(const char *path, const char* mode)
 {
-    if(settings.log == 0)
-        return -1;
-
     int i;
  
     for (i = LOG_USER; i < MAX_LOGS+1; i++)
@@ -110,7 +107,7 @@ int log_open(const char *path, const char* mode)
 void log_handler(const char *msg)
 {
     int fd;
-    int log_to_stdout = settings.log == 0;
+    int log_to_stdout = settings.log_level == -1;
 
     fd = log_to_stdout ? STDOUT_FILENO :
         open(settings.log_name, O_APPEND|O_CREAT|O_WRONLY, 0644);
@@ -123,9 +120,6 @@ err:
 
 void log_printf0(int log_id, int log_level, const char *fmt, ...)
 {
-    if(settings.log == 0)
-        return;
-
     FILE *fp;
     time_t t;
     char tmbuf[30];

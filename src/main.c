@@ -91,10 +91,12 @@ static void settings_init(void)
     settings.cache_on = 0;
     str_lcpy(settings.cache_ip, "127.0.0.1", sizeof(settings.cache_ip));
     settings.cache_port = 11211;
-    settings.log = 0;
+    settings.log_level = 6;
     str_lcpy(settings.log_name, "./log/zimg.log", sizeof(settings.log_name));
     str_lcpy(settings.root_path, "./www/index.html", sizeof(settings.root_path));
     str_lcpy(settings.admin_path, "./www/admin.html", sizeof(settings.admin_path));
+    settings.script_on = 0;
+    settings.script_name[0] = '\0';
     str_lcpy(settings.dst_format, "JPEG", sizeof(settings.dst_format));
     settings.quality = 75;
     settings.mode = 1;
@@ -203,9 +205,9 @@ static int load_conf(const char *conf)
         settings.cache_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
-    lua_getglobal(L, "log");
+    lua_getglobal(L, "log_level");
     if(lua_isnumber(L, -1))
-        settings.log = (int)lua_tonumber(L, -1);
+        settings.log_level = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_name"); //stack index: -1
@@ -221,6 +223,11 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "admin_path");
     if(lua_isstring(L, -1))
         str_lcpy(settings.admin_path, lua_tostring(L, -1), sizeof(settings.admin_path));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "script_name"); //stack index: -1
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.script_name, lua_tostring(L, -1), sizeof(settings.script_name));
     lua_pop(L, 1);
 
     int format = 1;
@@ -435,14 +442,21 @@ int main(int argc, char **argv)
     }
     //init the Path zimg need to use.
     //start log module... ./log/zimg.log
-    if(settings.log)
+    if(mk_dirf(settings.log_name) != 1)
     {
-        if(mk_dirf(settings.log_name) != 1)
+        fprintf(stderr, "%s log path create failed!\n", settings.log_name);
+        return -1;
+    }
+    log_init();
+
+    if(settings.script_name[0] != '\0')
+    {
+        if(is_file(settings.script_name) == -1)
         {
-            fprintf(stderr, "%s log path create failed!\n", settings.log_name);
+            fprintf(stderr, "%s open failed!\n", settings.script_name);
             return -1;
         }
-        log_init();
+        settings.script_on = 1;
     }
 
     if(is_dir(settings.img_path) != 1)

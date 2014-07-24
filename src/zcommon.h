@@ -62,10 +62,12 @@ struct setting{
     int cache_on;
     char cache_ip[128];
     int cache_port;
-    int log;
+    int log_level;
     char log_name[512];
     char root_path[512];
     char admin_path[512];
+    int script_on;
+    char script_name[512];
     char dst_format[16];
     int quality;
     int mode;
@@ -130,7 +132,7 @@ struct timespec retry_sleep;
 #else
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
-        if (level < LOG_DEBUG) { \
+        if (level <= settings.log_level) { \
             int log_id = log_open(settings.log_name, "a"); \
             log_printf0(log_id, level, fmt, ##__VA_ARGS__) ; \
             log_close(log_id); \

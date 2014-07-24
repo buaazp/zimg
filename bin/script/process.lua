@@ -267,19 +267,20 @@ function square(size)
     print("x: " .. x)
     print("y: " .. y)
 
-    ret = webimg.wi_crop(x, y, cols, cols)
+    ret = webimg.crop(x, y, cols, cols)
+    print("webimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. cols .. ") ret = " .. ret)
     if ret ~= WI_OK then
         return TS_FAILED
     end
 
     ret = webimg.scale(size, size)
-    print("webimg.scale() ret = " .. ret)
+    print("webimg.scale(" .. size .. ", " .. size .. ") ret = " .. ret)
     if ret ~= WI_OK then
-        print("webimg.scale() failed")
+        print("square() failed")
         return TS_FAILED
     end
 
-    print("webimg.scale() succ")
+    print("square() succ")
     return TS_OK
 end
 
@@ -289,6 +290,7 @@ function max_width(arg)
     local im_cols = webimg.cols()
     local im_rows = webimg.rows()
     print("im_cols: " .. im_cols)
+    print("im_rows: " .. im_rows)
     print("arg.size: " .. arg.size)
     if im_cols <= arg.size then
         print("im_cols <= arg.size return.")
@@ -306,6 +308,7 @@ function max_width(arg)
                 rows = im_rows
             end
             ret = webimg.crop(0, 0, cols, rows)
+            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if ret ~= WI_OK then
                 return TS_FAILED
             end
@@ -314,6 +317,7 @@ function max_width(arg)
             rows = im_rows
 
             ret = webimg.crop(0, 0, cols, rows)
+            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if ret == WI_OK then
                 return TS_OK
             else
@@ -323,7 +327,7 @@ function max_width(arg)
     else
         rows = math.ceil((cols / im_cols) * im_rows);
         ret = webimg.scale(cols, rows)
-        print("webimg.scale(" .. cols .. ", " .. rows .. ") done.")
+        print("webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
         if ret == WI_OK then
             return TS_OK
         else
@@ -350,6 +354,7 @@ function max_size(arg)
             rows = math.min(im_rows, arg.size)
 
             ret = webimg.crop(0, 0, cols, rows)
+            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret == WI_OK) then
                 return TS_OK 
             else
@@ -361,6 +366,7 @@ function max_size(arg)
             cols = math.min(im_cols, arg.size)
 
             ret = webimg.crop(0, 0, cols, rows)
+            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret == WI_OK) then
                 return TS_OK
             else
@@ -376,6 +382,7 @@ function max_size(arg)
             end
 
             ret = webimg.crop(0, 0, cols, rows)
+            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret ~= WI_OK) then
                 return TS_FAILED
             end
@@ -386,6 +393,7 @@ function max_size(arg)
                 rows = im_rows
             end
             ret = webimg.crop(0, 0, cols, rows)
+            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret ~= WI_OK) then
                 return TS_FAILED
             end
@@ -399,9 +407,9 @@ function max_size(arg)
         rows = arg.size
         cols = math.ceil((rows / im_rows) * im_cols);
     end
-    print("cols = " .. cols .. " rows = ".. rows)
 
     ret = webimg.scale(cols, rows)
+    print("webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
     if ret == WI_OK then
         return TS_OK
     else
@@ -430,8 +438,8 @@ function proportion(arg)
         cols = math.ceil((rows / im_rows) * im_cols);
     end
 
-    print("cols = " .. cols .. " rows = ".. rows)
 	ret = webimg.scale(cols, rows)
+    print("webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
 	if ret == WI_OK then
         return TS_OK
     else
@@ -467,7 +475,7 @@ function crop(arg)
     y = math.ceil((im_rows - rows) / 2.0);
 
     ret = webimg.crop(x, y, cols, rows)
-    print("webimg.crop(" .. x .. y .. cols .. rows .. ")")
+    print("webimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
     if ret ~= WI_OK then
         return TS_FAILED
     end
@@ -496,6 +504,7 @@ if arg then
         action()
         if ret == TS_OK then
             if arg.quality and webimg.quality() > arg.quality then
+                print("webimg.quality = " .. webimg.quality())
                 webimg.wi_set_quality(arg.quality)
                 print("webimg.wi_set_quality(" .. arg.quality .. ")")
             end

@@ -640,7 +640,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     }
 
     // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
-    if(req->type != NULL)
+    if(settings.script_on == 1 && req->type != NULL)
     {
         gen_key(cache_key, req->md5, 1, req->type);
     }
@@ -672,7 +672,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
     char rsp_path[512];
-    if(req->type != NULL)
+    if(settings.script_on == 1 && req->type != NULL)
         snprintf(rsp_path, 512, "%s/t_%s", whole_path, req->type);
     else
     {
@@ -757,7 +757,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             }
         }
 
-        if(req->type != NULL)
+        if(settings.script_on == 1 && req->type != NULL)
             ret = lua_convert(im, req->type);
         else
             ret = convert(im, req);
@@ -801,21 +801,26 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     }
 
     //LOG_PRINT(LOG_INFO, "New Image[%s]", rsp_path);
-    if(settings.save_new == 1 && to_save == true)
+    if(settings.save_new != 0 && to_save == true)
     {
-        LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
-        if(new_img(buff, len, rsp_path) == -1)
+        if(settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
         {
-            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
-            LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
+            LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
+            if(new_img(buff, len, rsp_path) == -1)
+            {
+                LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
+                LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
+            }
         }
+        else
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);
     }
     else
         LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);
 
     if(len < CACHE_MAX_SIZE)
     {
-        if(req->type != NULL)
+        if(settings.script_on == 1 && req->type != NULL)
             gen_key(cache_key, req->md5, 1, req->type);
         else
             gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);

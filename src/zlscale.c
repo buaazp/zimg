@@ -9,9 +9,6 @@
 
 int lua_convert(struct image *im, const char *type);
 
-//const static char *lua_path = "process.lua";
-const static char *lua_path = "wk.lua";
-
 static int get_wi_cols(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     int cols = larg->img->cols;
@@ -163,7 +160,7 @@ int lua_convert(struct image *im, const char *type)
     larg->img = im;
     pthread_setspecific(thread_key, larg);
 
-    luaL_dofile(L, lua_path);
+    luaL_dofile(L, settings.script_name);
     lua_close(L);
 
     larg = pthread_getspecific(thread_key);
