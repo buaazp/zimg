@@ -59,6 +59,7 @@ void usage(int argc, char **argv);
 static void settings_init(void); 
 static int load_conf(const char *conf); 
 static void sighandler(int signal); 
+void init_thread(evhtp_t *htp, evthr_t *thread, void *arg);
 int main(int argc, char **argv);
 void kill_server(void);
 
@@ -312,6 +313,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 {
     thr_arg_t *thr_args;
     thr_args = calloc(1, sizeof(thr_arg_t));
+    LOG_PRINT(LOG_DEBUG, "thr_args alloc");
     thr_args->thread = thread;
 
     char mserver[32];
@@ -365,9 +367,13 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     }
 
     thr_args->L = luaL_newstate(); 
-    luaL_openlibs(thr_args->L);
-    luaL_openlib(thr_args->L, "request", requestlib, 0);
-    luaL_openlib(thr_args->L, "webimg", webimg_lib, 0);
+    LOG_PRINT(LOG_DEBUG, "luaL_newstate alloc");
+    if(thr_args->L != NULL)
+    {
+        luaL_openlibs(thr_args->L);
+        luaL_openlib(thr_args->L, "request", requestlib, 0);
+        luaL_openlib(thr_args->L, "webimg", webimg_lib, 0);
+    }
 
     evthr_set_aux(thread, thr_args);
 }

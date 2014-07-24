@@ -148,18 +148,23 @@ int lua_convert(struct image *im, zimg_req_t *req)
     int ret = -1;
     LOG_PRINT(LOG_DEBUG, "lua_convert: %s", req->type);
 
-    lua_arg *larg = (lua_arg *)malloc(sizeof(lua_arg));
-    if(larg == NULL)
-        return -1;
-    larg->lua_ret = ret;
-    larg->trans_type = req->type;
-    larg->img = im;
-    pthread_setspecific(thread_key, larg);
+    if(req->thr_arg->L != NULL)
+    {
+        lua_arg *larg = (lua_arg *)malloc(sizeof(lua_arg));
+        if(larg == NULL)
+            return -1;
+        larg->lua_ret = ret;
+        larg->trans_type = req->type;
+        larg->img = im;
+        pthread_setspecific(thread_key, larg);
+        luaL_dofile(req->thr_arg->L, settings.script_name);
 
-    luaL_dofile(req->thr_arg->L, settings.script_name);
+        ret = larg->lua_ret;
+        free(larg);
+    }
+    else
+        LOG_PRINT(LOG_WARNING, "no lua_stats, lua_convert failed!");
 
-    ret = larg->lua_ret;
-    free(larg);
     return ret;
 }
 

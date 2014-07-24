@@ -350,6 +350,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     int result = -1;
     char cache_key[CACHE_KEY_SIZE];
     char *buff_ptr = NULL;
+    char *orig_buff_ptr = NULL;
     size_t img_size;
     struct image *im = NULL;
     bool to_save = true;
@@ -400,20 +401,20 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
     if (im == NULL) goto err;
 
     gen_key(cache_key, req->md5, 0);
-    if(find_cache_bin(req->thr_arg, cache_key, &buff_ptr, &img_size) == -1)
+    if(find_cache_bin(req->thr_arg, cache_key, &orig_buff_ptr, &img_size) == -1)
     {
-        if(get_img_db(req->thr_arg, cache_key, &buff_ptr, &img_size) == -1)
+        if(get_img_db(req->thr_arg, cache_key, &orig_buff_ptr, &img_size) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
             goto err;
         }
         else if(img_size < CACHE_MAX_SIZE)
         {
-            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
+            set_cache_bin(req->thr_arg, cache_key, orig_buff_ptr, img_size);
         }
     }
 
-    result = wi_read_blob(im, buff_ptr, img_size);
+    result = wi_read_blob(im, orig_buff_ptr, img_size);
     if (result != WI_OK)
     {
         LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
@@ -467,6 +468,7 @@ done:
     }
 
 err:
+    free(orig_buff_ptr);
     if(im != NULL)
         wi_free_image(im);
     else if(buff_ptr != NULL)
@@ -794,11 +796,12 @@ int exist_beansdb(memcached_st *memc, const char *key)
     uint32_t flags;
     memcached_return rc;
 
-    memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
 
     if (rc == MEMCACHED_SUCCESS) 
     {
         LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Exist.", key);
+        free(value);
         rst = 1;
     }
     else

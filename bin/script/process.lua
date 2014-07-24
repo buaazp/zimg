@@ -537,5 +537,6 @@ else
 end
 
 request.push(code)
+print("zimg lua script finished.")
 return
 
