@@ -619,6 +619,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     int fd = -1;
     struct stat f_stat;
     char *buff = NULL;
+    char *orig_buff = NULL;
     struct image *im = NULL;
     size_t len = 0;
 
@@ -705,11 +706,11 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
         int ret;
 
         gen_key(cache_key, req->md5, 0);
-        if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
+        if(find_cache_bin(req->thr_arg, cache_key, &orig_buff, &len) == 1)
         {
             LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
 
-            ret = wi_read_blob(im, buff, len);
+            ret = wi_read_blob(im, orig_buff, len);
             if (ret != WI_OK)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
@@ -722,6 +723,17 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
                 }
                 else
                 {
+                    buff = (char *)im->in_buf.data;
+                    len = im->in_buf.len;
+                    if (buff == NULL) {
+                        LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
+                        goto err;
+                    }
+                    if(len < CACHE_MAX_SIZE)
+                    {
+                        set_cache_bin(req->thr_arg, cache_key, buff, len);
+                    }
+                    /*
                     buff = (char *)wi_get_blob(im, &len);
                     if (buff == NULL) {
                         LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
@@ -731,6 +743,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
                     {
                         set_cache_bin(req->thr_arg, cache_key, (const char *)buff, len);
                     }
+                    */
                 }
             }
         }
@@ -745,7 +758,21 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             }
             else
             {
-                char *orig_buff = (char *)wi_get_blob(im, &len);
+                buff = (char *)im->in_buf.data;
+                len = im->in_buf.len;
+                if (buff == NULL) {
+                    LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
+                    goto err;
+                }
+                if(len < CACHE_MAX_SIZE)
+                {
+                    set_cache_bin(req->thr_arg, cache_key, buff, len);
+                }
+            }
+            /*
+            else
+            {
+                orig_buff = (char *)wi_get_blob(im, &len);
                 if (orig_buff == NULL) {
                     LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
                     goto err;
@@ -754,8 +781,8 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
                 {
                     set_cache_bin(req->thr_arg, cache_key, orig_buff, len);
                 }
-                free(orig_buff);
             }
+            */
         }
 
         if(settings.script_on == 1 && req->type != NULL)
@@ -849,6 +876,7 @@ err:
         wi_free_image(im);
     else if(buff != NULL)
         free(buff);
+    free(orig_buff);
     return result;
 }
 

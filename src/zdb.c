@@ -468,11 +468,11 @@ done:
     }
 
 err:
-    free(orig_buff_ptr);
     if(im != NULL)
         wi_free_image(im);
     else if(buff_ptr != NULL)
         free(buff_ptr);
+    free(orig_buff_ptr);
     return result;
 }
 
