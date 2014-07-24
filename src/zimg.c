@@ -743,19 +743,19 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
                 goto err;
             }
-            //double wi_get_blob will lead memory leak!
-            //else
-            //{
-            //    buff = (char *)wi_get_blob(im, &len);
-            //    if (buff == NULL) {
-            //        LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
-            //        goto err;
-            //    }
-            //    if(len < CACHE_MAX_SIZE)
-            //    {
-            //        set_cache_bin(req->thr_arg, cache_key, (const char *)buff, len);
-            //    }
-            //}
+            else
+            {
+                char *orig_buff = (char *)wi_get_blob(im, &len);
+                if (orig_buff == NULL) {
+                    LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
+                    goto err;
+                }
+                if(len < CACHE_MAX_SIZE)
+                {
+                    set_cache_bin(req->thr_arg, cache_key, orig_buff, len);
+                }
+                free(orig_buff);
+            }
         }
 
         if(settings.script_on == 1 && req->type != NULL)

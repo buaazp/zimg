@@ -53,7 +53,7 @@ quality=75
 
 --storage config
 --zimg support 3 ways for storage images
-mode=2
+mode=1
 save_new=0
 
 --mode[1]: local disk mode
