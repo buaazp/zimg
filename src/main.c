@@ -43,6 +43,7 @@
 #include "zutil.h"
 #include "zlog.h"
 #include "zcache.h"
+#include "zlscale.h"
 
 #if __APPLE__
 #undef daemon
@@ -304,6 +305,9 @@ static void sighandler(int signal)
     _exit(1);
 }
 
+extern const struct luaL_reg webimg_lib[];
+extern const struct luaL_Reg requestlib[];
+
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 {
     thr_arg_t *thr_args;
@@ -326,9 +330,12 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
         memcached_server_list_free(servers);
     }
+    else
+        thr_args->cache_conn = NULL;
 
     if(settings.mode == 2)
     {
+        thr_args->ssdb_conn = NULL;
         memcached_st *beans = memcached_create(NULL);
         snprintf(mserver, 32, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
         memcached_server_st *servers = memcached_servers_parse(mserver);
@@ -343,6 +350,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     }
     else if(settings.mode == 3)
     {
+        thr_args->beansdb_conn = NULL;
         redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
         if(c->err)
         {
@@ -356,9 +364,13 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         }
     }
 
+    thr_args->L = luaL_newstate(); 
+    luaL_openlibs(thr_args->L);
+    luaL_openlib(thr_args->L, "request", requestlib, 0);
+    luaL_openlib(thr_args->L, "webimg", webimg_lib, 0);
+
     evthr_set_aux(thread, thr_args);
 }
-
 
 /**
  * @brief main The entrance of zimg.
@@ -544,7 +556,6 @@ int main(int argc, char **argv)
     free_access_conf(settings.down_access);
     free_access_conf(settings.admin_access);
 
-    //fprintf(stdout, "\nByebye!\n");
     return 0;
 }
 

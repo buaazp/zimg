@@ -7,7 +7,7 @@
 #include "zlscale.h"
 #include "webimg/webimg2.h"
 
-int lua_convert(struct image *im, const char *type);
+int lua_convert(struct image *im, zimg_req_t *req);
 
 static int get_wi_cols(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
@@ -101,7 +101,7 @@ static int set_wi_format (lua_State *L) {
     return 1;
 }
 
-static const struct luaL_reg webimg_lib[] = {
+const struct luaL_reg webimg_lib[] = {
     //{"__gc",                destroy_wi_image    },
     {"cols",                get_wi_cols         },
     {"rows",                get_wi_rows         },
@@ -137,33 +137,27 @@ static int req_push(lua_State *L)
     return 0;
 }
 
-static const struct luaL_Reg requestlib [] = {
+const struct luaL_Reg requestlib[] = {
     {"pull",        req_pull    },
     {"push",        req_push    },
     {NULL,          NULL        }
 };
 
-int lua_convert(struct image *im, const char *type)
+int lua_convert(struct image *im, zimg_req_t *req)
 {
     int ret = -1;
-    LOG_PRINT(LOG_INFO, "lua_convert: %s", type);
-    lua_State* L = luaL_newstate(); 
-    luaL_openlibs(L);
-    luaL_openlib(L, "request", requestlib, 0);
-    luaL_openlib(L, "webimg", webimg_lib, 0);
+    LOG_PRINT(LOG_DEBUG, "lua_convert: %s", req->type);
 
     lua_arg *larg = (lua_arg *)malloc(sizeof(lua_arg));
     if(larg == NULL)
         return -1;
     larg->lua_ret = ret;
-    larg->trans_type = (char *)type;
+    larg->trans_type = req->type;
     larg->img = im;
     pthread_setspecific(thread_key, larg);
 
-    luaL_dofile(L, settings.script_name);
-    lua_close(L);
+    luaL_dofile(req->thr_arg->L, settings.script_name);
 
-    larg = pthread_getspecific(thread_key);
     ret = larg->lua_ret;
     free(larg);
     return ret;

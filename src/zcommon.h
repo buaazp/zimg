@@ -32,6 +32,7 @@
 #include "libevhtp/evhtp.h"
 #include "zaccess.h"
 #include "zhttpd.h"
+#include "lua/lualib.h"
 
 #ifndef ZIMG_VERSION
 #define ZIMG_VERSION "3.0.0"
@@ -84,6 +85,7 @@ typedef struct thr_arg_s {
     memcached_st *cache_conn;
     memcached_st *beansdb_conn;
     redisContext *ssdb_conn;
+    lua_State* L;
 } thr_arg_t;
 
 typedef struct zimg_req_s {

@@ -9,6 +9,6 @@ typedef struct lua_arg_s {
     int lua_ret;
 } lua_arg;
 
-int lua_convert(struct image *im, const char *type);
+int lua_convert(struct image *im, zimg_req_t *req);
 
 #endif

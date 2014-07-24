@@ -420,7 +420,7 @@ int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
     if(settings.script_on == 1 && req->type != NULL)
-        result = lua_convert(im, req->type);
+        result = lua_convert(im, req);
     else
         result = convert(im, req);
     if(result == -1) goto err;

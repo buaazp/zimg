@@ -1,34 +1,34 @@
-print("hello world!")
+print("zimg using lua script.")
 
-TS_OK = 0
-TS_FAILED = -1
+local TS_OK = 0
+local TS_FAILED = -1
 
-WI_OK = 0
-WI_E_UNKNOW_FORMAT = 1
-WI_E_LOADER_INIT = 2
-WI_E_LOADER_LOAD = 3
-WI_E_READ_FILE = 4
-WI_E_WRITE_FILE = 5
-WI_E_ENCODE = 6
+local WI_OK = 0
+local WI_E_UNKNOW_FORMAT = 1
+local WI_E_LOADER_INIT = 2
+local WI_E_LOADER_LOAD = 3
+local WI_E_READ_FILE = 4
+local WI_E_WRITE_FILE = 5
+local WI_E_ENCODE = 6
 
-CT_SQUARE = 0
-CT_MAX_WIDTH = 1
-CT_MAX_SIZE = 2
-CT_PROPORTION = 3
-CT_CROP = 4
-CT_NONE = 5
+local CT_SQUARE = 0
+local CT_MAX_WIDTH = 1
+local CT_MAX_SIZE = 2
+local CT_PROPORTION = 3
+local CT_CROP = 4
+local CT_NONE = 5
 
-CF_JPEG = 0
-CF_PNG = 1
-CF_GIF = 2
-CF_WEBP = 3
+local CF_JPEG = 0
+local CF_PNG = 1
+local CF_GIF = 2
+local CF_WEBP = 3
 
-WAP_QUALITY = 70
-THUMB_QUALITY = 85
-QUALITY_90 = 90
-QUALITY_95 = 95
+local WAP_QUALITY = 70
+local THUMB_QUALITY = 85
+local QUALITY_90 = 90
+local QUALITY_95 = 95
 
-type_list = {
+local type_list = {
     woriginal = {
 		type				= CT_NONE,
 		quality			    = WAP_QUALITY,
