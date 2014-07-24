@@ -22,6 +22,8 @@ enum evthr_res {
     EVTHR_RES_FATAL
 };
 
+pthread_key_t thread_key;
+
 struct evthr_pool;
 struct evthr;
 

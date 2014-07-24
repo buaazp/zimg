@@ -322,6 +322,8 @@ evthr_start(evthr_t * thread) {
         return -1;
     }
 
+    pthread_key_create(&thread_key, NULL);
+
     if (pthread_create(thread->thr, NULL, _evthr_loop, (void *)thread)) {
         return -1;
     }
@@ -336,6 +338,8 @@ evthr_free(evthr_t * thread) {
     if (thread == NULL) {
         return;
     }
+
+    pthread_key_delete(thread_key);
 
     if (thread->rdr > 0) {
         close(thread->rdr);

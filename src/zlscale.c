@@ -11,30 +11,31 @@ int lua_convert(struct image *im, const char *type);
 
 //const static char *lua_path = "process.lua";
 const static char *lua_path = "wk.lua";
-static struct image *img;
-static char *trans_type;
-static int lua_ret;
 
 static int get_wi_cols(lua_State *L) {
-    int cols = img->cols;
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int cols = larg->img->cols;
     lua_pushnumber(L, cols);
     return 1;
 }
 
 static int get_wi_rows(lua_State *L) {
-    int rows = img->rows;
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int rows = larg->img->rows;
     lua_pushnumber(L, rows);
     return 1;
 }
 
 static int get_wi_quality(lua_State *L) {
-    int quality = img->quality;
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int quality = larg->img->quality;
     lua_pushnumber(L, quality);
     return 1;
 }
 
 static int get_wi_format(lua_State *L) {
-    char *format = img->format;
+    lua_arg *larg = pthread_getspecific(thread_key);
+    char *format = larg->img->format;
     LOG_PRINT(LOG_INFO, "get_wi_format: %s", format);
     lua_pushstring(L, format);
     return 1;
@@ -45,11 +46,12 @@ static int scale_wi (lua_State *L) {
     double rows = lua_tonumber(L, 2);
 
     LOG_PRINT(LOG_DEBUG, "cols = %f rows = %f", cols, rows);
-    int ret = wi_scale(img, cols, rows);
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int ret = wi_scale(larg->img, cols, rows);
     LOG_PRINT(LOG_DEBUG, "ret = %d", ret);
-    if (img->colorspace == CS_RGB) {
+    if (larg->img->colorspace == CS_RGB) {
         LOG_PRINT(LOG_DEBUG, "rgb!");
-    } else if (img->colorspace == CS_GRAYSCALE) {
+    } else if (larg->img->colorspace == CS_GRAYSCALE) {
         LOG_PRINT(LOG_DEBUG, "gray!");
     } else {
         LOG_PRINT(LOG_DEBUG, "other!");
@@ -64,16 +66,18 @@ static int crop_wi (lua_State *L) {
     double cols = lua_tonumber(L, 3);
     double rows = lua_tonumber(L, 4);
     
-    int ret = wi_crop(img, x, y, cols, rows);
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int ret = wi_crop(larg->img, x, y, cols, rows);
     lua_pushnumber(L, ret);
     return 1;
 }
 
 static int gray_wi (lua_State *L) {
-    int ret = wi_gray(img);
-    if (img->colorspace == CS_RGB) {
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int ret = wi_gray(larg->img);
+    if (larg->img->colorspace == CS_RGB) {
         LOG_PRINT(LOG_DEBUG, "rgb!");
-    } else if (img->colorspace == CS_GRAYSCALE) {
+    } else if (larg->img->colorspace == CS_GRAYSCALE) {
         LOG_PRINT(LOG_DEBUG, "gray!");
     } else {
         LOG_PRINT(LOG_DEBUG, "other!");
@@ -85,14 +89,16 @@ static int gray_wi (lua_State *L) {
 static int set_wi_quality (lua_State *L) {
     int quality = lua_tonumber(L, 1);
     
-    wi_set_quality(img, quality);
+    lua_arg *larg = pthread_getspecific(thread_key);
+    wi_set_quality(larg->img, quality);
     return 0;
 }
 
 static int set_wi_format (lua_State *L) {
     const char *format = lua_tostring(L, 1);
     
-    int ret = wi_set_format(img, (char *)format);
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int ret = wi_set_format(larg->img, (char *)format);
     LOG_PRINT(LOG_INFO, "set_wi_format: %s ret = %d", format, ret);
     lua_pushnumber(L, ret);
     return 1;
@@ -121,14 +127,16 @@ static const struct luaL_reg webimg_lib[] = {
 
 static int req_pull(lua_State *L)
 {
-    lua_pushstring(L, trans_type);
-    LOG_PRINT(LOG_INFO, "req_pull: %s", trans_type);
+    lua_arg *larg = pthread_getspecific(thread_key);
+    lua_pushstring(L, larg->trans_type);
+    LOG_PRINT(LOG_INFO, "req_pull: %s", larg->trans_type);
     return 1;
 }
 
 static int req_push(lua_State *L)
 {
-    lua_ret = lua_tonumber(L, 1);
+    lua_arg *larg = pthread_getspecific(thread_key);
+    larg->lua_ret = lua_tonumber(L, 1);
     return 0;
 }
 
@@ -140,17 +148,27 @@ static const struct luaL_Reg requestlib [] = {
 
 int lua_convert(struct image *im, const char *type)
 {
+    int ret = -1;
     LOG_PRINT(LOG_INFO, "lua_convert: %s", type);
     lua_State* L = luaL_newstate(); 
     luaL_openlibs(L);
     luaL_openlib(L, "request", requestlib, 0);
     luaL_openlib(L, "webimg", webimg_lib, 0);
-    lua_ret = -1;
-    trans_type = (char *)type;
-    img = im;
+
+    lua_arg *larg = (lua_arg *)malloc(sizeof(lua_arg));
+    if(larg == NULL)
+        return -1;
+    larg->lua_ret = ret;
+    larg->trans_type = (char *)type;
+    larg->img = im;
+    pthread_setspecific(thread_key, larg);
+
     luaL_dofile(L, lua_path);
     lua_close(L);
 
-    return lua_ret;
+    larg = pthread_getspecific(thread_key);
+    ret = larg->lua_ret;
+    free(larg);
+    return ret;
 }
 
