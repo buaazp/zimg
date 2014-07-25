@@ -308,6 +308,7 @@ static void sighandler(int signal)
 
 extern const struct luaL_reg webimg_lib[];
 extern const struct luaL_Reg requestlib[];
+extern const struct luaL_Reg loglib[];
 
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 {
@@ -373,6 +374,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         luaL_openlibs(thr_args->L);
         luaL_openlib(thr_args->L, "request", requestlib, 0);
         luaL_openlib(thr_args->L, "webimg", webimg_lib, 0);
+        luaL_openlib(thr_args->L, "log", loglib, 0);
     }
 
     evthr_set_aux(thread, thr_args);

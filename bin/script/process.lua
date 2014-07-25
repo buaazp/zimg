@@ -1,4 +1,13 @@
-print("zimg using lua script.")
+local LOG_FATAL = 0
+local LOG_ALERT = 1
+local LOG_CRIT = 2
+local LOG_ERROR = 3
+local LOG_WARNING = 4
+local LOG_NOTICE = 5
+local LOG_INFO = 6
+local LOG_DEBUG = 7
+
+log.print(LOG_DEBUG, "zimg using lua script.")
 
 local TS_OK = 0
 local TS_FAILED = -1
@@ -247,14 +256,14 @@ local type_list = {
 }
 
 function square(size)
-    print("square()...")
-    print("size: " .. size)
+    log.print(LOG_DEBUG, "square()...")
+    log.print(LOG_DEBUG, "size: " .. size)
     local ret, x, y, cols
 
     local im_cols = webimg.cols()
     local im_rows = webimg.rows()
-    print("im_cols: " .. im_cols)
-    print("im_rows: " .. im_rows)
+    log.print(LOG_DEBUG, "im_cols: " .. im_cols)
+    log.print(LOG_DEBUG, "im_rows: " .. im_rows)
     if im_cols > im_rows then
         cols = im_rows
         y = 0
@@ -264,41 +273,41 @@ function square(size)
         x = 0
         y = math.ceil((im_rows - im_cols)/2)
     end
-    print("x: " .. x)
-    print("y: " .. y)
+    log.print(LOG_DEBUG, "x: " .. x)
+    log.print(LOG_DEBUG, "y: " .. y)
 
     ret = webimg.crop(x, y, cols, cols)
-    print("webimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. cols .. ") ret = " .. ret)
+    log.print(LOG_DEBUG, "webimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. cols .. ") ret = " .. ret)
     if ret ~= WI_OK then
         return TS_FAILED
     end
 
     ret = webimg.scale(size, size)
-    print("webimg.scale(" .. size .. ", " .. size .. ") ret = " .. ret)
+    log.print(LOG_DEBUG, "webimg.scale(" .. size .. ", " .. size .. ") ret = " .. ret)
     if ret ~= WI_OK then
-        print("square() failed")
+        log.print(LOG_DEBUG, "square() failed")
         return TS_FAILED
     end
 
-    print("square() succ")
+    log.print(LOG_DEBUG, "square() succ")
     return TS_OK
 end
 
 function max_width(arg)
-    print("max_width()...")
+    log.print(LOG_DEBUG, "max_width()...")
     local ret, ratio, cols, rows 
     local im_cols = webimg.cols()
     local im_rows = webimg.rows()
-    print("im_cols: " .. im_cols)
-    print("im_rows: " .. im_rows)
-    print("arg.size: " .. arg.size)
+    log.print(LOG_DEBUG, "im_cols: " .. im_cols)
+    log.print(LOG_DEBUG, "im_rows: " .. im_rows)
+    log.print(LOG_DEBUG, "arg.size: " .. arg.size)
     if im_cols <= arg.size then
-        print("im_cols <= arg.size return.")
+        log.print(LOG_DEBUG, "im_cols <= arg.size return.")
         return TS_OK
     end
 
     cols = arg.size
-    print("cols = " .. cols)
+    log.print(LOG_DEBUG, "cols = " .. cols)
     if arg.ratio then
         ratio = im_cols / im_rows
         if ratio < arg.ratio then
@@ -308,7 +317,7 @@ function max_width(arg)
                 rows = im_rows
             end
             ret = webimg.crop(0, 0, cols, rows)
-            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+            log.print(LOG_DEBUG, "webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if ret ~= WI_OK then
                 return TS_FAILED
             end
@@ -317,7 +326,7 @@ function max_width(arg)
             rows = im_rows
 
             ret = webimg.crop(0, 0, cols, rows)
-            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+            log.print(LOG_DEBUG, "webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if ret == WI_OK then
                 return TS_OK
             else
@@ -327,7 +336,7 @@ function max_width(arg)
     else
         rows = math.ceil((cols / im_cols) * im_rows);
         ret = webimg.scale(cols, rows)
-        print("webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
+        log.print(LOG_DEBUG, "webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
         if ret == WI_OK then
             return TS_OK
         else
@@ -337,7 +346,7 @@ function max_width(arg)
 end
 
 function max_size(arg)
-    print("max_size()...")
+    log.print(LOG_DEBUG, "max_size()...")
     local ret, ratio, rows, cols
     local im_cols = webimg.cols(im)
     local im_rows = webimg.rows(im)
@@ -348,13 +357,13 @@ function max_size(arg)
 
     if arg.ratio then
         ratio = im_cols / im_rows
-        print("ratio = " .. ratio)
+        log.print(LOG_DEBUG, "ratio = " .. ratio)
         if im_cols < (arg.size * arg.ratio) and ratio < arg.ratio then
             cols = im_cols
             rows = math.min(im_rows, arg.size)
 
             ret = webimg.crop(0, 0, cols, rows)
-            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+            log.print(LOG_DEBUG, "webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret == WI_OK) then
                 return TS_OK 
             else
@@ -366,7 +375,7 @@ function max_size(arg)
             cols = math.min(im_cols, arg.size)
 
             ret = webimg.crop(0, 0, cols, rows)
-            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+            log.print(LOG_DEBUG, "webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret == WI_OK) then
                 return TS_OK
             else
@@ -382,7 +391,7 @@ function max_size(arg)
             end
 
             ret = webimg.crop(0, 0, cols, rows)
-            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+            log.print(LOG_DEBUG, "webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret ~= WI_OK) then
                 return TS_FAILED
             end
@@ -393,7 +402,7 @@ function max_size(arg)
                 rows = im_rows
             end
             ret = webimg.crop(0, 0, cols, rows)
-            print("webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+            log.print(LOG_DEBUG, "webimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret ~= WI_OK) then
                 return TS_FAILED
             end
@@ -409,7 +418,7 @@ function max_size(arg)
     end
 
     ret = webimg.scale(cols, rows)
-    print("webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
+    log.print(LOG_DEBUG, "webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
     if ret == WI_OK then
         return TS_OK
     else
@@ -418,7 +427,7 @@ function max_size(arg)
 end
 
 function proportion(arg)
-    print("proportion()...")
+    log.print(LOG_DEBUG, "proportion()...")
 	local ret, ratio, cols, rows
     local im_cols = webimg.cols()
     local im_rows = webimg.rows()
@@ -439,7 +448,7 @@ function proportion(arg)
     end
 
 	ret = webimg.scale(cols, rows)
-    print("webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
+    log.print(LOG_DEBUG, "webimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
 	if ret == WI_OK then
         return TS_OK
     else
@@ -448,7 +457,7 @@ function proportion(arg)
 end
 
 function crop(arg)
-    print("crop()...")
+    log.print(LOG_DEBUG, "crop()...")
     local ret, x, y, cols, rows
     local im_cols = webimg.cols()
     local im_rows = webimg.rows()
@@ -475,7 +484,7 @@ function crop(arg)
     y = math.ceil((im_rows - rows) / 2.0);
 
     ret = webimg.crop(x, y, cols, rows)
-    print("webimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
+    log.print(LOG_DEBUG, "webimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
     if ret ~= WI_OK then
         return TS_FAILED
     end
@@ -484,12 +493,12 @@ end
 
 local code = TS_FAILED
 local rtype = request.pull()
-print("rtype:" .. rtype)
+log.print(LOG_DEBUG, "rtype:" .. rtype)
 
 local arg = type_list[rtype]
 if arg then
     local ret = -1
-    print("arg.type = " .. arg.type)
+    log.print(LOG_DEBUG, "arg.type = " .. arg.type)
     local switch = {
         [CT_SQUARE]         = function()    ret = square(arg.size)     end,
         [CT_MAX_WIDTH]      = function()    ret = max_width(arg)       end,
@@ -498,45 +507,45 @@ if arg then
         [CT_CROP]           = function()    ret = crop(arg)            end,
         [CT_NONE]           = function()    ret = TS_OK                end,
     }
-    print("start scale image...")
+    log.print(LOG_DEBUG, "start scale image...")
     local action = switch[arg.type]
     if action then
         action()
         if ret == TS_OK then
             if arg.quality and webimg.quality() > arg.quality then
-                print("webimg.quality = " .. webimg.quality())
+                log.print(LOG_DEBUG, "webimg.quality = " .. webimg.quality())
                 webimg.wi_set_quality(arg.quality)
-                print("webimg.wi_set_quality(" .. arg.quality .. ")")
+                log.print(LOG_DEBUG, "webimg.wi_set_quality(" .. arg.quality .. ")")
             end
 
             local format = webimg.format()
-            print("webimg.format() = " .. format)
+            log.print(LOG_DEBUG, "webimg.format() = " .. format)
             if not string.find(format, "GIF") then
-                print("not GIF, change")
+                log.print(LOG_DEBUG, "not GIF, change")
                 if arg.format and arg.format == CF_WEBP then
-                    print("arg.format = WEBP")
+                    log.print(LOG_DEBUG, "arg.format = WEBP")
                     ret = webimg.wi_set_format("WEBP")
                 else
-                    print("arg.format = JPEG")
+                    log.print(LOG_DEBUG, "arg.format = JPEG")
                     ret = webimg.wi_set_format("JPEG")
                 end
             else
-                print("GIF, donot change")
+                log.print(LOG_DEBUG, "GIF, donot change")
             end
 
             code = ret
-            print("code = " .. code)
+            log.print(LOG_DEBUG, "code = " .. code)
         else
-            print("scale image failed.")
+            log.print(LOG_DEBUG, "scale image failed.")
         end
     else
-        print("action = nil")
+        log.print(LOG_DEBUG, "action = nil")
     end
 else
-    print("arg = nil")
+    log.print(LOG_DEBUG, "arg = nil")
 end
 
 request.push(code)
-print("zimg lua script finished.")
+log.print(LOG_DEBUG, "zimg lua script finished.")
 return
 

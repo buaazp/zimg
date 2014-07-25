@@ -143,6 +143,20 @@ const struct luaL_Reg requestlib[] = {
     {NULL,          NULL        }
 };
 
+static int lua_log_print(lua_State *L)
+{
+    int log_level = lua_tonumber(L, 1);
+    const char *log_str = lua_tostring(L, 2);
+    LOG_PRINT(log_level, "Lua: %s", log_str);
+    return 0;
+}
+
+const struct luaL_Reg loglib[] = {
+    {"print",       lua_log_print   },
+    {NULL,          NULL            }
+};
+
+
 int lua_convert(struct image *im, zimg_req_t *req)
 {
     int ret = -1;
