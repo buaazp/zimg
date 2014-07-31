@@ -31,6 +31,7 @@
 #include "zlog.h"
 #include "zdb.h"
 #include "zaccess.h"
+#include "cjson/cJSON.h"
 
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
@@ -337,6 +338,15 @@ void echo_cb(evhtp_request_t *req, void *arg)
     evhtp_send_reply(req, EVHTP_RES_OK);
 }
 
+static const char * post_error_list[] = {
+    "Internal error.",
+    "File type not support.",
+    "Request method error.",
+    "Access error.",
+    "Request body parse error.",
+    "Content-Length error.",
+    "Content-Type error."
+};
 
 /**
  * @brief post_request_cb The callback function of a POST request to upload a image.
@@ -352,6 +362,8 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     char *fileName = NULL;
     char *boundaryPattern = NULL;
     char *buff = NULL;
+    int errno = 0;
+    int ret_json = 0;
 
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
@@ -367,6 +379,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
         LOG_PRINT(LOG_INFO, "%s refuse post method", address);
+        errno = 2;
         goto err;
     }
 
@@ -378,12 +391,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
             LOG_PRINT(LOG_INFO, "%s refuse post forbidden", address);
+            errno = 3;
             goto forbidden;
         }
         else if(acs == ZIMG_ERROR)
         {
             LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
             LOG_PRINT(LOG_ERROR, "%s fail post access %s", address);
+            errno = 0;
             goto err;
         }
     }
@@ -392,6 +407,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Get Content-Length error!");
         LOG_PRINT(LOG_ERROR, "%s fail post content-length", address);
+        errno = 5;
         goto err;
     }
     const char *content_len = evhtp_header_find(req->headers_in, "Content-Length");
@@ -400,6 +416,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Get Content-Type error!");
         LOG_PRINT(LOG_ERROR, "%s fail post content-type", address);
+        errno = 6;
         goto err;
     }
     const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
@@ -407,12 +424,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "POST form error!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 6;
         goto err;
     }
     else if(strstr(content_type, "boundary") == 0)
     {
         LOG_PRINT(LOG_DEBUG, "boundary NOT found!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 6;
         goto err;
     }
 
@@ -428,6 +447,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "Invalid boundary in multipart/form-data POST data");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+            errno = 6;
             goto err;
         }
     } 
@@ -452,6 +472,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
         LOG_PRINT(LOG_ERROR, "%s fail malloc buff", address);
+        errno = 0;
         goto err;
     }
     int rmblen, evblen;
@@ -461,6 +482,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Empty Request!");
         LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
+        errno = 4;
         goto err;
     }
 
@@ -473,6 +495,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "evbuffer_remove failed!");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+            errno = 4;
             goto err;
         }
     }
@@ -489,6 +512,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
         LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
+        errno = 0;
         goto err;
     }
     snprintf(boundaryPattern, boundary_len + 4, "\r\n--%s", boundary);
@@ -498,6 +522,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Content-Disposition Not Found!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 4;
         goto err;
     }
     start += 9;
@@ -508,6 +533,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "quote \" Not Found!");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+            errno = 4;
             goto err;
         }
     }
@@ -517,6 +543,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "quote \\r\\n Not Found!");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+            errno = 4;
             goto err;
         }
     }
@@ -525,6 +552,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "filename malloc failed!");
         LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
+        errno = 0;
         goto err;
     }
     memcpy(fileName, buff+start, end);
@@ -536,12 +564,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Get Type of File[%s] Failed!", fileName);
         LOG_PRINT(LOG_ERROR, "%s fail post type", address);
+        errno = 4;
         goto err;
     }
     if(is_img(fileType) != 1)
     {
         LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", fileType);
         LOG_PRINT(LOG_ERROR, "%s fail post type", address);
+        errno = 1;
         goto err;
     }
 
@@ -551,6 +581,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Content-Type Not Found!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 4;
         goto err;
     }
     start += end;
@@ -559,6 +590,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Image Not complete!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 4;
         goto err;
     }
     end += start;
@@ -572,6 +604,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
        {
        LOG_PRINT(LOG_DEBUG, "Image Not complete!");
        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 4;
        goto err;
        }
        end += start;
@@ -585,6 +618,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Image Not complete!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+        errno = 4;
         goto err;
     }
     end += start;
@@ -598,6 +632,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Image Size is Zero!");
         LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
+        errno = 4;
         goto err;
     }
 
@@ -611,6 +646,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", address);
+        errno = 0;
         goto err;
     }
 
@@ -619,38 +655,108 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     //const int *host_port = req->uri->authority->port;
     //LOG_PRINT(LOG_DEBUG, "hostname: %s", req->uri->authority->hostname);
     //LOG_PRINT(LOG_DEBUG, "hostport: %d", host_port);
-    evbuffer_add_printf(req->buffer_out, 
-        "<html>\n<head>\n"
-        "<title>Upload Successfully</title>\n"
-        "</head>\n"
-        "<body>\n"
-        "<h1>MD5: %s</h1>\n"
-        "Image upload successfully! You can get this image via this address:<br/><br/>\n"
-        "http://yourhostname:%d/%s?w=width&h=height&p=proportion&g=isgray\n"
-        "</body>\n</html>\n",
-        md5sum, settings.port, md5sum
-        );
+    if(ret_json == 0)
+    {
+        evbuffer_add_printf(req->buffer_out, 
+            "<html>\n<head>\n"
+            "<title>Upload Successfully</title>\n"
+            "</head>\n"
+            "<body>\n"
+            "<h1>MD5: %s</h1>\n"
+            "Image upload successfully! You can get this image via this address:<br/><br/>\n"
+            "http://yourhostname:%d/%s?w=width&h=height&p=proportion&g=isgray&x=crop_postion_x&y=crop_postion_y&q=quality\n"
+            "</body>\n</html>\n",
+            md5sum, settings.port, md5sum
+            );
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    }
+    else
+    {
+        //json sample:
+        //{"ret":true,"info":{"size":"1024", "md5":"edac35fd4b0059d3218f0630bc56a6f4"}}
+        //{"ret":false,"error":{"code":"1","message":"\u9a8c\u8bc1\u5931\u8d25"}}
+        cJSON *j_ret = cJSON_CreateObject();
+        cJSON *j_ret_info = cJSON_CreateObject();
+        cJSON_AddBoolToObject(j_ret, "ret", 1);
+        cJSON_AddStringToObject(j_ret_info, "md5", md5sum);
+        cJSON_AddNumberToObject(j_ret_info, "size", img_size);
+        cJSON_AddItemToObject(j_ret, "info", j_ret_info);
+        char *ret_str = cJSON_Print(j_ret);
+        char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
+        LOG_PRINT(LOG_DEBUG, "ret_str: %s", ret_str);
+        LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
+        evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
+        cJSON_Delete(j_ret);
+        free(ret_str);
+        free(ret_str_unformat);
+    }
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() DONE!===============");
     LOG_PRINT(LOG_INFO, "%s succ post pic:%s size:%d", address, md5sum, img_size);
     goto done;
 
 forbidden:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
+    if(ret_json == 0)
+    {
+        evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    }
+    else
+    {
+        //json sample:
+        //{"ret":true,"info":{"size":"1024", "md5":"edac35fd4b0059d3218f0630bc56a6f4"}}
+        //{"ret":false,"error":{"code":"1","message":"\u9a8c\u8bc1\u5931\u8d25"}}
+        cJSON *j_ret = cJSON_CreateObject();
+        cJSON *j_ret_error = cJSON_CreateObject();
+        cJSON_AddBoolToObject(j_ret, "ret", 0);
+        cJSON_AddNumberToObject(j_ret_error, "code", errno);
+        LOG_PRINT(LOG_DEBUG, "post_error_list[%d]: %s", errno, post_error_list[errno]);
+        cJSON_AddStringToObject(j_ret_error, "message", post_error_list[errno]);
+        cJSON_AddItemToObject(j_ret, "error", j_ret_error);
+        char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
+        LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
+        evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
+        cJSON_Delete(j_ret);
+        free(ret_str_unformat);
+    }
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
-    evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
+    //evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
+    evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() FORBIDDEN!===============");
     goto done;
 
 
 err:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body></html>"); 
+    if(ret_json == 0)
+    {
+        evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body></html>"); 
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+    }
+    else
+    {
+        //json sample:
+        //{"ret":true,"info":{"size":"1024", "md5":"edac35fd4b0059d3218f0630bc56a6f4"}}
+        //{"ret":false,"error":{"code":"1","message":"\u9a8c\u8bc1\u5931\u8d25"}}
+        cJSON *j_ret = cJSON_CreateObject();
+        cJSON *j_ret_error = cJSON_CreateObject();
+        cJSON_AddBoolToObject(j_ret, "ret", 0);
+        cJSON_AddNumberToObject(j_ret_error, "code", errno);
+        LOG_PRINT(LOG_DEBUG, "post_error_list[%d]: %s", errno, post_error_list[errno]);
+        cJSON_AddStringToObject(j_ret_error, "message", post_error_list[errno]);
+        cJSON_AddItemToObject(j_ret, "error", j_ret_error);
+        char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
+        LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
+        evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
+        cJSON_Delete(j_ret);
+        free(ret_str_unformat);
+    }
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
-    evhtp_send_reply(req, EVHTP_RES_SERVERR);
+    //evhtp_send_reply(req, EVHTP_RES_SERVERR);
+    evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() ERROR!===============");
 
 done:
