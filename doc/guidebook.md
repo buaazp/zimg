@@ -94,7 +94,8 @@ make && make install
 zimg的编译使用cmake工具2.8以上版本，因此你需要安装它。
 
 ```
-wget "http://www.cmake.org/files/v2.8/cmake-2.8.10.2.tar.gz"tar xzvf cmake-2.8.10.2.tar.gz 
+wget "http://www.cmake.org/files/v2.8/cmake-2.8.10.2.tar.gz"
+tar xzvf cmake-2.8.10.2.tar.gz 
 cd cmake-2.8.10.2 
 ./bootstrap --prefix=/usr/local 
 make && make install 
