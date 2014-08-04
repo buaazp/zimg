@@ -213,7 +213,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     char *img_format = NULL;
     int fd = -1;
     struct stat f_stat;
-    char *buff_ptr;
+    char *buff_ptr = NULL;
     size_t img_size;
 
     MagickBooleanType status;
@@ -315,9 +315,11 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                 {
                     set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                 }
-                free(buff_ptr);
-                buff_ptr = NULL;
-
+                if(buff_ptr != NULL)
+                {
+                    free(buff_ptr);
+                    buff_ptr = NULL;
+                }
                 goto convert;
             }
         }
@@ -348,8 +350,11 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                     {
                         set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                     }
-                    free(buff_ptr);
-                    buff_ptr = NULL;
+                    if(buff_ptr != NULL)
+                    {
+                        free(buff_ptr);
+                        buff_ptr = NULL;
+                    }
                 }
             }
         }
@@ -369,8 +374,11 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                 {
                     set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
                 }
-                free(buff_ptr);
-                buff_ptr = NULL;
+                if(buff_ptr != NULL)
+                {
+                    free(buff_ptr);
+                    buff_ptr = NULL;
+                }
             }
         }
 
