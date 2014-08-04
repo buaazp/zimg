@@ -68,7 +68,7 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
     int result = -1;
     char cache_key[CACHE_KEY_SIZE];
     char *img_format = NULL;
-    char *buff_ptr;
+    char *buff_ptr = NULL;
     size_t img_size;
 
     MagickBooleanType status;

@@ -108,6 +108,12 @@ static void settings_init(void)
     settings.beansdb_port = 7905;
     str_lcpy(settings.ssdb_ip, "127.0.0.1", sizeof(settings.ssdb_ip));
     settings.ssdb_port = 6379;
+    multipart_parser_settings *callbacks = (multipart_parser_settings *)malloc(sizeof(multipart_parser_settings));
+    memset(callbacks, 0, sizeof(multipart_parser_settings));
+    callbacks->on_header_field = on_header_field;
+    callbacks->on_header_value = on_header_value;
+    callbacks->on_chunk_data = on_chunk_data;
+    settings.mp_set = callbacks;
 }
 
 static int load_conf(const char *conf)

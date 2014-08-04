@@ -3,7 +3,7 @@
 --server config
 is_daemon=0
 port=4869
-thread_num=4
+thread_num=1
 backlog_num=1024
 max_keepalives=1
 retry=3

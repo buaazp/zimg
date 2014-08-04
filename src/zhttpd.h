@@ -23,6 +23,7 @@
 #define ZHTTPD_H
 
 #include "libevhtp/evhtp.h"
+#include "multipart_parser.h"
 
 typedef struct zimg_headers_s zimg_headers_t;
 
@@ -41,6 +42,9 @@ typedef struct {
     zimg_headers_t *headers;
 } zimg_headers_conf_t;
 
+int on_header_field(multipart_parser* p, const char *at, size_t length);
+int on_header_value(multipart_parser* p, const char *at, size_t length);
+int on_chunk_data(multipart_parser* p, const char *at, size_t length);
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 void free_headers_conf(zimg_headers_conf_t *hcf);

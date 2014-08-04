@@ -33,6 +33,7 @@
 #include "zaccess.h"
 #include "zhttpd.h"
 #include "lua/lualib.h"
+#include "multipart_parser.h"
 
 #ifndef ZIMG_VERSION
 #define ZIMG_VERSION "3.0.0"
@@ -78,6 +79,7 @@ struct setting{
     int beansdb_port;
     char ssdb_ip[128];
     int ssdb_port;
+    multipart_parser_settings *mp_set;
 } settings;
 
 typedef struct thr_arg_s {

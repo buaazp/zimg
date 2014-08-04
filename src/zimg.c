@@ -228,7 +228,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     char *img_format = NULL;
     int fd = -1;
     struct stat f_stat;
-    char *buff_ptr;
+    char *buff_ptr = NULL;
     size_t img_size;
 
     MagickBooleanType status;

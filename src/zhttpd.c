@@ -31,7 +31,16 @@
 #include "zlog.h"
 #include "zdb.h"
 #include "zaccess.h"
+#include "multipart_parser.h"
 #include "cjson/cJSON.h"
+
+typedef struct {
+    evhtp_request_t *req;
+    thr_arg_t *thr_arg;
+    char address[16];
+    int partno;
+    int succno;
+} mp_arg_t;
 
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
@@ -348,6 +357,58 @@ static const char * post_error_list[] = {
     "Content-Type error."
 };
 
+int on_header_field(multipart_parser* p, const char *at, size_t length)
+{
+    char *header_name = (char *)malloc(length+1);
+    snprintf(header_name, length+1, "%s", at);
+    LOG_PRINT(LOG_DEBUG, "header_name %d %s: ", length, header_name);
+    free(header_name);
+    return 0;
+}
+
+int on_header_value(multipart_parser* p, const char *at, size_t length)
+{
+    char *header_value = (char *)malloc(length+1);
+    snprintf(header_value, length+1, "%s", at);
+    LOG_PRINT(LOG_DEBUG, "header_value %d %s", length, header_value);
+    free(header_value);
+    return 0;
+}
+
+int on_chunk_data(multipart_parser* p, const char *at, size_t length)
+{
+    mp_arg_t *mp_arg = (mp_arg_t *)multipart_parser_get_data(p);
+    mp_arg->partno++;
+    char md5sum[33];
+    if(save_img(mp_arg->thr_arg, at, length, md5sum) == -1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
+        LOG_PRINT(LOG_ERROR, "%s fail post save", mp_arg->address);
+    }
+    else
+    {
+        mp_arg->succno++;
+        LOG_PRINT(LOG_INFO, "%s succ post pic:%s size:%d", mp_arg->address, md5sum, length);
+        evbuffer_add_printf(mp_arg->req->buffer_out, 
+            "<h1>MD5: %s</h1>\n"
+            "Image upload successfully! You can get this image via this address:<br/><br/>\n"
+            "http://yourhostname:%d/%s?w=width&h=height&p=proportion&g=isgray&x=crop_postion_x&y=crop_postion_y&q=quality\n",
+            md5sum, settings.port, md5sum
+            );
+    }
+    if(length < 100)
+    {
+        char *data_value = (char *)malloc(length+1);
+        snprintf(data_value, length+1, "%s", at);
+        LOG_PRINT(LOG_DEBUG, "------------data_value %d %s", length, data_value);
+        free(data_value);
+    }
+    else
+        LOG_PRINT(LOG_DEBUG, "============data_value %d", length);
+
+    return 0;
+}
+
 /**
  * @brief post_request_cb The callback function of a POST request to upload a image.
  *
@@ -500,14 +561,132 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         }
     }
 
-    int start = -1, end = -1;
-    const char *fileNamePattern = "filename=";
-    const char *typePattern = "Content-Type";
-    const char *quotePattern = "\"";
-    const char *blankPattern = "\r\n";
-    LOG_PRINT(LOG_DEBUG, "boundary = %s boundary_len = %d", boundary, boundary_len);
-    //boundaryPattern = (char *)malloc(boundary_len + 3);
-    boundaryPattern = (char *)malloc(boundary_len + 4);
+    //int start = -1, end = -1;
+    //const char *fileNamePattern = "filename=";
+    //const char *typePattern = "Content-Type";
+    //const char *quotePattern = "\"";
+    //const char *blankPattern = "\r\n";
+    //LOG_PRINT(LOG_DEBUG, "boundary = %s boundary_len = %d", boundary, boundary_len);
+    ////boundaryPattern = (char *)malloc(boundary_len + 3);
+    //boundaryPattern = (char *)malloc(boundary_len + 4);
+    //if(boundaryPattern == NULL)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
+    //    LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
+    //    errno = 0;
+    //    goto err;
+    //}
+    //snprintf(boundaryPattern, boundary_len + 4, "\r\n--%s", boundary);
+    ////snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
+    //LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
+    //if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "Content-Disposition Not Found!");
+    //    LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //    errno = 4;
+    //    goto err;
+    //}
+    //start += 9;
+    //if(buff[start] == '\"')
+    //{
+    //    start++;
+    //    if((end = kmp(buff+start, post_size-start, quotePattern, strlen(quotePattern))) == -1)
+    //    {
+    //        LOG_PRINT(LOG_DEBUG, "quote \" Not Found!");
+    //        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //        errno = 4;
+    //        goto err;
+    //    }
+    //}
+    //else
+    //{
+    //    if((end = kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
+    //    {
+    //        LOG_PRINT(LOG_DEBUG, "quote \\r\\n Not Found!");
+    //        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //        errno = 4;
+    //        goto err;
+    //    }
+    //}
+    //fileName = (char *)malloc(end + 1);
+    //if(fileName == NULL)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "filename malloc failed!");
+    //    LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
+    //    errno = 0;
+    //    goto err;
+    //}
+    //memcpy(fileName, buff+start, end);
+    //fileName[end] = '\0';
+    //LOG_PRINT(LOG_DEBUG, "fileName = %s", fileName);
+
+    //char fileType[32];
+    //if(get_type(fileName, fileType) == -1)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "Get Type of File[%s] Failed!", fileName);
+    //    LOG_PRINT(LOG_ERROR, "%s fail post type", address);
+    //    errno = 4;
+    //    goto err;
+    //}
+    //if(is_img(fileType) != 1)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", fileType);
+    //    LOG_PRINT(LOG_ERROR, "%s fail post type", address);
+    //    errno = 1;
+    //    goto err;
+    //}
+
+    //end += start;
+
+    //if((start = kmp(buff+end, post_size-end, typePattern, strlen(typePattern))) == -1)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "Content-Type Not Found!");
+    //    LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //    errno = 4;
+    //    goto err;
+    //}
+    //start += end;
+    //LOG_PRINT(LOG_DEBUG, "start = %d", start);
+    //if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "Image Not complete!");
+    //    LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //    errno = 4;
+    //    goto err;
+    //}
+    //end += start;
+
+    ////by @momoplan: fixed some http tool's post bug.
+    ///*
+    //   if((start = kmp(buff+end, post_size-end, "Content-Transfer-Encoding", strlen("Content-Transfer-Encoding"))) != -1)
+    //   {
+    //   start += end;
+    //   if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
+    //   {
+    //   LOG_PRINT(LOG_DEBUG, "Image Not complete!");
+    //   LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //    errno = 4;
+    //   goto err;
+    //   }
+    //   end += start;
+    //   }
+    //   */
+
+    //LOG_PRINT(LOG_DEBUG, "end = %d", end);
+    //start = end + 4;
+    //LOG_PRINT(LOG_DEBUG, "start = %d", start);
+    //if((end = kmp(buff+start, post_size-start, boundaryPattern, strlen(boundaryPattern))) == -1)
+    //{
+    //    LOG_PRINT(LOG_DEBUG, "Image Not complete!");
+    //    LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
+    //    errno = 4;
+    //    goto err;
+    //}
+    //end += start;
+    //LOG_PRINT(LOG_DEBUG, "end = %d", end);
+    //img_size = end - start;
+
+    boundaryPattern = (char *)malloc(boundary_len + 3);
     if(boundaryPattern == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
@@ -515,117 +694,57 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         errno = 0;
         goto err;
     }
-    snprintf(boundaryPattern, boundary_len + 4, "\r\n--%s", boundary);
+    snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
     //snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
     LOG_PRINT(LOG_DEBUG, "boundaryPattern = %s, strlen = %d", boundaryPattern, (int)strlen(boundaryPattern));
-    if((start = kmp(buff, post_size, fileNamePattern, strlen(fileNamePattern))) == -1)
+
+    multipart_parser* parser = multipart_parser_init(boundaryPattern);
+    if(!parser)
     {
-        LOG_PRINT(LOG_DEBUG, "Content-Disposition Not Found!");
-        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-        errno = 4;
-        goto err;
-    }
-    start += 9;
-    if(buff[start] == '\"')
-    {
-        start++;
-        if((end = kmp(buff+start, post_size-start, quotePattern, strlen(quotePattern))) == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "quote \" Not Found!");
-            LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-            errno = 4;
-            goto err;
-        }
-    }
-    else
-    {
-        if((end = kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "quote \\r\\n Not Found!");
-            LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-            errno = 4;
-            goto err;
-        }
-    }
-    fileName = (char *)malloc(end + 1);
-    if(fileName == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "filename malloc failed!");
-        LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
+        LOG_PRINT(LOG_DEBUG, "Multipart_parser Init Failed!");
+        LOG_PRINT(LOG_ERROR, "%s fail post save", address);
         errno = 0;
         goto err;
     }
-    memcpy(fileName, buff+start, end);
-    fileName[end] = '\0';
-    LOG_PRINT(LOG_DEBUG, "fileName = %s", fileName);
-
-    char fileType[32];
-    if(get_type(fileName, fileType) == -1)
+    mp_arg_t *mp_arg = (mp_arg_t *)malloc(sizeof(mp_arg_t));
+    if(!mp_arg)
     {
-        LOG_PRINT(LOG_DEBUG, "Get Type of File[%s] Failed!", fileName);
-        LOG_PRINT(LOG_ERROR, "%s fail post type", address);
-        errno = 4;
+        LOG_PRINT(LOG_DEBUG, "Multipart_parser Arg Malloc Failed!");
+        LOG_PRINT(LOG_ERROR, "%s fail post save", address);
+        errno = 0;
         goto err;
     }
-    if(is_img(fileType) != 1)
+    evbuffer_add_printf(req->buffer_out, 
+            "<html>\n<head>\n"
+            "<title>Upload Result</title>\n"
+            "</head>\n"
+            "<body>\n"
+            );
+
+    evthr_t *thread = get_request_thr(req);
+    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
+    mp_arg->req = req;
+    mp_arg->thr_arg = thr_arg;
+    str_lcpy(mp_arg->address, address, 16);
+    mp_arg->partno = 0;
+    mp_arg->succno = 0;
+    multipart_parser_set_data(parser, mp_arg);
+    multipart_parser_execute(parser, buff, post_size);
+    multipart_parser_free(parser);
+
+    if(mp_arg->succno < mp_arg->partno)
     {
-        LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", fileType);
-        LOG_PRINT(LOG_ERROR, "%s fail post type", address);
-        errno = 1;
+        free(mp_arg);
+        LOG_PRINT(LOG_DEBUG, "Images Saved Failed!");
+        LOG_PRINT(LOG_ERROR, "%s fail post save", address);
+        errno = 0;
         goto err;
     }
+    evbuffer_add_printf(req->buffer_out, "</body>\n</html>\n");
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
 
-    end += start;
 
-    if((start = kmp(buff+end, post_size-end, typePattern, strlen(typePattern))) == -1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Content-Type Not Found!");
-        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-        errno = 4;
-        goto err;
-    }
-    start += end;
-    LOG_PRINT(LOG_DEBUG, "start = %d", start);
-    if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Image Not complete!");
-        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-        errno = 4;
-        goto err;
-    }
-    end += start;
-
-    //by @momoplan: fixed some http tool's post bug.
     /*
-       if((start = kmp(buff+end, post_size-end, "Content-Transfer-Encoding", strlen("Content-Transfer-Encoding"))) != -1)
-       {
-       start += end;
-       if((end =  kmp(buff+start, post_size-start, blankPattern, strlen(blankPattern))) == -1)
-       {
-       LOG_PRINT(LOG_DEBUG, "Image Not complete!");
-       LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-        errno = 4;
-       goto err;
-       }
-       end += start;
-       }
-       */
-
-    LOG_PRINT(LOG_DEBUG, "end = %d", end);
-    start = end + 4;
-    LOG_PRINT(LOG_DEBUG, "start = %d", start);
-    if((end = kmp(buff+start, post_size-start, boundaryPattern, strlen(boundaryPattern))) == -1)
-    {
-        LOG_PRINT(LOG_DEBUG, "Image Not complete!");
-        LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-        errno = 4;
-        goto err;
-    }
-    end += start;
-    LOG_PRINT(LOG_DEBUG, "end = %d", end);
-    img_size = end - start;
-
-
     LOG_PRINT(LOG_DEBUG, "post_size = %d", post_size);
     LOG_PRINT(LOG_DEBUG, "img_size = %d", img_size);
     if(img_size <= 0)
@@ -649,12 +768,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         errno = 0;
         goto err;
     }
+    */
 
     //libevhtp has bug with uri->authority->hostname, so zimg don't show hostname temporarily.
     //const char *host_name = req->uri->authority->hostname;
     //const int *host_port = req->uri->authority->port;
     //LOG_PRINT(LOG_DEBUG, "hostname: %s", req->uri->authority->hostname);
     //LOG_PRINT(LOG_DEBUG, "hostport: %d", host_port);
+    /*
     if(ret_json == 0)
     {
         evbuffer_add_printf(req->buffer_out, 
@@ -691,10 +812,10 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         free(ret_str);
         free(ret_str_unformat);
     }
+    */
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() DONE!===============");
-    LOG_PRINT(LOG_INFO, "%s succ post pic:%s size:%d", address, md5sum, img_size);
     goto done;
 
 forbidden:
@@ -732,7 +853,8 @@ forbidden:
 err:
     if(ret_json == 0)
     {
-        evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body></html>"); 
+        //evbuffer_add_printf(req->buffer_out, "<html><body><h1>Upload Failed!</h1></body></html>"); 
+        evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1></body></html>"); 
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     }
     else
