@@ -278,7 +278,7 @@ int is_file(const char *filename)
  */
 int is_img(const char *filename)
 {
-    char *imgType[] = {"jpg", "jpeg", "png", "gif"};
+    char *imgType[] = {"jpg", "jpeg", "png", "gif", "webp"};
     char *lower= (char *)malloc(strlen(filename) + 1);
     if(lower == NULL)
     {
@@ -292,7 +292,7 @@ int is_img(const char *filename)
         lower[i] = tolower(filename[i]);
     }
     lower[strlen(filename)] = '\0';
-    for(i = 0; i < 4; i++)
+    for(i = 0; i < 5; i++)
     {
         LOG_PRINT(LOG_DEBUG, "compare %s - %s.", lower, imgType[i]);
         if((tmp = strstr(lower, imgType[i])) == lower)

@@ -1,7 +1,7 @@
 --zimg server config
 
 --server config
-is_daemon=0
+is_daemon=1
 port=4869
 thread_num=1
 backlog_num=1024
