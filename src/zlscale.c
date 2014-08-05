@@ -101,7 +101,22 @@ static int set_wi_format (lua_State *L) {
     return 1;
 }
 
-const struct luaL_reg webimg_lib[] = {
+static int zimg_type(lua_State *L)
+{
+    lua_arg *larg = pthread_getspecific(thread_key);
+    lua_pushstring(L, larg->trans_type);
+    LOG_PRINT(LOG_INFO, "zimg_type: %s", larg->trans_type);
+    return 1;
+}
+
+static int zimg_ret(lua_State *L)
+{
+    lua_arg *larg = pthread_getspecific(thread_key);
+    larg->lua_ret = lua_tonumber(L, 1);
+    return 0;
+}
+
+const struct luaL_reg zimg_lib[] = {
     //{"__gc",                destroy_wi_image    },
     {"cols",                get_wi_cols         },
     {"rows",                get_wi_rows         },
@@ -110,44 +125,18 @@ const struct luaL_reg webimg_lib[] = {
     {"scale",               scale_wi            },
     {"crop",                crop_wi             },
     {"gray",                gray_wi             },
-    {"wi_get_cols",         get_wi_cols         },
-    {"wi_get_rows",         get_wi_rows         },
-    {"wi_get_quality",      get_wi_quality      },
-    {"wi_set_quality",      set_wi_quality      },
-    {"wi_get_format",       get_wi_format       },
-    {"wi_set_format",       set_wi_format       },
-    {"wi_scale",            scale_wi            },
-    {"wi_crop",             crop_wi             },
-    {"wi_gray",             gray_wi             },
+    {"set_quality",         set_wi_quality      },
+    {"set_format",          set_wi_format       },
+    {"type",                zimg_type           },
+    {"ret",                 zimg_ret            },
     {NULL,                  NULL                }
-};
-
-static int req_pull(lua_State *L)
-{
-    lua_arg *larg = pthread_getspecific(thread_key);
-    lua_pushstring(L, larg->trans_type);
-    LOG_PRINT(LOG_INFO, "req_pull: %s", larg->trans_type);
-    return 1;
-}
-
-static int req_push(lua_State *L)
-{
-    lua_arg *larg = pthread_getspecific(thread_key);
-    larg->lua_ret = lua_tonumber(L, 1);
-    return 0;
-}
-
-const struct luaL_Reg requestlib[] = {
-    {"pull",        req_pull    },
-    {"push",        req_push    },
-    {NULL,          NULL        }
 };
 
 static int lua_log_print(lua_State *L)
 {
     int log_level = lua_tonumber(L, 1);
     const char *log_str = lua_tostring(L, 2);
-    LOG_PRINT(log_level, "Lua: %s", log_str);
+    LOG_PRINT(log_level, "zimg_lua: %s", log_str);
     return 0;
 }
 

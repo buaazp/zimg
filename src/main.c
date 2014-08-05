@@ -312,8 +312,7 @@ static void sighandler(int signal)
     _exit(1);
 }
 
-extern const struct luaL_reg webimg_lib[];
-extern const struct luaL_Reg requestlib[];
+extern const struct luaL_reg zimg_lib[];
 extern const struct luaL_Reg loglib[];
 
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
@@ -378,8 +377,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     if(thr_args->L != NULL)
     {
         luaL_openlibs(thr_args->L);
-        luaL_openlib(thr_args->L, "request", requestlib, 0);
-        luaL_openlib(thr_args->L, "webimg", webimg_lib, 0);
+        luaL_openlib(thr_args->L, "zimg", zimg_lib, 0);
         luaL_openlib(thr_args->L, "log", loglib, 0);
     }
     luaL_loadfile(thr_args->L, settings.script_name);
