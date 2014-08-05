@@ -24,6 +24,9 @@
 
 #include "zcommon.h"
 
+char *strnchr(const char *p, char c, size_t n);
+size_t str_lcat(char *dst, const char *src, size_t size);
+size_t str_lcpy(char *dst, const char *src, size_t size);
 int bind_check(int port);
 pid_t gettid();
 int get_cpu_cores();
@@ -41,8 +44,5 @@ int delete_file(const char *path);
 int is_md5(char *s);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);
-
-size_t str_lcat(char *dst, const char *src, size_t size);
-size_t str_lcpy(char *dst, const char *src, size_t size);
 
 #endif

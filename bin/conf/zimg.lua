@@ -37,15 +37,15 @@ mc_port=11211
 --LOG_INFO 6            Information
 --LOG_DEBUG 7           DEBUG message
 log_level=7
-log_name=pwd .. '/log/zimg.log'
+log_name= pwd .. '/log/zimg.log'
 
 --htdoc config
-root_path=pwd .. '/www/index.html'
-admin_path=pwd .. '/www/admin.html'
+root_path= pwd .. '/www/index.html'
+admin_path= pwd .. '/www/admin.html'
 
 --image process config
 --lua process script
-script_name=pwd .. '/script/process.lua'
+script_name= pwd .. '/script/process.lua'
 --format value: 0.keep intact 1.JPEG 2.webp
 format=1
 --quality value: 1~100(default: 75)
@@ -57,7 +57,7 @@ mode=1
 save_new=0
 
 --mode[1]: local disk mode
-img_path=pwd .. '/img'
+img_path= pwd .. '/img'
 
 --mode[2]: beansdb mode
 beansdb_ip='127.0.0.1'

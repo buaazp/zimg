@@ -32,6 +32,7 @@
 #include "zlog.h"
 
 //functions list
+char *strnchr(const char *p, char c, size_t n);
 size_t str_lcat(char *dst, const char *src, size_t size);
 size_t str_lcpy(char *dst, const char *src, size_t size);
 int bind_check(int port);
@@ -56,6 +57,20 @@ int gen_key(char *key, char *md5, ...);
 
 // this data is for KMP searching
 static int pi[128];
+
+char *
+strnchr(const char *p, char c, size_t n)
+{
+    if (!p)
+        return (0);
+
+    while (n-- > 0) {
+        if (*p == c)
+            return ((char *)p);
+        p++;
+    }
+    return (0);
+}
 
 /*
  * '_cups_strlcat()' - Safely concatenate two strings.
@@ -240,7 +255,7 @@ int get_type(const char *filename, char *type)
         flag = tmp;
     }
     flag++;
-    strncpy(type, flag, 32);
+    str_lcpy(type, flag, 32);
     return 1;
 }
 
@@ -426,7 +441,7 @@ int mk_dirf(const char *filename)
         return ret;
     size_t len = strlen(filename);
     char str[256];
-    strncpy(str, filename, len);
+    str_lcpy(str, filename, len);
     str[len] = '\0';
     char *end = str;
     char *start = strchr(end, '/');
@@ -537,7 +552,7 @@ static int htoi(char s[])
 int str_hash(const char *str)
 {
     char c[4];
-    strncpy(c, str, 3);
+    str_lcpy(c, str, 3);
     c[3] = '\0';
     //LOG_PRINT(LOG_DEBUG, "str = %s.", c);
     //int d = htoi(c);

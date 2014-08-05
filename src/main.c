@@ -110,7 +110,7 @@ static void settings_init(void)
     settings.ssdb_port = 6379;
     multipart_parser_settings *callbacks = (multipart_parser_settings *)malloc(sizeof(multipart_parser_settings));
     memset(callbacks, 0, sizeof(multipart_parser_settings));
-    callbacks->on_header_field = on_header_field;
+    //callbacks->on_header_field = on_header_field;
     callbacks->on_header_value = on_header_value;
     callbacks->on_chunk_data = on_chunk_data;
     settings.mp_set = callbacks;
@@ -382,6 +382,8 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         luaL_openlib(thr_args->L, "webimg", webimg_lib, 0);
         luaL_openlib(thr_args->L, "log", loglib, 0);
     }
+    luaL_loadfile(thr_args->L, settings.script_name);
+    lua_pcall(thr_args->L, 0, 0, 0);
 
     evthr_set_aux(thread, thr_args);
 }

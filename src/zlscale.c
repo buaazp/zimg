@@ -156,7 +156,6 @@ const struct luaL_Reg loglib[] = {
     {NULL,          NULL            }
 };
 
-
 int lua_convert(struct image *im, zimg_req_t *req)
 {
     int ret = -1;
@@ -171,7 +170,12 @@ int lua_convert(struct image *im, zimg_req_t *req)
         larg->trans_type = req->type;
         larg->img = im;
         pthread_setspecific(thread_key, larg);
-        luaL_dofile(req->thr_arg->L, settings.script_name);
+        //luaL_dofile(req->thr_arg->L, settings.script_name);
+        lua_getglobal(req->thr_arg->L, "f");
+        if(lua_pcall(req->thr_arg->L, 0, 0, 0) != 0)
+        {
+            LOG_PRINT(LOG_WARNING, "lua f() failed!");
+        }
 
         ret = larg->lua_ret;
         free(larg);

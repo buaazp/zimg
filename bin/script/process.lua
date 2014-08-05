@@ -255,7 +255,7 @@ local type_list = {
 	},
 }
 
-function square(size)
+local function square(size)
     log.print(LOG_DEBUG, "square()...")
     log.print(LOG_DEBUG, "size: " .. size)
     local ret, x, y, cols
@@ -293,7 +293,7 @@ function square(size)
     return TS_OK
 end
 
-function max_width(arg)
+local function max_width(arg)
     log.print(LOG_DEBUG, "max_width()...")
     local ret, ratio, cols, rows 
     local im_cols = webimg.cols()
@@ -345,7 +345,7 @@ function max_width(arg)
     end
 end
 
-function max_size(arg)
+local function max_size(arg)
     log.print(LOG_DEBUG, "max_size()...")
     local ret, ratio, rows, cols
     local im_cols = webimg.cols(im)
@@ -426,7 +426,7 @@ function max_size(arg)
     end
 end
 
-function proportion(arg)
+local function proportion(arg)
     log.print(LOG_DEBUG, "proportion()...")
 	local ret, ratio, cols, rows
     local im_cols = webimg.cols()
@@ -456,7 +456,7 @@ function proportion(arg)
     end
 end
 
-function crop(arg)
+local function crop(arg)
     log.print(LOG_DEBUG, "crop()...")
     local ret, x, y, cols, rows
     local im_cols = webimg.cols()
@@ -491,61 +491,63 @@ function crop(arg)
     return TS_OK
 end
 
-local code = TS_FAILED
-local rtype = request.pull()
-log.print(LOG_DEBUG, "rtype:" .. rtype)
+function f()
+    local code = TS_FAILED
+    local rtype = request.pull()
+    log.print(LOG_DEBUG, "rtype:" .. rtype)
 
-local arg = type_list[rtype]
-if arg then
-    local ret = -1
-    log.print(LOG_DEBUG, "arg.type = " .. arg.type)
-    local switch = {
-        [CT_SQUARE]         = function()    ret = square(arg.size)     end,
-        [CT_MAX_WIDTH]      = function()    ret = max_width(arg)       end,
-        [CT_MAX_SIZE]       = function()    ret = max_size(arg)        end,
-        [CT_PROPORTION]     = function()    ret = proportion(arg)      end,
-        [CT_CROP]           = function()    ret = crop(arg)            end,
-        [CT_NONE]           = function()    ret = TS_OK                end,
-    }
-    log.print(LOG_DEBUG, "start scale image...")
-    local action = switch[arg.type]
-    if action then
-        action()
-        if ret == TS_OK then
-            if arg.quality and webimg.quality() > arg.quality then
-                log.print(LOG_DEBUG, "webimg.quality = " .. webimg.quality())
-                webimg.wi_set_quality(arg.quality)
-                log.print(LOG_DEBUG, "webimg.wi_set_quality(" .. arg.quality .. ")")
-            end
-
-            local format = webimg.format()
-            log.print(LOG_DEBUG, "webimg.format() = " .. format)
-            if not string.find(format, "GIF") then
-                log.print(LOG_DEBUG, "not GIF, change")
-                if arg.format and arg.format == CF_WEBP then
-                    log.print(LOG_DEBUG, "arg.format = WEBP")
-                    ret = webimg.wi_set_format("WEBP")
-                else
-                    log.print(LOG_DEBUG, "arg.format = JPEG")
-                    ret = webimg.wi_set_format("JPEG")
+    local arg = type_list[rtype]
+    if arg then
+        local ret = -1
+        log.print(LOG_DEBUG, "arg.type = " .. arg.type)
+        local switch = {
+            [CT_SQUARE]         = function()    ret = square(arg.size)     end,
+            [CT_MAX_WIDTH]      = function()    ret = max_width(arg)       end,
+            [CT_MAX_SIZE]       = function()    ret = max_size(arg)        end,
+            [CT_PROPORTION]     = function()    ret = proportion(arg)      end,
+            [CT_CROP]           = function()    ret = crop(arg)            end,
+            [CT_NONE]           = function()    ret = TS_OK                end,
+        }
+        log.print(LOG_DEBUG, "start scale image...")
+        local action = switch[arg.type]
+        if action then
+            action()
+            if ret == TS_OK then
+                if arg.quality and webimg.quality() > arg.quality then
+                    log.print(LOG_DEBUG, "webimg.quality = " .. webimg.quality())
+                    webimg.wi_set_quality(arg.quality)
+                    log.print(LOG_DEBUG, "webimg.wi_set_quality(" .. arg.quality .. ")")
                 end
-            else
-                log.print(LOG_DEBUG, "GIF, donot change")
-            end
 
-            code = ret
-            log.print(LOG_DEBUG, "code = " .. code)
+                local format = webimg.format()
+                log.print(LOG_DEBUG, "webimg.format() = " .. format)
+                if not string.find(format, "GIF") then
+                    log.print(LOG_DEBUG, "not GIF, change")
+                    if arg.format and arg.format == CF_WEBP then
+                        log.print(LOG_DEBUG, "arg.format = WEBP")
+                        ret = webimg.wi_set_format("WEBP")
+                    else
+                        log.print(LOG_DEBUG, "arg.format = JPEG")
+                        ret = webimg.wi_set_format("JPEG")
+                    end
+                else
+                    log.print(LOG_DEBUG, "GIF, donot change")
+                end
+
+                code = ret
+                log.print(LOG_DEBUG, "code = " .. code)
+            else
+                log.print(LOG_DEBUG, "scale image failed.")
+            end
         else
-            log.print(LOG_DEBUG, "scale image failed.")
+            log.print(LOG_DEBUG, "action = nil")
         end
     else
-        log.print(LOG_DEBUG, "action = nil")
+        log.print(LOG_DEBUG, "arg = nil")
     end
-else
-    log.print(LOG_DEBUG, "arg = nil")
+
+    request.push(code)
+    log.print(LOG_DEBUG, "zimg lua script finished.")
 end
 
-request.push(code)
-log.print(LOG_DEBUG, "zimg lua script finished.")
-return
 

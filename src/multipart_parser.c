@@ -210,7 +210,7 @@ size_t multipart_parser_execute(multipart_parser* p, const char *buf, size_t len
         NOTIFY_CB(headers_complete);
         mark = i;
         dmark = i;
-        multipart_log("s_part_data_start @ %d", dmark);
+        //multipart_log("s_part_data_start @ %d", dmark);
         p->state = s_part_data;
 
       /* fallthrough */
@@ -260,7 +260,7 @@ size_t multipart_parser_execute(multipart_parser* p, const char *buf, size_t len
         return i;
    
       case s_part_data_final_hyphen:
-        multipart_log("s_part_data_final_hyphen %d~%d", dmark, dbmark);
+        //multipart_log("s_part_data_final_hyphen %d~%d", dmark, dbmark);
         EMIT_DATA_CB(chunk_data, buf + dmark, dbmark - dmark);
         if (c == '-') {
             NOTIFY_CB(body_end);
@@ -271,7 +271,7 @@ size_t multipart_parser_execute(multipart_parser* p, const char *buf, size_t len
 
       case s_part_data_end:
         if (c == LF) {
-            multipart_log("s_part_data_end %d~%d", dmark, dbmark);
+            //multipart_log("s_part_data_end %d~%d", dmark, dbmark);
             EMIT_DATA_CB(chunk_data, buf + dmark, dbmark - dmark);
             p->state = s_header_field_start;
             NOTIFY_CB(part_data_begin);

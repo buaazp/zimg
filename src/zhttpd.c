@@ -40,6 +40,7 @@ typedef struct {
     char address[16];
     int partno;
     int succno;
+    int check_name;
 } mp_arg_t;
 
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
@@ -251,7 +252,6 @@ static evthr_t * get_request_thr(evhtp_request_t *request)
  *
  * @return Const string of type.
  */
-
 static const char * guess_type(const char *type)
 {
 	const struct table_entry *ent;
@@ -369,6 +369,52 @@ int on_header_field(multipart_parser* p, const char *at, size_t length)
 
 int on_header_value(multipart_parser* p, const char *at, size_t length)
 {
+    mp_arg_t *mp_arg = (mp_arg_t *)multipart_parser_get_data(p);
+    char *filename = strnstr(at, "filename=", length);
+    char *nameend = NULL;
+    LOG_PRINT(LOG_INFO, "mp_arg->check_name = %d", mp_arg->check_name);
+    if(filename)
+    {
+        filename += 9;
+        if(filename[0] == '\"')
+        {
+            filename++;
+            nameend = strnchr(filename, '\"', length-(filename-at));
+            if(!nameend)
+                mp_arg->check_name = -1;
+            else
+            {
+                nameend[0] = '\0';
+                char fileType[32];
+                LOG_PRINT(LOG_DEBUG, "File[%s]", filename);
+                if(get_type(filename, fileType) == -1)
+                {
+                    LOG_PRINT(LOG_DEBUG, "Get Type of File[%s] Failed!", filename);
+                    mp_arg->check_name = -1;
+                }
+                else
+                {
+                    LOG_PRINT(LOG_DEBUG, "fileType[%s]", fileType);
+                    if(is_img(fileType) != 1)
+                    {
+                        LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", fileType);
+                        mp_arg->check_name = -1;
+                    }
+                }
+            }
+        }
+        if(filename[0] != '\0' && mp_arg->check_name == -1)
+        {
+            LOG_PRINT(LOG_ERROR, "%s fail post type", mp_arg->address);
+            evbuffer_add_printf(mp_arg->req->buffer_out, 
+                "<h1>File: %s</h1>\n"
+                "<p>File type is not supported!</p>\n",
+                filename
+                );
+        }
+    }
+    LOG_PRINT(LOG_INFO, "mp_arg->check_name = %d", mp_arg->check_name);
+    //multipart_parser_set_data(p, mp_arg);
     char *header_value = (char *)malloc(length+1);
     snprintf(header_value, length+1, "%s", at);
     LOG_PRINT(LOG_DEBUG, "header_value %d %s", length, header_value);
@@ -380,11 +426,24 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
 {
     mp_arg_t *mp_arg = (mp_arg_t *)multipart_parser_get_data(p);
     mp_arg->partno++;
+    LOG_PRINT(LOG_DEBUG, "mp_arg->check_name = %d", mp_arg->check_name);
+    if(mp_arg->check_name == -1)
+    {
+        mp_arg->check_name = 0;
+        return 0;
+    }
+    if(length < 1)
+        return 0;
+    //multipart_parser_set_data(p, mp_arg);
     char md5sum[33];
     if(save_img(mp_arg->thr_arg, at, length, md5sum) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", mp_arg->address);
+        evbuffer_add_printf(mp_arg->req->buffer_out, 
+            "<h1>Failed!</h1>\n"
+            "<p>File save failed!</p>\n"
+            );
     }
     else
     {
@@ -544,17 +603,11 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     str_lcpy(mp_arg->address, address, 16);
     mp_arg->partno = 0;
     mp_arg->succno = 0;
+    mp_arg->check_name = 0;
     multipart_parser_set_data(parser, mp_arg);
     multipart_parser_execute(parser, buff, post_size);
     multipart_parser_free(parser);
 
-    if(mp_arg->succno == 0)
-    {
-        LOG_PRINT(LOG_DEBUG, "Images Saved Failed!");
-        LOG_PRINT(LOG_ERROR, "%s fail post save", address);
-        errno = 0;
-        goto done;
-    }
     evbuffer_add_printf(req->buffer_out, "</body>\n</html>\n");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     errno = -1;
