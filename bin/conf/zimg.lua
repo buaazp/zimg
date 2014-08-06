@@ -3,7 +3,7 @@
 --server config
 is_daemon=1
 port=4869
-thread_num=1
+thread_num=4
 backlog_num=1024
 max_keepalives=1
 retry=3
@@ -36,7 +36,7 @@ mc_port=11211
 --LOG_NOTICE 5          Normal, but significant
 --LOG_INFO 6            Information
 --LOG_DEBUG 7           DEBUG message
-log_level=7
+log_level=6
 log_name= pwd .. '/log/zimg.log'
 
 --htdoc config

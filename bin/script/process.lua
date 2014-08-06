@@ -7,8 +7,6 @@ local LOG_NOTICE = 5
 local LOG_INFO = 6
 local LOG_DEBUG = 7
 
-log.print(LOG_DEBUG, "zimg using lua script.")
-
 local TS_OK = 0
 local TS_FAILED = -1
 
@@ -550,4 +548,5 @@ function f()
     log.print(LOG_DEBUG, "zimg lua script finished.")
 end
 
+log.print(LOG_DEBUG, "zimg using lua script.")
 
