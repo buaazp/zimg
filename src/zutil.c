@@ -33,13 +33,12 @@
 
 //functions list
 char *strnchr(const char *p, char c, size_t n);
+char * strnstr(const char *s, const char *find, size_t slen);
 size_t str_lcat(char *dst, const char *src, size_t size);
 size_t str_lcpy(char *dst, const char *src, size_t size);
 int bind_check(int port);
 pid_t gettid();
 int get_cpu_cores();
-static void kmp_init(const char *pattern, int pattern_size);
-int kmp(const char *matcher, int mlen, const char *pattern, int plen);
 int get_type(const char *filename, char *type);
 int is_file(const char *filename);
 int is_img(const char *filename);
@@ -54,11 +53,7 @@ int is_md5(char *s);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);
 
-// this data is for KMP searching
-static int pi[128];
-
-char *
-strnchr(const char *p, char c, size_t n)
+char * strnchr(const char *p, char c, size_t n)
 {
     if (!p)
         return (0);
@@ -69,6 +64,26 @@ strnchr(const char *p, char c, size_t n)
         p++;
     }
     return (0);
+}
+
+char * strnstr(const char *s, const char *find, size_t slen)
+{
+    char c, sc;
+    size_t len;
+
+    if ((c = *find++) != '\0') {
+        len = strlen(find);
+        do {
+            do {
+                if ((sc = *s++) == '\0' || slen-- < 1)
+                    return (NULL);
+            } while (sc != c);
+            if (len > slen)
+                return (NULL);
+        } while (strncmp(s, find, len) != 0);
+        s--;
+    }
+    return ((char *)s);
 }
 
 /*
@@ -168,69 +183,6 @@ pid_t gettid()
 int get_cpu_cores()
 {
     return (int)sysconf(_SC_NPROCESSORS_CONF);
-}
-
-/* KMP for searching */
-static void kmp_init(const char *pattern, int pattern_size)  // prefix-function
-{
-    pi[0] = 0;  // pi[0] always equals to 0 by defination
-    int k = 0;  // an important pointer
-    int q;
-    for(q = 1; q < pattern_size; q++)  // find each pi[q] for pattern[q]
-    {
-        while(k>0 && pattern[k+1]!=pattern[q])
-            k = pi[k];  // use previous prefixes to match pattern[0..q]
-
-        if(pattern[k+1] == pattern[q]) // if pattern[0..(k+1)] is a prefix
-            k++;             // let k = k + 1
-
-        pi[q] = k;   // be ware, (0 <= k <= q), and (pi[k] < k)
-    }
-    // The worst-case time complexity of this procedure is O(pattern_size)
-}
-
-/**
- * @brief kmp The kmp algorithm.
- *
- * @param matcher The buffer.
- * @param mlen Buffer length.
- * @param pattern The pattern.
- * @param plen Pattern length.
- *
- * @return The place of pattern in buffer.
- */
-int kmp(const char *matcher, int mlen, const char *pattern, int plen)
-{
-    // this function does string matching using the KMP algothm.
-    // matcher and pattern are pointers to BINARY sequencies, while mlen
-    // and plen are their lengths respectively.
-    // if a match is found, return its position immediately.
-    // return -1 if no match can be found.
-
-    if(!mlen || !plen || mlen < plen) // take care of illegal parameters
-        return -1;
-
-    kmp_init(pattern, plen);  // prefix-function
-
-    int i=0, j=0;
-    while(i < mlen && j < plen)  // don't increase i and j at this level
-    {
-        if(matcher[i+j] == pattern[j])
-            j++;
-        else if(j == 0)  // dismatch: matcher[i] vs pattern[0]
-            i++;
-        else      // dismatch: matcher[i+j] vs pattern[j], and j>0
-        {
-            i = i + j - pi[j-1];  // i: jump forward by (j - pi[j-1])
-            j = pi[j-1];          // j: reset to the proper position
-        }
-    }
-    if(j == plen) // found a match!!
-    {
-        return i;
-    }
-    else          // if no match was found
-        return -1;
 }
 
 /**

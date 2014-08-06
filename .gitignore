@@ -1,5 +1,6 @@
 # Object files
 *.o
+*.s
 
 # Libraries
 *.lib
@@ -45,3 +46,13 @@ test/result.json
 test/stress_random.txt
 test/stress_random_big.txt
 test/zimg with webimg2.txt
+
+#luaJIT headers
+src/LuaJIT/src/host/buildvm
+src/LuaJIT/src/host/buildvm_arch.h
+src/LuaJIT/src/host/minilua
+src/LuaJIT/src/lj_bcdef.h
+src/LuaJIT/src/lj_ffdef.h
+src/LuaJIT/src/lj_folddef.h
+src/LuaJIT/src/lj_libdef.h
+src/LuaJIT/src/lj_recdef.h

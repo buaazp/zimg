@@ -25,12 +25,12 @@
 #include "zcommon.h"
 
 char *strnchr(const char *p, char c, size_t n);
+char * strnstr(const char *s, const char *find, size_t slen);
 size_t str_lcat(char *dst, const char *src, size_t size);
 size_t str_lcpy(char *dst, const char *src, size_t size);
 int bind_check(int port);
 pid_t gettid();
 int get_cpu_cores();
-int kmp(const char *matcher, int mlen, const char *pattern, int plen);
 int get_type(const char *filename, char *type);
 int is_file(const char *filename);
 int is_img(const char *filename);
