@@ -23,7 +23,7 @@
 #define ZHTTPD_H
 
 #include "libevhtp/evhtp.h"
-#include "multipart_parser.h"
+#include "multipart-parser-c/multipart_parser.h"
 
 typedef struct zimg_headers_s zimg_headers_t;
 

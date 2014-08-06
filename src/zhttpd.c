@@ -31,7 +31,6 @@
 #include "zlog.h"
 #include "zdb.h"
 #include "zaccess.h"
-#include "multipart_parser.h"
 #include "cjson/cJSON.h"
 
 typedef struct {
@@ -48,8 +47,6 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
 void free_headers_conf(zimg_headers_conf_t *hcf);
 static evthr_t * get_request_thr(evhtp_request_t *request);
-static const char * guess_type(const char *type);
-static const char * guess_content_type(const char *path);
 static int print_headers(evhtp_header_t * header, void * arg); 
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_cb(evhtp_request_t *req, void *arg);
@@ -67,6 +64,7 @@ static const char * post_error_list[] = {
     "Content-Type error."
 };
 
+/*
 static const struct table_entry {
 	const char *extension;
 	const char *content_type;
@@ -85,6 +83,7 @@ static const struct table_entry {
 	{ "ps", "application/postsript" },
 	{ NULL, NULL },
 };
+*/
 
 static const char * method_strmap[] = {
     "GET",
@@ -252,6 +251,7 @@ static evthr_t * get_request_thr(evhtp_request_t *request)
  *
  * @return Const string of type.
  */
+/*
 static const char * guess_type(const char *type)
 {
 	const struct table_entry *ent;
@@ -261,6 +261,7 @@ static const char * guess_type(const char *type)
 	}
 	return "application/misc";
 }
+*/
 
 /* Try to guess a good content-type for 'path' */
 /**
@@ -270,13 +271,14 @@ static const char * guess_type(const char *type)
  *
  * @return The string of type.
  */
+/*
 static const char * guess_content_type(const char *path)
 {
 	const char *last_period, *extension;
 	const struct table_entry *ent;
 	last_period = strrchr(path, '.');
 	if (!last_period || strchr(last_period, '/'))
-		goto not_found; /* no exension */
+		goto not_found;
 	extension = last_period + 1;
 	for (ent = &content_type_table[0]; ent->extension; ++ent) {
 		if (!evutil_ascii_strcasecmp(ent->extension, extension))
@@ -286,6 +288,7 @@ static const char * guess_content_type(const char *path)
 not_found:
 	return "application/misc";
 }
+*/
 
 /**
  * @brief print_headers It displays all headers and values.

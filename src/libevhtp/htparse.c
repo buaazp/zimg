@@ -299,6 +299,7 @@ str_to_uint64(char * str, size_t n, int * err) {
     return value;
 }
 
+/*
 static inline ssize_t
 _str_to_ssize_t(char * str, size_t n) {
     ssize_t value;
@@ -323,6 +324,7 @@ _str_to_ssize_t(char * str, size_t n) {
 
     return value;
 }
+*/
 
 htpparse_error
 htparser_get_error(htparser * p) {

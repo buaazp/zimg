@@ -51,7 +51,6 @@ int mk_dirs(const char *dir);
 int mk_dirf(const char *filename);
 int delete_file(const char *path);
 int is_md5(char *s);
-static int htoi(char s[]);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);
 
@@ -515,6 +514,7 @@ int is_md5(char *s)
  *
  * @return The number in the string.
  */
+/*
 static int htoi(char s[])
 {
     int i;
@@ -540,6 +540,7 @@ static int htoi(char s[])
     }
     return n;
 }
+*/
 
 
 /**

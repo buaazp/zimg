@@ -32,8 +32,8 @@
 #include "libevhtp/evhtp.h"
 #include "zaccess.h"
 #include "zhttpd.h"
-#include "lua/lualib.h"
-#include "multipart_parser.h"
+#include <lualib.h>
+#include "multipart-parser-c/multipart_parser.h"
 
 #ifndef ZIMG_VERSION
 #define ZIMG_VERSION "3.0.0"
