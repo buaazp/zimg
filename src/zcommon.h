@@ -49,6 +49,7 @@
 
 struct setting{
     int is_daemon;
+    char ip[128];
     int port;
     int num_threads;
     int backlog;
@@ -74,6 +75,7 @@ struct setting{
     int quality;
     int mode;
     int save_new;
+    int max_size;
     char img_path[512];
     char beansdb_ip[128];
     int beansdb_port;

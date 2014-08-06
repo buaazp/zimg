@@ -33,7 +33,7 @@ static int get_wi_quality(lua_State *L) {
 static int get_wi_format(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     char *format = larg->img->format;
-    LOG_PRINT(LOG_INFO, "get_wi_format: %s", format);
+    LOG_PRINT(LOG_DEBUG, "get_wi_format: %s", format);
     lua_pushstring(L, format);
     return 1;
 }
@@ -96,7 +96,7 @@ static int set_wi_format (lua_State *L) {
     
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = wi_set_format(larg->img, (char *)format);
-    LOG_PRINT(LOG_INFO, "set_wi_format: %s ret = %d", format, ret);
+    LOG_PRINT(LOG_DEBUG, "set_wi_format: %s ret = %d", format, ret);
     lua_pushnumber(L, ret);
     return 1;
 }
@@ -105,7 +105,7 @@ static int zimg_type(lua_State *L)
 {
     lua_arg *larg = pthread_getspecific(thread_key);
     lua_pushstring(L, larg->trans_type);
-    LOG_PRINT(LOG_INFO, "zimg_type: %s", larg->trans_type);
+    LOG_PRINT(LOG_DEBUG, "zimg_type: %s", larg->trans_type);
     return 1;
 }
 

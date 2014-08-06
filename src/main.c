@@ -78,6 +78,7 @@ void usage(int argc, char **argv)
 static void settings_init(void) 
 {
     settings.is_daemon = 0;
+    str_lcpy(settings.ip, "0.0.0.0", sizeof(settings.ip));
     settings.port = 4869;
     settings.num_threads = get_cpu_cores();         /* N workers */
     settings.backlog = 1024;
@@ -103,6 +104,7 @@ static void settings_init(void)
     settings.quality = 75;
     settings.mode = 1;
     settings.save_new = 1;
+    settings.max_size = 10485760;
     str_lcpy(settings.img_path, "./img", sizeof(settings.img_path));
     str_lcpy(settings.beansdb_ip, "127.0.0.1", sizeof(settings.beansdb_ip));
     settings.beansdb_port = 7905;
@@ -129,6 +131,11 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "is_daemon"); //stack index: -12
     if(lua_isnumber(L, -1))
         settings.is_daemon = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "ip");
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.ip, lua_tostring(L, -1), sizeof(settings.ip));
     lua_pop(L, 1);
 
     lua_getglobal(L, "port");
@@ -263,6 +270,11 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "save_new");
     if(lua_isnumber(L, -1))
         settings.save_new = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "max_size");
+    if(lua_isnumber(L, -1))
+        settings.max_size = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "img_path");
@@ -557,7 +569,7 @@ int main(int argc, char **argv)
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
 #endif
     evhtp_set_max_keepalive_requests(htp, settings.max_keepalives);
-    evhtp_bind_socket(htp, "0.0.0.0", settings.port, settings.backlog);
+    evhtp_bind_socket(htp, settings.ip, settings.port, settings.backlog);
 
     event_base_loop(evbase, 0);
 

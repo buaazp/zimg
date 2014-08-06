@@ -61,7 +61,8 @@ static const char * post_error_list[] = {
     "Access error.",
     "Request body parse error.",
     "Content-Length error.",
-    "Content-Type error."
+    "Content-Type error.",
+    "File too large."
 };
 
 /*
@@ -375,7 +376,6 @@ int on_header_value(multipart_parser* p, const char *at, size_t length)
     mp_arg_t *mp_arg = (mp_arg_t *)multipart_parser_get_data(p);
     char *filename = strnstr(at, "filename=", length);
     char *nameend = NULL;
-    LOG_PRINT(LOG_INFO, "mp_arg->check_name = %d", mp_arg->check_name);
     if(filename)
     {
         filename += 9;
@@ -416,7 +416,6 @@ int on_header_value(multipart_parser* p, const char *at, size_t length)
                 );
         }
     }
-    LOG_PRINT(LOG_INFO, "mp_arg->check_name = %d", mp_arg->check_name);
     //multipart_parser_set_data(p, mp_arg);
     char *header_value = (char *)malloc(length+1);
     snprintf(header_value, length+1, "%s", at);
@@ -429,7 +428,6 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
 {
     mp_arg_t *mp_arg = (mp_arg_t *)multipart_parser_get_data(p);
     mp_arg->partno++;
-    LOG_PRINT(LOG_DEBUG, "mp_arg->check_name = %d", mp_arg->check_name);
     if(mp_arg->check_name == -1)
     {
         mp_arg->check_name = 0;
@@ -686,6 +684,13 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         LOG_PRINT(LOG_DEBUG, "Image Size is Zero!");
         LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
         errno = 5;
+        goto err;
+    }
+    if(post_size > settings.max_size)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image Size Too Large!");
+        LOG_PRINT(LOG_ERROR, "%s fail post large", address);
+        errno = 7;
         goto err;
     }
     const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
@@ -952,7 +957,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             type = (char *)malloc(type_len);
             if(type != NULL)
                 str_lcpy(type, str_t, type_len);
-            LOG_PRINT(LOG_INFO, "type = %s", type);
+            LOG_PRINT(LOG_DEBUG, "type = %s", type);
         }
     }
 

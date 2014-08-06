@@ -98,7 +98,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     {
         if(exist_db(thr_arg, cache_key) == 1)
         {
-            LOG_PRINT(LOG_INFO, "File Exist, Needn't Save.");
+            LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
             result = 1;
             goto done;
         }
@@ -697,7 +697,7 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             snprintf(rsp_path, 512, "%s/%s", whole_path, name);
         }
     }
-    LOG_PRINT(LOG_INFO, "Got the rsp_path: %s", rsp_path);
+    LOG_PRINT(LOG_DEBUG, "Got the rsp_path: %s", rsp_path);
 
     if((fd = open(rsp_path, O_RDONLY)) == -1)
     {
