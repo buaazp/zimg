@@ -36,12 +36,14 @@
 #include "zscale.h"
 #include "zhttpd.h"
 #include "zlscale.h"
+#include "cjson/cJSON.h"
 
 int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, evhtp_request_t *request);
 int get_img2(zimg_req_t *req, evhtp_request_t *request);
-int admin_img(const char *md5, int t);
+int admin_img(evhtp_request_t *req, const char *md5, int t);
+int info_img(char *md5, evhtp_request_t *request);
 
 
 /**
@@ -880,7 +882,7 @@ err:
     return result;
 }
 
-int admin_img(const char *md5, int t)
+int admin_img(evhtp_request_t *req, const char *md5, int t)
 {
     int result = -1;
 
@@ -900,12 +902,77 @@ int admin_img(const char *md5, int t)
     if(t == 1)
     {
         if(delete_file(whole_path) != -1)
-            result = 1;
-        else
         {
-            LOG_PRINT(LOG_DEBUG, "delete path: %s failed!", whole_path);
+            result = 1;
+            evbuffer_add_printf(req->buffer_out, 
+                "<html><body><h1>Admin Command Successful!</h1> \
+                <p>MD5: %s</p> \
+                <p>Command Type: %d</p> \
+                </body></html>",
+                md5, t);
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         }
     }
     return result;
 }
 
+int info_img(char *md5, evhtp_request_t *request)
+{
+    int result = -1;
+
+    LOG_PRINT(LOG_DEBUG, "info_img() start processing info request...");
+    struct image *im = NULL;
+    char whole_path[512];
+    int lvl1 = str_hash(md5);
+    int lvl2 = str_hash(md5 + 3);
+    snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5);
+    LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
+    
+    if(is_dir(whole_path) == -1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image %s is not existed!", md5);
+        goto err;
+    }
+
+    char orig_path[512];
+    snprintf(orig_path, 512, "%s/0*0", whole_path);
+    LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
+
+    im = wi_new_image();
+    if (im == NULL) goto err;
+    int ret = -1;
+    ret = wi_read_file(im, orig_path);
+    if (ret != WI_OK)
+    {
+        LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
+        goto err;
+    }
+
+    size_t size = im->in_buf.len;
+    int width = im->cols;
+    int height = im->rows;
+    char *format = im->format;
+    int quality = im->quality;
+
+    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"quality":90,"format":"JPEG"}}
+    cJSON *j_ret = cJSON_CreateObject();
+    cJSON *j_ret_info = cJSON_CreateObject();
+    cJSON_AddBoolToObject(j_ret, "ret", 1);
+    cJSON_AddNumberToObject(j_ret_info, "size", size);
+    cJSON_AddNumberToObject(j_ret_info, "width", width);
+    cJSON_AddNumberToObject(j_ret_info, "height", height);
+    cJSON_AddNumberToObject(j_ret_info, "quality", quality);
+    cJSON_AddStringToObject(j_ret_info, "format", format);
+    cJSON_AddItemToObject(j_ret, "info", j_ret_info);
+    char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
+    LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
+    evbuffer_add_printf(request->buffer_out, "%s", ret_str_unformat);
+    cJSON_Delete(j_ret);
+    free(ret_str_unformat);
+    result = 1;
+
+err:
+    if(im != NULL)
+        wi_free_image(im);
+    return result;
+}

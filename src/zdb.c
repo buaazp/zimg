@@ -29,6 +29,7 @@
 #include "zutil.h"
 #include "zscale.h"
 #include "zlscale.h"
+#include "cjson/cJSON.h"
 
 int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request);
 int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request);
@@ -41,7 +42,8 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
 int save_img_beansdb(memcached_st *memc, const char *key, const char *value, const size_t len);
 int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, const size_t len);
 
-int admin_img_mode_db(thr_arg_t *thr_arg, char *md5, int t);
+int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t);
+int info_img_mode_db(char *md5, evhtp_request_t *request, thr_arg_t *thr_arg);
 
 int exist_db(thr_arg_t *thr_arg, const char *cache_key);
 int exist_beansdb(memcached_st *memc, const char *key);
@@ -710,7 +712,7 @@ int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, cons
     return 1;
 }
 
-int admin_img_mode_db(thr_arg_t *thr_arg, char *md5, int t)
+int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t)
 {
     int result = -1;
 
@@ -726,8 +728,77 @@ int admin_img_mode_db(thr_arg_t *thr_arg, char *md5, int t)
 
     if(t == 1)
     {
-        result = del_db(thr_arg, cache_key);
+        if(del_db(thr_arg, cache_key) != -1)
+        {
+            result = 1;
+            evbuffer_add_printf(req->buffer_out, 
+                "<html><body><h1>Admin Command Successful!</h1> \
+                <p>MD5: %s</p> \
+                <p>Command Type: %d</p> \
+                </body></html>",
+                md5, t);
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
+        }
     }
+    return result;
+}
+
+int info_img_mode_db(char *md5, evhtp_request_t *request, thr_arg_t *thr_arg)
+{
+    int result = -1;
+
+    LOG_PRINT(LOG_DEBUG, "info_img() start processing info request...");
+    struct image *im = NULL;
+    char *orig_buff_ptr = NULL;
+
+    char cache_key[CACHE_KEY_SIZE];
+    gen_key(cache_key, md5, 0);
+    LOG_PRINT(LOG_DEBUG, "original key: %s", cache_key);
+
+    size_t size = 0;
+    if(get_img_db(thr_arg, cache_key, &orig_buff_ptr, &size) == -1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
+        goto err;
+    }
+
+    im = wi_new_image();
+    if (im == NULL) goto err;
+
+    int ret = -1;
+    ret = wi_read_blob(im, orig_buff_ptr, size);
+    if (ret != WI_OK)
+    {
+        LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
+        goto err;
+    }
+
+    int width = im->cols;
+    int height = im->rows;
+    char *format = im->format;
+    int quality = im->quality;
+
+    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"quality":90,"format":"JPEG"}}
+    cJSON *j_ret = cJSON_CreateObject();
+    cJSON *j_ret_info = cJSON_CreateObject();
+    cJSON_AddBoolToObject(j_ret, "ret", 1);
+    cJSON_AddNumberToObject(j_ret_info, "size", size);
+    cJSON_AddNumberToObject(j_ret_info, "width", width);
+    cJSON_AddNumberToObject(j_ret_info, "height", height);
+    cJSON_AddNumberToObject(j_ret_info, "quality", quality);
+    cJSON_AddStringToObject(j_ret_info, "format", format);
+    cJSON_AddItemToObject(j_ret, "info", j_ret_info);
+    char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
+    LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
+    evbuffer_add_printf(request->buffer_out, "%s", ret_str_unformat);
+    cJSON_Delete(j_ret);
+    free(ret_str_unformat);
+    result = 1;
+
+err:
+    if(im != NULL)
+        wi_free_image(im);
+    free(orig_buff_ptr);
     return result;
 }
 

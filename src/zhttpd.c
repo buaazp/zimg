@@ -485,7 +485,7 @@ int json_return(evhtp_request_t *req, int errno, const char *md5sum, int post_si
     char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
     LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
     evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "application/json", 0, 0));
     cJSON_Delete(j_ret);
     free(ret_str_unformat);
     return 0;
@@ -833,12 +833,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
 	const char *uri;
 	uri = req->uri->path->full;
-	//const char *rfull = req->uri->path->full;
-	//const char *rpath = req->uri->path->path;
-	//const char *rfile= req->uri->path->file;
-	//LOG_PRINT(LOG_DEBUG, "uri->path->full: %s",  rfull);
-	//LOG_PRINT(LOG_DEBUG, "uri->path->path: %s",  rpath);
-	//LOG_PRINT(LOG_DEBUG, "uri->path->file: %s",  rfile);
 
     if(strlen(uri) == 1 && uri[0] == '/')
     {
@@ -916,6 +910,9 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
 	/* This holds the content we're sending. */
 
+    evthr_t *thread = get_request_thr(req);
+    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
+
     char *type = NULL;
     int width, height, proportion, gray, x, y, quality;
     evhtp_kvs_t *params;
@@ -932,6 +929,31 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     }
     else
     {
+        const char *str_info = evhtp_kv_find(params, "info");
+        if(str_info)
+        {
+            LOG_PRINT(LOG_DEBUG, "get image info request: %s", str_info);
+            int info_img_rst = -1;
+            if(settings.mode == 1)
+                info_img_rst = info_img(md5, req);
+            else
+                info_img_rst = info_img_mode_db(md5, req, thr_arg);
+
+            if(info_img_rst == -1)
+            {
+                LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Info Failed!", md5);
+                LOG_PRINT(LOG_ERROR, "%s fail info pic:%s", address, md5); 
+                goto err;
+            }
+
+            LOG_PRINT(LOG_INFO, "%s succ info pic:%s", address, md5); 
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "application/json", 0, 0));
+            evhtp_send_reply(req, EVHTP_RES_OK);
+            LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
+            goto done;
+        }
+
         const char *str_w = evhtp_kv_find(params, "w");
         const char *str_h = evhtp_kv_find(params, "h");
         width = (str_w) ? atoi(str_w) : 0;
@@ -977,10 +999,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     zimg_req -> x = x;
     zimg_req -> y = y;
     zimg_req -> quality = quality;
-
-    
-    evthr_t *thread = get_request_thr(req);
-    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
     zimg_req -> thr_arg = thr_arg;
 
     int get_img_rst = -1;
@@ -1181,44 +1199,39 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
 
     int admin_img_rst = -1;
     if(settings.mode == 1)
-        admin_img_rst = admin_img(md5, t);
+        admin_img_rst = admin_img(req, md5, t);
     else
-        admin_img_rst = admin_img_mode_db(thr_arg, md5, t);
+        admin_img_rst = admin_img_mode_db(req, thr_arg, md5, t);
 
     if(admin_img_rst == -1)
     {
         evbuffer_add_printf(req->buffer_out, 
             "<html><body><h1>Admin Command Failed!</h1> \
-            <br>MD5: %s</br> \
-            <br>Command Type: %d</br> \
-            <br>Command Failed.</br> \
+            <p>MD5: %s</p> \
+            <p>Command Type: %d</p> \
+            <p>Command Failed.</p> \
             </body></html>",
             md5, t);
         LOG_PRINT(LOG_ERROR, "%s fail admin pic:%s t:%d", address, md5, t); 
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     }
     else if(admin_img_rst == 2)
     {
         evbuffer_add_printf(req->buffer_out, 
             "<html><body><h1>Admin Command Failed!</h1> \
-            <br>MD5: %s</br> \
-            <br>Command Type: %d</br> \
-            <br>Image Not Found.</br> \
+            <p>MD5: %s</p> \
+            <p>Command Type: %d</p> \
+            <p>Image Not Found.</p> \
             </body></html>",
             md5, t);
         LOG_PRINT(LOG_ERROR, "%s 404 admin pic:%s t:%d", address, md5, t); 
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     }
     else
     {
-        evbuffer_add_printf(req->buffer_out, 
-            "<html><body><h1>Admin Command Successful!</h1> \
-            <br>MD5: %s</br> \
-            <br>Command Type: %d</br> \
-            </body></html>",
-            md5, t);
         LOG_PRINT(LOG_INFO, "%s succ admin pic:%s t:%d", address, md5, t); 
     }
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============admin_request_cb() DONE!===============");
     return;
