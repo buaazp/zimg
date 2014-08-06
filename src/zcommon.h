@@ -29,10 +29,10 @@
 #include <sys/time.h>
 #include <libmemcached/memcached.h>
 #include <hiredis/hiredis.h>
+#include <lualib.h>
 #include "libevhtp/evhtp.h"
 #include "zaccess.h"
 #include "zhttpd.h"
-#include <lualib.h>
 #include "multipart-parser-c/multipart_parser.h"
 
 #ifndef ZIMG_VERSION
@@ -40,10 +40,8 @@
 #endif
 
 #define MAX_LINE 1024 
-#define CACHE_MAX_SIZE 1024*1024
+#define CACHE_MAX_SIZE 1048576 //1024*1024
 #define RETRY_TIME_WAIT 1000
-/* Number of worker threads.  Should match number of CPU cores reported in /proc/cpuinfo. */
-#define NUM_THREADS 4
 #define CACHE_KEY_SIZE 128
 #define PATH_MAX_SIZE 512
 
