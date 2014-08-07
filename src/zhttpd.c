@@ -460,14 +460,14 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
     return 0;
 }
 
-int json_return(evhtp_request_t *req, int errno, const char *md5sum, int post_size)
+int json_return(evhtp_request_t *req, int err_no, const char *md5sum, int post_size)
 {
     //json sample:
     //{"ret":true,"info":{"size":"1024", "md5":"edac35fd4b0059d3218f0630bc56a6f4"}}
     //{"ret":false,"error":{"code":"1","message":"\u9a8c\u8bc1\u5931\u8d25"}}
     cJSON *j_ret = cJSON_CreateObject();
     cJSON *j_ret_info = cJSON_CreateObject();
-    if(errno == -1)
+    if(err_no == -1)
     {
         cJSON_AddBoolToObject(j_ret, "ret", 1);
         cJSON_AddStringToObject(j_ret_info, "md5", md5sum);
@@ -477,9 +477,9 @@ int json_return(evhtp_request_t *req, int errno, const char *md5sum, int post_si
     else
     {
         cJSON_AddBoolToObject(j_ret, "ret", 0);
-        cJSON_AddNumberToObject(j_ret_info, "code", errno);
-        LOG_PRINT(LOG_DEBUG, "post_error_list[%d]: %s", errno, post_error_list[errno]);
-        cJSON_AddStringToObject(j_ret_info, "message", post_error_list[errno]);
+        cJSON_AddNumberToObject(j_ret_info, "code", err_no);
+        LOG_PRINT(LOG_DEBUG, "post_error_list[%d]: %s", err_no, post_error_list[err_no]);
+        cJSON_AddStringToObject(j_ret_info, "message", post_error_list[err_no]);
         cJSON_AddItemToObject(j_ret, "error", j_ret_info);
     }
     char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
@@ -493,12 +493,12 @@ int json_return(evhtp_request_t *req, int errno, const char *md5sum, int post_si
 
 int binary_parse(evhtp_request_t *req, const char *content_type, const char *address, const char *buff, int post_size)
 {
-    int errno = 0;
+    int err_no = 0;
     if(is_img(content_type) != 1)
     {
         LOG_PRINT(LOG_DEBUG, "fileType[%s] is Not Supported!", content_type);
         LOG_PRINT(LOG_ERROR, "%s fail post type", address);
-        errno = 1;
+        err_no = 1;
         goto done;
     }
     char md5sum[33];
@@ -511,16 +511,16 @@ int binary_parse(evhtp_request_t *req, const char *content_type, const char *add
         LOG_PRINT(LOG_ERROR, "%s fail post save", address);
         goto done;
     }
-    errno = -1;
-    json_return(req, errno, md5sum, post_size);
+    err_no = -1;
+    json_return(req, err_no, md5sum, post_size);
 
 done:
-    return errno;
+    return err_no;
 }
 
 int multipart_parse(evhtp_request_t *req, const char *content_type, const char *address, const char *buff, int post_size)
 {
-    int errno = 0;
+    int err_no = 0;
     char *boundary = NULL, *boundary_end = NULL;
     char *boundaryPattern = NULL;
     int boundary_len = 0;
@@ -537,7 +537,7 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     {
         LOG_PRINT(LOG_DEBUG, "boundary NOT found!");
         LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-        errno = 6;
+        err_no = 6;
         goto done;
     }
 
@@ -553,7 +553,7 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
         {
             LOG_PRINT(LOG_DEBUG, "Invalid boundary in multipart/form-data POST data");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-            errno = 6;
+            err_no = 6;
             goto done;
         }
     } 
@@ -574,7 +574,7 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     {
         LOG_PRINT(LOG_DEBUG, "boundarypattern malloc failed!");
         LOG_PRINT(LOG_ERROR, "%s fail malloc", address);
-        errno = 0;
+        err_no = 0;
         goto done;
     }
     snprintf(boundaryPattern, boundary_len + 3, "--%s", boundary);
@@ -585,7 +585,7 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     {
         LOG_PRINT(LOG_DEBUG, "Multipart_parser Init Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", address);
-        errno = 0;
+        err_no = 0;
         goto done;
     }
     mp_arg = (mp_arg_t *)malloc(sizeof(mp_arg_t));
@@ -593,7 +593,7 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     {
         LOG_PRINT(LOG_DEBUG, "Multipart_parser Arg Malloc Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", address);
-        errno = 0;
+        err_no = 0;
         goto done;
     }
 
@@ -611,12 +611,12 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
 
     evbuffer_add_printf(req->buffer_out, "</body>\n</html>\n");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
-    errno = -1;
+    err_no = -1;
 
 done:
     free(boundaryPattern);
     free(mp_arg);
-    return errno;
+    return err_no;
 }
 
 /**
@@ -629,7 +629,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
 {
     int post_size = 0;
     char *buff = NULL;
-    int errno = 0;
+    int err_no = 0;
     int ret_json = 1;
 
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
@@ -646,7 +646,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
         LOG_PRINT(LOG_INFO, "%s refuse post method", address);
-        errno = 2;
+        err_no = 2;
         goto err;
     }
 
@@ -658,14 +658,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "check access: ip[%s] forbidden!", address);
             LOG_PRINT(LOG_INFO, "%s refuse post forbidden", address);
-            errno = 3;
+            err_no = 3;
             goto forbidden;
         }
         else if(acs == ZIMG_ERROR)
         {
             LOG_PRINT(LOG_DEBUG, "check access: check ip[%s] failed!", address);
             LOG_PRINT(LOG_ERROR, "%s fail post access %s", address);
-            errno = 0;
+            err_no = 0;
             goto err;
         }
     }
@@ -675,7 +675,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Get Content-Length error!");
         LOG_PRINT(LOG_ERROR, "%s fail post content-length", address);
-        errno = 5;
+        err_no = 5;
         goto err;
     }
     post_size = atoi(content_len);
@@ -683,14 +683,14 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Image Size is Zero!");
         LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
-        errno = 5;
+        err_no = 5;
         goto err;
     }
     if(post_size > settings.max_size)
     {
         LOG_PRINT(LOG_DEBUG, "Image Size Too Large!");
         LOG_PRINT(LOG_ERROR, "%s fail post large", address);
-        errno = 7;
+        err_no = 7;
         goto err;
     }
     const char *content_type = evhtp_header_find(req->headers_in, "Content-Type");
@@ -698,7 +698,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Get Content-Type error!");
         LOG_PRINT(LOG_ERROR, "%s fail post content-type", address);
-        errno = 6;
+        err_no = 6;
         goto err;
     }
 	evbuf_t *buf;
@@ -708,7 +708,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
         LOG_PRINT(LOG_ERROR, "%s fail malloc buff", address);
-        errno = 0;
+        err_no = 0;
         goto err;
     }
     int rmblen, evblen;
@@ -716,7 +716,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     {
         LOG_PRINT(LOG_DEBUG, "Empty Request!");
         LOG_PRINT(LOG_ERROR, "%s fail post empty", address);
-        errno = 4;
+        err_no = 4;
         goto err;
     }
     while((evblen = evbuffer_get_length(buf)) > 0)
@@ -728,20 +728,20 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         {
             LOG_PRINT(LOG_DEBUG, "evbuffer_remove failed!");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
-            errno = 4;
+            err_no = 4;
             goto err;
         }
     }
     if(strstr(content_type, "multipart/form-data") == NULL)
     {
-        errno = binary_parse(req, content_type, address, buff, post_size);
+        err_no = binary_parse(req, content_type, address, buff, post_size);
     }
     else
     {
         ret_json = 0;
-        errno = multipart_parse(req, content_type, address, buff, post_size);
+        err_no = multipart_parse(req, content_type, address, buff, post_size);
     }
-    if(errno != -1)
+    if(err_no != -1)
     {
         goto err;
     }
@@ -751,7 +751,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     goto done;
 
 forbidden:
-    json_return(req, errno, NULL, 0);
+    json_return(req, err_no, NULL, 0);
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_send_reply(req, EVHTP_RES_OK);
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() FORBIDDEN!===============");
@@ -765,7 +765,7 @@ err:
     }
     else
     {
-        json_return(req, errno, NULL, 0);
+        json_return(req, err_no, NULL, 0);
     }
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_send_reply(req, EVHTP_RES_OK);

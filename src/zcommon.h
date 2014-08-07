@@ -103,8 +103,6 @@ typedef struct zimg_req_s {
     thr_arg_t *thr_arg;
 } zimg_req_t;
 
-struct timespec retry_sleep;
-
 #define LOG_FATAL 0                        /* System is unusable */
 #define LOG_ALERT 1                        /* Action must be taken immediately */
 #define LOG_CRIT 2                       /* Critical conditions */

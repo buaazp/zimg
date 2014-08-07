@@ -58,10 +58,9 @@ evbase_t *evbase;
 void usage(int argc, char **argv);
 static void settings_init(void); 
 static int load_conf(const char *conf); 
-static void sighandler(int signal); 
+static void sighandler(int signal, siginfo_t *siginfo, void *arg);
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg);
 int main(int argc, char **argv);
-void kill_server(void);
 
 
 void usage(int argc, char **argv)
@@ -312,7 +311,7 @@ static int load_conf(const char *conf)
  *
  * @param signal System signals.
  */
-static void sighandler(int signal) 
+static void sighandler(int signal, siginfo_t *siginfo, void *arg)
 {
     char msg[128];
     msg[0] = '\0';
@@ -321,7 +320,9 @@ static void sighandler(int signal)
     log_handler(msg);
     write(STDOUT_FILENO, "\nbye bye!\n", 10);
 
-    _exit(1);
+    //evbase_t *evbase = (evbase_t *)arg;
+    struct timeval tv = { .tv_usec = 100000, .tv_sec = 0 }; /* 100 ms */
+    event_base_loopexit(evbase, &tv);
 }
 
 extern const struct luaL_reg zimg_lib[];
@@ -408,15 +409,11 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
  */
 int main(int argc, char **argv)
 {
-    int i;
-    retry_sleep.tv_sec = 0;
-    retry_sleep.tv_nsec = RETRY_TIME_WAIT;      //1000 ns = 1 us
-
     /* Set signal handlers */
     sigset_t sigset;
     sigemptyset(&sigset);
     struct sigaction siginfo = {
-        .sa_handler = sighandler,
+        .sa_sigaction = &sighandler,
         .sa_mask = sigset,
         .sa_flags = SA_RESTART,
     };
@@ -431,6 +428,7 @@ int main(int argc, char **argv)
 
     settings_init();
     const char *conf_file = NULL;
+    int i;
     for(i=1; i<argc; i++)
     {
         if(strcmp(argv[i], "-d") == 0){
@@ -573,26 +571,16 @@ int main(int argc, char **argv)
 
     event_base_loop(evbase, 0);
 
-    evhtp_unbind_socket(htp);
-    evhtp_free(htp);
-    event_base_free(evbase);
     MagickWandTerminus();
+    evhtp_unbind_socket(htp);
+    //evhtp_free(htp);
+    event_base_free(evbase);
     free_headers_conf(settings.headers);
     free_access_conf(settings.up_access);
     free_access_conf(settings.down_access);
     free_access_conf(settings.admin_access);
+    free(settings.mp_set);
 
     return 0;
 }
 
-
-/**
- * @brief kill_server Kill threads and exit the event_base_loop.
- */
-void kill_server(void)
-{
-    if (event_base_loopexit(evbase, NULL)) {
-        LOG_PRINT(LOG_DEBUG, "Error shutting down server");
-    }
-    LOG_PRINT(LOG_INFO, "zimg stop");
-}
