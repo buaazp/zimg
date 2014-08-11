@@ -62,3 +62,24 @@ src/LuaJIT/src/lj_recdef.h
 
 #libwebp
 src/webp/examples
+src/webp/Makefile
+src/webp/autom4te.cache/
+src/webp/config.status
+src/webp/libtool
+src/webp/man/Makefile
+src/webp/src/.libs/
+src/webp/src/Makefile
+src/webp/src/dec/.deps/
+src/webp/src/dec/Makefile
+src/webp/src/demux/.deps/
+src/webp/src/demux/Makefile
+src/webp/src/dsp/.deps/
+src/webp/src/dsp/Makefile
+src/webp/src/enc/.deps/
+src/webp/src/enc/Makefile
+src/webp/src/mux/.deps/
+src/webp/src/mux/Makefile
+src/webp/src/utils/.deps/
+src/webp/src/utils/Makefile
+src/webp/src/webp/config.h
+src/webp/src/webp/stamp-h1
