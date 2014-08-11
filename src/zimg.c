@@ -804,25 +804,13 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
     {
         to_save = false;
         fstat(fd, &f_stat);
+        size_t rlen = 0;
         len = f_stat.st_size;
         if(len <= 0)
         {
             LOG_PRINT(LOG_DEBUG, "File[%s] is Empty.", rsp_path);
             goto err;
         }
-        if(evbuffer_add_file(request->buffer_out, fd, 0, len) == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "evbuffer_add_file() Failed!");
-            goto err;
-        }
-        else
-        {
-            result = 1;
-            LOG_PRINT(LOG_DEBUG, "evbuffer_add_file() succ!");
-            goto err;
-        }
-        /*
-        size_t rlen = 0;
         if((buff = (char *)malloc(len)) == NULL)
         {
             LOG_PRINT(LOG_DEBUG, "buff Malloc Failed!");
@@ -840,7 +828,6 @@ int get_img2(zimg_req_t *req, evhtp_request_t *request)
             LOG_PRINT(LOG_DEBUG, "File[%s] Read Not Compeletly.", rsp_path);
             goto err;
         }
-        */
     }
 
     //LOG_PRINT(LOG_INFO, "New Image[%s]", rsp_path);
@@ -885,10 +872,8 @@ done:
     }
 
 err:
-    /* file descriptor will close when evbuffer_chain_free
     if(fd != -1)
         close(fd);
-    */
     if(im != NULL)
         wi_free_image(im);
     else if(buff != NULL)
