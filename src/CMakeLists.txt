@@ -110,7 +110,7 @@ find_package (LibMemcached REQUIRED)
 find_package (JPEG REQUIRED)
 find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
-find_package (WebP REQUIRED)
+#find_package (WebP REQUIRED)
 
 if (NOT OPENSSL_FOUND)
 	message ("Diabling SSL")
@@ -121,6 +121,8 @@ if (NOT OPENSSL_FOUND)
 	set (LIBEVENT_OPENSSL_LIBRARY "")
 endif()
 
+set (LIBWEBP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/webp/build/include)
+set (LIBWEBP_LIBRARIES ${PROJECT_SOURCE_DIR}/webp/build/lib/libwebp.a)
 set (LUAJIT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/LuaJIT/src)
 set (LUAJIT_LIBRARIES ${PROJECT_SOURCE_DIR}/LuaJIT/src/libluajit.a)
 
@@ -132,7 +134,8 @@ include_directories(
     ${JPEG_INCLUDE_DIRS}
     ${GIF_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
-    ${WEBP_INCLUDE_DIRS}
+    ${LIBWEBP_INCLUDE_DIR}
+    #${WEBP_INCLUDE_DIRS}
     ${LUAJIT_INCLUDE_DIR}
 )
 
@@ -146,7 +149,8 @@ set (ZIMG_EXTERNAL_LIBS
     ${JPEG_LIBRARIES}
     ${GIF_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${WEBP_LIBRARIES}
+    ${LIBWEBP_LIBRARIES}
+    #${WEBP_LIBRARIES}
     ${LUAJIT_LIBRARIES}
     "m"
     "dl"
