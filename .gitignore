@@ -1,10 +1,12 @@
 # Object files
 *.o
 *.s
+*.lo
 
 # Libraries
 *.lib
 *.a
+*.la
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -23,6 +25,7 @@ img/.DS_Store
 .DS_Store
 
 *.swp
+*.pc
 
 *.log
 *.dSYM
@@ -56,3 +59,6 @@ src/LuaJIT/src/lj_ffdef.h
 src/LuaJIT/src/lj_folddef.h
 src/LuaJIT/src/lj_libdef.h
 src/LuaJIT/src/lj_recdef.h
+
+#libwebp
+src/webp/examples
