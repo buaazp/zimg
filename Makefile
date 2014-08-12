@@ -24,7 +24,7 @@ clean:
 	rm bin/zimg
 
 cleanall:
-	cd src/webp; make clean
-	cd src/LuaJIT; make clean
 	rm -rf build
 	rm bin/zimg
+	cd src/LuaJIT; make clean
+	cd src/webp; make clean
