@@ -505,8 +505,7 @@ static int htoi(char s[])
 int str_hash(const char *str)
 {
     char c[4];
-    str_lcpy(c, str, 3);
-    c[3] = '\0';
+    str_lcpy(c, str, 4);
     //LOG_PRINT(LOG_DEBUG, "str = %s.", c);
     //int d = htoi(c);
     int d = strtol(c, NULL, 16);
