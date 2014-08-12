@@ -31,6 +31,7 @@ local CF_GIF = 2
 local CF_WEBP = 3
 
 local WAP_QUALITY = 70
+local TEST_QUALITY = 75
 local THUMB_QUALITY = 85
 local QUALITY_90 = 90
 local QUALITY_95 = 95
@@ -74,6 +75,11 @@ local type_list = {
 		type				= CT_SQUARE,
 		size				= 80,
 		quality			    = THUMB_QUALITY,
+	},
+	test = {
+		type				= CT_SQUARE,
+		size				= 100,
+		quality			    = TEST_QUALITY,
 	},
 	cover = {
 		type				= CT_SQUARE,
