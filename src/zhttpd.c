@@ -512,6 +512,7 @@ int binary_parse(evhtp_request_t *req, const char *content_type, const char *add
         goto done;
     }
     err_no = -1;
+    LOG_PRINT(LOG_INFO, "%s succ post pic:%s size:%d", address, md5sum, post_size);
     json_return(req, err_no, md5sum, post_size);
 
 done:

@@ -1,6 +1,6 @@
 ### Benchmark Tnfomation
 
-I used webimg to replace imagemagick as a new image processing library for zimg since v3.0. This benchmark test will show you how fast webimg is.
+We used webimg to replace imagemagick as a new image processing library in zimg since v3.0. This benchmark test will show you how fast webimg is.
 
 ### Test targets
 
@@ -17,12 +17,15 @@ Disk：WD 1TB 7200
 
 ### Test Method
 
-Both v2.2 and v3.0 disabled save new image. Each request will spend mass of CPU to process and compress image. All requests will send by ab from apache http util. Both zimg use 4 threads to handle the requests. Different concurrency level will be tested.
+Both v2.2 and v3.0 disabled save new image option. Each request will spend mass of CPU to process and compress image. All requests will send by ab from apache httpd util. Both zimg use 4 threads to handle the requests. Different concurrency levels will be tested independently.
 
 ```
 ab -c 10 -n 10000 "http://127.0.0.1:4868/xxx?w=100&h=100&g=1"
 ab -c 10 -n 10000 "http://127.0.0.1:4869/xxx?t=test"
 ```
+
+In the zimg-lua mode, type test is designed to do the same thing of request above.
+
 ### Test Result
 
 | Concurrency | 10 | 50 | 100 | 300 | 500 |
