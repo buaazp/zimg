@@ -610,6 +610,11 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     multipart_parser_execute(parser, buff, post_size);
     multipart_parser_free(parser);
 
+    if(mp_arg->succno == 0)
+    {
+        evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1>\n");
+    }
+
     evbuffer_add_printf(req->buffer_out, "</body>\n</html>\n");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     err_no = -1;
