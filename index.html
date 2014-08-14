@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="zimg : A light and high performance image storage and processing system written by C.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>zimg</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/buaazp/zimg">View on GitHub</a>
+
+          <h1 id="project_title">zimg</h1>
+          <h2 id="project_tagline">A light and high performance image storage and processing system written by C.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/buaazp/zimg/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/buaazp/zimg/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="zimg" class="anchor" href="#zimg"><span class="octicon octicon-link"></span></a>zimg</h1>
+
+<p>zimg is a light image storage and processing system. It's written by C and it has high performance in image field. There is a benchmark test report with more infomation: <a href="http://zimg.buaa.us/benchmark.html">Benchmark</a>. zimg is designed for high concurrency image server. It supports many features for uploading and downloading images.  </p>
+
+<p>Homepage: <a href="http://zimg.buaa.us/">zimg.buaa.us</a><br>
+Author: <a href="http://weibo.com/819880808">@招牌疯子</a><br>
+Contact me: <a href="mailto:zp@buaa.us">zp@buaa.us</a>  </p>
+
+<p><a href="https://travis-ci.org/buaazp/zimg"><img src="https://travis-ci.org/buaazp/zimg.svg?branch=master" alt="Build Status"></a>
+<a href="https://drone.io/github.com/buaazp/zimg/latest"><img src="https://drone.io/github.com/buaazp/zimg/status.png" alt="Build Status"></a>  </p>
+
+<h3>
+<a name="versions" class="anchor" href="#versions"><span class="octicon octicon-link"></span></a>Versions:</h3>
+
+<ul>
+<li>06/10/2014 - zimg 2.2.0 Release. Fixed memory leak in imagemagick.</li>
+<li>05/18/2014 - zimg 2.1.0 Release. Added IP access control module.</li>
+<li>04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.</li>
+<li>03/10/2014 - zimg 1.1.0 Release. Supported SSDB storage.</li>
+<li>08/01/2013 - zimg 1.0.0 Release.</li>
+</ul><h3>
+<a name="dependence" class="anchor" href="#dependence"><span class="octicon octicon-link"></span></a>Dependence:</h3>
+
+<blockquote>
+<p>We stand on the shoulders of giants.  </p>
+</blockquote>
+
+<p><a href="https://github.com/libevent/libevent">libevent</a>: Provides a sophisticated framework for buffered network IO.<br><a href="http://www.imagemagick.org/script/magick-wand.php">imagemagick</a>: A software suite to create, edit, compose, or convert bitmap images.<br><a href="https://github.com/trondn/libmemcached">libmemcached</a>: LibMemcached is designed to provide the greatest number of options to use Memcached.<br><a href="http://www.lua.org/">lua</a>: Lua is a lightweight multi-paradigm programming language designed as a scripting language with extensible semantics as a primary goal.  </p>
+
+<h4>
+<a name="optional-for-storage" class="anchor" href="#optional-for-storage"><span class="octicon octicon-link"></span></a>[Optional] For Storage:</h4>
+
+<p><a href="https://github.com/memcached/memcached">memcached</a>: A distributed memory object caching system.<br><a href="https://github.com/douban/beansdb">beansdb</a>: Beansdb is a distributed key-value storage system designed for large scale online system, aiming for high avaliablility and easy management.<br><a href="https://github.com/douban/beanseye">beanseye</a>: Beanseye is proxy and monitor for beansdb, written in Go.<br><a href="https://github.com/ideawu/ssdb">SSDB</a>: SSDB is a high performace key-value(key-string, key-zset, key-hashmap) NoSQL database, an alternative to Redis.<br><a href="https://github.com/twitter/twemproxy">twemproxy</a>: Twemproxy is a fast and lightweight proxy for memcached and redis protocol.  </p>
+
+<h4>
+<a name="thanks-to" class="anchor" href="#thanks-to"><span class="octicon octicon-link"></span></a>Thanks to:</h4>
+
+<blockquote>
+<p>zimg contains libevhtp and libhiredis. You needn't install them now.</p>
+</blockquote>
+
+<p><a href="https://github.com/ellzey/libevhtp">libevhtp</a>: A more flexible replacement for libevent's httpd API.<br><a href="https://github.com/redis/hiredis">hiredis</a>: Hiredis is a minimalistic C client library for the Redis database.  </p>
+
+<h3>
+<a name="supplying" class="anchor" href="#supplying"><span class="octicon octicon-link"></span></a>Supplying:</h3>
+
+<p>Receive and storage users' upload images.<br>
+Transfer image through HTTP protocol.<br>
+Process resized and grayed image by request parameter.<br>
+Use memcached to improve performance.<br>
+Multi-thread support for multi-core processor server.<br>
+Use lua for conf and other functions.<br><strong>Support beansdb/SSDB mode to save images into distributed storage backends.</strong><br>
+IP access control for uploading and downloading images.  </p>
+
+<h3>
+<a name="in-planning" class="anchor" href="#in-planning"><span class="octicon octicon-link"></span></a>In Planning:</h3>
+
+<p>Performance optimization.<br>
+Security measures.  </p>
+
+<h3>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation:</h3>
+
+<p>There is an architecture design document of zimg v1.0. It is written in Chinese.<br><a href="http://zimg.buaa.us/arch_design.html">Architecture Design of zimg</a><br>
+And this document is to introduce zimg v2.0.<br><a href="http://blog.buaa.us/?p=215">Distributed Image Storage Server: zimg</a><br>
+The architecture of zimg's storage:  </p>
+
+<p><img src="http://ww2.sinaimg.cn/large/4c422e03gw1efpmngazc0j21ik1e6dnk.jpg" alt="architecture_of_zimg_v2"></p>
+
+<h3>
+<a name="download" class="anchor" href="#download"><span class="octicon octicon-link"></span></a>Download:</h3>
+
+<p>The source code is licensed under a BSD-like License.<br>
+All versions on <a href="https://github.com/buaazp/zimg">Github</a>.  </p>
+
+<h3>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Build:</h3>
+
+<p>You should build dependences above and make sure the beansdb, beanseye or ssdb backend is working well.   </p>
+
+<pre><code>git clone https://github.com/buaazp/zimg
+cd zimg   
+make  
+cd bin  
+./zimg conf/zimg.lua
+</code></pre>
+
+<p>More infomation of building zimg in guide book:
+<a href="http://zimg.buaa.us/guidebook.html">Guide Book of zimg</a>  </p>
+
+<h3>
+<a name="config" class="anchor" href="#config"><span class="octicon octicon-link"></span></a>Config:</h3>
+
+<pre><code>--zimg server config
+
+--server config
+is_daemon=1
+port=4869
+thread_num=4
+backlog_num=1024
+max_keepalives=1
+retry=3
+system=io.popen("uname -s"):read("*l")
+
+--access config
+--support mask rules like "allow 10.1.121.138/24"
+--note: remove rule can improve performance
+download_rule="allow all"
+upload_rule="allow 127.0.0.1;deny all"
+
+--cache config
+cache=1
+mc_ip='127.0.0.1'
+mc_port=11211
+
+--log config
+log=1
+log_name='./log/zimg.log'
+
+--htdoc config
+root_path='./www/index.html'
+
+--storage config
+--zimg support 3 ways for storage images
+mode=1
+
+--mode[1]: local disk mode
+img_path='./img'
+
+--mode[2]: beansdb mode
+beansdb_ip='127.0.0.1'
+beansdb_port='7900'
+
+--mode[3]: ssdb mode
+ssdb_ip='127.0.0.1'
+ssdb_port='8888'
+
+</code></pre>
+
+<h3>
+<a name="feedback" class="anchor" href="#feedback"><span class="octicon octicon-link"></span></a>Feedback:</h3>
+
+<p>If you have any question, please submit comment here or mention me on <a href="http://weibo.com/819880808">Weibo</a>.<br>
+Technical issues are also welcomed to be submitted on <a href="https://github.com/buaazp/zimg/issues">GitHub</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">zimg maintained by <a href="https://github.com/buaazp">buaazp</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-24069372-3");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
