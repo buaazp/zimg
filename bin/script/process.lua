@@ -37,35 +37,16 @@ local QUALITY_90 = 90
 local QUALITY_95 = 95
 
 local type_list = {
-    woriginal = {
+	test = {
+		type				= CT_SQUARE,
+		size				= 100,
+		quality			    = TEST_QUALITY,
+		gray			    = 1,
+	},
+    original = {
 		type				= CT_NONE,
 		quality			    = WAP_QUALITY,
     },
-	mw2048 = {
-		type				= CT_NONE,
-		quality			    = WAP_QUALITY,
-		interlace			= 1,
-	},
-	thumb30 = {
-		type				= CT_SQUARE,
-		size				= 30,
-		quality			    = THUMB_QUALITY,
-	},
-	thumb50 = {
-		type				= CT_SQUARE,
-		size				= 50,
-		quality			    = THUMB_QUALITY,
-	},
-	thumb150 = {
-		type				= CT_SQUARE,
-		size				= 150,
-		quality			    = THUMB_QUALITY,
-	},
-	thumb180 = {
-		type				= CT_SQUARE,
-		size				= 180,
-		quality		    	= THUMB_QUALITY,
-	},
 	thumb300 = {
 		type				= CT_SQUARE,
 		size				= 300,
@@ -73,32 +54,12 @@ local type_list = {
 	},
 	square = {
 		type				= CT_SQUARE,
-		size				= 80,
+		size				= 500,
 		quality			    = THUMB_QUALITY,
-	},
-	test = {
-		type				= CT_SQUARE,
-		size				= 100,
-		quality			    = TEST_QUALITY,
-	},
-	cover = {
-		type				= CT_SQUARE,
-		size				= 200,
-		quality			    = THUMB_QUALITY,
-	},
-	sq612 = {
-		type				= CT_SQUARE,
-		size				= 612,
-		quality			    = QUALITY_90,
 	},
 	thumbnail = {
 		type				= CT_MAX_SIZE,
 		size				= 120,
-		quality			    = THUMB_QUALITY,
-	},
-	ms160 = {
-		type				= CT_MAX_SIZE,
-		size				= 160,
 		quality			    = THUMB_QUALITY,
 	},
 	small = {
@@ -107,149 +68,20 @@ local type_list = {
 		quality			    = THUMB_QUALITY,
 		ratio				= 3.0/10,
 	},
-	bmiddle = {
+	middle = {
 		type				= CT_MAX_WIDTH,
 		size				= 440,
 		quality			    = QUALITY_90,
-	},
-	mw1024 = {
-		type				= CT_MAX_WIDTH,
-		size				= 1024,
-		quality			    = QUALITY_95,
-		interlace			= 1,
-	},
-	mw720 = {
-		type				= CT_MAX_WIDTH,
-		size				= 720,
-		quality			    = THUMB_QUALITY,
-		interlace			= 1,
-	},
-	mw600 = {
-		type				= CT_MAX_WIDTH,
-		size				= 600,
-		quality			    = QUALITY_95,
-	},
-	mw690 = {
-		type				= CT_MAX_WIDTH,
-		size				= 690,
-		quality			    = QUALITY_95,
-		interlace			= 1,
-	},
-	mw220 = {
-		type				= CT_MAX_WIDTH,
-		size				= 220,
-		quality			    = THUMB_QUALITY,
-	},
-	mw240 = {
-		type				= CT_MAX_WIDTH,
-		size				= 240,
-		quality			    = THUMB_QUALITY,
-	},
-	mw205 = {
-		type				= CT_MAX_WIDTH,
-		size				= 205,
-		quality			    = THUMB_QUALITY,
 	},
 	large = {
 		type				= CT_MAX_WIDTH,
 		size				= 2048,
 		quality			    = QUALITY_95,
 	},
-	wap720 = {
+	webp500 = {
 		type				= CT_MAX_WIDTH,
-		size				= 720,
-		quality			    = WAP_QUALITY,
-	},
-	ms080 = {
-		type				= CT_MAX_SIZE,
-		size				= 80,
-		quality			    = THUMB_QUALITY,
-	},
-	wap800 = {
-		type				= CT_MAX_SIZE,
-		size				= 800,
-		quality			    = WAP_QUALITY,
-	},
-	wap690 = {
-		type				= CT_MAX_SIZE,
-		size				= 690,
-		quality			    = WAP_QUALITY,
-	},
-	wap35 = {
-		type				= CT_MAX_SIZE,
-		size				= 35,
-		quality			    = WAP_QUALITY,
-	},
-	wap50 = {
-		type				= CT_MAX_SIZE,
-		size				= 50,
-		quality			    = WAP_QUALITY,
-	},
-	wap120 = {
-		type				= CT_MAX_SIZE,
-		size				= 120,
-		quality			    = WAP_QUALITY,
-	},
-	wap360 = {
-		type				= CT_MAX_SIZE,
-		size				= 360,
-		ratio				= 3.0/10,
-		quality			    = WAP_QUALITY,
-	},
-	wap180 = {
-		type				= CT_MAX_SIZE,
-		size				= 180,
-		ratio				= 3.0/10,
-		quality			    = WAP_QUALITY,
-	},
-	wap128 = {
-		type				= CT_PROPORTION,
-		cols				= 128,
-		rows				= 160,
-		quality			    = WAP_QUALITY,
-	},
-	wap176 = {
-		type				= CT_PROPORTION,
-		cols				= 176,
-		rows				= 220,
-		quality			    = WAP_QUALITY,
-	},
-	wap240 = {
-		type				= CT_PROPORTION,
-		cols				= 240,
-		rows				= 320,
-		quality			    = WAP_QUALITY,
-	},
-	wap320 = {
-		type				= CT_PROPORTION,
-		cols				= 320,
-		rows				= 480,
-		quality			    = WAP_QUALITY,
-	},
-	webp720 = {
-		type				= CT_MAX_WIDTH,
-		size				= 720,
-		quality			    = WAP_QUALITY,
-		format				= CF_WEBP,
-	},
-	webp440 = {
-		type				= CT_MAX_WIDTH,
-		size				= 440,
+		size				= 500,
 		quality			    = QUALITY_90,
-		format				= CF_WEBP,
-	},
-	webp360 = {
-		type				= CT_MAX_SIZE,
-		size				= 360,
-		ratio				= 3.0/10,
-		quality			    = WAP_QUALITY,
-		format				= CF_WEBP,
-	},
-	webp180 = {
-		type				= CT_MAX_SIZE,
-		size				= 180,
-		ratio				= 3.0/10,
-		quality			    = WAP_QUALITY,
 		format				= CF_WEBP,
 	},
 	crop200 = {
@@ -536,6 +368,11 @@ function f()
                     end
                 else
                     log.print(LOG_DEBUG, "GIF, donot change")
+                end
+
+                if arg.gray and arg.gray == 1 then
+                    ret = zimg.gray()
+                    log.print(LOG_DEBUG, "zimg.gray()")
                 end
 
                 code = ret
