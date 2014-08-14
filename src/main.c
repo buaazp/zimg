@@ -28,7 +28,6 @@
 
 #include <stdio.h>
 #include <fcntl.h>
-#include <wand/MagickWand.h>
 #include <inttypes.h>
 #include <unistd.h>
 #include <signal.h>
@@ -83,7 +82,7 @@ static void settings_init(void)
     settings.backlog = 1024;
     settings.max_keepalives = 1;
     settings.retry = 3;
-    str_lcpy(settings.version, STR(ZIMG_VERSION), sizeof(settings.version));
+    str_lcpy(settings.version, STR(PROJECT_VERSION), sizeof(settings.version));
     snprintf(settings.server_name, 128, "zimg/%s", settings.version);
     settings.headers = NULL;
     settings.etag = 0;
@@ -549,9 +548,6 @@ int main(int argc, char **argv)
         }
     }
 
-    //init magickwand
-    MagickWandGenesis();
-
     //begin to start httpd...
     LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");
     LOG_PRINT(LOG_INFO, "zimg started");
@@ -571,7 +567,6 @@ int main(int argc, char **argv)
 
     event_base_loop(evbase, 0);
 
-    MagickWandTerminus();
     evhtp_unbind_socket(htp);
     //evhtp_free(htp);
     event_base_free(evbase);

@@ -35,8 +35,8 @@
 #include "zhttpd.h"
 #include "multipart-parser-c/multipart_parser.h"
 
-#ifndef ZIMG_VERSION
-#define ZIMG_VERSION "3.0.0"
+#ifndef PROJECT_VERSION
+#define PROJECT_VERSION "3.0.0"
 #endif
 
 #define MAX_LINE 1024 
@@ -122,15 +122,6 @@ typedef struct zimg_req_s {
         ##__VA_ARGS__); \
         log_close(log_id); \
     }while(0) 
-
-  #define ThrowWandException(wand) \
-  { \
-      char *description; \
-      ExceptionType severity; \
-      description=MagickGetException(wand,&severity); \
-      LOG_PRINT(LOG_ERROR, "%s %s %lu %s",GetMagickModule(),description); \
-      description=(char *) MagickRelinquishMemory(description); \
-  }
 #else
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
@@ -140,7 +131,6 @@ typedef struct zimg_req_s {
             log_close(log_id); \
         } \
     }while(0) 
-  #define ThrowWandException(wand) 0
 #endif
  
 #endif

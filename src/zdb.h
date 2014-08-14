@@ -26,7 +26,6 @@
 #include "zcommon.h"
 
 int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request);
-int get_img_mode_db2(zimg_req_t *req, evhtp_request_t *request);
 
 int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len);
 int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_t *len);
