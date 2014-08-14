@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -10,13 +10,12 @@
  * 
  */
 
-
 /**
  * @file zutil.c
- * @brief A suit of related functions.
+ * @brief the util functions used by zimg.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #include <sys/syscall.h>
@@ -31,14 +30,13 @@
 #include "zutil.h"
 #include "zlog.h"
 
-//functions list
-char *strnchr(const char *p, char c, size_t n);
+char * strnchr(const char *p, char c, size_t n);
 char * strnstr(const char *s, const char *find, size_t slen);
 size_t str_lcat(char *dst, const char *src, size_t size);
 size_t str_lcpy(char *dst, const char *src, size_t size);
 int bind_check(int port);
-pid_t gettid();
-int get_cpu_cores();
+pid_t gettid(void);
+int get_cpu_cores(void);
 int get_type(const char *filename, char *type);
 int is_file(const char *filename);
 int is_img(const char *filename);
@@ -53,19 +51,37 @@ int is_md5(char *s);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);
 
+/**
+ * @brief strnchr find the pointer of a char in a string
+ *
+ * @param p the string
+ * @param c the char
+ * @param n find length
+ *
+ * @return the char position or 0
+ */
 char * strnchr(const char *p, char c, size_t n)
 {
     if (!p)
-        return (0);
+        return 0;
 
     while (n-- > 0) {
         if (*p == c)
             return ((char *)p);
         p++;
     }
-    return (0);
+    return 0;
 }
 
+/**
+ * @brief strnstr find the sub string in a string
+ *
+ * @param s the string
+ * @param find the sub string
+ * @param slen find length
+ *
+ * @return the position of sub string or NULL
+ */
 char * strnstr(const char *s, const char *find, size_t slen)
 {
     char c, sc;
@@ -151,6 +167,13 @@ str_lcpy(char           *dst,       /* O - Destination string */
     return (srclen);
 }
 
+/**
+ * @brief bind_check check if the port is binded
+ *
+ * @param port the port
+ *
+ * @return 1 for OK or -1 for binded
+ */
 int bind_check(int port)
 {
     int mysocket, ret = -1;
@@ -175,12 +198,22 @@ int bind_check(int port)
     return ret;
 }
 
-pid_t gettid()
+/**
+ * @brief gettid get pid
+ *
+ * @return pid
+ */
+pid_t gettid(void)
 {
     return syscall(SYS_gettid);
 }
 
-int get_cpu_cores()
+/**
+ * @brief get_cpu_cores get the cpu cores of a server
+ *
+ * @return the cpu core number
+ */
+int get_cpu_cores(void)
 {
     return (int)sysconf(_SC_NPROCESSORS_CONF);
 }
@@ -296,6 +329,13 @@ int is_dir(const char *path)
 }
 
 //判断是否是特殊目录
+/**
+ * @brief is_special_dir check if the path is a special path
+ *
+ * @param path the path want to check
+ *
+ * @return 1 for yes and -1 for not
+ */
 int is_special_dir(const char *path)
 {
     if(strcmp(path, ".") == 0 || strcmp(path, "..") == 0)
@@ -304,7 +344,13 @@ int is_special_dir(const char *path)
         return -1;
 }
 
-//生成完整的文件路径
+/**
+ * @brief get_file_path get the file's path
+ *
+ * @param path the file's parent path
+ * @param file_name the file name
+ * @param file_path the full path of the file
+ */
 void get_file_path(const char *path, const char *file_name, char *file_path)
 {
     strcpy(file_path, path);
@@ -325,7 +371,6 @@ int mk_dir(const char *path)
 {
     if(access(path, 0) == -1)
     {
-        LOG_PRINT(LOG_DEBUG, "Begin to mk_dir()...");
         int status = mkdir(path, 0755);
         if(status == -1)
         {
@@ -408,6 +453,13 @@ int mk_dirf(const char *filename)
     return ret;
 }
 
+/**
+ * @brief delete_file delete a file
+ *
+ * @param path the path of the file
+ *
+ * @return 1 for OK or -1 for fail
+ */
 int delete_file(const char *path)
 {
     DIR *dir;

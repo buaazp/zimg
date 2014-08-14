@@ -1,22 +1,21 @@
-/*
+/*   
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us
- *
+ *       http://zimg.buaa.us 
+ *   
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *
+ *   
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- *
+ * 
  */
-
 
 /**
  * @file zdb.c
  * @brief Get and save image for ssdb/redis and beansdb/memcachedb backend functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 2.0.0
- * @date 2014-04-21
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #include <string.h>
@@ -31,29 +30,29 @@
 #include "cjson/cJSON.h"
 
 int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request);
-
 int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len);
 int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_t *len);
 int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *len);
-
 int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, const size_t len);
 int save_img_beansdb(memcached_st *memc, const char *key, const char *value, const size_t len);
 int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, const size_t len);
-
 int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t);
 int info_img_mode_db(char *md5, evhtp_request_t *request, thr_arg_t *thr_arg);
-
 int exist_db(thr_arg_t *thr_arg, const char *cache_key);
 int exist_beansdb(memcached_st *memc, const char *key);
 int exist_ssdb(redisContext* c, const char *cache_key);
-
 int del_db(thr_arg_t *thr_arg, const char *cache_key);
 int del_beansdb(memcached_st *memc, const char *key);
 int del_ssdb(redisContext* c, const char *cache_key);
 
-int find_beansdb(memcached_st *memc, const char *key, char *value);
-int set_beansdb(memcached_st *memc, const char *key, const char *value);
-
+/**
+ * @brief get_img_mode_db get image from nosql db mode
+ *
+ * @param req the zimg request
+ * @param request the evhtp request
+ *
+ * @return 1 for OK, 2 for 304 not modify and -1 for failed
+ */
 int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
@@ -220,7 +219,6 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
             thr_arg->ssdb_conn = c;
             LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
             ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
-            //evthr_set_aux(thr_arg->thread, thr_arg);
         }
     }
     return ret;
@@ -419,6 +417,16 @@ int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, cons
     return 1;
 }
 
+/**
+ * @brief admin_img_mode_db deal with admin requests for db mode
+ *
+ * @param req the evhtp request
+ * @param thr_arg the thread arg
+ * @param md5 the md5 of image
+ * @param t admin type
+ *
+ * @return 1 for OK, 2 for 404 not found and -1 for fail
+ */
 int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t)
 {
     int result = -1;
@@ -450,6 +458,15 @@ int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t
     return result;
 }
 
+/**
+ * @brief info_img_mode_db deal with the requests of getting info of image
+ *
+ * @param md5 the image's md5
+ * @param request the evhtp request
+ * @param thr_arg the thread arg
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int info_img_mode_db(char *md5, evhtp_request_t *request, thr_arg_t *thr_arg)
 {
     int result = -1;
@@ -509,6 +526,14 @@ err:
     return result;
 }
 
+/**
+ * @brief exist_db check a file is existed in db or not
+ *
+ * @param thr_arg the arg of thread
+ * @param cache_key the key of the file
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int exist_db(thr_arg_t *thr_arg, const char *cache_key)
 {
     int result = -1;
@@ -543,29 +568,6 @@ int exist_db(thr_arg_t *thr_arg, const char *cache_key)
  */
 int exist_beansdb(memcached_st *memc, const char *key)
 {
-    /*
-    int rst = -1;
-    if(memc == NULL)
-        return rst;
-
-    memcached_return rc;
-
-    //memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
-    rc = memcached_exist(memc, key, strlen(key));
-
-    if (rc == MEMCACHED_SUCCESS) 
-    {
-        LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Exist.", key);
-        rst = 1;
-    }
-    else
-    {
-        const char *str_rc = memcached_strerror(memc, rc);
-        LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
-    }
-
-    return rst;
-    */
     int rst = -1;
     if(memc == NULL)
         return rst;
@@ -591,6 +593,14 @@ int exist_beansdb(memcached_st *memc, const char *key)
     return rst;
 }
 
+/**
+ * @brief exist_ssdb check if a key is existed in ssdb
+ *
+ * @param c the connection of ssdb
+ * @param cache_key the key of file
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int exist_ssdb(redisContext* c, const char *cache_key)
 {
     int rst = -1;
@@ -608,6 +618,14 @@ int exist_ssdb(redisContext* c, const char *cache_key)
     return rst;
 }
 
+/**
+ * @brief del_db delete a file from db mode
+ *
+ * @param thr_arg the arg of thread
+ * @param cache_key the key of the file
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int del_db(thr_arg_t *thr_arg, const char *cache_key)
 {
     int result = -1;
@@ -666,6 +684,14 @@ int del_beansdb(memcached_st *memc, const char *key)
     return rst;
 }
 
+/**
+ * @brief del_ssdb delete a file from ssdb
+ *
+ * @param c the connection to ssdb
+ * @param cache_key the key of the file
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int del_ssdb(redisContext* c, const char *cache_key)
 {
     int rst = -1;
@@ -683,83 +709,3 @@ int del_ssdb(redisContext* c, const char *cache_key)
     return rst;
 }
 
-
-
-/**
- * @brief find_beansdb Connect to a beansdb server and find a key's value.
- *
- * @param memc The connection to beansdb.
- * @param key The string of the key you want to find.
- * @param value It contains the string of the key's value.
- *
- * @return 1 for success and -1 for fail.
- */
-int find_beansdb(memcached_st *memc, const char *key, char *value)
-{
-    //LOG_PRINT(LOG_INFO, "Beansdb Find Key[%s] Value Size: %d", key, sizeof(value));
-    int rst = -1;
-    if(memc == NULL)
-        return rst;
-
-    size_t valueLen;
-    uint32_t  flags;
-    memcached_return rc;
-
-    char *pvalue = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
-
-    if (rc == MEMCACHED_SUCCESS) 
-    {
-        LOG_PRINT(LOG_DEBUG, "Beansdb Find Key[%s] Value: %s", key, pvalue);
-        str_lcpy(value, pvalue, sizeof(value));
-        free(pvalue);
-        rst = 1;
-    }
-    else if (rc == MEMCACHED_NOTFOUND)
-    {
-        LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Not Find!", key);
-        rst = -1;
-    }
-    else
-    {
-        const char *str_rc = memcached_strerror(memc, rc);
-        LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
-    }
-
-    return rst;
-}
-
-
-/**
- * @brief set_beansdb Set a key with the value input.
- *
- * @param memc The connection to beansdb.
- * @param key The key you want to set a new value.
- * @param value The value of the key.
- *
- * @return 1 for success and -1 for fail.
- */
-int set_beansdb(memcached_st *memc, const char *key, const char *value)
-{
-    int rst = -1;
-    if(memc == NULL)
-        return rst;
-
-    memcached_return rc;
-
-    rc = memcached_set(memc, key, strlen(key), value, strlen(value), 0, 0);
-
-    if (rc == MEMCACHED_SUCCESS) 
-    {
-        LOG_PRINT(LOG_DEBUG, "Beansdb Set Successfully. Key[%s] Value: %s", key, value);
-        rst = 1;
-    }
-    else
-    {
-        LOG_PRINT(LOG_DEBUG, "Beansdb Set(Key: %s Value: %s) Failed!", key, value);
-        const char *str_rc = memcached_strerror(memc, rc);
-        LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
-        rst = -1;
-    }
-
-    return rst;
-}

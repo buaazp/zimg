@@ -764,18 +764,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ./src \
-                         ./README.md \
-                         ./doc/benchmark_of_zimg_v2_storage_backends.md \
-                         ./doc/Distributed_Image_Storage_Server_zimg.md \
-                         ./doc/guidebook.md \
-                         ./doc/高性能图片服务器浅谈.md \
-                         ./doc/arch_design.md \
-                         ./doc/index.md \
-                         ./doc/高性能图片服务器浅谈2.md \
-                         ./doc/arch_design_old.md \
-                         ./doc/benchmark.md \
-                         ./doc/zimg_backend_test.md
+INPUT                  = ./src
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -810,7 +799,7 @@ FILE_PATTERNS          = *.c \
 # be searched for input files as well.
 # The default value is: NO.
 
-RECURSIVE              = NO
+RECURSIVE              = YES
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a

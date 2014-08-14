@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -12,12 +12,11 @@
 
 /**
  * @file zcache.c
- * @brief memcached functions.
+ * @brief memcached functions
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
-
 
 #include "zcache.h"
 #include "zutil.h"
@@ -30,7 +29,6 @@ int set_cache(memcached_st *memc, const char *key, const char *value);
 int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len);
 int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len);
 int del_cache(thr_arg_t *thr_arg, const char *key);
-
 
 /**
  * @brief retry_cache Reconnect to the cache server.
@@ -192,7 +190,6 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
  *
  * @return 1 for success and -1 for fail.
  */
-//int find_cache_bin(const char *key, char **value_ptr, size_t *len)
 int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len)
 {
     int rst = -1;

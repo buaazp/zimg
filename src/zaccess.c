@@ -12,12 +12,11 @@
 
 /**
  * @file zaccess.c
- * @brief IP access control module in zimg
+ * @brief IP access control module in zimg.
  * @author 招牌疯子 zp@buaa.us
- * @version 2.1.0
- * @date 2014-05-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
-
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -12,10 +12,10 @@
 
 /**
  * @file zcache.h
- * @brief header of memcached functions.
+ * @brief memcached functions header.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-23
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #ifndef ZCACHE_H

@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -12,16 +12,14 @@
 
 /**
  * @file zcommon.h
- * @brief Common header.
+ * @brief common data structs header.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
-
 
 #ifndef ZCOMMON_H
 #define ZCOMMON_H
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,11 +37,11 @@
 #define PROJECT_VERSION "3.0.0"
 #endif
 
-#define MAX_LINE 1024 
-#define CACHE_MAX_SIZE 1048576 //1024*1024
-#define RETRY_TIME_WAIT 1000
-#define CACHE_KEY_SIZE 128
-#define PATH_MAX_SIZE 512
+#define MAX_LINE            1024 
+#define CACHE_MAX_SIZE      1048576 //1024*1024
+#define RETRY_TIME_WAIT     1000
+#define CACHE_KEY_SIZE      128
+#define PATH_MAX_SIZE       512
 
 struct setting{
     int is_daemon;
@@ -103,15 +101,14 @@ typedef struct zimg_req_s {
     thr_arg_t *thr_arg;
 } zimg_req_t;
 
-#define LOG_FATAL 0                        /* System is unusable */
-#define LOG_ALERT 1                        /* Action must be taken immediately */
-#define LOG_CRIT 2                       /* Critical conditions */
-#define LOG_ERROR 3                        /* Error conditions */
-#define LOG_WARNING 4                      /* Warning conditions */
-#define LOG_NOTICE 5                      /* Normal, but significant */
-#define LOG_INFO 6                      /* Information */
-#define LOG_DEBUG 7                       /* DEBUG message */
-
+#define LOG_FATAL       0           /* System is unusable */
+#define LOG_ALERT       1           /* Action must be taken immediately */
+#define LOG_CRIT        2           /* Critical conditions */
+#define LOG_ERROR       3           /* Error conditions */
+#define LOG_WARNING     4           /* Warning conditions */
+#define LOG_NOTICE      5           /* Normal, but significant */
+#define LOG_INFO        6           /* Information */
+#define LOG_DEBUG       7           /* DEBUG message */
 
 #ifdef DEBUG 
   #define LOG_PRINT(level, fmt, ...)            \

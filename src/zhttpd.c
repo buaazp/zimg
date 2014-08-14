@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -10,13 +10,12 @@
  * 
  */
 
-
 /**
  * @file zhttpd.c
  * @brief http protocol parse functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #include <stdio.h>
@@ -65,27 +64,6 @@ static const char * post_error_list[] = {
     "File too large."
 };
 
-/*
-static const struct table_entry {
-	const char *extension;
-	const char *content_type;
-} content_type_table[] = {
-	{ "txt", "text/plain" },
-	{ "c", "text/plain" },
-	{ "h", "text/plain" },
-	{ "html", "text/html" },
-	{ "htm", "text/htm" },
-	{ "css", "text/css" },
-	{ "gif", "image/gif" },
-	{ "jpg", "image/jpeg" },
-	{ "jpeg", "image/jpeg" },
-	{ "png", "image/png" },
-	{ "pdf", "application/pdf" },
-	{ "ps", "application/postsript" },
-	{ NULL, NULL },
-};
-*/
-
 static const char * method_strmap[] = {
     "GET",
     "HEAD",
@@ -106,6 +84,15 @@ static const char * method_strmap[] = {
     "UNKNOWN",
 };
 
+/**
+ * @brief zimg_etag_set set zimg response etag
+ *
+ * @param request the request of evhtp
+ * @param buff response body buffer
+ * @param len body buffer len
+ *
+ * @return 1 for set true and 2 for 304
+ */
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
 {
     int result = 1;
@@ -150,6 +137,13 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
     return result;
 }
 
+/**
+ * @brief conf_get_headers get headers from conf
+ *
+ * @param hdr_str zimg conf string
+ *
+ * @return zimg_headers_conf
+ */
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
 {
     if(hdr_str == NULL)
@@ -206,6 +200,14 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
     return hdrconf;
 }
 
+/**
+ * @brief zimg_headers_add add header to evhtp request from conf
+ *
+ * @param req the evhtp request
+ * @param hcf zimg_header_conf
+ *
+ * @return 1 for OK and -1 for fail
+ */
 static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf)
 {
     if(hcf == NULL) return -1;
@@ -220,6 +222,11 @@ static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf)
     return 1;
 }
 
+/**
+ * @brief free_headers_conf release zimg_headers_conf
+ *
+ * @param hcf the hcf
+ */
 void free_headers_conf(zimg_headers_conf_t *hcf)
 {
     if(hcf == NULL)
@@ -235,6 +242,13 @@ void free_headers_conf(zimg_headers_conf_t *hcf)
     free(hcf);
 }
 
+/**
+ * @brief get_request_thr get the request's thread
+ *
+ * @param request the evhtp request
+ *
+ * @return the thread dealing with the request
+ */
 static evthr_t * get_request_thr(evhtp_request_t *request)
 {
     evhtp_connection_t * htpconn;
@@ -453,8 +467,8 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
         evbuffer_add_printf(mp_arg->req->buffer_out, 
             "<h1>MD5: %s</h1>\n"
             "Image upload successfully! You can get this image via this address:<br/><br/>\n"
-            "http://yourhostname:%d/%s?w=width&h=height&p=proportion&g=isgray&x=crop_postion_x&y=crop_postion_y&q=quality\n",
-            md5sum, settings.port, md5sum
+            "<a href=\"/%s\">http://yourhostname:%d/%s</a>?w=width&h=height&p=proportion&g=isgray&x=crop_postion_x&y=crop_postion_y&q=quality\n",
+            md5sum, md5sum, settings.port, md5sum
             );
     }
     return 0;
@@ -1080,6 +1094,12 @@ done:
 }
 
 // remove a image http://127.0.0.1:4869/admin?md5=5f189d8ec57f5a5a0d3dcba47fa797e2&t=1
+/**
+ * @brief admin_request_cb the callback function of admin requests
+ *
+ * @param req the evhtp request
+ * @param arg the arg of request
+ */
 void admin_request_cb(evhtp_request_t *req, void *arg)
 {
     char md5[33];

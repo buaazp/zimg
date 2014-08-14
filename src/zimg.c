@@ -1,22 +1,21 @@
-/*
+/*   
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us
- *
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *
+ *   
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- *
+ * 
  */
-
 
 /**
  * @file zimg.c
  * @brief Convert, get and save image functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #include <stdio.h>
@@ -208,6 +207,14 @@ done:
     return result;
 }
 
+/**
+ * @brief get_img get image from disk mode through the request
+ *
+ * @param req the zimg request
+ * @param request the evhtp request
+ *
+ * @return 1 for OK, 2 for 304 needn't response buffer and -1 for failed
+ */
 int get_img(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
@@ -476,6 +483,15 @@ err:
     return result;
 }
 
+/**
+ * @brief admin_img the function to deal with admin reqeust for disk mode
+ *
+ * @param req the evhtp request
+ * @param md5 the file md5
+ * @param t admin type
+ *
+ * @return 1 for OK, 2 for 404 not found and -1 for fail
+ */
 int admin_img(evhtp_request_t *req, const char *md5, int t)
 {
     int result = -1;
@@ -510,6 +526,14 @@ int admin_img(evhtp_request_t *req, const char *md5, int t)
     return result;
 }
 
+/**
+ * @brief info_img the function of getting info of a image
+ *
+ * @param md5 the md5 of image
+ * @param request the evhtp request
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int info_img(char *md5, evhtp_request_t *request)
 {
     int result = -1;

@@ -1,7 +1,26 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+/**
+ * @file zlscale.c
+ * @brief processing image with lua script.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 3.0.0
+ * @date 2014-08-14
+ */
+
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-
 #include "zcommon.h"
 #include "zlog.h"
 #include "zlscale.h"
@@ -145,6 +164,14 @@ const struct luaL_Reg loglib[] = {
     {NULL,          NULL            }
 };
 
+/**
+ * @brief lua_convert the function of convert image by lua
+ *
+ * @param im the im object which will be convert
+ * @param req the zimg request
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int lua_convert(struct image *im, zimg_req_t *req)
 {
     int ret = -1;

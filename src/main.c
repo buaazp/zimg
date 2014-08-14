@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -12,10 +12,10 @@
 
 /**
  * @file main.c
- * @brief Entrance of zimg.
+ * @brief the entrance of zimg
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #if __APPLE__
@@ -52,7 +52,6 @@ extern int daemon(int, int);
 #define _STR(s) #s   
 #define STR(s) _STR(s)
 
-evbase_t *evbase;
 
 void usage(int argc, char **argv);
 static void settings_init(void); 
@@ -61,7 +60,17 @@ static void sighandler(int signal, siginfo_t *siginfo, void *arg);
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg);
 int main(int argc, char **argv);
 
+evbase_t *evbase;
 
+extern const struct luaL_reg zimg_lib[];
+extern const struct luaL_Reg loglib[];
+
+/**
+ * @brief usage usage display of zimg
+ *
+ * @param argc the arg count
+ * @param argv the args
+ */
 void usage(int argc, char **argv)
 {
     printf("Usage:\n");
@@ -116,6 +125,13 @@ static void settings_init(void)
     settings.mp_set = callbacks;
 }
 
+/**
+ * @brief load_conf load the conf of zimg
+ *
+ * @param conf conf name
+ *
+ * @return 1 for OK and -1 for fail
+ */
 static int load_conf(const char *conf)
 {
     lua_State *L = luaL_newstate();
@@ -248,7 +264,7 @@ static int load_conf(const char *conf)
     if(lua_isnumber(L, -1))
         format = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    //LOG_PRINT(LOG_INFO, "format = %d", format);
+
     if (format == 2) {
         str_lcpy(settings.dst_format, "WEBP", sizeof(settings.dst_format));
     } else if (format == 0) {
@@ -304,11 +320,12 @@ static int load_conf(const char *conf)
 
     return 1;
 }
-
 /**
- * @brief sighandler Signal process function.
+ * @brief sighandler the signal handler of zimg
  *
- * @param signal System signals.
+ * @param signal the signal zimg get
+ * @param siginfo signal info
+ * @param arg the arg for handler
  */
 static void sighandler(int signal, siginfo_t *siginfo, void *arg)
 {
@@ -324,9 +341,13 @@ static void sighandler(int signal, siginfo_t *siginfo, void *arg)
     event_base_loopexit(evbase, &tv);
 }
 
-extern const struct luaL_reg zimg_lib[];
-extern const struct luaL_Reg loglib[];
-
+/**
+ * @brief init_thread the init function of threads
+ *
+ * @param htp evhtp object
+ * @param thread the current thread
+ * @param arg the arg for init
+ */
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 {
     thr_arg_t *thr_args;

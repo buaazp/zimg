@@ -1,3 +1,23 @@
+/*   
+ *   zimg - high performance image storage and processing system.
+ *       http://zimg.buaa.us 
+ *   
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   All rights reserved.
+ *   
+ *   Use and distribution licensed under the BSD license.
+ *   See the LICENSE file for full text.
+ * 
+ */
+
+/**
+ * @file zscale.c
+ * @brief scale image functions by webimg.
+ * @author 招牌疯子 zp@buaa.us
+ * @version 3.0.0
+ * @date 2014-08-14
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,27 +33,18 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
 static int crop(struct image *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows);
 int convert(struct image *im, zimg_req_t *req);
 
-
-/*
- * 
- * sample URLs:
- * http://127.0.0.1:4869/md5?w=300
- * http://127.0.0.1:4869/md5?w=200&h=300&p=0
- * http://127.0.0.1:4869/md5?w=200&h=300&p=2
- * http://127.0.0.1:4869/md5?x=0&y=0&w=100&h=100
- * http://127.0.0.1:4869/md5?t=square
- * http://127.0.0.1:4869/md5?t=maxwidth
- * http://127.0.0.1:4869/md5?t=maxsize
+/**
+ * @brief square square an image
  *
+ * @param im the image
+ * @param size square size
  *
- *
+ * @return 0 for OK and -1 for fail
  */
-
 static int square(struct image *im, uint32_t size)
 {
 	int ret;
 	uint32_t x, y, cols;
-
 
 	if (im->cols > im->rows) {
 		cols = im->rows;
@@ -56,6 +67,16 @@ static int square(struct image *im, uint32_t size)
 	return 0;
 }
 
+/**
+ * @brief proportion proportion function
+ *
+ * @param im the image
+ * @param p_type p type
+ * @param cols width of target image
+ * @param rows height of target image
+ *
+ * @return 0 for OK and -1 for fail
+ */
 static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows)
 {
 	int ret = -1;
@@ -123,6 +144,17 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
 	return ret;
 }
 
+/**
+ * @brief crop crop an image
+ *
+ * @param im the image
+ * @param x position x
+ * @param y position y
+ * @param cols target width
+ * @param rows target height
+ *
+ * @return 0 for OK and -1 for fail
+ */
 static int crop(struct image *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows)
 {
     int ret;
@@ -134,6 +166,14 @@ static int crop(struct image *im,  uint32_t x, uint32_t y, uint32_t cols, uint32
     return ret;
 }
 
+/**
+ * @brief convert convert image function
+ *
+ * @param im the image
+ * @param req the zimg request
+ *
+ * @return 1 for OK and -1 for fail
+ */
 int convert(struct image *im, zimg_req_t *req)
 {
     int result = 0, ret;
