@@ -328,7 +328,6 @@ int is_dir(const char *path)
         return -1;
 }
 
-//判断是否是特殊目录
 /**
  * @brief is_special_dir check if the path is a special path
  *

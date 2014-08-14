@@ -12,16 +12,14 @@
 
 /**
  * @file zdb.h
- * @brief Get and save image for ssdb/redis and beansdb/memcachedb backend functions' header.
+ * @brief Get and save image for ssdb/redis and beansdb/memcachedb backend functions header.
  * @author 招牌疯子 zp@buaa.us
- * @version 2.0.0
- * @date 2014-04-16
+ * @version 3.0.0
+ * @date 2014-08-14
  */
-
 
 #ifndef ZDB_H
 #define ZDB_H
-
 
 #include "zcommon.h"
 
