@@ -91,8 +91,7 @@ static void settings_init(void)
     settings.backlog = 1024;
     settings.max_keepalives = 1;
     settings.retry = 3;
-    str_lcpy(settings.version, STR(PROJECT_VERSION), sizeof(settings.version));
-    snprintf(settings.server_name, 128, "zimg/%s", settings.version);
+    snprintf(settings.server_name, 128, "zimg/%s", PROJECT_VERSION);
     settings.headers = NULL;
     settings.etag = 0;
     settings.up_access = NULL;
@@ -491,7 +490,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            fprintf(stdout, "zimg %s\n", settings.version);
+            fprintf(stdout, "zimg %s\n", PROJECT_VERSION);
             fprintf(stdout, "Copyright (c) 2013-2014 zimg.buaa.us\n");
             fprintf(stderr, "\n");
         }

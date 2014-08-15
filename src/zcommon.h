@@ -51,7 +51,6 @@ struct setting{
     int backlog;
     int max_keepalives;
     int retry;
-    char version[128];
     char server_name[128];
     zimg_headers_conf_t *headers;
     int etag;
