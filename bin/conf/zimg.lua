@@ -4,7 +4,7 @@
 is_daemon=1
 ip='0.0.0.0'
 port=4869
-thread_num=4
+--thread_num=4
 backlog_num=1024
 max_keepalives=1
 retry=3
@@ -47,6 +47,8 @@ root_path= pwd .. '/www/index.html'
 admin_path= pwd .. '/www/admin.html'
 
 --image process config
+disable_args=0
+disable_type=0
 --lua process script
 script_name= pwd .. '/script/process.lua'
 --format value: 0.keep intact 1.JPEG 2.webp
@@ -57,6 +59,7 @@ quality=75
 --storage config
 --zimg support 3 ways for storage images
 mode=1
+--save_new value: 0.don't save any 1.save all 2.only save types in lua script
 save_new=0
 max_size=100*1024*1024
 

@@ -51,6 +51,7 @@ struct setting{
     int backlog;
     int max_keepalives;
     int retry;
+    char version[128];
     char server_name[128];
     zimg_headers_conf_t *headers;
     int etag;
@@ -64,6 +65,8 @@ struct setting{
     char log_name[512];
     char root_path[512];
     char admin_path[512];
+    int disable_args;
+    int disable_type;
     int script_on;
     char script_name[512];
     char dst_format[16];

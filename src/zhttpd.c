@@ -974,32 +974,38 @@ void send_document_cb(evhtp_request_t *req, void *arg)
             goto done;
         }
 
-        const char *str_w = evhtp_kv_find(params, "w");
-        const char *str_h = evhtp_kv_find(params, "h");
-        width = (str_w) ? atoi(str_w) : 0;
-        height = (str_h) ? atoi(str_h) : 0;
-
-        const char *str_p = evhtp_kv_find(params, "p");
-        const char *str_g = evhtp_kv_find(params, "g");
-        proportion = (str_p) ? atoi(str_p) : 1;
-        gray = (str_g) ? atoi(str_g) : 0;
-
-        const char *str_x = evhtp_kv_find(params, "x");
-        const char *str_y = evhtp_kv_find(params, "y");
-        x = (str_x) ? atoi(str_x) : 0;
-        y = (str_y) ? atoi(str_y) : 0;
-
-        const char *str_q = evhtp_kv_find(params, "q");
-        quality = (str_q) ? atoi(str_q) : 0;
-
-        const char *str_t = evhtp_kv_find(params, "t");
-        if(str_t)
+        if(settings.disable_args != 1)
         {
-            size_t type_len = strlen(str_t) + 1;
-            type = (char *)malloc(type_len);
-            if(type != NULL)
-                str_lcpy(type, str_t, type_len);
-            LOG_PRINT(LOG_DEBUG, "type = %s", type);
+            const char *str_w = evhtp_kv_find(params, "w");
+            const char *str_h = evhtp_kv_find(params, "h");
+            width = (str_w) ? atoi(str_w) : 0;
+            height = (str_h) ? atoi(str_h) : 0;
+
+            const char *str_p = evhtp_kv_find(params, "p");
+            const char *str_g = evhtp_kv_find(params, "g");
+            proportion = (str_p) ? atoi(str_p) : 1;
+            gray = (str_g) ? atoi(str_g) : 0;
+
+            const char *str_x = evhtp_kv_find(params, "x");
+            const char *str_y = evhtp_kv_find(params, "y");
+            x = (str_x) ? atoi(str_x) : 0;
+            y = (str_y) ? atoi(str_y) : 0;
+
+            const char *str_q = evhtp_kv_find(params, "q");
+            quality = (str_q) ? atoi(str_q) : 0;
+        }
+
+        if(settings.disable_type != 1)
+        {
+            const char *str_t = evhtp_kv_find(params, "t");
+            if(str_t)
+            {
+                size_t type_len = strlen(str_t) + 1;
+                type = (char *)malloc(type_len);
+                if(type != NULL)
+                    str_lcpy(type, str_t, type_len);
+                LOG_PRINT(LOG_DEBUG, "type = %s", type);
+            }
         }
     }
 

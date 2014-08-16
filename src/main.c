@@ -91,7 +91,8 @@ static void settings_init(void)
     settings.backlog = 1024;
     settings.max_keepalives = 1;
     settings.retry = 3;
-    snprintf(settings.server_name, 128, "zimg/%s", PROJECT_VERSION);
+    str_lcpy(settings.version, STR(PROJECT_VERSION), sizeof(settings.version));
+    snprintf(settings.server_name, 128, "zimg/%s", settings.version);
     settings.headers = NULL;
     settings.etag = 0;
     settings.up_access = NULL;
@@ -104,6 +105,8 @@ static void settings_init(void)
     str_lcpy(settings.log_name, "./log/zimg.log", sizeof(settings.log_name));
     str_lcpy(settings.root_path, "./www/index.html", sizeof(settings.root_path));
     str_lcpy(settings.admin_path, "./www/admin.html", sizeof(settings.admin_path));
+    settings.disable_args = 0;
+    settings.disable_type = 0;
     settings.script_on = 0;
     settings.script_name[0] = '\0';
     str_lcpy(settings.dst_format, "JPEG", sizeof(settings.dst_format));
@@ -251,6 +254,16 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "admin_path");
     if(lua_isstring(L, -1))
         str_lcpy(settings.admin_path, lua_tostring(L, -1), sizeof(settings.admin_path));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "disable_args");
+    if(lua_isnumber(L, -1))
+        settings.disable_args = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "disable_type");
+    if(lua_isnumber(L, -1))
+        settings.disable_type = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "script_name"); //stack index: -1
@@ -490,7 +503,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            fprintf(stdout, "zimg %s\n", PROJECT_VERSION);
+            fprintf(stdout, "zimg %s\n", settings.version);
             fprintf(stdout, "Copyright (c) 2013-2014 zimg.buaa.us\n");
             fprintf(stderr, "\n");
         }
@@ -577,7 +590,7 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);
-    //evhtp_set_gencb(htp, echo_cb, NULL);
+    evhtp_set_cb(htp, "/echo", echo_cb, NULL);
     evhtp_set_gencb(htp, send_document_cb, NULL);
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
