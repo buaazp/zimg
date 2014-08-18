@@ -420,8 +420,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         LOG_PRINT(LOG_DEBUG, "img_size = %d", len);
         if((rlen = read(fd, buff, len)) == -1)
         {
-            LOG_PRINT(LOG_DEBUG, "File[%s] Read Failed.", rsp_path);
-            LOG_PRINT(LOG_DEBUG, "Error: %s.", strerror(errno));
+            LOG_PRINT(LOG_DEBUG, "File[%s] Read Failed: %s", rsp_path, strerror(errno));
             goto err;
         }
         else if(rlen < len)
