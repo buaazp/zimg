@@ -935,19 +935,17 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
     char *type = NULL;
     int width, height, proportion, gray, x, y, quality;
+    width = 0;
+    height = 0;
+    proportion = 1;
+    gray = 0;
+    x = 0;
+    y = 0;
+    quality = 0;
+
     evhtp_kvs_t *params;
     params = req->uri->query;
-    if(!params)
-    {
-        width = 0;
-        height = 0;
-        proportion = 1;
-        gray = 0;
-        x = 0;
-        y = 0;
-        quality = 0;
-    }
-    else
+    if(params != NULL)
     {
         const char *str_info = evhtp_kv_find(params, "info");
         if(str_info)
