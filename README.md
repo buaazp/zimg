@@ -44,7 +44,7 @@ There are several documents to introduce the design and architecture of zimg:
 [Documents of zimg](http://zimg.buaa.us/documents/)  
 And this picture below shows the architecture of zimg's storage:  
 
-![architecture_of_zimg_v2](http://ww2.sinaimg.cn/large/4c422e03gw1efpmngazc0j21ik1e6dnk.jpg)
+![architecture_of_zimg_v3](http://ww2.sinaimg.cn/large/4c422e03jw1ejjdg5puouj20kf0modkf.jpg)
 
 ### Download:
 The source code is licensed under a BSD-like License.  
