@@ -25,6 +25,6 @@ clean:
 
 cleanall:
 	rm -rf build
-	rm bin/zimg
+	rm -f bin/zimg
 	rm -rf src/LuaJIT-2.0.3
 	rm -rf src/libwebp-0.4.0
