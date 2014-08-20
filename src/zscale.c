@@ -93,11 +93,11 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
         {
             if (cols > 0)
             {
-                rows = round(((double)cols / im->cols) * im->rows);
+                rows = (uint32_t)round(((double)cols / im->cols) * im->rows);
             }
             else
             {
-                cols = round(((double)rows / im->rows) * im->cols);
+                cols = (uint32_t)round(((double)rows / im->rows) * im->cols);
             }
             LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
             ret = wi_scale(im, cols, rows);
@@ -112,12 +112,12 @@ static int proportion(struct image *im, int p_type, uint32_t cols, uint32_t rows
         if (cols_rate > rows_rate)
         {
             s_cols = cols;
-            s_rows = round(cols_rate * im->rows);
+            s_rows = (uint32_t)round(cols_rate * im->rows);
             y = (uint32_t)floor((s_rows - rows) / 2.0);
         }
         else
         {
-            s_cols = round(rows_rate * im->cols);
+            s_cols = (uint32_t)round(rows_rate * im->cols);
             s_rows = rows;
             x = (uint32_t)floor((s_cols - cols) / 2.0);
         }
