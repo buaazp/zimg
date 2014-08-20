@@ -1,7 +1,7 @@
 PREFIX=/usr/local/zimg
 PWP=$(shell pwd)
 
-libwebp=./src/webp/src/.libs/libwebp.a
+libwebp=./src/libwebp-0.4.0/src/.libs/libwebp.a
 libluajit=src/LuaJIT/src/libluajit.a
 deps=$(libwebp) $(libluajit)
 
@@ -14,7 +14,7 @@ debug: $(deps)
 	cd build/zimg; cmake -DCMAKE_BUILD_TYPE=Debug $(PWD)/src; make; cp zimg $(PWD)/bin
 
 $(libwebp):
-	cd src/webp; ./configure --enable-shared=no; make
+	cd src; tar zxf libwebp-0.4.0.tar.gz; cd libwebp-0.4.0; ./configure --enable-shared=no; make
 
 $(libluajit):
 	cd src/LuaJIT; make
@@ -27,4 +27,4 @@ cleanall:
 	rm -rf build
 	rm bin/zimg
 	cd src/LuaJIT; make clean
-	cd src/webp; make clean
+	cd src/libwebp-0.4.0; make clean
