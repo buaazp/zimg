@@ -177,6 +177,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -DDEBUG")
 endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function")
 message("Build Type: ${CMAKE_BUILD_TYPE}")
 message("Std CFLAGS: ${CMAKE_C_FLAGS}")
 
