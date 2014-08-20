@@ -12,8 +12,8 @@ system=io.popen('uname -sn'):read('*l')
 pwd=io.popen('pwd'):read('*l')
 
 --header config
---headers='Cache-Control:max-age=7776000'
---etag=1
+headers='Cache-Control:max-age=7776000'
+etag=1
 
 --access config
 --support mask rules like 'allow 10.1.121.138/24'
@@ -23,7 +23,7 @@ pwd=io.popen('pwd'):read('*l')
 admin_rule='allow 127.0.0.1'
 
 --cache config
-cache=0
+cache=1
 mc_ip='127.0.0.1'
 mc_port=11211
 
@@ -60,7 +60,7 @@ quality=75
 --zimg support 3 ways for storage images
 mode=1
 --save_new value: 0.don't save any 1.save all 2.only save types in lua script
-save_new=0
+save_new=1
 max_size=100*1024*1024
 
 --mode[1]: local disk mode
