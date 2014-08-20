@@ -20,9 +20,9 @@
 *.app
 *.c.swp
 *.DS_Store
+
 .gitignore
-img/.DS_Store
-.DS_Store
+tags
 
 *.swp
 *.pc
@@ -34,16 +34,8 @@ bin/img/
 bin/log/
 bin/zimg
 
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-tags
-
 bin/conf/debug.lua
 build/
-src/include/evhtp-config.h
-src/hiredis.c
-results.bin
 
 test/result.json
 test/stress_random.txt
@@ -51,14 +43,7 @@ test/stress_random_big.txt
 test/zimg with webimg2.txt
 
 #luaJIT headers
-src/LuaJIT/src/host/buildvm
-src/LuaJIT/src/host/buildvm_arch.h
-src/LuaJIT/src/host/minilua
-src/LuaJIT/src/lj_bcdef.h
-src/LuaJIT/src/lj_ffdef.h
-src/LuaJIT/src/lj_folddef.h
-src/LuaJIT/src/lj_libdef.h
-src/LuaJIT/src/lj_recdef.h
+src/LuaJIT-2.0.3/
 
 #libwebp
 src/libwebp-0.4.0/

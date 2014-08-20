@@ -120,8 +120,8 @@ endif()
 
 set (LIBWEBP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libwebp-0.4.0/src)
 set (LIBWEBP_LIBRARIES ${PROJECT_SOURCE_DIR}/libwebp-0.4.0/src/.libs/libwebp.a)
-set (LUAJIT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/LuaJIT/src)
-set (LUAJIT_LIBRARIES ${PROJECT_SOURCE_DIR}/LuaJIT/src/libluajit.a)
+set (LUAJIT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/LuaJIT-2.0.3/src)
+set (LUAJIT_LIBRARIES ${PROJECT_SOURCE_DIR}/LuaJIT-2.0.3/src/libluajit.a)
 
 include_directories(
 	${OPENSSL_INCLUDE_DIR}
