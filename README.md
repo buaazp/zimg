@@ -11,14 +11,14 @@ Contact me: zp@buaa.us
 [![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
 ### Versions:
-- 08/01/2014 - zimg 3.0.0 Release. New generation.
+- 08/28/2014 - zimg 3.0.0 Release. New generation.
 - 04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.
 - 08/01/2013 - zimg 1.0.0 Release.
 
 ### Dependence:
 > We stand on the shoulders of giants.  
 
-[webimg](http://webimg.org): A software suite to create, edit, compose, or convert bitmap images. Developed by SINA imgbed group.  
+webimg: A software suite to create, edit, compose, or convert bitmap images. Developed by SINA imgbed group.  
 [libevhtp](https://github.com/ellzey/libevhtp): A more flexible replacement for libevent's httpd API.  
 [LuaJIT](http://luajit.org/): LuaJIT is JIT compiler for the Lua language.  
 [hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
