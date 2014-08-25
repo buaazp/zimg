@@ -185,7 +185,7 @@ int convert(struct image *im, zimg_req_t *req)
     }
 
     /* crop and scale */
-    if (x == 0 && y == 0) {
+    if (x == -1 && y == -1) {
         LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
         ret = proportion(im, req->proportion, cols, rows);
         if (ret != WI_OK) return -1;

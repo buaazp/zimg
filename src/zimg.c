@@ -250,7 +250,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     }
     else
     {
-        if(req->x != 0 || req->y != 0)
+        if(req->x != -1 || req->y != -1)
             req->proportion = 1;
 
         if(req->proportion == 0 && req->width == 0 && req->height == 0)

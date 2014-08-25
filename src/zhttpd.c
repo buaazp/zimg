@@ -939,8 +939,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     height = 0;
     proportion = 1;
     gray = 0;
-    x = 0;
-    y = 0;
+    x = -1;
+    y = -1;
     quality = 0;
 
     evhtp_kvs_t *params;
