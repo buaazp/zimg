@@ -9,8 +9,8 @@ struct loader * choose_loader(void *blob, size_t len)
 {
 	struct loader **ld = loaders;
 
-	while (*ld != NULL && (*ld)->suitable != NULL) {
-		if ((*ld)->suitable(blob, len)) {
+	while (*ld != NULL) {
+		if ((*ld)->suitable != NULL && (*ld)->suitable(blob, len)) {
 			break;
 		}
 		ld++;
@@ -23,8 +23,8 @@ struct loader * choose_saver(const char *fmt)
 {
 	struct loader **ld = loaders;
 
-	while (*ld != NULL && (*ld)->save != NULL) {
-		if (strcmp(fmt, (*ld)->name) == 0) {
+	while (*ld != NULL) {
+		if ((*ld)->save != NULL && strcmp(fmt, (*ld)->name) == 0) {
 			break;
 		}
 		ld++;
