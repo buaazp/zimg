@@ -77,8 +77,10 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
     memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
-    //memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
-    rc = memcached_exist(memc, key, strlen(key));
+    size_t valueLen = 0;
+    uint32_t flags;
+    char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    //rc = memcached_exist(memc, key, strlen(key));
 
     if (rc == MEMCACHED_SUCCESS) 
     {
@@ -95,6 +97,7 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
     }
+    free(value);
 
     return rst;
 }
@@ -115,7 +118,7 @@ int find_cache(memcached_st *memc, const char *key, char *value)
         return rst;
 
     size_t valueLen;
-    uint32_t  flags;
+    uint32_t flags;
     memcached_return rc;
 
     char *pvalue = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
@@ -201,7 +204,7 @@ int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t
         return rst;
     }
 
-    uint32_t  flags;
+    uint32_t flags;
     memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
