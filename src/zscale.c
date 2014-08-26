@@ -219,11 +219,11 @@ grayscale:
 	/* set format */
 	//if (strncmp(im->format, "GIF", 3) != 0 && settings.dst_format[0] != '\0') {
 	if (settings.dst_format[0] != '\0') {
-        LOG_PRINT(LOG_INFO, "wi_set_format(im, %s)", settings.dst_format);
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", settings.dst_format);
         ret = wi_set_format(im, settings.dst_format);
         if (ret != WI_OK) return -1;
     } else {
-        LOG_PRINT(LOG_INFO, "wi_set_format(im, %s)", im->format);
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", im->format);
         ret = wi_set_format(im, im->format);
         //if (ret != WI_OK) return -1;
     }
