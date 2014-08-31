@@ -109,8 +109,6 @@ find_package (LibMemcached REQUIRED)
 find_package (JPEG REQUIRED)
 find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
-message("Graphicsmagick Include: ${MAGICKWAND_INCLUDE_DIR}")
-message("Graphicsmagick Library: ${MAGICKWAND_LIBRARIES}")
 
 if (NOT OPENSSL_FOUND)
 	message ("Diabling SSL")

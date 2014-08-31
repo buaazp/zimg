@@ -25,65 +25,52 @@ SET(MAGICK++_FOUND      "NO" )
 SET(MAGICKWAND_FOUND    "NO" )
  
 FIND_PATH( MAGICK_INCLUDE_DIR
-  NAMES magick.h
+  NAMES "magick/magick.h"
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GraphicsMagick\\Current;BinPath]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GraphicsMagick\\Current;BinPath]/include/magick"
-  /usr/include/GraphicsMagick/magick
-  "$ENV{MAGICK_LOCATION}/magick"
+  "$ENV{MAGICK_LOCATION}"
   "$ENV{MAGICK_LOCATION}/include"
   "$ENV{MAGICK_LOCATION}/include/GraphicsMagick"
-  "$ENV{MAGICK_LOCATION}/include/magick"
-  "$ENV{MAGICK_HOME}/include/magick"
-  /usr/include/magick
+  "$ENV{MAGICK_HOME}/include"
   /usr/include/
+  /usr/include/GraphicsMagick
   /usr/local/include
-  /usr/local/include/GraphicsMagick/
-  /usr/local/include/GraphicsMagick/magick
+  /usr/local/include/GraphicsMagick
   /opt/local/include/GraphicsMagick
-  /opt/local/include/GraphicsMagick/magick
   )
  
 FIND_PATH( MAGICK++_INCLUDE_DIR
-  NAMES Magick++.h
+  NAMES "Magick++/Magick++.h"
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GraphicsMagick\\Current;BinPath]/include"
-  "$ENV{MAGICK++_LOCATION}/Magick++"
-  "$ENV{MAGICK++_LOCATION}/include/"
-  "$ENV{MAGICK_LOCATION}/Magick++"
-  "$ENV{MAGICK_LOCATION}/include/Magick++"
+  "$ENV{MAGICK++_LOCATION}"
+  "$ENV{MAGICK++_LOCATION}/include"
+  "$ENV{MAGICK_LOCATION}"
+  "$ENV{MAGICK_LOCATION}/include"
   "$ENV{MAGICK_LOCATION}/include/GraphicsMagick"
-  "$ENV{MAGICK_LOCATION}/include/"
-  "$ENV{MAGICK_HOME}/include/"
-  /usr/include/GraphicsMagick
-  /usr/include/Magick++
+  "$ENV{MAGICK_HOME}/include"
   /usr/include/
+  /usr/include/GraphicsMagick
   /usr/local/include
   /usr/local/include/GraphicsMagick
-  /usr/local/include/GraphicsMagick/Magick++
   /opt/local/include/GraphicsMagick
-  /opt/local/include/GraphicsMagick/Magick++
   )
   
 FIND_PATH( MAGICKWAND_INCLUDE_DIR
   NAMES "wand/magick_wand.h" 
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GraphicsMagick\\Current;BinPath]/include"
-  "$ENV{MAGICKWAND_LOCATION}/wand"
-  "$ENV{MAGICKWAND_LOCATION}/include/"
-  "$ENV{MAGICK_LOCATION}/wand"
-  "$ENV{MAGICK_LOCATION}/include/wand"
+  "$ENV{MAGICKWAND_LOCATION}"
+  "$ENV{MAGICKWAND_LOCATION}/include"
+  "$ENV{MAGICK_LOCATION}"
+  "$ENV{MAGICK_LOCATION}/include"
   "$ENV{MAGICK_LOCATION}/include/GraphicsMagick"
-  "$ENV{MAGICK_LOCATION}/include/"
-  "$ENV{MAGICK_HOME}/include/"
-  /usr/include/GraphicsMagick
-  /usr/include/wand
+  "$ENV{MAGICK_HOME}/include"
   /usr/include/
+  /usr/include/GraphicsMagick
   /usr/local/include
   /usr/local/include/GraphicsMagick
-  /usr/local/include/GraphicsMagick/wand
   /opt/local/include/GraphicsMagick
-  /opt/local/include/GraphicsMagick/wand
   )
 
 FIND_LIBRARY( Magick
@@ -101,7 +88,6 @@ FIND_LIBRARY( Magick
   /opt/local/lib
   DOC   "GraphicsMagick magic library"
   )
- 
  
 FIND_LIBRARY( Magick++
   NAMES GraphicsMagick++ CORE_RL_Magick++_
@@ -138,12 +124,10 @@ FIND_LIBRARY( MagickWand
   /usr/local/lib
   DOC   "GraphicsMagick MagickWand library"
   )
-
  
 SET(MAGICK_LIBRARIES ${Magick} )
 SET(MAGICK++_LIBRARIES ${Magick++} )
 SET(MAGICKWAND_LIBRARIES ${MagickWand} )
- 
  
 IF (MAGICK_INCLUDE_DIR)
   IF(MAGICK_LIBRARIES)
@@ -177,6 +161,5 @@ IF(NOT MAGICK_FOUND)
     ENDIF(Magick_FIND_REQUIRED)
   ENDIF(NOT Magick_FIND_QUIETLY)
 ENDIF(NOT MAGICK_FOUND)
- 
  
 #####
