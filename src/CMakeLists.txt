@@ -104,10 +104,13 @@ else()
     set (ONIG_INCLUDE_DIR "")
 endif()
 
+find_package (GraphicsMagick REQUIRED)
 find_package (LibMemcached REQUIRED)
 find_package (JPEG REQUIRED)
 find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
+message("Graphicsmagick Include: ${MAGICKWAND_INCLUDE_DIR}")
+message("Graphicsmagick Library: ${MAGICKWAND_LIBRARIES}")
 
 if (NOT OPENSSL_FOUND)
 	message ("Diabling SSL")
@@ -132,6 +135,7 @@ include_directories(
     ${PNG_INCLUDE_DIRS}
     ${LIBWEBP_INCLUDE_DIR}
     ${LUAJIT_INCLUDE_DIR}
+    ${MAGICKWAND_INCLUDE_DIR}
 )
 
 set (ZIMG_EXTERNAL_LIBS
@@ -145,6 +149,7 @@ set (ZIMG_EXTERNAL_LIBS
     ${PNG_LIBRARIES}
     ${LIBWEBP_LIBRARIES}
     ${LUAJIT_LIBRARIES}
+    ${MAGICKWAND_LIBRARIES}
     "m"
     "dl"
 )

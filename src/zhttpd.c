@@ -986,8 +986,8 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
             const char *str_x = evhtp_kv_find(params, "x");
             const char *str_y = evhtp_kv_find(params, "y");
-            x = (str_x) ? atoi(str_x) : 0;
-            y = (str_y) ? atoi(str_y) : 0;
+            x = (str_x) ? atoi(str_x) : -1;
+            y = (str_y) ? atoi(str_y) : -1;
 
             const char *str_q = evhtp_kv_find(params, "q");
             quality = (str_q) ? atoi(str_q) : 0;

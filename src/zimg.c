@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <wand/magick_wand.h>
 #include "webimg/webimg2.h"
 #include "zimg.h"
 #include "zmd5.h"
@@ -223,7 +224,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     struct stat f_stat;
     char *buff = NULL;
     char *orig_buff = NULL;
-    struct image *im = NULL;
+    MagickWand *im = NULL;
     size_t len = 0;
 
     bool to_save = true;
@@ -304,7 +305,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
 
     if((fd = open(rsp_path, O_RDONLY)) == -1)
     {
-        im = wi_new_image();
+        im = NewMagickWand();
         if (im == NULL) goto err;
         int ret;
 
@@ -313,56 +314,55 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         {
             LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
 
-            ret = wi_read_blob(im, orig_buff, len);
-            if (ret != WI_OK)
+            ret = MagickReadImageBlob(im, orig_buff, len);
+            if (ret != MagickTrue)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 del_cache(req->thr_arg, cache_key);
-                ret = wi_read_file(im, orig_path);
-                if (ret != WI_OK)
+                FILE *o_fd = fopen(orig_path, "rb");
+                if (o_fd == NULL)
+                {
+                    LOG_PRINT(LOG_DEBUG, "Fopen Original Image From Disk Failed!");
+                    goto err;
+                }
+                ret = MagickReadImageFile(im, o_fd);
+                if (ret != MagickTrue)
                 {
                     LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
                     goto err;
                 }
                 else
                 {
-                    buff = (char *)im->in_buf.data;
-                    len = im->in_buf.len;
-                    if (buff == NULL) {
-                        LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
-                        goto err;
-                    }
-                    if(len < CACHE_MAX_SIZE)
-                    {
-                        set_cache_bin(req->thr_arg, cache_key, buff, len);
-                    }
-                    /*
-                    buff = (char *)wi_get_blob(im, &len);
+                    buff = (char *)MagickWriteImageBlob(im, &len);
                     if (buff == NULL) {
                         LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
                         goto err;
                     }
                     if(len < CACHE_MAX_SIZE)
                     {
-                        set_cache_bin(req->thr_arg, cache_key, (const char *)buff, len);
+                        set_cache_bin(req->thr_arg, cache_key, buff, len);
                     }
-                    */
                 }
             }
         }
         else
         {
             LOG_PRINT(LOG_DEBUG, "Not Hit Original Image Cache. Begin to Open it.");
-            ret = wi_read_file(im, orig_path);
-            if (ret != WI_OK)
+            FILE *o_fd = fopen(orig_path, "rb");
+            if (o_fd == NULL)
+            {
+                LOG_PRINT(LOG_DEBUG, "Fopen Original Image From Disk Failed!");
+                goto err;
+            }
+            ret = MagickReadImageFile(im, o_fd);
+            if (ret != MagickTrue)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
                 goto err;
             }
             else
             {
-                buff = (char *)im->in_buf.data;
-                len = im->in_buf.len;
+                buff = (char *)MagickWriteImageBlob(im, &len);
                 if (buff == NULL) {
                     LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
                     goto err;
@@ -372,20 +372,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                     set_cache_bin(req->thr_arg, cache_key, buff, len);
                 }
             }
-            /*
-            else
-            {
-                orig_buff = (char *)wi_get_blob(im, &len);
-                if (orig_buff == NULL) {
-                    LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
-                    goto err;
-                }
-                if(len < CACHE_MAX_SIZE)
-                {
-                    set_cache_bin(req->thr_arg, cache_key, orig_buff, len);
-                }
-            }
-            */
         }
 
         if(settings.script_on == 1 && req->type != NULL)
@@ -395,7 +381,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         if(ret == -1) goto err;
         if(ret == 1) to_save = false;
 
-        buff = (char *)wi_get_blob(im, &len);
+        buff = (char *)MagickWriteImageBlob(im, &len);
         if (buff == NULL) {
             LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
             goto err;
@@ -475,7 +461,7 @@ err:
     if(fd != -1)
         close(fd);
     if(im != NULL)
-        wi_free_image(im);
+        DestroyMagickWand(im);
     else if(buff != NULL)
         free(buff);
     free(orig_buff);

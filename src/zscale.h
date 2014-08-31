@@ -22,7 +22,8 @@
 #define ZSCALE_H
 
 #include "zcommon.h"
+#include <wand/magick_wand.h>
 
-int convert(struct image *im, zimg_req_t *req);
+int convert(MagickWand *im, zimg_req_t *req);
 
 #endif
