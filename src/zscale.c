@@ -28,9 +28,9 @@
 #include "zcommon.h"
 #include "zscale.h"
 
-static int square(MagickWand *im, uint32_t size);
-static int proportion(MagickWand *im, int p_type, uint32_t cols, uint32_t rows);
-static int crop(MagickWand *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows);
+static int square(MagickWand *im, int size);
+static int proportion(MagickWand *im, int p_type, int cols, int rows);
+static int crop(MagickWand *im, int x, int y, int cols, int rows);
 int convert(MagickWand *im, zimg_req_t *req);
 
 /**
@@ -41,7 +41,7 @@ int convert(MagickWand *im, zimg_req_t *req);
  *
  * @return 0 for OK and -1 for fail
  */
-static int square(MagickWand *im, uint32_t size)
+static int square(MagickWand *im, int size)
 {
 	int ret;
 	uint32_t x, y, cols;
@@ -83,7 +83,7 @@ static int square(MagickWand *im, uint32_t size)
  *
  * @return 0 for OK and -1 for fail
  */
-static int proportion(MagickWand *im, int p_type, uint32_t cols, uint32_t rows)
+static int proportion(MagickWand *im, int p_type, int cols, int rows)
 {
 	int ret = -1;
     unsigned long im_cols = MagickGetImageWidth(im);
@@ -163,11 +163,13 @@ static int proportion(MagickWand *im, int p_type, uint32_t cols, uint32_t rows)
  *
  * @return 0 for OK and -1 for fail
  */
-static int crop(MagickWand *im,  uint32_t x, uint32_t y, uint32_t cols, uint32_t rows)
+static int crop(MagickWand *im, int x, int y, int cols, int rows)
 {
     int ret = -1;
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
     if (x >= im_cols || y >= im_rows) return -1;
     if (cols == 0 || im_cols < x + cols) cols = im_cols - x;
     if (rows == 0 || im_rows < y + rows) rows = im_rows - y;
@@ -191,7 +193,7 @@ int convert(MagickWand *im, zimg_req_t *req)
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
-    uint32_t x = req->x, y = req->y, cols = req->width, rows = req->height;
+    int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (cols == 0 && rows == 0) goto grayscale;
     if (im_cols < cols || im_rows < rows) {
         result = 1;
