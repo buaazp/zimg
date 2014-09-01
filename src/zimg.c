@@ -327,6 +327,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                     LOG_PRINT(LOG_DEBUG, "image size = %d", size);
                     if(size < CACHE_MAX_SIZE)
                     {
+                        MagickResetIterator(im);
                         char *new_buff = (char *)MagickWriteImageBlob(im, &len);
                         if (new_buff == NULL) {
                             LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
@@ -356,10 +357,15 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
             }
             else
             {
+    int index;
+    int frames = MagickGetNumberImages(im);
+    index = MagickGetImageIndex(im);
+    LOG_PRINT(LOG_DEBUG, "frames = %d index = %d", frames, index);
                 MagickSizeType size = MagickGetImageSize(im);
                 LOG_PRINT(LOG_DEBUG, "image size = %d", size);
                 if(size < CACHE_MAX_SIZE)
                 {
+                    MagickResetIterator(im);
                     char *new_buff = (char *)MagickWriteImageBlob(im, &len);
                     if (new_buff == NULL) {
                         LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");

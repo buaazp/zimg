@@ -66,7 +66,8 @@ static int square(MagickWand *im, int size)
 	if (ret != MagickTrue) return -1;
 
     LOG_PRINT(LOG_DEBUG, "p=4, wi_scale(im, %d, %d)", size, size);
-    ret = MagickResizeImage(im, size, size, LanczosFilter, 1.0);
+    //ret = MagickResizeImage(im, size, size, LanczosFilter, 1.0);
+    ret = MagickScaleImage(im, size, size);
     LOG_PRINT(LOG_DEBUG, "p=4, wi_scale() ret = %d", ret);
 	if (ret != MagickTrue) return -1;
 
@@ -89,13 +90,13 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
-    if(p_type == 1 || cols == 0 || rows == 0)
+    if(p_type == 1 || cols == 0 || rows == 0 || p_type == 4)
     {
         if (p_type == 4)
         {
-            cols = cols + rows;
-            LOG_PRINT(LOG_DEBUG, "p=4, square(im, %d)", cols);
-            ret = square(im, cols);
+            int size = cols > rows ? cols : rows;
+            LOG_PRINT(LOG_DEBUG, "p=4, square(im, %d)", size);
+            ret = square(im, size);
         }
         else
         {
@@ -108,7 +109,8 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
                 cols = (uint32_t)round(((double)rows / im_rows) * im_cols);
             }
             LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            //ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            ret = MagickScaleImage(im, cols, rows);
         }
     }
     else if (p_type == 2)
@@ -130,7 +132,8 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
             x = (uint32_t)floor((s_cols - cols) / 2.0);
         }
         LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
-        ret = MagickResizeImage(im, s_cols, s_rows, LanczosFilter, 1.0);
+        //ret = MagickResizeImage(im, s_cols, s_rows, LanczosFilter, 1.0);
+        ret = MagickScaleImage(im, s_cols, s_rows);
 
         LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
         ret = MagickCropImage(im, cols, rows, x, y);
@@ -138,7 +141,8 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
     else if (p_type == 0)
     {
         LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d)", cols, rows);
-        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+        //ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+        ret = MagickScaleImage(im, cols, rows);
     }
     else if (p_type == 3)
     {
@@ -189,7 +193,24 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows)
 int convert(MagickWand *im, zimg_req_t *req)
 {
     int result = 0, ret = -1;
+    int index;
     ColorspaceType color_space;
+
+    MagickResetIterator(im);
+    int frames = MagickGetNumberImages(im);
+
+    MagickNextImage(im);
+    index = MagickGetImageIndex(im);
+    LOG_PRINT(LOG_DEBUG, "frames = %d index 0 = %d", frames, index);
+
+    while (MagickNextImage(im) != MagickFalse)
+    {
+        index = MagickGetImageIndex(im);
+        LOG_PRINT(LOG_DEBUG, "frames = %d index = %d", frames, index);
+        ret = MagickRemoveImage(im);
+        if (ret != MagickTrue) return -1;
+    }
+
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
