@@ -21,10 +21,10 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <wand/magick_wand.h>
 #include "zcommon.h"
 #include "zlog.h"
 #include "zlscale.h"
-#include <wand/magick_wand.h>
 
 int lua_convert(MagickWand *im, zimg_req_t *req);
 

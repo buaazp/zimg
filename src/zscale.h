@@ -12,7 +12,7 @@
 
 /**
  * @file zscale.h
- * @brief scale image functions by webimg header.
+ * @brief scale image functions by graphicsmagick header.
  * @author 招牌疯子 zp@buaa.us
  * @version 3.0.0
  * @date 2014-08-14

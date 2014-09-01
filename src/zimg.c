@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <wand/magick_wand.h>
-#include "webimg/webimg2.h"
 #include "zimg.h"
 #include "zmd5.h"
 #include "zlog.h"
@@ -520,7 +519,7 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     int result = -1;
 
     LOG_PRINT(LOG_DEBUG, "info_img() start processing info request...");
-    struct image *im = NULL;
+    MagickWand *im = NULL;
     char whole_path[512];
     int lvl1 = str_hash(md5);
     int lvl2 = str_hash(md5 + 3);
@@ -538,30 +537,36 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     snprintf(orig_path, 512, "%s/0*0", whole_path);
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
 
-    im = wi_new_image();
+    im = NewMagickWand();
     if (im == NULL) goto err;
     int ret = -1;
-    ret = wi_read_file(im, orig_path);
-    if (ret != WI_OK)
+
+    FILE *o_fd = fopen(orig_path, "rb");
+    if (o_fd == NULL)
+    {
+        LOG_PRINT(LOG_DEBUG, "Fopen Original Image From Disk Failed!");
+        goto err;
+    }
+    ret = MagickReadImageFile(im, o_fd);
+    fclose(o_fd);
+    if (ret != MagickTrue)
     {
         LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
         goto err;
     }
 
-    size_t size = im->in_buf.len;
-    int width = im->cols;
-    int height = im->rows;
-    char *format = im->format;
-    int quality = im->quality;
+    MagickSizeType size = MagickGetImageSize(im);
+    unsigned long width = MagickGetImageWidth(im);
+    unsigned long height = MagickGetImageHeight(im);
+    char *format = MagickGetImageFormat(im);
 
-    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"quality":90,"format":"JPEG"}}
+    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"format":"JPEG"}}
     cJSON *j_ret = cJSON_CreateObject();
     cJSON *j_ret_info = cJSON_CreateObject();
     cJSON_AddBoolToObject(j_ret, "ret", 1);
     cJSON_AddNumberToObject(j_ret_info, "size", size);
     cJSON_AddNumberToObject(j_ret_info, "width", width);
     cJSON_AddNumberToObject(j_ret_info, "height", height);
-    cJSON_AddNumberToObject(j_ret_info, "quality", quality);
     cJSON_AddStringToObject(j_ret_info, "format", format);
     cJSON_AddItemToObject(j_ret, "info", j_ret_info);
     char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
@@ -573,6 +578,6 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
 
 err:
     if(im != NULL)
-        wi_free_image(im);
+        DestroyMagickWand(im);
     return result;
 }
