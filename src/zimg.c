@@ -296,6 +296,14 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     {
         im = NewMagickWand();
         if (im == NULL) goto err;
+
+        /*
+        MagickInfo *magick_info=("JPEG",MagickInfo &exception);
+        magick_info->thread_support=MagickTrue;
+        MagickInfo *magick_info=("JPG",MagickInfo &exception);
+        magick_info->thread_support=MagickTrue;
+        */
+
         int ret;
 
         gen_key(cache_key, req->md5, 0);
@@ -308,6 +316,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 del_cache(req->thr_arg, cache_key);
+                /*
                 FILE *o_fd = fopen(orig_path, "rb");
                 if (o_fd == NULL)
                 {
@@ -316,6 +325,8 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                 }
                 ret = MagickReadImageFile(im, o_fd);
                 fclose(o_fd);
+                */
+                ret = MagickReadImage(im, orig_path);
                 if (ret != MagickTrue)
                 {
                     LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
@@ -342,6 +353,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         else
         {
             LOG_PRINT(LOG_DEBUG, "Not Hit Original Image Cache. Begin to Open it.");
+            /*
             FILE *o_fd = fopen(orig_path, "rb");
             if (o_fd == NULL)
             {
@@ -350,8 +362,11 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
             }
             ret = MagickReadImageFile(im, o_fd);
             fclose(o_fd);
+            */
+            ret = MagickReadImage(im, orig_path);
             if (ret != MagickTrue)
             {
+                LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed! %d != %d", ret, MagickTrue);
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
                 goto err;
             }
@@ -547,6 +562,7 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     if (im == NULL) goto err;
     int ret = -1;
 
+    /*
     FILE *o_fd = fopen(orig_path, "rb");
     if (o_fd == NULL)
     {
@@ -555,6 +571,8 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     }
     ret = MagickReadImageFile(im, o_fd);
     fclose(o_fd);
+    */
+    ret = MagickReadImage(im, orig_path);
     if (ret != MagickTrue)
     {
         LOG_PRINT(LOG_DEBUG, "Open Original Image From Disk Failed!");
