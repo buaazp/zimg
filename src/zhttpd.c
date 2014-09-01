@@ -48,10 +48,11 @@ void free_headers_conf(zimg_headers_conf_t *hcf);
 static evthr_t * get_request_thr(evhtp_request_t *request);
 static int print_headers(evhtp_header_t * header, void * arg); 
 void dump_request_cb(evhtp_request_t *req, void *arg);
-void echo_cb(evhtp_request_t *req, void *arg);
+void echo_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
-void send_document_cb(evhtp_request_t *req, void *arg);
+void get_request_cb(evhtp_request_t *req, void *arg);
 void admin_request_cb(evhtp_request_t *req, void *arg);
+void info_request_cb(evhtp_request_t *req, void *arg);
 
 static const char * post_error_list[] = {
     "Internal error.",
@@ -61,7 +62,9 @@ static const char * post_error_list[] = {
     "Request body parse error.",
     "Content-Length error.",
     "Content-Type error.",
-    "File too large."
+    "File too large.",
+    "Request url illegal.",
+    "Image not existed."
 };
 
 static const char * method_strmap[] = {
@@ -795,14 +798,13 @@ done:
     free(buff);
 }
 
-
 /**
- * @brief send_document_cb The callback function of get a image request.
+ * @brief get_request_cb The callback function of get a image request.
  *
  * @param req The request with a list of params and the md5 of image.
  * @param arg It is not useful.
  */
-void send_document_cb(evhtp_request_t *req, void *arg)
+void get_request_cb(evhtp_request_t *req, void *arg)
 {
     char *md5 = NULL;
 	size_t len;
@@ -882,7 +884,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
-        LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
+        LOG_PRINT(LOG_DEBUG, "============get_request_cb() DONE!===============");
         LOG_PRINT(LOG_INFO, "%s succ root page", address);
         goto done;
     }
@@ -947,31 +949,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
     params = req->uri->query;
     if(params != NULL)
     {
-        const char *str_info = evhtp_kv_find(params, "info");
-        if(str_info)
-        {
-            LOG_PRINT(LOG_DEBUG, "get image info request: %s", str_info);
-            int info_img_rst = -1;
-            if(settings.mode == 1)
-                info_img_rst = info_img(md5, req);
-            else
-                info_img_rst = info_img_mode_db(md5, req, thr_arg);
-
-            if(info_img_rst == -1)
-            {
-                LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Info Failed!", md5);
-                LOG_PRINT(LOG_ERROR, "%s fail info pic:%s", address, md5); 
-                goto err;
-            }
-
-            LOG_PRINT(LOG_INFO, "%s succ info pic:%s", address, md5); 
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-            evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "application/json", 0, 0));
-            evhtp_send_reply(req, EVHTP_RES_OK);
-            LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
-            goto done;
-        }
-
         if(settings.disable_args != 1)
         {
             const char *str_w = evhtp_kv_find(params, "w");
@@ -1027,12 +1004,6 @@ void send_document_cb(evhtp_request_t *req, void *arg)
 
     int get_img_rst = -1;
     get_img_rst = settings.get_img(zimg_req, req);
-    /*
-    if(settings.mode == 1)
-        get_img_rst = get_img(zimg_req, req);
-    else
-        get_img_rst = get_img_mode_db(zimg_req, req);
-    */
 
     if(get_img_rst == -1)
     {
@@ -1070,7 +1041,7 @@ void send_document_cb(evhtp_request_t *req, void *arg)
         LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d size:%d", 
                 address, md5, width, height, proportion, gray, x, y, quality, 
                 len);
-    LOG_PRINT(LOG_DEBUG, "============send_document_cb() DONE!===============");
+    LOG_PRINT(LOG_DEBUG, "============get_request_cb() DONE!===============");
     goto done;
 
 forbidden:
@@ -1078,7 +1049,7 @@ forbidden:
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
-    LOG_PRINT(LOG_DEBUG, "============send_document_cb() FORBIDDEN!===============");
+    LOG_PRINT(LOG_DEBUG, "============get_request_cb() FORBIDDEN!===============");
     goto done;
 
 err:
@@ -1086,7 +1057,7 @@ err:
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_NOTFOUND);
-    LOG_PRINT(LOG_DEBUG, "============send_document_cb() ERROR!===============");
+    LOG_PRINT(LOG_DEBUG, "============get_request_cb() ERROR!===============");
 
 done:
 	if(buff)
@@ -1228,10 +1199,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
 
     int admin_img_rst = -1;
-    if(settings.mode == 1)
-        admin_img_rst = admin_img(req, md5, t);
-    else
-        admin_img_rst = admin_img_mode_db(req, thr_arg, md5, t);
+    admin_img_rst = settings.admin_img(req, thr_arg, md5, t);
 
     if(admin_img_rst == -1)
     {
@@ -1282,4 +1250,95 @@ err:
     LOG_PRINT(LOG_DEBUG, "============admin_request_cb() ERROR!===============");
     return;
 }
+
+void info_request_cb(evhtp_request_t *req, void *arg)
+{
+    char md5[33];
+    int err_no = 0;
+
+    evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
+    struct sockaddr *saddr = ev_conn->saddr;
+    struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
+    char address[16];
+    strncpy(address, inet_ntoa(ss->sin_addr), 16);
+
+    int req_method = evhtp_request_get_method(req);
+    if(req_method >= 16)
+        req_method = 16;
+    LOG_PRINT(LOG_DEBUG, "Method: %d", req_method);
+	if(strcmp(method_strmap[req_method], "GET") != 0)
+    {
+        err_no = 2;
+        LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
+        LOG_PRINT(LOG_INFO, "%s refuse info method", address);
+        goto err;
+    }
+
+    evthr_t *thread = get_request_thr(req);
+    thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
+
+    evhtp_kvs_t *params;
+    params = req->uri->query;
+    if(params == NULL)
+    {
+        err_no = 8;
+        LOG_PRINT(LOG_DEBUG, "zimg Requset Get Info Failed! No params");
+        LOG_PRINT(LOG_INFO, "%s refuse info params", address);
+        goto err;
+    }
+
+    const char *str_md5;
+    str_md5 = evhtp_kv_find(params, "md5");
+    if(str_md5 == NULL)
+    {
+        err_no = 8;
+        LOG_PRINT(LOG_DEBUG, "md5() = NULL return");
+        LOG_PRINT(LOG_INFO, "%s refuse info params", address);
+        goto err;
+    }
+
+    str_lcpy(md5, str_md5, sizeof(md5));
+    if(is_md5(md5) == -1)
+    {
+        err_no = 8;
+        LOG_PRINT(LOG_DEBUG, "Admin Request MD5 Error.");
+        LOG_PRINT(LOG_INFO, "%s refuse info md5", address);
+        goto err;
+    }
+
+    int info_img_rst = -1;
+    info_img_rst = settings.info_img(req, thr_arg, md5);
+
+    if(info_img_rst == 0)
+    {
+        err_no = 9;
+        LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Info Failed!", md5);
+        LOG_PRINT(LOG_ERROR, "%s refuse info 404", address); 
+        goto err;
+    }
+    else if(info_img_rst == -1)
+    {
+        err_no = 0;
+        LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Info Failed!", md5);
+        LOG_PRINT(LOG_ERROR, "%s fail info pic:%s", address, md5); 
+        goto err;
+    }
+
+    LOG_PRINT(LOG_INFO, "%s succ info pic:%s", address, md5); 
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "application/json", 0, 0));
+    evhtp_send_reply(req, EVHTP_RES_OK);
+    LOG_PRINT(LOG_DEBUG, "============info_request_cb() SUCC!===============");
+    goto done;
+
+err:
+    json_return(req, err_no, NULL, 0);
+    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
+    evhtp_send_reply(req, EVHTP_RES_OK);
+    LOG_PRINT(LOG_DEBUG, "============info_request_cb() ERROR!===============");
+
+done:
+    return;
+}
+
 

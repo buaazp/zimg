@@ -31,7 +31,7 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
 int save_img_beansdb(memcached_st *memc, const char *key, const char *value, const size_t len);
 int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, const size_t len);
 int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t);
-int info_img_mode_db(char *md5, evhtp_request_t *request, thr_arg_t *thr_arg);
+int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5);
 int exist_db(thr_arg_t *thr_arg, const char *cache_key);
 int exist_beansdb(memcached_st *memc, const char *key);
 int exist_ssdb(redisContext* c, const char *cache_key);

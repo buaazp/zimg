@@ -40,8 +40,8 @@
 int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
 int new_img(const char *buff, const size_t len, const char *save_name);
 int get_img(zimg_req_t *req, evhtp_request_t *request);
-int admin_img(evhtp_request_t *req, const char *md5, int t);
-int info_img(char *md5, evhtp_request_t *request);
+int admin_img(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t);
+int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5);
 
 
 /**
@@ -84,15 +84,6 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     char save_path[512];
     char save_name[512];
     gen_key(cache_key, md5sum, 0);
-    /*
-    if(exist_cache(thr_arg, cache_key) == 1)
-    {
-        LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
-        result = 1;
-        goto done;
-    }
-    LOG_PRINT(LOG_DEBUG, "exist_cache not found. Begin to Save File.");
-    */
 
     if(settings.mode != 1)
     {
@@ -482,7 +473,7 @@ err:
  *
  * @return 1 for OK, 2 for 404 not found and -1 for fail
  */
-int admin_img(evhtp_request_t *req, const char *md5, int t)
+int admin_img(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t)
 {
     int result = -1;
 
@@ -524,7 +515,7 @@ int admin_img(evhtp_request_t *req, const char *md5, int t)
  *
  * @return 1 for OK and -1 for fail
  */
-int info_img(char *md5, evhtp_request_t *request)
+int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
 {
     int result = -1;
 
@@ -538,6 +529,7 @@ int info_img(char *md5, evhtp_request_t *request)
     
     if(is_dir(whole_path) == -1)
     {
+        result = 0;
         LOG_PRINT(LOG_DEBUG, "Image %s is not existed!", md5);
         goto err;
     }

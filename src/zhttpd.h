@@ -50,7 +50,8 @@ void free_headers_conf(zimg_headers_conf_t *hcf);
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
-void send_document_cb(evhtp_request_t *req, void *arg);
+void get_request_cb(evhtp_request_t *req, void *arg);
 void admin_request_cb(evhtp_request_t *req, void *arg);
+void info_request_cb(evhtp_request_t *req, void *arg);
 
 #endif

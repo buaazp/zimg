@@ -128,17 +128,23 @@ static void settings_init(void)
     callbacks->on_chunk_data = on_chunk_data;
     settings.mp_set = callbacks;
     settings.get_img = NULL;
+    settings.info_img = NULL;
+    settings.admin_img = NULL;
 }
 
 static void set_callback(int mode)
 {
     if(mode == 1)
     {
-        settings.get_img = &get_img;
+        settings.get_img = get_img;
+        settings.info_img = info_img;
+        settings.admin_img = admin_img;
     }
     else if(mode == 2)
     {
-        settings.get_img = &get_img_mode_db;
+        settings.get_img = get_img_mode_db;
+        settings.info_img = info_img_mode_db;
+        settings.admin_img = admin_img_mode_db;
     }
 }
 
@@ -607,8 +613,9 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);
+    evhtp_set_cb(htp, "/info", info_request_cb, NULL);
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
-    evhtp_set_gencb(htp, send_document_cb, NULL);
+    evhtp_set_gencb(htp, get_request_cb, NULL);
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
 #endif
