@@ -10,13 +10,7 @@ local LOG_DEBUG = 7
 local TS_OK = 0
 local TS_FAILED = -1
 
-local WI_OK = 0
-local WI_E_UNKNOW_FORMAT = 1
-local WI_E_LOADER_INIT = 2
-local WI_E_LOADER_LOAD = 3
-local WI_E_READ_FILE = 4
-local WI_E_WRITE_FILE = 5
-local WI_E_ENCODE = 6
+local WI_OK = 1
 
 local CT_SQUARE = 0
 local CT_MAX_WIDTH = 1
@@ -349,9 +343,8 @@ function f()
         if action then
             action()
             if ret == TS_OK then
-                if arg.quality and zimg.quality() > arg.quality then
-                    log.print(LOG_DEBUG, "zimg.quality = " .. zimg.quality())
-                    zimg.set_quality(arg.quality)
+                if arg.quality then
+                    ret = zimg.set_quality(arg.quality)
                     log.print(LOG_DEBUG, "zimg.set_quality(" .. arg.quality .. ")")
                 end
 

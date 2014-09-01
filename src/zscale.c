@@ -224,10 +224,12 @@ grayscale:
 	/* set quality */
     if (req->quality > 0 && req->quality <= 100) {
         LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-        MagickSetCompressionQuality(im, req->quality);
+        ret = MagickSetCompressionQuality(im, req->quality);
+        if (ret != MagickTrue) return -1;
     } else {
         LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", settings.quality);
-        MagickSetCompressionQuality(im, settings.quality);
+        ret = MagickSetCompressionQuality(im, settings.quality);
+        if (ret != MagickTrue) return -1;
     }
 
 	/* set format */

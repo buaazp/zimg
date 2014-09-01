@@ -39,6 +39,8 @@
 #include "libevhtp/evhtp.h"
 #include "zcommon.h"
 #include "zhttpd.h"
+#include "zimg.h"
+#include "zdb.h"
 #include "zutil.h"
 #include "zlog.h"
 #include "zcache.h"
@@ -125,6 +127,19 @@ static void settings_init(void)
     callbacks->on_header_value = on_header_value;
     callbacks->on_chunk_data = on_chunk_data;
     settings.mp_set = callbacks;
+    settings.get_img = NULL;
+}
+
+static void set_callback(int mode)
+{
+    if(mode == 1)
+    {
+        settings.get_img = &get_img;
+    }
+    else if(mode == 2)
+    {
+        settings.get_img = &get_img_mode_db;
+    }
 }
 
 /**
@@ -292,6 +307,8 @@ static int load_conf(const char *conf)
     if(lua_isnumber(L, -1))
         settings.mode = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
+
+    set_callback(settings.mode);
 
     lua_getglobal(L, "save_new");
     if(lua_isnumber(L, -1))

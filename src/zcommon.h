@@ -43,6 +43,27 @@
 #define CACHE_KEY_SIZE      128
 #define PATH_MAX_SIZE       512
 
+typedef struct thr_arg_s {
+    evthr_t *thread;
+    memcached_st *cache_conn;
+    memcached_st *beansdb_conn;
+    redisContext *ssdb_conn;
+    lua_State* L;
+} thr_arg_t;
+
+typedef struct zimg_req_s {
+    char *md5;
+    char *type;
+    int width;
+    int height;
+    int proportion;
+    int gray;
+    int x;
+    int y;
+    int quality;
+    thr_arg_t *thr_arg;
+} zimg_req_t;
+
 struct setting{
     int is_daemon;
     char ip[128];
@@ -80,28 +101,8 @@ struct setting{
     char ssdb_ip[128];
     int ssdb_port;
     multipart_parser_settings *mp_set;
+	int (*get_img)(zimg_req_t *, evhtp_request_t *);
 } settings;
-
-typedef struct thr_arg_s {
-    evthr_t *thread;
-    memcached_st *cache_conn;
-    memcached_st *beansdb_conn;
-    redisContext *ssdb_conn;
-    lua_State* L;
-} thr_arg_t;
-
-typedef struct zimg_req_s {
-    char *md5;
-    char *type;
-    int width;
-    int height;
-    int proportion;
-    int gray;
-    int x;
-    int y;
-    int quality;
-    thr_arg_t *thr_arg;
-} zimg_req_t;
 
 #define LOG_FATAL       0           /* System is unusable */
 #define LOG_ALERT       1           /* Action must be taken immediately */

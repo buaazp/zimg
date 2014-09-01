@@ -24,34 +24,34 @@
 #include "zcommon.h"
 #include "zlog.h"
 #include "zlscale.h"
-#include "webimg/webimg2.h"
+#include <wand/magick_wand.h>
 
-int lua_convert(struct image *im, zimg_req_t *req);
+int lua_convert(MagickWand *im, zimg_req_t *req);
 
 static int get_wi_cols(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
-    int cols = larg->img->cols;
+    unsigned long cols = MagickGetImageWidth(larg->img);
     lua_pushnumber(L, cols);
     return 1;
 }
 
 static int get_wi_rows(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
-    int rows = larg->img->rows;
+    unsigned long rows = MagickGetImageHeight(larg->img);
     lua_pushnumber(L, rows);
     return 1;
 }
 
 static int get_wi_quality(lua_State *L) {
-    lua_arg *larg = pthread_getspecific(thread_key);
-    int quality = larg->img->quality;
+    //lua_arg *larg = pthread_getspecific(thread_key);
+    int quality = 100;
     lua_pushnumber(L, quality);
     return 1;
 }
 
 static int get_wi_format(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
-    char *format = larg->img->format;
+    char *format = MagickGetImageFormat(larg->img);
     LOG_PRINT(LOG_DEBUG, "get_wi_format: %s", format);
     lua_pushstring(L, format);
     return 1;
@@ -63,15 +63,7 @@ static int scale_wi (lua_State *L) {
 
     LOG_PRINT(LOG_DEBUG, "cols = %f rows = %f", cols, rows);
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = wi_scale(larg->img, cols, rows);
-    LOG_PRINT(LOG_DEBUG, "ret = %d", ret);
-    if (larg->img->colorspace == CS_RGB) {
-        LOG_PRINT(LOG_DEBUG, "rgb!");
-    } else if (larg->img->colorspace == CS_GRAYSCALE) {
-        LOG_PRINT(LOG_DEBUG, "gray!");
-    } else {
-        LOG_PRINT(LOG_DEBUG, "other!");
-    }
+    int ret = MagickResizeImage(larg->img, cols, rows, LanczosFilter, 1.0);
     lua_pushnumber(L, ret);
     return 1;
 }
@@ -83,21 +75,14 @@ static int crop_wi (lua_State *L) {
     double rows = lua_tonumber(L, 4);
     
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = wi_crop(larg->img, x, y, cols, rows);
+    int ret = MagickCropImage(larg->img, cols, rows, x, y);
     lua_pushnumber(L, ret);
     return 1;
 }
 
 static int gray_wi (lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = wi_gray(larg->img);
-    if (larg->img->colorspace == CS_RGB) {
-        LOG_PRINT(LOG_DEBUG, "rgb!");
-    } else if (larg->img->colorspace == CS_GRAYSCALE) {
-        LOG_PRINT(LOG_DEBUG, "gray!");
-    } else {
-        LOG_PRINT(LOG_DEBUG, "other!");
-    }
+    int ret = MagickSetImageColorspace(larg->img, GRAYColorspace);
     lua_pushnumber(L, ret);
     return 1;
 }
@@ -106,15 +91,16 @@ static int set_wi_quality (lua_State *L) {
     int quality = lua_tonumber(L, 1);
     
     lua_arg *larg = pthread_getspecific(thread_key);
-    wi_set_quality(larg->img, quality);
-    return 0;
+    int ret = MagickSetCompressionQuality(larg->img, quality);
+    lua_pushnumber(L, ret);
+    return 1;
 }
 
 static int set_wi_format (lua_State *L) {
     const char *format = lua_tostring(L, 1);
     
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = wi_set_format(larg->img, (char *)format);
+    int ret = MagickSetFormat(larg->img, format);
     LOG_PRINT(LOG_DEBUG, "set_wi_format: %s ret = %d", format, ret);
     lua_pushnumber(L, ret);
     return 1;
@@ -172,7 +158,7 @@ const struct luaL_Reg loglib[] = {
  *
  * @return 1 for OK and -1 for fail
  */
-int lua_convert(struct image *im, zimg_req_t *req)
+int lua_convert(MagickWand *im, zimg_req_t *req)
 {
     int ret = -1;
     LOG_PRINT(LOG_DEBUG, "lua_convert: %s", req->type);
