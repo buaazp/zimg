@@ -40,5 +40,3 @@ build/
 #luaJIT headers
 deps/LuaJIT-2.0.3/
 
-#libwebp
-deps/libwebp-0.4.0/
