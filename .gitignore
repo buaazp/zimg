@@ -38,7 +38,7 @@ bin/conf/debug.lua
 build/
 
 #luaJIT headers
-src/LuaJIT-2.0.3/
+deps/LuaJIT-2.0.3/
 
 #libwebp
-src/libwebp-0.4.0/
+deps/libwebp-0.4.0/

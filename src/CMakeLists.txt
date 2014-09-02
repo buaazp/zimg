@@ -72,8 +72,6 @@ if (EVHTP_USE_DEFER_ACCEPT)
 	set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DUSE_DEFER_ACCEPT")
 endif(EVHTP_USE_DEFER_ACCEPT)
 
-SET (CMAKE_INCLUDE_CURRENT_DIR ON)
-
 include(BaseConfig)
 
 find_package(LibEvent REQUIRED)
@@ -121,10 +119,13 @@ if (NOT OPENSSL_FOUND)
 	set (LIBEVENT_OPENSSL_LIBRARY "")
 endif()
 
-set (LIBWEBP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libwebp-0.4.0/src)
-set (LIBWEBP_LIBRARIES ${PROJECT_SOURCE_DIR}/libwebp-0.4.0/src/.libs/libwebp.a)
-set (LUAJIT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/LuaJIT-2.0.3/src)
-set (LUAJIT_LIBRARIES ${PROJECT_SOURCE_DIR}/LuaJIT-2.0.3/src/libluajit.a)
+set (DEPS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../deps")
+include_directories(${DEPS_SOURCE_DIR})
+
+set (LIBWEBP_INCLUDE_DIR ${DEPS_SOURCE_DIR}/libwebp-0.4.0/src)
+set (LIBWEBP_LIBRARIES ${DEPS_SOURCE_DIR}/libwebp-0.4.0/src/.libs/libwebp.a)
+set (LUAJIT_INCLUDE_DIR ${DEPS_SOURCE_DIR}/LuaJIT-2.0.3/src)
+set (LUAJIT_LIBRARIES ${DEPS_SOURCE_DIR}/LuaJIT-2.0.3/src/libluajit.a)
 
 #set (ImageMagick_INCLUDE_DIRS "/Users/zippo/develop/linuxc/imagemagick-src")
 #set (ImageMagick_MagickCore_LIBRARY "/Users/zippo/develop/linuxc/imagemagick-src/magick/.libs/libMagickCore-Q16.a")
@@ -174,14 +175,15 @@ endif(NOT ${LIBEVENT_PTHREADS_FOUND})
 
 if (NOT EVHTP_DISABLE_EVTHR)
 	set (ZIMG_EXTERNAL_LIBS ${ZIMG_EXTERNAL_LIBS} pthread)
-    set (LIBEVHTP_SOURCES ${LIBEVHTP_SOURCES} libevhtp/evthr.c)
+    set (LIBEVHTP_SOURCES ${LIBEVHTP_SOURCES} ${DEPS_SOURCE_DIR}/libevhtp/evthr.c)
 endif(NOT EVHTP_DISABLE_EVTHR)
 
-set (LIBEVHTP_SOURCES ${LIBEVHTP_SOURCES} libevhtp/evhtp.c libevhtp/htparse.c)
+set (LIBEVHTP_SOURCES ${LIBEVHTP_SOURCES} ${DEPS_SOURCE_DIR}/libevhtp/evhtp.c
+    ${DEPS_SOURCE_DIR}/libevhtp/htparse.c)
 aux_source_directory (${PROJECT_SOURCE_DIR} ZIMG_SOURCES)
-aux_source_directory (${PROJECT_SOURCE_DIR}/hiredis LIBHIREDIS_SOURCE_DIR)
-aux_source_directory (${PROJECT_SOURCE_DIR}/cjson LIBCJSON_SOURCE_DIR)
-aux_source_directory (${PROJECT_SOURCE_DIR}/multipart-parser-c MULTIPART_SOURCE_DIR)
+aux_source_directory (${DEPS_SOURCE_DIR}/hiredis LIBHIREDIS_SOURCE_DIR)
+aux_source_directory (${DEPS_SOURCE_DIR}/cjson LIBCJSON_SOURCE_DIR)
+aux_source_directory (${DEPS_SOURCE_DIR}/multipart-parser-c MULTIPART_SOURCE_DIR)
 set (SOURCES ${ZIMG_SOURCES} ${LIBEVHTP_SOURCES} ${LIBHIREDIS_SOURCE_DIR}
     ${LIBCJSON_SOURCE_DIR} ${MULTIPART_SOURCE_DIR})
 
@@ -196,7 +198,7 @@ message("Std CFLAGS: ${CMAKE_C_FLAGS}")
 #set (CMAKE_EXE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib")
 
 configure_file (
-    ${CMAKE_CURRENT_SOURCE_DIR}/libevhtp/evhtp-config.h.in
+    ${DEPS_SOURCE_DIR}/libevhtp/evhtp-config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/evhtp-config.h
 )
 
