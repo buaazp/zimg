@@ -233,7 +233,7 @@ int convert(MagickWand *im, zimg_req_t *req)
         LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
         if (req->quality < im_quality) {
             LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-            ret = MagickSetCompressionQuality(im, req->quality);
+            ret = MagickSetImageCompressionQuality(im, req->quality);
             if (ret != MagickTrue) return -1;
         }
     } else {
@@ -242,7 +242,7 @@ int convert(MagickWand *im, zimg_req_t *req)
         LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
         if (settings.quality < im_quality) {
             LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", settings.quality);
-            ret = MagickSetCompressionQuality(im, settings.quality);
+            ret = MagickSetImageCompressionQuality(im, settings.quality);
             if (ret != MagickTrue) return -1;
         }
     }

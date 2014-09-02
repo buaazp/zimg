@@ -92,7 +92,7 @@ static int set_wi_quality (lua_State *L) {
     int quality = lua_tonumber(L, 1);
     
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = MagickSetCompressionQuality(larg->img, quality);
+    int ret = MagickSetImageCompressionQuality(larg->img, quality);
     lua_pushnumber(L, ret);
     return 1;
 }
@@ -101,7 +101,7 @@ static int set_wi_format (lua_State *L) {
     const char *format = lua_tostring(L, 1);
     
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = MagickSetFormat(larg->img, format);
+    int ret = MagickSetImageFormat(larg->img, format);
     LOG_PRINT(LOG_DEBUG, "set_wi_format: %s ret = %d", format, ret);
     lua_pushnumber(L, ret);
     return 1;
