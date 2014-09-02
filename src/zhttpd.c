@@ -47,6 +47,7 @@ static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
 void free_headers_conf(zimg_headers_conf_t *hcf);
 static evthr_t * get_request_thr(evhtp_request_t *request);
 static int print_headers(evhtp_header_t * header, void * arg); 
+void add_info(MagickWand *im, evhtp_request_t *req);
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
@@ -325,6 +326,32 @@ static int print_headers(evhtp_header_t * header, void * arg)
     evbuffer_add(buf, header->val, header->vlen);
     evbuffer_add(buf, "\r\n", 2);
 	return 1;
+}
+
+void add_info(MagickWand *im, evhtp_request_t *req)
+{
+    MagickSizeType size = MagickGetImageSize(im);
+    unsigned long width = MagickGetImageWidth(im);
+    unsigned long height = MagickGetImageHeight(im);
+    size_t quality = MagickGetImageCompressionQuality(im);
+    quality = (quality == 0 ? 100 : quality);
+    char *format = MagickGetImageFormat(im);
+
+    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"quality":75,"format":"JPEG"}}
+    cJSON *j_ret = cJSON_CreateObject();
+    cJSON *j_ret_info = cJSON_CreateObject();
+    cJSON_AddBoolToObject(j_ret, "ret", 1);
+    cJSON_AddNumberToObject(j_ret_info, "size", size);
+    cJSON_AddNumberToObject(j_ret_info, "width", width);
+    cJSON_AddNumberToObject(j_ret_info, "height", height);
+    cJSON_AddNumberToObject(j_ret_info, "quality", quality);
+    cJSON_AddStringToObject(j_ret_info, "format", format);
+    cJSON_AddItemToObject(j_ret, "info", j_ret_info);
+    char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
+    LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
+    evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
+    cJSON_Delete(j_ret);
+    free(ret_str_unformat);
 }
 
 /**

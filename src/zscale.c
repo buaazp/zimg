@@ -193,46 +193,30 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows)
 int convert(MagickWand *im, zimg_req_t *req)
 {
     int result = 0, ret = -1;
-    int index;
     ColorspaceType color_space;
 
     MagickResetIterator(im);
-    int frames = MagickGetNumberImages(im);
-
-    MagickNextImage(im);
-    index = MagickGetImageIndex(im);
-    LOG_PRINT(LOG_DEBUG, "frames = %d index 0 = %d", frames, index);
-
-    while (MagickNextImage(im) != MagickFalse)
-    {
-        index = MagickGetImageIndex(im);
-        LOG_PRINT(LOG_DEBUG, "frames = %d index = %d", frames, index);
-        ret = MagickRemoveImage(im);
-        if (ret != MagickTrue) return -1;
-    }
-
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
-    if (cols == 0 && rows == 0) goto grayscale;
-    if (im_cols < cols || im_rows < rows) {
-        result = 1;
-        goto grayscale;
+    if (!(cols == 0 && rows == 0)) {
+        if (im_cols < cols || im_rows < rows) {
+            result = 1;
+        } else {
+            /* crop and scale */
+            if (x == -1 && y == -1) {
+                LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
+                ret = proportion(im, req->proportion, cols, rows);
+                if (ret != MagickTrue) return -1;
+            } else {
+                LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+                ret = crop(im, x, y, cols, rows);
+                if (ret != MagickTrue) return -1;
+            }
+        }
     }
 
-    /* crop and scale */
-    if (x == -1 && y == -1) {
-        LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
-        ret = proportion(im, req->proportion, cols, rows);
-        if (ret != MagickTrue) return -1;
-    } else {
-        LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
-        ret = crop(im, x, y, cols, rows);
-        if (ret != MagickTrue) return -1;
-    }
-
-grayscale:
     /* set gray */
     color_space = MagickGetImageColorspace(im);
     if (req->gray && color_space != GRAYColorspace) {
@@ -244,19 +228,31 @@ grayscale:
 
 	/* set quality */
     if (req->quality > 0 && req->quality <= 100) {
-        LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-        ret = MagickSetCompressionQuality(im, req->quality);
-        if (ret != MagickTrue) return -1;
+        int im_quality = MagickGetImageCompressionQuality(im);
+        im_quality = (im_quality == 0 ? 100 : im_quality);
+        LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
+        if (req->quality < im_quality) {
+            LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
+            ret = MagickSetCompressionQuality(im, req->quality);
+            if (ret != MagickTrue) return -1;
+        }
     } else {
-        LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", settings.quality);
-        ret = MagickSetCompressionQuality(im, settings.quality);
-        if (ret != MagickTrue) return -1;
+        int im_quality = MagickGetImageCompressionQuality(im);
+        im_quality = (im_quality == 0 ? 100 : im_quality);
+        LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
+        if (settings.quality < im_quality) {
+            LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", settings.quality);
+            ret = MagickSetCompressionQuality(im, settings.quality);
+            if (ret != MagickTrue) return -1;
+        }
     }
+    int im_quality = MagickGetImageCompressionQuality(im);
+    LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
 
 	/* set format */
 	if (settings.dst_format[0] != '\0') {
         LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", settings.dst_format);
-        ret = MagickSetFormat(im, settings.dst_format);
+        ret = MagickSetImageFormat(im, settings.dst_format);
         if (ret != MagickTrue) return -1;
     }
 

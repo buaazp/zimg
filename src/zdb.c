@@ -497,24 +497,7 @@ int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
         goto err;
     }
 
-    unsigned long width = MagickGetImageWidth(im);
-    unsigned long height = MagickGetImageHeight(im);
-    char *format = MagickGetImageFormat(im);
-
-    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"format":"JPEG"}}
-    cJSON *j_ret = cJSON_CreateObject();
-    cJSON *j_ret_info = cJSON_CreateObject();
-    cJSON_AddBoolToObject(j_ret, "ret", 1);
-    cJSON_AddNumberToObject(j_ret_info, "size", size);
-    cJSON_AddNumberToObject(j_ret_info, "width", width);
-    cJSON_AddNumberToObject(j_ret_info, "height", height);
-    cJSON_AddStringToObject(j_ret_info, "format", format);
-    cJSON_AddItemToObject(j_ret, "info", j_ret_info);
-    char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
-    LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
-    evbuffer_add_printf(request->buffer_out, "%s", ret_str_unformat);
-    cJSON_Delete(j_ret);
-    free(ret_str_unformat);
+    add_info(im, request);
     result = 1;
 
 err:

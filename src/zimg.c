@@ -297,15 +297,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         im = NewMagickWand();
         if (im == NULL) goto err;
 
-        /*
-        MagickInfo *magick_info=("JPEG",MagickInfo &exception);
-        magick_info->thread_support=MagickTrue;
-        MagickInfo *magick_info=("JPG",MagickInfo &exception);
-        magick_info->thread_support=MagickTrue;
-        */
-
         int ret;
-
         gen_key(cache_key, req->md5, 0);
         if(find_cache_bin(req->thr_arg, cache_key, &orig_buff, &len) == 1)
         {
@@ -316,16 +308,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
                 del_cache(req->thr_arg, cache_key);
-                /*
-                FILE *o_fd = fopen(orig_path, "rb");
-                if (o_fd == NULL)
-                {
-                    LOG_PRINT(LOG_DEBUG, "Fopen Original Image From Disk Failed!");
-                    goto err;
-                }
-                ret = MagickReadImageFile(im, o_fd);
-                fclose(o_fd);
-                */
                 ret = MagickReadImage(im, orig_path);
                 if (ret != MagickTrue)
                 {
@@ -353,16 +335,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         else
         {
             LOG_PRINT(LOG_DEBUG, "Not Hit Original Image Cache. Begin to Open it.");
-            /*
-            FILE *o_fd = fopen(orig_path, "rb");
-            if (o_fd == NULL)
-            {
-                LOG_PRINT(LOG_DEBUG, "Fopen Original Image From Disk Failed!");
-                goto err;
-            }
-            ret = MagickReadImageFile(im, o_fd);
-            fclose(o_fd);
-            */
             ret = MagickReadImage(im, orig_path);
             if (ret != MagickTrue)
             {
@@ -372,10 +344,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
             }
             else
             {
-    int index;
-    int frames = MagickGetNumberImages(im);
-    index = MagickGetImageIndex(im);
-    LOG_PRINT(LOG_DEBUG, "frames = %d index = %d", frames, index);
                 MagickSizeType size = MagickGetImageSize(im);
                 LOG_PRINT(LOG_DEBUG, "image size = %d", size);
                 if(size < CACHE_MAX_SIZE)
@@ -562,16 +530,6 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     if (im == NULL) goto err;
     int ret = -1;
 
-    /*
-    FILE *o_fd = fopen(orig_path, "rb");
-    if (o_fd == NULL)
-    {
-        LOG_PRINT(LOG_DEBUG, "Fopen Original Image From Disk Failed!");
-        goto err;
-    }
-    ret = MagickReadImageFile(im, o_fd);
-    fclose(o_fd);
-    */
     ret = MagickReadImage(im, orig_path);
     if (ret != MagickTrue)
     {
@@ -579,25 +537,7 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
         goto err;
     }
 
-    MagickSizeType size = MagickGetImageSize(im);
-    unsigned long width = MagickGetImageWidth(im);
-    unsigned long height = MagickGetImageHeight(im);
-    char *format = MagickGetImageFormat(im);
-
-    //{"ret":true,"info":{"size":195135,"width":720,"height":480,"format":"JPEG"}}
-    cJSON *j_ret = cJSON_CreateObject();
-    cJSON *j_ret_info = cJSON_CreateObject();
-    cJSON_AddBoolToObject(j_ret, "ret", 1);
-    cJSON_AddNumberToObject(j_ret_info, "size", size);
-    cJSON_AddNumberToObject(j_ret_info, "width", width);
-    cJSON_AddNumberToObject(j_ret_info, "height", height);
-    cJSON_AddStringToObject(j_ret_info, "format", format);
-    cJSON_AddItemToObject(j_ret, "info", j_ret_info);
-    char *ret_str_unformat = cJSON_PrintUnformatted(j_ret);
-    LOG_PRINT(LOG_DEBUG, "ret_str_unformat: %s", ret_str_unformat);
-    evbuffer_add_printf(request->buffer_out, "%s", ret_str_unformat);
-    cJSON_Delete(j_ret);
-    free(ret_str_unformat);
+    add_info(im, request);
     result = 1;
 
 err:

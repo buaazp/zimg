@@ -35,6 +35,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <magick/api.h>
 #include <evhtp-config.h>
 #include "libevhtp/evhtp.h"
 #include "zcommon.h"
@@ -603,6 +604,15 @@ int main(int argc, char **argv)
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
         }
     }
+
+    //init magickwand
+    MagickCoreGenesis((char *) NULL, MagickFalse);
+    ExceptionInfo *exception=AcquireExceptionInfo();
+
+    MagickInfo *jpeg_info = (MagickInfo *)GetMagickInfo("JPEG", exception);
+    jpeg_info->thread_support = MagickTrue;
+    MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
+    jpg_info->thread_support = MagickTrue;
 
     //begin to start httpd...
     LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");

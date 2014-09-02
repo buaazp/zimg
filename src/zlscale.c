@@ -43,8 +43,9 @@ static int get_wi_rows(lua_State *L) {
 }
 
 static int get_wi_quality(lua_State *L) {
-    //lua_arg *larg = pthread_getspecific(thread_key);
-    int quality = 100;
+    lua_arg *larg = pthread_getspecific(thread_key);
+    int quality = MagickGetImageCompressionQuality(larg->img);
+    quality = (quality == 0 ? 100 : quality);
     lua_pushnumber(L, quality);
     return 1;
 }

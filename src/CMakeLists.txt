@@ -104,11 +104,13 @@ else()
     set (ONIG_INCLUDE_DIR "")
 endif()
 
-find_package (GraphicsMagick REQUIRED)
 find_package (LibMemcached REQUIRED)
-find_package (JPEG REQUIRED)
-find_package (GIF REQUIRED)
-find_package (PNG REQUIRED)
+#find_package (JPEG REQUIRED)
+#find_package (GIF REQUIRED)
+#find_package (PNG REQUIRED)
+#find_package (GraphicsMagick REQUIRED)
+find_package (ImageMagick COMPONENTS MagickCore REQUIRED)
+find_package (ImageMagick COMPONENTS MagickWand REQUIRED)
 
 if (NOT OPENSSL_FOUND)
 	message ("Diabling SSL")
@@ -124,30 +126,39 @@ set (LIBWEBP_LIBRARIES ${PROJECT_SOURCE_DIR}/libwebp-0.4.0/src/.libs/libwebp.a)
 set (LUAJIT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/LuaJIT-2.0.3/src)
 set (LUAJIT_LIBRARIES ${PROJECT_SOURCE_DIR}/LuaJIT-2.0.3/src/libluajit.a)
 
+#set (ImageMagick_INCLUDE_DIRS "/Users/zippo/develop/linuxc/imagemagick-src")
+#set (ImageMagick_MagickCore_LIBRARY "/Users/zippo/develop/linuxc/imagemagick-src/magick/.libs/libMagickCore-Q16.a")
+#set (ImageMagick_MagickWand_LIBRARY "/Users/zippo/develop/linuxc/imagemagick-src/wand/.libs/libMagickWand-Q16.a")
+
 include_directories(
 	${OPENSSL_INCLUDE_DIR}
 	${LIBEVENT_INCLUDE_DIR}
     ${LIBMEMCACHED_INCLUDE_DIRS}
-    ${JPEG_INCLUDE_DIRS}
-    ${GIF_INCLUDE_DIRS}
-    ${PNG_INCLUDE_DIRS}
-    ${LIBWEBP_INCLUDE_DIR}
     ${LUAJIT_INCLUDE_DIR}
-    ${MAGICKWAND_INCLUDE_DIR}
+    #${LIBWEBP_INCLUDE_DIR}
+    #${JPEG_INCLUDE_DIRS}
+    #${GIF_INCLUDE_DIRS}
+    #${PNG_INCLUDE_DIRS}
+    #${MAGICK_INCLUDE_DIR}
+    #${MAGICKWAND_INCLUDE_DIR}
+    ${ImageMagick_INCLUDE_DIRS}
 )
 
 set (ZIMG_EXTERNAL_LIBS
+    ${OPENSSL_LIBRARIES}
     ${LIBEVENT_LIBRARY}
     ${LIBEVENT_PTHREADS_LIBRARY}
     ${LIBEVENT_OPENSSL_LIBRARY}
-    ${OPENSSL_LIBRARIES}
     ${LIBMEMCACHED_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${GIF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${LIBWEBP_LIBRARIES}
     ${LUAJIT_LIBRARIES}
-    ${MAGICKWAND_LIBRARIES}
+    #${LIBWEBP_LIBRARIES}
+    #${JPEG_LIBRARIES}
+    #${GIF_LIBRARIES}
+    #${PNG_LIBRARIES}
+    #${MAGICK_LIBRARIES}
+    #${MAGICKWAND_LIBRARIES}
+    ${ImageMagick_MagickCore_LIBRARY}
+    ${ImageMagick_MagickWand_LIBRARY}
     "m"
     "dl"
 )
@@ -178,7 +189,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -DDEBUG")
 endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function -Wno-deprecated -DMAGICKCORE_HDRI_ENABLE -DMAGICKCORE_QUANTUM_DEPTH=16")
 message("Build Type: ${CMAKE_BUILD_TYPE}")
 message("Std CFLAGS: ${CMAKE_C_FLAGS}")
 

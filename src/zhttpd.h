@@ -21,6 +21,7 @@
 #ifndef ZHTTPD_H
 #define ZHTTPD_H
 
+#include <wand/magick_wand.h>
 #include "libevhtp/evhtp.h"
 #include "multipart-parser-c/multipart_parser.h"
 
@@ -47,6 +48,7 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length);
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 void free_headers_conf(zimg_headers_conf_t *hcf);
+void add_info(MagickWand *im, evhtp_request_t *req);
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
