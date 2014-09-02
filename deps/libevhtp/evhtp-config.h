@@ -6,9 +6,9 @@
 #undef EVHTP_DISABLE_SSL
 #undef EVHTP_DISABLE_EVTHR
 
-#cmakedefine EVHTP_DISABLE_EVTHR
-#cmakedefine EVHTP_DISABLE_REGEX
-#cmakedefine EVHTP_DISABLE_SSL
-#cmakedefine EVHTP_DISABLE_EVTHR
+/* #undef EVHTP_DISABLE_EVTHR */
+#define EVHTP_DISABLE_REGEX
+#define EVHTP_DISABLE_SSL
+/* #undef EVHTP_DISABLE_EVTHR */
 
 #endif

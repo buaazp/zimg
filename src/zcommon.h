@@ -34,7 +34,7 @@
 #include "multipart-parser-c/multipart_parser.h"
 
 #ifndef PROJECT_VERSION
-#define PROJECT_VERSION "3.0.0"
+#define PROJECT_VERSION "3.1.0"
 #endif
 
 #define MAX_LINE            1024 

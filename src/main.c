@@ -36,7 +36,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <magick/api.h>
-#include <evhtp-config.h>
+#include "libevhtp/evhtp-config.h"
 #include "libevhtp/evhtp.h"
 #include "zcommon.h"
 #include "zhttpd.h"

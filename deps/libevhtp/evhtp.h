@@ -1,7 +1,7 @@
 #ifndef __EVHTP__H__
 #define __EVHTP__H__
 
-#include <evhtp-config.h>
+#include "evhtp-config.h"
 #ifndef EVHTP_DISABLE_EVTHR
 #include "evthr.h"
 #endif
