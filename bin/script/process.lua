@@ -1,34 +1,27 @@
-local LOG_FATAL = 0
-local LOG_ALERT = 1
-local LOG_CRIT = 2
-local LOG_ERROR = 3
-local LOG_WARNING = 4
-local LOG_NOTICE = 5
-local LOG_INFO = 6
-local LOG_DEBUG = 7
+local LOG_FATAL             = 0
+local LOG_ALERT             = 1
+local LOG_CRIT              = 2
+local LOG_ERROR             = 3
+local LOG_WARNING           = 4
+local LOG_NOTICE            = 5
+local LOG_INFO              = 6
+local LOG_DEBUG             = 7
 
-local TS_OK = 0
-local TS_FAILED = -1
+local WI_OK                 = 1
+local WI_FAILED             = -1
 
-local WI_OK = 1
+local CT_SQUARE             = 0
+local CT_MAX_WIDTH          = 1
+local CT_MAX_SIZE           = 2
+local CT_PROPORTION         = 3
+local CT_CROP               = 4
+local CT_NONE               = 5
 
-local CT_SQUARE = 0
-local CT_MAX_WIDTH = 1
-local CT_MAX_SIZE = 2
-local CT_PROPORTION = 3
-local CT_CROP = 4
-local CT_NONE = 5
-
-local CF_JPEG = 0
-local CF_PNG = 1
-local CF_GIF = 2
-local CF_WEBP = 3
-
-local WAP_QUALITY = 70
-local TEST_QUALITY = 75
-local THUMB_QUALITY = 85
-local QUALITY_90 = 90
-local QUALITY_95 = 95
+local WAP_QUALITY           = 70
+local TEST_QUALITY          = 75
+local THUMB_QUALITY         = 85
+local QUALITY_90            = 90
+local QUALITY_95            = 95
 
 local type_list = {
 	test = {
@@ -36,6 +29,7 @@ local type_list = {
 		size				= 100,
 		quality			    = TEST_QUALITY,
 		gray			    = 1,
+		format			    = 'JPEG',
 	},
     original = {
 		type				= CT_NONE,
@@ -109,18 +103,18 @@ local function square(size)
     ret = zimg.crop(x, y, cols, cols)
     log.print(LOG_DEBUG, "zimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. cols .. ") ret = " .. ret)
     if ret ~= WI_OK then
-        return TS_FAILED
+        return WI_FAILED
     end
 
     ret = zimg.scale(size, size)
     log.print(LOG_DEBUG, "zimg.scale(" .. size .. ", " .. size .. ") ret = " .. ret)
     if ret ~= WI_OK then
         log.print(LOG_DEBUG, "square() failed")
-        return TS_FAILED
+        return WI_FAILED
     end
 
     log.print(LOG_DEBUG, "square() succ")
-    return TS_OK
+    return WI_OK
 end
 
 local function max_width(arg)
@@ -133,7 +127,7 @@ local function max_width(arg)
     log.print(LOG_DEBUG, "arg.size: " .. arg.size)
     if im_cols <= arg.size then
         log.print(LOG_DEBUG, "im_cols <= arg.size return.")
-        return TS_OK
+        return WI_OK
     end
 
     cols = arg.size
@@ -149,7 +143,7 @@ local function max_width(arg)
             ret = zimg.crop(0, 0, cols, rows)
             log.print(LOG_DEBUG, "zimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if ret ~= WI_OK then
-                return TS_FAILED
+                return WI_FAILED
             end
         else
             cols = math.min(arg.size, im_cols)
@@ -157,21 +151,13 @@ local function max_width(arg)
 
             ret = zimg.crop(0, 0, cols, rows)
             log.print(LOG_DEBUG, "zimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
-            if ret == WI_OK then
-                return TS_OK
-            else
-                return TS_FAILED
-            end
+            return ret 
         end
     else
         rows = math.ceil((cols / im_cols) * im_rows);
         ret = zimg.scale(cols, rows)
         log.print(LOG_DEBUG, "zimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
-        if ret == WI_OK then
-            return TS_OK
-        else
-            return TS_FAILED
-        end
+        return ret 
     end
 end
 
@@ -182,7 +168,7 @@ local function max_size(arg)
     local im_rows = zimg.rows(im)
 
     if im_cols <= arg.size and im_rows <= arg.size then
-        return TS_OK
+        return WI_OK
     end
 
     if arg.ratio then
@@ -195,9 +181,9 @@ local function max_size(arg)
             ret = zimg.crop(0, 0, cols, rows)
             log.print(LOG_DEBUG, "zimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret == WI_OK) then
-                return TS_OK 
+                return WI_OK 
             else
-                return TS_FAILED
+                return WI_FAILED
             end
         end
         if im_rows < (arg.size * arg.ratio) and ratio > (1.0 / arg.ratio) then
@@ -207,9 +193,9 @@ local function max_size(arg)
             ret = zimg.crop(0, 0, cols, rows)
             log.print(LOG_DEBUG, "zimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret == WI_OK) then
-                return TS_OK
+                return WI_OK
             else
-                return TS_FAILED
+                return WI_FAILED
             end
         end
 
@@ -223,7 +209,7 @@ local function max_size(arg)
             ret = zimg.crop(0, 0, cols, rows)
             log.print(LOG_DEBUG, "zimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret ~= WI_OK) then
-                return TS_FAILED
+                return WI_FAILED
             end
         elseif ratio < arg.ratio then
             cols = im_cols
@@ -234,7 +220,7 @@ local function max_size(arg)
             ret = zimg.crop(0, 0, cols, rows)
             log.print(LOG_DEBUG, "zimg.crop(" .. 0 .. ", " .. 0 .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
             if (ret ~= WI_OK) then
-                return TS_FAILED
+                return WI_FAILED
             end
         end
     end
@@ -249,11 +235,8 @@ local function max_size(arg)
 
     ret = zimg.scale(cols, rows)
     log.print(LOG_DEBUG, "zimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
-    if ret == WI_OK then
-        return TS_OK
-    else
-        return TS_FAILED
-    end
+
+    return ret 
 end
 
 local function proportion(arg)
@@ -266,24 +249,20 @@ local function proportion(arg)
 	if arg.ratio and ratio > arg.ratio then
 		cols = arg.cols
 		if im_cols < cols then
-            return TS_OK
+            return WI_OK
         end
         rows = math.ceil((cols / im_cols) * im_rows);
 	else
 		rows = arg.rows
 		if im_rows < rows then
-            return TS_OK
+            return WI_OK
         end
         cols = math.ceil((rows / im_rows) * im_cols);
     end
 
 	ret = zimg.scale(cols, rows)
     log.print(LOG_DEBUG, "zimg.scale(" .. cols .. ", " .. rows .. ") ret = " .. ret)
-	if ret == WI_OK then
-        return TS_OK
-    else
-        return TS_FAILED
-    end
+    return ret
 end
 
 local function crop(arg)
@@ -315,20 +294,18 @@ local function crop(arg)
 
     ret = zimg.crop(x, y, cols, rows)
     log.print(LOG_DEBUG, "zimg.crop(" .. x .. ", " .. y .. ", ".. cols .. ", " .. rows .. ") ret = " .. ret)
-    if ret ~= WI_OK then
-        return TS_FAILED
-    end
-    return TS_OK
+
+    return ret 
 end
 
 function f()
-    local code = TS_FAILED
+    local code = WI_FAILED
     local rtype = zimg.type()
     log.print(LOG_DEBUG, "rtype:" .. rtype)
 
     local arg = type_list[rtype]
     if arg then
-        local ret = -1
+        local ret = WI_FAILED
         log.print(LOG_DEBUG, "arg.type = " .. arg.type)
         local switch = {
             [CT_SQUARE]         = function()    ret = square(arg.size)     end,
@@ -336,36 +313,26 @@ function f()
             [CT_MAX_SIZE]       = function()    ret = max_size(arg)        end,
             [CT_PROPORTION]     = function()    ret = proportion(arg)      end,
             [CT_CROP]           = function()    ret = crop(arg)            end,
-            [CT_NONE]           = function()    ret = TS_OK                end,
+            [CT_NONE]           = function()    ret = WI_OK                end,
         }
         log.print(LOG_DEBUG, "start scale image...")
         local action = switch[arg.type]
         if action then
             action()
-            if ret == TS_OK then
+            if ret == WI_OK then
+                if arg.gray and arg.gray == 1 then
+                    ret = zimg.gray()
+                    log.print(LOG_DEBUG, "zimg.gray()")
+                end
+
                 if arg.quality then
                     ret = zimg.set_quality(arg.quality)
                     log.print(LOG_DEBUG, "zimg.set_quality(" .. arg.quality .. ")")
                 end
 
-                local format = zimg.format()
-                log.print(LOG_DEBUG, "zimg.format() = " .. format)
-                if not string.find(format, "GIF") then
-                    log.print(LOG_DEBUG, "not GIF, change")
-                    if arg.format and arg.format == CF_WEBP then
-                        log.print(LOG_DEBUG, "arg.format = WEBP")
-                        ret = zimg.set_format("WEBP")
-                    else
-                        log.print(LOG_DEBUG, "arg.format = JPEG")
-                        ret = zimg.set_format("JPEG")
-                    end
-                else
-                    log.print(LOG_DEBUG, "GIF, donot change")
-                end
-
-                if arg.gray and arg.gray == 1 then
-                    ret = zimg.gray()
-                    log.print(LOG_DEBUG, "zimg.gray()")
+                if arg.format then
+                    log.print(LOG_DEBUG, "arg.format = " .. arg.format)
+                    ret = zimg.set_format(arg.format)
                 end
 
                 code = ret

@@ -84,6 +84,7 @@ static int crop_wi (lua_State *L) {
 static int gray_wi (lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = MagickSetImageColorspace(larg->img, GRAYColorspace);
+    LOG_PRINT(LOG_DEBUG, "gray_wi: ret = %d", ret);
     lua_pushnumber(L, ret);
     return 1;
 }
@@ -163,6 +164,7 @@ int lua_convert(MagickWand *im, zimg_req_t *req)
 {
     int ret = -1;
     LOG_PRINT(LOG_DEBUG, "lua_convert: %s", req->type);
+    MagickResetIterator(im);
 
     if(req->thr_arg->L != NULL)
     {

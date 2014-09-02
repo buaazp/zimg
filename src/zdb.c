@@ -133,7 +133,7 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
     else
         result = convert(im, req);
     if(result == -1) goto err;
-    if(result == 1) to_save = false;
+    if(result == 0) to_save = false;
 
     buff = (char *)MagickWriteImageBlob(im, &img_size);
     if (buff == NULL) {

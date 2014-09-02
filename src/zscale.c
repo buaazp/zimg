@@ -192,7 +192,7 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows)
  */
 int convert(MagickWand *im, zimg_req_t *req)
 {
-    int result = 0, ret = -1;
+    int result = 1, ret = -1;
     ColorspaceType color_space;
 
     MagickResetIterator(im);
@@ -202,7 +202,7 @@ int convert(MagickWand *im, zimg_req_t *req)
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (!(cols == 0 && rows == 0)) {
         if (im_cols < cols || im_rows < rows) {
-            result = 1;
+            result = 0;
         } else {
             /* crop and scale */
             if (x == -1 && y == -1) {
