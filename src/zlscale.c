@@ -64,7 +64,8 @@ static int scale_wi (lua_State *L) {
 
     LOG_PRINT(LOG_DEBUG, "cols = %f rows = %f", cols, rows);
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = MagickScaleImage(larg->img, cols, rows);
+    int ret = MagickResizeImage(larg->img, cols, rows, LanczosFilter, 1.0);
+    //int ret = MagickScaleImage(larg->img, cols, rows);
     lua_pushnumber(L, ret);
     return 1;
 }
