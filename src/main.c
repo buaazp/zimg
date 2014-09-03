@@ -110,7 +110,7 @@ static void settings_init(void)
     settings.disable_type = 0;
     settings.script_on = 0;
     settings.script_name[0] = '\0';
-    str_lcpy(settings.dst_format, "JPEG", sizeof(settings.dst_format));
+    str_lcpy(settings.format, "none", sizeof(settings.format));
     settings.quality = 75;
     settings.mode = 1;
     settings.save_new = 1;
@@ -291,17 +291,10 @@ static int load_conf(const char *conf)
         str_lcpy(settings.script_name, lua_tostring(L, -1), sizeof(settings.script_name));
     lua_pop(L, 1);
 
-    int format = 1;
     lua_getglobal(L, "format");
-    if(lua_isnumber(L, -1))
-        format = (int)lua_tonumber(L, -1);
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.format, lua_tostring(L, -1), sizeof(settings.format));
     lua_pop(L, 1);
-
-    if (format == 2) {
-        str_lcpy(settings.dst_format, "WEBP", sizeof(settings.dst_format));
-    } else if (format == 0) {
-        settings.dst_format[0] = '\0';
-    }
 
     lua_getglobal(L, "quality");
     if(lua_isnumber(L, -1))

@@ -51,8 +51,8 @@ disable_args=0
 disable_type=0
 --lua process script
 script_name= pwd .. '/script/process.lua'
---format value: 0.keep intact 1.JPEG 2.webp
-format=1
+--format value: 'none' for original or other format names
+format='jpeg'
 --quality value: 1~100(default: 75)
 quality=75
 

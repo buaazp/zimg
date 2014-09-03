@@ -227,33 +227,29 @@ int convert(MagickWand *im, zimg_req_t *req)
     }
 
 	/* set quality */
-    if (req->quality > 0 && req->quality <= 100) {
-        int im_quality = MagickGetImageCompressionQuality(im);
-        im_quality = (im_quality == 0 ? 100 : im_quality);
-        LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
-        if (req->quality < im_quality) {
-            LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-            ret = MagickSetImageCompressionQuality(im, req->quality);
-            if (ret != MagickTrue) return -1;
-        }
-    } else {
-        int im_quality = MagickGetImageCompressionQuality(im);
-        im_quality = (im_quality == 0 ? 100 : im_quality);
-        LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
-        if (settings.quality < im_quality) {
-            LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", settings.quality);
-            ret = MagickSetImageCompressionQuality(im, settings.quality);
-            if (ret != MagickTrue) return -1;
-        }
-    }
-    int im_quality = MagickGetImageCompressionQuality(im);
-    LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
+    //int quality = 100;
+    //int im_quality = MagickGetImageCompressionQuality(im);
+    //im_quality = (im_quality == 0 ? 100 : im_quality);
+    //LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
+    //quality = req->quality < im_quality ? req->quality : im_quality;
+    LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
+    ret = MagickSetImageCompressionQuality(im, req->quality);
+    if (ret != MagickTrue) return -1;
 
 	/* set format */
-	if (settings.dst_format[0] != '\0') {
-        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", settings.dst_format);
-        ret = MagickSetImageFormat(im, settings.dst_format);
+    if (strncmp(req->fmt, "none", 4) != 0) {
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
+        ret = MagickSetImageFormat(im, req->fmt);
         if (ret != MagickTrue) return -1;
+    /* just for GIF images
+    } else {
+        char *im_format = MagickGetImageFormat(im);
+        if (strncmp(im_format, "GIF", 3) == 0) {
+            LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", "jpeg");
+            ret = MagickSetImageFormat(im, "jpeg");
+            if (ret != MagickTrue) return -1;
+        }
+    */
     }
 
     LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);

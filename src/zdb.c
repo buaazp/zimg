@@ -56,7 +56,7 @@ int del_ssdb(redisContext* c, const char *cache_key);
 int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
-    char cache_key[CACHE_KEY_SIZE];
+    char rsp_cache_key[CACHE_KEY_SIZE];
     char *buff = NULL;
     char *orig_buff = NULL;
     size_t img_size;
@@ -65,41 +65,37 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
-    gen_key(cache_key, req->md5, 0);
-    if(exist_db(req->thr_arg, cache_key) == -1)
+    if(exist_db(req->thr_arg, req->md5) == -1)
     {
-        LOG_PRINT(LOG_DEBUG, "Image [%s] is not existed.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Image [%s] is not existed.", req->md5);
         goto err;
     }
 
     if(settings.script_on == 1 && req->type != NULL)
-    {
-        gen_key(cache_key, req->md5, 1, req->type);
-    }
+        snprintf(rsp_cache_key, CACHE_KEY_SIZE, "%s:%s", req->md5, req->type);
     else
     {
         if(req->x != -1 || req->y != -1)
             req->proportion = 1;
-
-        if(!(req->proportion == 0 && req->width == 0 && req->height == 0))
-        {
-            gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
-        }
+        if(req->proportion == 0 && req->width == 0 && req->height == 0)
+            str_lcpy(rsp_cache_key, req->md5, CACHE_KEY_SIZE);
+        else
+            gen_key(rsp_cache_key, req->md5, 9, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->rotate, req->quality, req->fmt);
     }
 
-    if(find_cache_bin(req->thr_arg, cache_key, &buff, &img_size) == 1)
+    if(find_cache_bin(req->thr_arg, rsp_cache_key, &buff, &img_size) == 1)
     {
-        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", rsp_cache_key);
         to_save = false;
         goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
-    if(get_img_db(req->thr_arg, cache_key, &buff, &img_size) == 1)
+    if(get_img_db(req->thr_arg, rsp_cache_key, &buff, &img_size) == 1)
     {
-        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db succ.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db succ.", rsp_cache_key);
         if(img_size < CACHE_MAX_SIZE)
         {
-            set_cache_bin(req->thr_arg, cache_key, buff, img_size);
+            set_cache_bin(req->thr_arg, rsp_cache_key, buff, img_size);
         }
         to_save = false;
         goto done;
@@ -108,17 +104,16 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
     im = NewMagickWand();
     if (im == NULL) goto err;
 
-    gen_key(cache_key, req->md5, 0);
-    if(find_cache_bin(req->thr_arg, cache_key, &orig_buff, &img_size) == -1)
+    if(find_cache_bin(req->thr_arg, req->md5, &orig_buff, &img_size) == -1)
     {
-        if(get_img_db(req->thr_arg, cache_key, &orig_buff, &img_size) == -1)
+        if(get_img_db(req->thr_arg, req->md5, &orig_buff, &img_size) == -1)
         {
-            LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", req->md5);
             goto err;
         }
         else if(img_size < CACHE_MAX_SIZE)
         {
-            set_cache_bin(req->thr_arg, cache_key, orig_buff, img_size);
+            set_cache_bin(req->thr_arg, req->md5, orig_buff, img_size);
         }
     }
 
@@ -141,13 +136,9 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
 
-    if(settings.script_on == 1 && req->type != NULL)
-        gen_key(cache_key, req->md5, 1, req->type);
-    else
-        gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
     if(img_size < CACHE_MAX_SIZE)
     {
-        set_cache_bin(req->thr_arg, cache_key, buff, img_size);
+        set_cache_bin(req->thr_arg, rsp_cache_key, buff, img_size);
     }
 
 done:
@@ -171,11 +162,11 @@ done:
 
         if(save_new == 1)
         {
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", cache_key);
-            save_img_db(req->thr_arg, cache_key, buff, img_size);
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", rsp_cache_key);
+            save_img_db(req->thr_arg, rsp_cache_key, buff, img_size);
         }
         else
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_cache_key);
         result = 1;
     }
 
@@ -437,7 +428,7 @@ int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t
     LOG_PRINT(LOG_DEBUG, "admin_img_mode_db() start processing admin request...");
 
     char cache_key[CACHE_KEY_SIZE];
-    gen_key(cache_key, md5, 0);
+    str_lcpy(cache_key, md5, CACHE_KEY_SIZE);
     LOG_PRINT(LOG_DEBUG, "original key: %s", cache_key);
 
     result = exist_db(thr_arg, cache_key);
@@ -479,7 +470,7 @@ int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     char *orig_buff = NULL;
 
     char cache_key[CACHE_KEY_SIZE];
-    gen_key(cache_key, md5, 0);
+    str_lcpy(cache_key, md5, CACHE_KEY_SIZE);
     LOG_PRINT(LOG_DEBUG, "original key: %s", cache_key);
 
     size_t size = 0;

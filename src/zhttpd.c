@@ -833,10 +833,10 @@ done:
  */
 void get_request_cb(evhtp_request_t *req, void *arg)
 {
-    char *md5 = NULL;
-	size_t len;
+    char *md5 = NULL, *fmt = NULL, *type = NULL;
     zimg_req_t *zimg_req = NULL;
 	char *buff = NULL;
+	size_t len;
 
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
@@ -962,7 +962,6 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     evthr_t *thread = get_request_thr(req);
     thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
 
-    char *type = NULL, *fmt = NULL;
     int width, height, proportion, gray, x, y, rotate, quality, sv;
     width = 0;
     height = 0;
@@ -970,6 +969,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     gray = 0;
     x = -1;
     y = -1;
+    rotate = 0;
     quality = 0;
     sv = 0;
 
@@ -1045,8 +1045,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     zimg_req -> x = x;
     zimg_req -> y = y;
     zimg_req -> rotate = rotate;
-    zimg_req -> quality = quality;
-    zimg_req -> fmt = fmt;
+    zimg_req -> quality = (quality != 0 ? quality : settings.quality);
+    zimg_req -> fmt = (fmt != NULL ? fmt : settings.format);
     zimg_req -> sv = sv;
     zimg_req -> thr_arg = thr_arg;
 
@@ -1109,15 +1109,11 @@ err:
     LOG_PRINT(LOG_DEBUG, "============get_request_cb() ERROR!===============");
 
 done:
-	if(buff)
-		free(buff);
-    if(zimg_req)
-    {
-        free(zimg_req->md5);
-        free(zimg_req->type);
-        free(zimg_req->fmt);
-        free(zimg_req);
-    }
+    free(fmt);
+    free(md5);
+    free(type);
+    free(zimg_req);
+    free(buff);
 }
 
 // remove a image http://127.0.0.1:4869/admin?md5=5f189d8ec57f5a5a0d3dcba47fa797e2&t=1

@@ -93,7 +93,7 @@ struct setting{
     int disable_type;
     int script_on;
     char script_name[512];
-    char dst_format[16];
+    char format[16];
     int quality;
     int mode;
     int save_new;

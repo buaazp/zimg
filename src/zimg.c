@@ -79,14 +79,12 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     str_lcpy(md5, md5sum, 33);
     LOG_PRINT(LOG_DEBUG, "md5: %s", md5sum);
 
-    char cache_key[CACHE_KEY_SIZE];
     char save_path[512];
     char save_name[512];
-    gen_key(cache_key, md5sum, 0);
 
     if(settings.mode != 1)
     {
-        if(exist_db(thr_arg, cache_key) == 1)
+        if(exist_db(thr_arg, md5sum) == 1)
         {
             LOG_PRINT(LOG_DEBUG, "File Exist, Needn't Save.");
             result = 1;
@@ -95,7 +93,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
         LOG_PRINT(LOG_DEBUG, "exist_db not found. Begin to Save File.");
 
 
-        if(save_img_db(thr_arg, cache_key, buff, len) == -1)
+        if(save_img_db(thr_arg, md5sum, buff, len) == -1)
         {
             LOG_PRINT(LOG_DEBUG, "save_img_db failed.");
             goto done;
@@ -138,8 +136,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
 cache:
     if(len < CACHE_MAX_SIZE)
     {
-        //gen_key(cache_key, md5sum, 0);
-        set_cache_bin(thr_arg, cache_key, buff, len);
+        set_cache_bin(thr_arg, md5sum, buff, len);
     }
     result = 1;
 
@@ -209,7 +206,7 @@ done:
 int get_img(zimg_req_t *req, evhtp_request_t *request)
 {
     int result = -1;
-    char cache_key[CACHE_KEY_SIZE];
+    char rsp_cache_key[CACHE_KEY_SIZE];
     int fd = -1;
     struct stat f_stat;
     char *buff = NULL;
@@ -233,29 +230,21 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
 
-    // to gen cache_key like this: 926ee2f570dc50b2575e35a6712b08ce:0:0:1:0
     if(settings.script_on == 1 && req->type != NULL)
-    {
-        gen_key(cache_key, req->md5, 1, req->type);
-    }
+        snprintf(rsp_cache_key, CACHE_KEY_SIZE, "%s:%s", req->md5, req->type);
     else
     {
         if(req->x != -1 || req->y != -1)
             req->proportion = 1;
-
         if(req->proportion == 0 && req->width == 0 && req->height == 0)
-        {
-            gen_key(cache_key, req->md5, 0);
-        }
+            str_lcpy(rsp_cache_key, req->md5, CACHE_KEY_SIZE);
         else
-        {
-            gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
-        }
+            gen_key(rsp_cache_key, req->md5, 9, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->rotate, req->quality, req->fmt);
     }
 
-    if(find_cache_bin(req->thr_arg, cache_key, &buff, &len) == 1)
+    if(find_cache_bin(req->thr_arg, rsp_cache_key, &buff, &len) == 1)
     {
-        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", rsp_cache_key);
         to_save = false;
         goto done;
     }
@@ -271,11 +260,13 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     else
     {
         char name[128];
-        snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_q%d", req->width, req->height,
+        snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_r%d_q%d.%s", req->width, req->height,
                 req->proportion, 
                 req->gray, 
                 req->x, req->y, 
-                req->quality);
+                req->rotate, 
+                req->quality,
+                req->fmt);
 
         if(req->width == 0 && req->height == 0 && req->proportion == 0)
         {
@@ -295,16 +286,15 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         if (im == NULL) goto err;
 
         int ret;
-        gen_key(cache_key, req->md5, 0);
-        if(find_cache_bin(req->thr_arg, cache_key, &orig_buff, &len) == 1)
+        if(find_cache_bin(req->thr_arg, req->md5, &orig_buff, &len) == 1)
         {
-            LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", cache_key);
+            LOG_PRINT(LOG_DEBUG, "Hit Orignal Image Cache[Key: %s].", req->md5);
 
             ret = MagickReadImageBlob(im, (const unsigned char *)orig_buff, len);
             if (ret != MagickTrue)
             {
                 LOG_PRINT(LOG_DEBUG, "Open Original Image From Blob Failed! Begin to Open it From Disk.");
-                del_cache(req->thr_arg, cache_key);
+                del_cache(req->thr_arg, req->md5);
                 ret = MagickReadImage(im, orig_path);
                 if (ret != MagickTrue)
                 {
@@ -323,7 +313,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                             LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
                             goto err;
                         }
-                        set_cache_bin(req->thr_arg, cache_key, new_buff, len);
+                        set_cache_bin(req->thr_arg, req->md5, new_buff, len);
                         free(new_buff);
                     }
                 }
@@ -351,7 +341,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                         LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
                         goto err;
                     }
-                    set_cache_bin(req->thr_arg, cache_key, new_buff, len);
+                    set_cache_bin(req->thr_arg, req->md5, new_buff, len);
                     free(new_buff);
                 }
             }
@@ -423,11 +413,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
 
     if(len < CACHE_MAX_SIZE)
     {
-        if(settings.script_on == 1 && req->type != NULL)
-            gen_key(cache_key, req->md5, 1, req->type);
-        else
-            gen_key(cache_key, req->md5, 7, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->quality);
-        set_cache_bin(req->thr_arg, cache_key, buff, len);
+        set_cache_bin(req->thr_arg, rsp_cache_key, buff, len);
     }
 
 done:

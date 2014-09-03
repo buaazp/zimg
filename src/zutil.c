@@ -585,22 +585,19 @@ int gen_key(char *key, char *md5, ...)
     int argc = va_arg(arg_ptr, int);
     char tmp[CACHE_KEY_SIZE];
     //LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
-    if(argc == 1)
-    {
-        char *argv = va_arg(arg_ptr, char *);
-        snprintf(tmp, CACHE_KEY_SIZE, "%s:%s", key, argv);
-        snprintf(key, CACHE_KEY_SIZE, "%s", tmp);
-    }
-    else
+    if(argc > 1)
     {
         int i, argv;
-        for(i = 0; i<argc; i++)
+        for(i = 0; i<argc-1; i++)
         {
             argv = va_arg(arg_ptr, int);
             snprintf(tmp, CACHE_KEY_SIZE, "%s:%d", key, argv);
             snprintf(key, CACHE_KEY_SIZE, "%s", tmp);
             //LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
         }
+        char *fmt = va_arg(arg_ptr, char *);
+        snprintf(tmp, CACHE_KEY_SIZE, "%s:%s", key, fmt);
+        snprintf(key, CACHE_KEY_SIZE, "%s", tmp);
     }
     va_end(arg_ptr);
     LOG_PRINT(LOG_DEBUG, "key: %s", key);
