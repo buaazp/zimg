@@ -160,15 +160,19 @@ done:
     result = evbuffer_add(request->buffer_out, buff, img_size);
     if(result != -1)
     {
-        if(settings.save_new != 0 && to_save == true)
+        int save_new = 0;
+        if(to_save == true)
         {
-            if(settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
+            if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
             {
-                LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", cache_key);
-                save_img_db(req->thr_arg, cache_key, buff, img_size);
+                save_new = 1;
             }
-            else
-                LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);
+        }
+
+        if(save_new == 1)
+        {
+            LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", cache_key);
+            save_img_db(req->thr_arg, cache_key, buff, img_size);
         }
         else
             LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", cache_key);

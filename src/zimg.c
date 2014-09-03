@@ -277,9 +277,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                 req->x, req->y, 
                 req->quality);
 
-        snprintf(orig_path, strlen(whole_path) + 6, "%s/0*0", whole_path);
-        LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
-
         if(req->width == 0 && req->height == 0 && req->proportion == 0)
         {
             LOG_PRINT(LOG_DEBUG, "Return original image.");
@@ -403,19 +400,23 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     }
 
     //LOG_PRINT(LOG_INFO, "New Image[%s]", rsp_path);
-    if(settings.save_new != 0 && to_save == true)
+    int save_new = 0;
+    if(to_save == true)
     {
-        if(settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
+        if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
         {
-            LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
-            if(new_img(buff, len, rsp_path) == -1)
-            {
-                LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
-                LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
-            }
+            save_new = 1;
         }
-        else
-            LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);
+    }
+
+    if(save_new == 1)
+    {
+        LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
+        if(new_img(buff, len, rsp_path) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
+            LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);
+        }
     }
     else
         LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_path);

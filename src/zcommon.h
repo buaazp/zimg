@@ -60,7 +60,10 @@ typedef struct zimg_req_s {
     int gray;
     int x;
     int y;
+    int rotate;
     int quality;
+    char *fmt;
+    int sv;
     thr_arg_t *thr_arg;
 } zimg_req_t;
 

@@ -35,8 +35,6 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <magick/api.h>
-#include "libevhtp/evhtp-config.h"
 #include "libevhtp/evhtp.h"
 #include "zcommon.h"
 #include "zhttpd.h"
@@ -610,7 +608,11 @@ int main(int argc, char **argv)
     ExceptionInfo *exception=AcquireExceptionInfo();
 
     MagickInfo *jpeg_info = (MagickInfo *)GetMagickInfo("JPEG", exception);
+    if(jpeg_info->thread_support != MagickTrue)
+        LOG_PRINT(LOG_INFO, "thread_support != MagickTrue");
     jpeg_info->thread_support = MagickTrue;
+    if(jpeg_info->thread_support != MagickTrue)
+        LOG_PRINT(LOG_INFO, "thread_support != MagickTrue");
     MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
     jpg_info->thread_support = MagickTrue;
 

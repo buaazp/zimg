@@ -962,8 +962,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     evthr_t *thread = get_request_thr(req);
     thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
 
-    char *type = NULL;
-    int width, height, proportion, gray, x, y, quality;
+    char *type = NULL, *fmt = NULL;
+    int width, height, proportion, gray, x, y, rotate, quality, sv;
     width = 0;
     height = 0;
     proportion = 1;
@@ -971,6 +971,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     x = -1;
     y = -1;
     quality = 0;
+    sv = 0;
 
     evhtp_kvs_t *params;
     params = req->uri->query;
@@ -993,8 +994,21 @@ void get_request_cb(evhtp_request_t *req, void *arg)
             x = (str_x) ? atoi(str_x) : -1;
             y = (str_y) ? atoi(str_y) : -1;
 
+            const char *str_r = evhtp_kv_find(params, "r");
+            rotate = (str_r) ? atoi(str_r) : 0;
+
             const char *str_q = evhtp_kv_find(params, "q");
             quality = (str_q) ? atoi(str_q) : 0;
+
+            const char *str_f = evhtp_kv_find(params, "f");
+            if(str_f)
+            {
+                size_t fmt_len = strlen(str_f) + 1;
+                fmt = (char *)malloc(fmt_len);
+                if(fmt != NULL)
+                    str_lcpy(fmt, str_f, fmt_len);
+                LOG_PRINT(LOG_DEBUG, "fmt = %s", fmt);
+            }
         }
 
         if(settings.disable_type != 1)
@@ -1009,6 +1023,10 @@ void get_request_cb(evhtp_request_t *req, void *arg)
                 LOG_PRINT(LOG_DEBUG, "type = %s", type);
             }
         }
+    }
+    else
+    {
+        sv = 1;
     }
 
     zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
@@ -1026,11 +1044,15 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     zimg_req -> gray = gray;
     zimg_req -> x = x;
     zimg_req -> y = y;
+    zimg_req -> rotate = rotate;
     zimg_req -> quality = quality;
+    zimg_req -> fmt = fmt;
+    zimg_req -> sv = sv;
     zimg_req -> thr_arg = thr_arg;
 
     int get_img_rst = -1;
-    get_img_rst = settings.get_img(zimg_req, req);
+    //get_img_rst = settings.get_img(zimg_req, req);
+    get_img_rst = get_img(zimg_req, req);
 
     if(get_img_rst == -1)
     {
@@ -1093,6 +1115,7 @@ done:
     {
         free(zimg_req->md5);
         free(zimg_req->type);
+        free(zimg_req->fmt);
         free(zimg_req);
     }
 }

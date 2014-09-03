@@ -97,8 +97,6 @@ include_directories(
     #${JPEG_INCLUDE_DIRS}
     #${GIF_INCLUDE_DIRS}
     #${PNG_INCLUDE_DIRS}
-    #${MAGICK_INCLUDE_DIR}
-    #${MAGICKWAND_INCLUDE_DIR}
     ${ImageMagick_INCLUDE_DIRS}
 )
 
@@ -147,7 +145,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -DDEBUG")
 endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function -Wno-deprecated -DMAGICKCORE_HDRI_ENABLE -DMAGICKCORE_QUANTUM_DEPTH=16")
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function -Wno-deprecated -DMAGICKCORE_HDRI_ENABLE -DMAGICKCORE_QUANTUM_DEPTH=16")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function -Wno-deprecated")
 message("Build Type: ${CMAKE_BUILD_TYPE}")
 message("Std CFLAGS: ${CMAKE_C_FLAGS}")
 
