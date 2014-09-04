@@ -194,6 +194,7 @@ int convert(MagickWand *im, zimg_req_t *req)
             ret = MagickSetImageFormat(im, "jpeg");
             if (ret != MagickTrue) return -1;
         }
+        free(im_format)
     */
     }
 
