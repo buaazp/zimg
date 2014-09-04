@@ -145,6 +145,9 @@ int convert(MagickWand *im, zimg_req_t *req)
     ColorspaceType color_space;
 
     MagickResetIterator(im);
+    OrientationType orientation = MagickGetImageOrientation(im);
+    LOG_PRINT(LOG_INFO, "orientation = %d", orientation);
+    MagickSetImageOrientation(im, TopLeftOrientation);
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (!(cols == 0 && rows == 0)) {

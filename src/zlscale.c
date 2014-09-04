@@ -193,6 +193,7 @@ int lua_convert(MagickWand *im, zimg_req_t *req)
     int ret = -1;
     LOG_PRINT(LOG_DEBUG, "lua_convert: %s", req->type);
     MagickResetIterator(im);
+    MagickSetImageOrientation(im, TopLeftOrientation);
 
     if(req->thr_arg->L != NULL)
     {
