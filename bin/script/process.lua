@@ -28,6 +28,7 @@ local type_list = {
 		type				= CT_SQUARE,
 		size				= 100,
 		quality			    = TEST_QUALITY,
+		rotate              = 90,
 		gray			    = 1,
 		format			    = 'JPEG',
 	},
@@ -320,6 +321,11 @@ function f()
         if action then
             action()
             if ret == WI_OK then
+                if arg.rotate then
+                    ret = zimg.rotate(arg.rotate)
+                    log.print(LOG_DEBUG, "zimg.rotate(" .. arg.rotate .. ")")
+                end
+
                 if arg.gray and arg.gray == 1 then
                     ret = zimg.gray()
                     log.print(LOG_DEBUG, "zimg.gray()")

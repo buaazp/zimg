@@ -162,21 +162,43 @@ int convert(MagickWand *im, zimg_req_t *req)
         }
     }
 
+    /* rotate image */
+    if (req->rotate != 0) {
+        LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d)", req->rotate);
+        PixelWand *background = NewPixelWand();
+        if (background == NULL) return -1;
+        ret = PixelSetColor(background, "white");
+        if (ret != MagickTrue) {
+            DestroyPixelWand(background);
+            return -1;
+        }
+        ret = MagickRotateImage(im, background, req->rotate);
+        LOG_PRINT(LOG_DEBUG, "rotate() ret = %d", ret);
+        DestroyPixelWand(background);
+        if (ret != MagickTrue) return -1;
+    }
+
     /* set gray */
     color_space = MagickGetImageColorspace(im);
     if (req->gray && color_space != GRAYColorspace) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
-        ret = MagickSetImageColorspace(im, GRAYColorspace);
+        //several ways to grayscale an image:
+        //ret = MagickSetImageColorspace(im, GRAYColorspace);
+        //ret = MagickQuantizeImage(im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
+        //ret = MagickSeparateImageChannel(im, GrayChannel);
+        ret = MagickSetImageType(im, GrayscaleType);
         LOG_PRINT(LOG_DEBUG, "gray() ret = %d", ret);
         if (ret != MagickTrue) return -1;
     }
 
 	/* set quality */
-    //int quality = 100;
-    //int im_quality = MagickGetImageCompressionQuality(im);
-    //im_quality = (im_quality == 0 ? 100 : im_quality);
-    //LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
-    //quality = req->quality < im_quality ? req->quality : im_quality;
+    /*
+    int quality = 100;
+    int im_quality = MagickGetImageCompressionQuality(im);
+    im_quality = (im_quality == 0 ? 100 : im_quality);
+    LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
+    quality = req->quality < im_quality ? req->quality : im_quality;
+    */
     LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
     ret = MagickSetImageCompressionQuality(im, req->quality);
     if (ret != MagickTrue) return -1;
@@ -186,16 +208,6 @@ int convert(MagickWand *im, zimg_req_t *req)
         LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
         ret = MagickSetImageFormat(im, req->fmt);
         if (ret != MagickTrue) return -1;
-    /* just for GIF images
-    } else {
-        char *im_format = MagickGetImageFormat(im);
-        if (strncmp(im_format, "GIF", 3) == 0) {
-            LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", "jpeg");
-            ret = MagickSetImageFormat(im, "jpeg");
-            if (ret != MagickTrue) return -1;
-        }
-        free(im_format)
-    */
     }
 
     LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);

@@ -83,10 +83,35 @@ static int crop_wi (lua_State *L) {
     return 1;
 }
 
+static int rotate_wi (lua_State *L) {
+    int ret = -1;
+    double rotate = lua_tonumber(L, 1);
+
+    lua_arg *larg = pthread_getspecific(thread_key);
+    LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d)", rotate);
+    PixelWand *background = NewPixelWand();
+    if (background == NULL) {
+        lua_pushnumber(L, ret);
+        return 1;
+    }
+    ret = PixelSetColor(background, "white");
+    if (ret != MagickTrue) {
+        DestroyPixelWand(background);
+        lua_pushnumber(L, ret);
+        return 1;
+    }
+    ret = MagickRotateImage(larg->img, background, rotate);
+    LOG_PRINT(LOG_DEBUG, "rotate() ret = %d", ret);
+
+    DestroyPixelWand(background);
+    lua_pushnumber(L, ret);
+    return 1;
+}
+
 static int gray_wi (lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
-    int ret = MagickSetImageColorspace(larg->img, GRAYColorspace);
-    LOG_PRINT(LOG_DEBUG, "gray_wi: ret = %d", ret);
+    int ret = MagickSetImageType(larg->img, GrayscaleType);
+    LOG_PRINT(LOG_INFO, "gray_wi: ret = %d", ret);
     lua_pushnumber(L, ret);
     return 1;
 }
@@ -133,6 +158,7 @@ const struct luaL_reg zimg_lib[] = {
     {"format",              get_wi_format       },
     {"scale",               scale_wi            },
     {"crop",                crop_wi             },
+    {"rotate",              rotate_wi           },
     {"gray",                gray_wi             },
     {"set_quality",         set_wi_quality      },
     {"set_format",          set_wi_format       },
