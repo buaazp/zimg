@@ -142,11 +142,8 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows)
 int convert(MagickWand *im, zimg_req_t *req)
 {
     int result = 1, ret = -1;
-    ColorspaceType color_space;
 
     MagickResetIterator(im);
-    OrientationType orientation = MagickGetImageOrientation(im);
-    LOG_PRINT(LOG_INFO, "orientation = %d", orientation);
     MagickSetImageOrientation(im, TopLeftOrientation);
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;

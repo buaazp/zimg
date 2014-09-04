@@ -11,7 +11,7 @@ local type_list = {
 }
 local OK                    = 1
 
-function f()
+function f() --The main function must be named f() for zimg-lua
     local code = -1
     local rtype = zimg.type() --Get the request type from url argument
 
