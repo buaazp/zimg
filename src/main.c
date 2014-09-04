@@ -139,7 +139,7 @@ static void set_callback(int mode)
         settings.info_img = info_img;
         settings.admin_img = admin_img;
     }
-    else if(mode == 2)
+    else
     {
         settings.get_img = get_img_mode_db;
         settings.info_img = info_img_mode_db;
@@ -602,10 +602,10 @@ int main(int argc, char **argv)
 
     MagickInfo *jpeg_info = (MagickInfo *)GetMagickInfo("JPEG", exception);
     if(jpeg_info->thread_support != MagickTrue)
-        LOG_PRINT(LOG_INFO, "thread_support != MagickTrue");
+        LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
     jpeg_info->thread_support = MagickTrue;
     if(jpeg_info->thread_support != MagickTrue)
-        LOG_PRINT(LOG_INFO, "thread_support != MagickTrue");
+        LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
     MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
     jpg_info->thread_support = MagickTrue;
 

@@ -75,8 +75,6 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
         snprintf(rsp_cache_key, CACHE_KEY_SIZE, "%s:%s", req->md5, req->type);
     else
     {
-        if(req->x != -1 || req->y != -1)
-            req->proportion = 1;
         if(req->proportion == 0 && req->width == 0 && req->height == 0)
             str_lcpy(rsp_cache_key, req->md5, CACHE_KEY_SIZE);
         else
@@ -469,24 +467,22 @@ int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     MagickWand *im = NULL;
     char *orig_buff = NULL;
 
-    char cache_key[CACHE_KEY_SIZE];
-    str_lcpy(cache_key, md5, CACHE_KEY_SIZE);
-    LOG_PRINT(LOG_DEBUG, "original key: %s", cache_key);
+    LOG_PRINT(LOG_DEBUG, "original key: %s", md5);
 
     size_t size = 0;
-    if(get_img_db(thr_arg, cache_key, &orig_buff, &size) == -1)
+    if(get_img_db(thr_arg, md5, &orig_buff, &size) == -1)
     {
         result = 0;
-        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", md5);
         goto err;
     }
 
     im = NewMagickWand();
     if (im == NULL) goto err;
-    int ret = -1;
 
+    int ret = -1;
     ret = MagickReadImageBlob(im, (const unsigned char *)orig_buff, size);
-    if (result != MagickTrue)
+    if (ret != MagickTrue)
     {
         LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
         goto err;

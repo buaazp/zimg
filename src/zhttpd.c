@@ -352,6 +352,7 @@ void add_info(MagickWand *im, evhtp_request_t *req)
     evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
     cJSON_Delete(j_ret);
     free(ret_str_unformat);
+    free(format);
 }
 
 /**
@@ -965,7 +966,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     int width, height, proportion, gray, x, y, rotate, quality, sv;
     width = 0;
     height = 0;
-    proportion = 1;
+    proportion = 2;
     gray = 0;
     x = -1;
     y = -1;
@@ -984,15 +985,28 @@ void get_request_cb(evhtp_request_t *req, void *arg)
             width = (str_w) ? atoi(str_w) : 0;
             height = (str_h) ? atoi(str_h) : 0;
 
-            const char *str_p = evhtp_kv_find(params, "p");
+            if(width == 0 || height == 0)
+            {
+                proportion = 1;
+            }
+            else
+            {
+                const char *str_p = evhtp_kv_find(params, "p");
+                proportion = (str_p) ? atoi(str_p) : 2;
+            }
+
             const char *str_g = evhtp_kv_find(params, "g");
-            proportion = (str_p) ? atoi(str_p) : 1;
             gray = (str_g) ? atoi(str_g) : 0;
 
             const char *str_x = evhtp_kv_find(params, "x");
             const char *str_y = evhtp_kv_find(params, "y");
             x = (str_x) ? atoi(str_x) : -1;
             y = (str_y) ? atoi(str_y) : -1;
+
+            if(x != -1 || y != -1)
+            {
+                proportion = 1;
+            }
 
             const char *str_r = evhtp_kv_find(params, "r");
             rotate = (str_r) ? atoi(str_r) : 0;
@@ -1029,6 +1043,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         sv = 1;
     }
 
+    quality = (quality != 0 ? quality : settings.quality);
     zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
     if(zimg_req == NULL)
     {
@@ -1045,14 +1060,13 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     zimg_req -> x = x;
     zimg_req -> y = y;
     zimg_req -> rotate = rotate;
-    zimg_req -> quality = (quality != 0 ? quality : settings.quality);
+    zimg_req -> quality = quality;
     zimg_req -> fmt = (fmt != NULL ? fmt : settings.format);
     zimg_req -> sv = sv;
     zimg_req -> thr_arg = thr_arg;
 
     int get_img_rst = -1;
-    //get_img_rst = settings.get_img(zimg_req, req);
-    get_img_rst = get_img(zimg_req, req);
+    get_img_rst = settings.get_img(zimg_req, req);
 
     if(get_img_rst == -1)
     {
@@ -1060,8 +1074,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         if(type)
             LOG_PRINT(LOG_ERROR, "%s fail pic:%s t:%s", address, md5, type);
         else
-            LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
-                address, md5, width, height, proportion, gray, x, y, quality); 
+            LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s",
+                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt); 
         goto err;
     }
     if(get_img_rst == 2)
@@ -1070,8 +1084,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         if(type)
             LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s t:%s", address, md5, type);
         else
-            LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d",
-                address, md5, width, height, proportion, gray, x, y, quality); 
+            LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s",
+                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt); 
         evhtp_send_reply(req, EVHTP_RES_NOTMOD);
         goto done;
     }
@@ -1087,8 +1101,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     if(type)
         LOG_PRINT(LOG_INFO, "%s succ pic:%s t:%s size:%d", address, md5, type, len); 
     else
-        LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d q:%d size:%d", 
-                address, md5, width, height, proportion, gray, x, y, quality, 
+        LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s size:%d", 
+                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt, 
                 len);
     LOG_PRINT(LOG_DEBUG, "============get_request_cb() DONE!===============");
     goto done;

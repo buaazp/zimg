@@ -234,8 +234,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         snprintf(rsp_cache_key, CACHE_KEY_SIZE, "%s:%s", req->md5, req->type);
     else
     {
-        if(req->x != -1 || req->y != -1)
-            req->proportion = 1;
         if(req->proportion == 0 && req->width == 0 && req->height == 0)
             str_lcpy(rsp_cache_key, req->md5, CACHE_KEY_SIZE);
         else
