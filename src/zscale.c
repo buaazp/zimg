@@ -145,8 +145,6 @@ int convert(MagickWand *im, zimg_req_t *req)
     ColorspaceType color_space;
 
     MagickResetIterator(im);
-    unsigned long im_cols = MagickGetImageWidth(im);
-    unsigned long im_rows = MagickGetImageHeight(im);
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (!(cols == 0 && rows == 0)) {
@@ -179,8 +177,7 @@ int convert(MagickWand *im, zimg_req_t *req)
     }
 
     /* set gray */
-    color_space = MagickGetImageColorspace(im);
-    if (req->gray && color_space != GRAYColorspace) {
+    if (req->gray == 1) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
         //several ways to grayscale an image:
         //ret = MagickSetImageColorspace(im, GRAYColorspace);
