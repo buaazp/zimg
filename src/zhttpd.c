@@ -328,6 +328,12 @@ static int print_headers(evhtp_header_t * header, void * arg)
 	return 1;
 }
 
+/**
+* @brief add_info Added image info to the request
+*
+* @param im The image struct
+* @param req The evhtp request
+*/
 void add_info(MagickWand *im, evhtp_request_t *req)
 {
     MagickSizeType size = MagickGetImageSize(im);
@@ -1130,7 +1136,6 @@ done:
     free(buff);
 }
 
-// remove a image http://127.0.0.1:4869/admin?md5=5f189d8ec57f5a5a0d3dcba47fa797e2&t=1
 /**
  * @brief admin_request_cb the callback function of admin requests
  *
@@ -1311,6 +1316,12 @@ err:
     return;
 }
 
+/**
+* @brief info_request_cb the callback funtion of get image info
+*
+* @param req the evhtp request
+* @param arg the callback args
+*/
 void info_request_cb(evhtp_request_t *req, void *arg)
 {
     char md5[33];

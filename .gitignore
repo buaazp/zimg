@@ -30,6 +30,8 @@ tags
 *.log
 *.dSYM
 
+doc/html/
+
 bin/img/
 bin/log/
 bin/zimg
