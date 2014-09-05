@@ -966,7 +966,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     int width, height, proportion, gray, x, y, rotate, quality, sv;
     width = 0;
     height = 0;
-    proportion = 2;
+    proportion = 1;
     gray = 0;
     x = -1;
     y = -1;

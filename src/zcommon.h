@@ -68,6 +68,7 @@ typedef struct zimg_req_s {
 } zimg_req_t;
 
 struct setting{
+    lua_State *L;
     int is_daemon;
     char ip[128];
     int port;

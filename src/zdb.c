@@ -195,6 +195,7 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
     else if(settings.mode == 3 && thr_arg->ssdb_conn != NULL)
         ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
 
+    /*
     if(ret == -1 && settings.mode == 3)
     {
         if(thr_arg->ssdb_conn != NULL)
@@ -213,6 +214,7 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
             ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
         }
     }
+    */
     return ret;
 }
 
@@ -318,6 +320,7 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
     else if(settings.mode == 3)
         ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
 
+    /*
     if(ret == -1 && settings.mode == 3)
     {
         if(thr_arg->ssdb_conn != NULL)
@@ -334,9 +337,9 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
             thr_arg->ssdb_conn = c;
             LOG_PRINT(LOG_DEBUG, "SSDB Server Reconnected.");
             ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
-            //evthr_set_aux(thr_arg->thread, thr_arg);
         }
     }
+    */
     return ret;
 }
 

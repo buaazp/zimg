@@ -85,6 +85,7 @@ void usage(int argc, char **argv)
  */
 static void settings_init(void) 
 {
+    settings.L = NULL;
     settings.is_daemon = 0;
     str_lcpy(settings.ip, "0.0.0.0", sizeof(settings.ip));
     settings.port = 4869;
@@ -342,8 +343,9 @@ static int load_conf(const char *conf)
     if(lua_isnumber(L, -1))
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
-    
-    lua_close(L);
+
+    settings.L = L;
+    //lua_close(L);
 
     return 1;
 }

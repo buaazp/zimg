@@ -21,12 +21,15 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <ctype.h>
 #include <sys/stat.h>
+#include <ctype.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include "zutil.h"
 #include "zlog.h"
 
@@ -277,6 +280,19 @@ int is_file(const char *filename)
  */
 int is_img(const char *filename)
 {
+    int isimg = -1;
+
+    lua_getglobal(settings.L, "is_img");
+    lua_pushstring(settings.L, filename);
+    if(lua_pcall(settings.L, 1, 1, 0) != 0)
+    {
+        LOG_PRINT(LOG_WARNING, "lua is_img() failed!");
+        return isimg;
+    }
+    isimg = (int)lua_tonumber(settings.L, -1);
+    lua_pop(settings.L, 1);
+
+    /*
     char *imgType[] = {"jpg", "jpeg", "png", "gif", "webp"};
     char *lower= (char *)malloc(strlen(filename) + 1);
     if(lower == NULL)
@@ -285,7 +301,6 @@ int is_img(const char *filename)
     }
     char *tmp;
     int i;
-    int isimg = -1;
     for(i = 0; i < strlen(filename); i++)
     {
         lower[i] = tolower(filename[i]);
@@ -301,6 +316,7 @@ int is_img(const char *filename)
         }
     }
     free(lower);
+    */
     return isimg;
 }
 
