@@ -42,14 +42,14 @@ mc_port         = 11211
 --log config
 --log_level output specified level of log to logfile
 --[[
-LOG_FATAL 0           System is unusable
-LOG_ALERT 1           Action must be taken immediately
-LOG_CRIT 2            Critical conditions
-LOG_ERROR 3           Error conditions
-LOG_WARNING 4         Warning conditions
-LOG_NOTICE 5          Normal, but significant
-LOG_INFO 6            Information
-LOG_DEBUG 7           DEBUG message
+LOG_FATAL 0     System is unusable
+LOG_ALERT 1     Action must be taken immediately
+LOG_CRIT 2      Critical conditions
+LOG_ERROR 3     Error conditions
+LOG_WARNING 4   Warning conditions
+LOG_NOTICE 5    Normal, but significant
+LOG_INFO 6      Information
+LOG_DEBUG 7     DEBUG message
 ]]
 --输出log级别
 log_level       = 6
@@ -110,7 +110,7 @@ ssdb_port       = 8888
 function is_img(type_name)
     local found = -1
     for _, allowed in pairs(allowed_type) do
-        if type_name == allowed then
+        if string.lower(type_name) == allowed then
             found = 1
             break
         end

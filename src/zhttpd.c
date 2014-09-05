@@ -504,7 +504,7 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
         evbuffer_add_printf(mp_arg->req->buffer_out, 
             "<h1>MD5: %s</h1>\n"
             "Image upload successfully! You can get this image via this address:<br/><br/>\n"
-            "<a href=\"/%s\">http://yourhostname:%d/%s</a>?w=width&h=height&p=proportion&g=isgray&x=crop_position_x&y=crop_position_y&q=quality\n",
+            "<a href=\"/%s\">http://yourhostname:%d/%s</a>?w=width&h=height&g=isgray&x=position_x&y=position_y&r=rotate&q=quality&f=format\n",
             md5sum, md5sum, settings.port, md5sum
             );
     }
@@ -991,15 +991,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
             width = (str_w) ? atoi(str_w) : 0;
             height = (str_h) ? atoi(str_h) : 0;
 
-            if(width == 0 || height == 0)
-            {
-                proportion = 1;
-            }
-            else
-            {
-                const char *str_p = evhtp_kv_find(params, "p");
-                proportion = (str_p) ? atoi(str_p) : 2;
-            }
+            const char *str_p = evhtp_kv_find(params, "p");
+            proportion = (str_p) ? atoi(str_p) : 1;
 
             const char *str_g = evhtp_kv_find(params, "g");
             gray = (str_g) ? atoi(str_g) : 0;

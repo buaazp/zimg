@@ -189,9 +189,7 @@ int new_img(const char *buff, const size_t len, const char *save_name)
 
 done:
     if(fd != -1)
-    {
         close(fd);
-    }
     return result;
 }
 

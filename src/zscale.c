@@ -50,44 +50,47 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
 
     if (p_type == 1)
     {
-        if (cols > 0)
+        if (cols == 0 || rows == 0)
         {
-            rows = (uint32_t)round(((double)cols / im_cols) * im_rows);
+            if (cols > 0)
+            {
+                rows = (uint32_t)round(((double)cols / im_cols) * im_rows);
+            }
+            else
+            {
+                cols = (uint32_t)round(((double)rows / im_rows) * im_cols);
+            }
+            LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            //ret = MagickScaleImage(im, cols, rows);
         }
         else
         {
-            cols = (uint32_t)round(((double)rows / im_rows) * im_cols);
-        }
-        LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
-        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
-        //ret = MagickScaleImage(im, cols, rows);
-    }
-    else if (p_type == 2 || cols > im_cols || rows > im_rows)
-    {
-        uint32_t x = 0, y = 0, s_cols, s_rows;
-        double cols_rate = (double)cols / im_cols;
-        double rows_rate = (double)rows / im_rows;
+            uint32_t x = 0, y = 0, s_cols, s_rows;
+            double cols_rate = (double)cols / im_cols;
+            double rows_rate = (double)rows / im_rows;
 
-        if (cols_rate > rows_rate)
-        {
-            s_cols = cols;
-            s_rows = (uint32_t)round(cols_rate * im_rows);
-            y = (uint32_t)floor((s_rows - rows) / 2.0);
-        }
-        else
-        {
-            s_cols = (uint32_t)round(rows_rate * im_cols);
-            s_rows = rows;
-            x = (uint32_t)floor((s_cols - cols) / 2.0);
-        }
-        LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
-        ret = MagickResizeImage(im, s_cols, s_rows, LanczosFilter, 1.0);
-        //ret = MagickScaleImage(im, s_cols, s_rows);
+            if (cols_rate > rows_rate)
+            {
+                s_cols = cols;
+                s_rows = (uint32_t)round(cols_rate * im_rows);
+                y = (uint32_t)floor((s_rows - rows) / 2.0);
+            }
+            else
+            {
+                s_cols = (uint32_t)round(rows_rate * im_cols);
+                s_rows = rows;
+                x = (uint32_t)floor((s_cols - cols) / 2.0);
+            }
+            LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
+            ret = MagickResizeImage(im, s_cols, s_rows, LanczosFilter, 1.0);
+            //ret = MagickScaleImage(im, s_cols, s_rows);
 
-        LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
-        ret = MagickCropImage(im, cols, rows, x, y);
+            LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+            ret = MagickCropImage(im, cols, rows, x, y);
+        }
     }
-    else if (p_type == 3)
+    else if (p_type == 2)
     {
         uint32_t x, y;
         x = (uint32_t)floor((im_cols - cols) / 2.0);
