@@ -1,0 +1,11 @@
+Package: zimg
+Version: 3.1.0-stable-1ubuntu1
+Architecture: amd64
+Maintainer: Peter Zhao <zp@buaa.us>
+Installed-Size: 764
+Depends: openssl, libevent-dev (>=2.0.20), libjpeg-dev, libgif-dev, libpng-dev, libwebp-dev, libmagickcore5, libmagickwand5, libmemcached-dev (>=1.0.8)
+Section: utils
+Priority: optional
+Homepage: http://zimg.buaa.us
+Description: image storage and processing system
+  zimg - A lightweight and high performance image storage and processing system.
