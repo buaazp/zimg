@@ -393,36 +393,6 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         {
             save_new = 1;
         }
-
-        buff_ptr = (char *)MagickGetImageBlob(magick_wand, &img_size);
-        if(buff_ptr == NULL)
-        {
-            LOG_PRINT(LOG_DEBUG, "Magick Get Image Blob Failed!");
-            goto err;
-        }
-        gen_key(cache_key, req->md5, 3, req->width, req->height, req->proportion);
-        if(img_size < CACHE_MAX_SIZE)
-        {
-            set_cache_bin(req->thr_arg, cache_key, buff_ptr, img_size);
-        }
-        if(got_rsp == false)
-        {
-            LOG_PRINT(LOG_DEBUG, "Color Image[%s] is Not Existed. Begin to Save it.", color_path);
-            if(new_img(buff_ptr, img_size, color_path) == -1)
-            {
-                LOG_PRINT(LOG_DEBUG, "Color Image[%s] Save Failed!", color_path);
-                LOG_PRINT(LOG_WARNING, "fail save %s", color_path);
-            }
-        }
-        if(req->gray == 1)
-        {
-            free(buff_ptr);
-            buff_ptr = NULL;
-        }
-        else
-        {
-            goto done;
-        }
     }
 
     if(save_new == 1)
