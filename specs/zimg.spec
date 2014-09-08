@@ -1,7 +1,7 @@
 Name:     zimg
 Version:  3.1.0
 Release:  Release
-Summary:  zimg - A light and high performance image storage and processing system.
+Summary:  zimg - A lightweight and high performance image storage and processing system.
 Group:    System Environment/Deamons
 License:  BSDv3
 Url:      http://zimg.buaa.us
