@@ -1,9 +1,12 @@
 # Object files
 *.o
+*.s
+*.lo
 
 # Libraries
 *.lib
 *.a
+*.la
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -17,31 +20,25 @@
 *.app
 *.c.swp
 *.DS_Store
+
 .gitignore
-img/.DS_Store
-.DS_Store
+tags
 
 *.swp
+*.pc
 
 *.log
 *.dSYM
+
+doc/html/
 
 bin/img/
 bin/log/
 bin/zimg
 
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-tags
-
 bin/conf/debug.lua
 build/
-src/include/evhtp-config.h
-src/hiredis.c
-results.bin
 
-test/result.json
-test/stress_random.txt
-test/stress_random_big.txt
-test/zimg with webimg2.txt
+#luaJIT headers
+deps/LuaJIT-2.0.3/
+

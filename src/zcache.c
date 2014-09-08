@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -12,17 +12,15 @@
 
 /**
  * @file zcache.c
- * @brief memcached functions.
+ * @brief memcached functions
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
-
 #include "zcache.h"
+#include "zutil.h"
 #include "zlog.h"
-
-extern struct setting settings;
 
 void retry_cache(thr_arg_t *thr_arg);
 int exist_cache(thr_arg_t *thr_arg, const char *key);
@@ -31,7 +29,6 @@ int set_cache(memcached_st *memc, const char *key, const char *value);
 int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len);
 int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len);
 int del_cache(thr_arg_t *thr_arg, const char *key);
-
 
 /**
  * @brief retry_cache Reconnect to the cache server.
@@ -77,12 +74,13 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
     if(thr_arg->cache_conn == NULL)
         return rst;
 
-    size_t valueLen;
-    uint32_t  flags;
     memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 
-    memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    size_t valueLen = 0;
+    uint32_t flags;
+    char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
+    //rc = memcached_exist(memc, key, strlen(key));
 
     if (rc == MEMCACHED_SUCCESS) 
     {
@@ -99,6 +97,7 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
     }
+    free(value);
 
     return rst;
 }
@@ -119,7 +118,7 @@ int find_cache(memcached_st *memc, const char *key, char *value)
         return rst;
 
     size_t valueLen;
-    uint32_t  flags;
+    uint32_t flags;
     memcached_return rc;
 
     char *pvalue = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
@@ -127,7 +126,7 @@ int find_cache(memcached_st *memc, const char *key, char *value)
     if (rc == MEMCACHED_SUCCESS) 
     {
         LOG_PRINT(LOG_DEBUG, "Cache Find Key[%s] Value: %s", key, pvalue);
-        strcpy(value, pvalue);
+        str_lcpy(value, pvalue, sizeof(value));
         free(pvalue);
         rst = 1;
     }
@@ -194,7 +193,6 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
  *
  * @return 1 for success and -1 for fail.
  */
-//int find_cache_bin(const char *key, char **value_ptr, size_t *len)
 int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len)
 {
     int rst = -1;
@@ -206,7 +204,7 @@ int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t
         return rst;
     }
 
-    uint32_t  flags;
+    uint32_t flags;
     memcached_st *memc = thr_arg->cache_conn;
     memcached_return rc;
 

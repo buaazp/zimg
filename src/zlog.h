@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -12,12 +12,11 @@
 
 /**
  * @file zlog.h
- * @brief Logger header.
+ * @brief zimg log functions header.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
-
 
 #ifndef ZLOG_H
 #define ZLOG_H
@@ -29,11 +28,11 @@
 #define MAX_LOGS        100
  
 #define LOG_INVALID     -1
-#define LOG_SYSTEM       0
-#define LOG_USER         1
+#define LOG_SYSTEM      0
+#define LOG_USER        1
  
 enum LOG_LEVEL{
-    LOG_LEVEL_FATAL = 0,                        /* System is unusable */
+    LOG_LEVEL_FATAL = 0,                    /* System is unusable */
     LOG_LEVEL_ALERT,                        /* Action must be taken immediately */
     LOG_LEVEL_CRIT,                         /* Critical conditions */
     LOG_LEVEL_ERROR,                        /* Error conditions */
@@ -43,8 +42,9 @@ enum LOG_LEVEL{
     LOG_LEVEL_DEBUG,                        /* DEBUG message */
 };
 
-void log_init();
+void log_init(void);
 int log_open(const char *path, const char* mode);
+void log_handler(const char *msg);
 void log_printf0(int log_id, int level, const char *fmt, ...);
 void log_flush(int log_id);
 void log_close(int log_id);

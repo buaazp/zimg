@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -10,115 +10,215 @@
  * 
  */
 
-
 /**
  * @file zutil.c
- * @brief A suit of related functions.
+ * @brief the util functions used by zimg.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #include <sys/syscall.h>
-#include <ctype.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
+#include <ctype.h>
+#include <dirent.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <errno.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include "zutil.h"
 #include "zlog.h"
 
-//functions list
-pid_t gettid();
-int get_cpu_cores();
-static void kmp_init(const char *pattern, int pattern_size);
-int kmp(const char *matcher, int mlen, const char *pattern, int plen);
+char * strnchr(const char *p, char c, size_t n);
+char * strnstr(const char *s, const char *find, size_t slen);
+size_t str_lcat(char *dst, const char *src, size_t size);
+size_t str_lcpy(char *dst, const char *src, size_t size);
+int bind_check(int port);
+pid_t gettid(void);
+int get_cpu_cores(void);
 int get_type(const char *filename, char *type);
 int is_file(const char *filename);
 int is_img(const char *filename);
 int is_dir(const char *path);
+int is_special_dir(const char *path);
+void get_file_path(const char *path, const char *file_name, char *file_path);
 int mk_dir(const char *path);
 int mk_dirs(const char *dir);
 int mk_dirf(const char *filename);
+int delete_file(const char *path);
 int is_md5(char *s);
-static int htoi(char s[]);
 int str_hash(const char *str);
 int gen_key(char *key, char *md5, ...);
 
-// this data is for KMP searching
-static int pi[128];
+/**
+ * @brief strnchr find the pointer of a char in a string
+ *
+ * @param p the string
+ * @param c the char
+ * @param n find length
+ *
+ * @return the char position or 0
+ */
+char * strnchr(const char *p, char c, size_t n)
+{
+    if (!p)
+        return 0;
 
-pid_t gettid()
+    while (n-- > 0) {
+        if (*p == c)
+            return ((char *)p);
+        p++;
+    }
+    return 0;
+}
+
+/**
+ * @brief strnstr find the sub string in a string
+ *
+ * @param s the string
+ * @param find the sub string
+ * @param slen find length
+ *
+ * @return the position of sub string or NULL
+ */
+char * strnstr(const char *s, const char *find, size_t slen)
+{
+    char c, sc;
+    size_t len;
+
+    if ((c = *find++) != '\0') {
+        len = strlen(find);
+        do {
+            do {
+                if ((sc = *s++) == '\0' || slen-- < 1)
+                    return (NULL);
+            } while (sc != c);
+            if (len > slen)
+                return (NULL);
+        } while (strncmp(s, find, len) != 0);
+        s--;
+    }
+    return ((char *)s);
+}
+
+/*
+ * '_cups_strlcat()' - Safely concatenate two strings.
+ */
+size_t                          /* O - Length of string */
+str_lcat(char       *dst,       /* O - Destination string */
+        const char  *src,       /* I - Source string */
+        size_t      size)       /* I - Size of destination string buffer */
+{
+    size_t    srclen;           /* Length of source string */
+    size_t    dstlen;           /* Length of destination string */
+    /*
+    * Figure out how much room is left...
+    */
+    
+    dstlen = strlen(dst);
+    size   -= dstlen + 1;
+    
+    if (!size)
+      return (dstlen);          /* No room, return immediately... */
+    
+    /*
+    * Figure out how much room is needed...
+    */
+    
+    srclen = strlen(src);
+    /*
+    * Copy the appropriate amount...
+    */
+    
+    if (srclen > size)
+      srclen = size;
+    
+    memcpy(dst + dstlen, src, srclen);
+    dst[dstlen + srclen] = '\0';
+    
+    return (dstlen + srclen);
+}
+
+/*
+ * '_cups_strlcpy()' - Safely copy two strings.
+ */
+size_t                              /* O - Length of string */
+str_lcpy(char           *dst,       /* O - Destination string */
+        const char      *src,       /* I - Source string */
+        size_t          size)       /* I - Size of destination string buffer */
+{
+    size_t    srclen;               /* Length of source string */
+    /*
+    * Figure out how much room is needed...
+    */
+    size --;
+    srclen = strlen(src);
+    
+    /*
+    * Copy the appropriate amount...
+    */
+    if (srclen > size)
+      srclen = size;
+    
+    memcpy(dst, src, srclen);
+    dst[srclen] = '\0';
+    
+    return (srclen);
+}
+
+/**
+ * @brief bind_check check if the port is binded
+ *
+ * @param port the port
+ *
+ * @return 1 for OK or -1 for binded
+ */
+int bind_check(int port)
+{
+    int mysocket, ret = -1;
+    struct sockaddr_in my_addr;
+    if((mysocket = socket(AF_INET, SOCK_STREAM,0)) < 0)
+    {
+        return ret;
+    }
+    bzero(&my_addr,sizeof(my_addr));
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(port);
+    my_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    if(connect(mysocket, (const struct sockaddr *)&my_addr, sizeof(my_addr)) < 0)
+    {
+        if(errno == ECONNREFUSED)
+        {
+            ret = 1;
+        }
+    }
+    close(mysocket);
+    return ret;
+}
+
+/**
+ * @brief gettid get pid
+ *
+ * @return pid
+ */
+pid_t gettid(void)
 {
     return syscall(SYS_gettid);
 }
 
-int get_cpu_cores()
+/**
+ * @brief get_cpu_cores get the cpu cores of a server
+ *
+ * @return the cpu core number
+ */
+int get_cpu_cores(void)
 {
     return (int)sysconf(_SC_NPROCESSORS_CONF);
-}
-
-/* KMP for searching */
-static void kmp_init(const char *pattern, int pattern_size)  // prefix-function
-{
-    pi[0] = 0;  // pi[0] always equals to 0 by defination
-    int k = 0;  // an important pointer
-    int q;
-    for(q = 1; q < pattern_size; q++)  // find each pi[q] for pattern[q]
-    {
-        while(k>0 && pattern[k+1]!=pattern[q])
-            k = pi[k];  // use previous prefixes to match pattern[0..q]
-
-        if(pattern[k+1] == pattern[q]) // if pattern[0..(k+1)] is a prefix
-            k++;             // let k = k + 1
-
-        pi[q] = k;   // be ware, (0 <= k <= q), and (pi[k] < k)
-    }
-    // The worst-case time complexity of this procedure is O(pattern_size)
-}
-
-/**
- * @brief kmp The kmp algorithm.
- *
- * @param matcher The buffer.
- * @param mlen Buffer length.
- * @param pattern The pattern.
- * @param plen Pattern length.
- *
- * @return The place of pattern in buffer.
- */
-int kmp(const char *matcher, int mlen, const char *pattern, int plen)
-{
-    // this function does string matching using the KMP algothm.
-    // matcher and pattern are pointers to BINARY sequencies, while mlen
-    // and plen are their lengths respectively.
-    // if a match is found, return its position immediately.
-    // return -1 if no match can be found.
-
-    if(!mlen || !plen || mlen < plen) // take care of illegal parameters
-        return -1;
-
-    kmp_init(pattern, plen);  // prefix-function
-
-    int i=0, j=0;
-    while(i < mlen && j < plen)  // don't increase i and j at this level
-    {
-        if(matcher[i+j] == pattern[j])
-            j++;
-        else if(j == 0)  // dismatch: matcher[i] vs pattern[0]
-            i++;
-        else      // dismatch: matcher[i+j] vs pattern[j], and j>0
-        {
-            i = i + j - pi[j-1];  // i: jump forward by (j - pi[j-1])
-            j = pi[j-1];          // j: reset to the proper position
-        }
-    }
-    if(j == plen) // found a match!!
-    {
-        return i;
-    }
-    else          // if no match was found
-        return -1;
 }
 
 /**
@@ -142,7 +242,7 @@ int get_type(const char *filename, char *type)
         flag = tmp;
     }
     flag++;
-    strncpy(type, flag, 32);
+    str_lcpy(type, flag, 32);
     return 1;
 }
 
@@ -166,8 +266,7 @@ int is_file(const char *filename)
         LOG_PRINT(LOG_DEBUG, "File[%s] is A File.", filename);
         return 1;
     }
-    else
-        return -1;
+    return -1;
 }
 
 
@@ -181,7 +280,20 @@ int is_file(const char *filename)
  */
 int is_img(const char *filename)
 {
-    char *imgType[] = {"jpg", "jpeg", "png", "gif"};
+    int isimg = -1;
+
+    lua_getglobal(settings.L, "is_img");
+    lua_pushstring(settings.L, filename);
+    if(lua_pcall(settings.L, 1, 1, 0) != 0)
+    {
+        LOG_PRINT(LOG_WARNING, "lua is_img() failed!");
+        return isimg;
+    }
+    isimg = (int)lua_tonumber(settings.L, -1);
+    lua_pop(settings.L, 1);
+
+    /*
+    char *imgType[] = {"jpg", "jpeg", "png", "gif", "webp"};
     char *lower= (char *)malloc(strlen(filename) + 1);
     if(lower == NULL)
     {
@@ -189,13 +301,12 @@ int is_img(const char *filename)
     }
     char *tmp;
     int i;
-    int isimg = -1;
     for(i = 0; i < strlen(filename); i++)
     {
         lower[i] = tolower(filename[i]);
     }
     lower[strlen(filename)] = '\0';
-    for(i = 0; i < 4; i++)
+    for(i = 0; i < 5; i++)
     {
         LOG_PRINT(LOG_DEBUG, "compare %s - %s.", lower, imgType[i]);
         if((tmp = strstr(lower, imgType[i])) == lower)
@@ -205,6 +316,7 @@ int is_img(const char *filename)
         }
     }
     free(lower);
+    */
     return isimg;
 }
 
@@ -233,6 +345,37 @@ int is_dir(const char *path)
 }
 
 /**
+ * @brief is_special_dir check if the path is a special path
+ *
+ * @param path the path want to check
+ *
+ * @return 1 for yes and -1 for not
+ */
+int is_special_dir(const char *path)
+{
+    if(strcmp(path, ".") == 0 || strcmp(path, "..") == 0)
+        return 1;
+    else
+        return -1;
+}
+
+/**
+ * @brief get_file_path get the file's path
+ *
+ * @param path the file's parent path
+ * @param file_name the file name
+ * @param file_path the full path of the file
+ */
+void get_file_path(const char *path, const char *file_name, char *file_path)
+{
+    strcpy(file_path, path);
+    if(file_path[strlen(path) - 1] != '/')
+        str_lcat(file_path, "/", PATH_MAX_SIZE);
+    str_lcat(file_path, file_name, PATH_MAX_SIZE);
+}
+
+
+/**
  * @brief mk_dir It create a new directory with the path input.
  *
  * @param path The path you want to create.
@@ -243,7 +386,6 @@ int mk_dir(const char *path)
 {
     if(access(path, 0) == -1)
     {
-        LOG_PRINT(LOG_DEBUG, "Begin to mk_dir()...");
         int status = mkdir(path, 0755);
         if(status == -1)
         {
@@ -270,10 +412,10 @@ int mk_dir(const char *path)
 int mk_dirs(const char *dir)
 {
     char tmp[256];
-    strcpy(tmp, dir);
+    str_lcpy(tmp, dir, sizeof(tmp));
     int i, len = strlen(tmp);
     if(tmp[len-1] != '/')
-        strcat(tmp, "/");
+        str_lcat(tmp, "/", sizeof(tmp));
 
     len = strlen(tmp);
 
@@ -310,7 +452,7 @@ int mk_dirf(const char *filename)
         return ret;
     size_t len = strlen(filename);
     char str[256];
-    strncpy(str, filename, len);
+    str_lcpy(str, filename, len);
     str[len] = '\0';
     char *end = str;
     char *start = strchr(end, '/');
@@ -323,6 +465,44 @@ int mk_dirf(const char *filename)
         str[end-str] = '\0';
         ret = mk_dirs(str);
     }
+    return ret;
+}
+
+/**
+ * @brief delete_file delete a file
+ *
+ * @param path the path of the file
+ *
+ * @return 1 for OK or -1 for fail
+ */
+int delete_file(const char *path)
+{
+    DIR *dir;
+    struct dirent *dir_info;
+    char file_path[PATH_MAX_SIZE];
+    int ret = -1;
+    if(is_file(path) == 1)
+    {   
+        remove(path);
+        ret = 1;
+    }   
+    if(is_dir(path) == 1)
+    {   
+        if((dir = opendir(path)) == NULL)
+            return ret; 
+        ret = 1;
+        while((dir_info = readdir(dir)) != NULL)
+        {   
+            get_file_path(path, dir_info->d_name, file_path);
+            if(is_special_dir(dir_info->d_name) == 1)
+                continue;
+            ret = delete_file(file_path);
+            if(ret == -1) 
+                break;
+        }   
+        if(ret == 1)
+            ret = rmdir(path);
+    }   
     return ret;
 }
 
@@ -353,6 +533,7 @@ int is_md5(char *s)
  *
  * @return The number in the string.
  */
+/*
 static int htoi(char s[])
 {
     int i;
@@ -378,6 +559,7 @@ static int htoi(char s[])
     }
     return n;
 }
+*/
 
 
 /**
@@ -390,14 +572,13 @@ static int htoi(char s[])
 int str_hash(const char *str)
 {
     char c[4];
-    strncpy(c, str, 3);
-    c[3] = '\0';
-    LOG_PRINT(LOG_DEBUG, "str = %s.", c);
+    str_lcpy(c, str, 4);
+    //LOG_PRINT(LOG_DEBUG, "str = %s.", c);
     //int d = htoi(c);
     int d = strtol(c, NULL, 16);
-    LOG_PRINT(LOG_DEBUG, "str(3)_to_d = %d.", d);
+    //LOG_PRINT(LOG_DEBUG, "str(3)_to_d = %d.", d);
     d = d / 4;
-    LOG_PRINT(LOG_DEBUG, "str(3)/4 = %d.", d);
+    //LOG_PRINT(LOG_DEBUG, "str(3)/4 = %d.", d);
     return d;
 }
 
@@ -418,16 +599,21 @@ int gen_key(char *key, char *md5, ...)
     va_list arg_ptr;
     va_start(arg_ptr, md5);
     int argc = va_arg(arg_ptr, int);
-    LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
-    LOG_PRINT(LOG_DEBUG, "key: %s", key);
-    int i, argv;
     char tmp[CACHE_KEY_SIZE];
-    for(i = 0; i<argc; i++)
+    //LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
+    if(argc > 1)
     {
-        argv = va_arg(arg_ptr, int);
-        snprintf(tmp, CACHE_KEY_SIZE, "%s:%d", key, argv);
+        int i, argv;
+        for(i = 0; i<argc-1; i++)
+        {
+            argv = va_arg(arg_ptr, int);
+            snprintf(tmp, CACHE_KEY_SIZE, "%s:%d", key, argv);
+            snprintf(key, CACHE_KEY_SIZE, "%s", tmp);
+            //LOG_PRINT(LOG_DEBUG, "arg[%d]: %d", i, argv);
+        }
+        char *fmt = va_arg(arg_ptr, char *);
+        snprintf(tmp, CACHE_KEY_SIZE, "%s:%s", key, fmt);
         snprintf(key, CACHE_KEY_SIZE, "%s", tmp);
-        LOG_PRINT(LOG_DEBUG, "key: %s", key);
     }
     va_end(arg_ptr);
     LOG_PRINT(LOG_DEBUG, "key: %s", key);

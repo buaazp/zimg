@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us 
  *   
- *   Copyright (c) 2013, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *   
  *   Use and distribution licensed under the BSD license.
@@ -10,13 +10,12 @@
  * 
  */
 
-
 /**
  * @file zmd5.c
- * @brief Caculate md5 functions.
+ * @brief calculate md5 functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 1.0
- * @date 2013-07-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
 
 #include "zmd5.h"
@@ -25,7 +24,6 @@ static void md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/);
 void md5_init(md5_state_t *pms);
 void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
 void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
-
 
 #ifndef HAVE_SSL /* only if we do not use OpenSSL provided implementation */
 
@@ -105,8 +103,13 @@ void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 #define T64 /* 0xeb86d391 */ (T_MASK ^ 0x14792c6e)
 
 
-static void
-md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
+/**
+ * @brief md5_process processing md5 of data
+ *
+ * @param pms md5_state_t
+ * @param data md5_byte_t
+ */
+static void md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 {
     md5_word_t
 	a = pms->abcd[0], b = pms->abcd[1],
@@ -286,8 +289,12 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
     pms->abcd[3] += d;
 }
 
-void
-md5_init(md5_state_t *pms)
+/**
+ * @brief md5_init init md5 calculating
+ *
+ * @param pms md5_state_t
+ */
+void md5_init(md5_state_t *pms)
 {
     pms->count[0] = pms->count[1] = 0;
     pms->abcd[0] = 0x67452301;
@@ -296,8 +303,14 @@ md5_init(md5_state_t *pms)
     pms->abcd[3] = 0x10325476;
 }
 
-void
-md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
+/**
+ * @brief md5_append md5 append function
+ *
+ * @param pms md5_state_t
+ * @param data md5_byte_t
+ * @param nbytes lenght of the data
+ */
+void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
 {
     const md5_byte_t *p = data;
     int left = nbytes;
@@ -334,8 +347,13 @@ md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
 	memcpy(pms->buf, p, left);
 }
 
-void
-md5_finish(md5_state_t *pms, md5_byte_t digest[16])
+/**
+ * @brief md5_finish finish calculate md5
+ *
+ * @param pms md5_state_t
+ * @param digest[16] digest of the md5
+ */
+void md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 {
     static const md5_byte_t pad[64] = {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

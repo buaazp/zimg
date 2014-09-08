@@ -1,0 +1,1683 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:yed="http://www.yworks.com/xml/yed/3" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
+  <!--Created by yEd 3.12.2-->
+  <key for="graphml" id="d0" yfiles.type="resources"/>
+  <key for="port" id="d1" yfiles.type="portgraphics"/>
+  <key for="port" id="d2" yfiles.type="portgeometry"/>
+  <key for="port" id="d3" yfiles.type="portuserdata"/>
+  <key attr.name="url" attr.type="string" for="node" id="d4"/>
+  <key attr.name="description" attr.type="string" for="node" id="d5"/>
+  <key for="node" id="d6" yfiles.type="nodegraphics"/>
+  <key attr.name="Description" attr.type="string" for="graph" id="d7"/>
+  <key attr.name="url" attr.type="string" for="edge" id="d8"/>
+  <key attr.name="description" attr.type="string" for="edge" id="d9"/>
+  <key for="edge" id="d10" yfiles.type="edgegraphics"/>
+  <graph edgedefault="directed" id="G">
+    <data key="d7"/>
+    <node id="n0" yfiles.foldertype="group">
+      <data key="d4"/>
+      <data key="d6">
+        <y:ProxyAutoBoundsNode>
+          <y:Realizers active="0">
+            <y:GroupNode>
+              <y:Geometry height="91.666015625" width="230.2913600000009" x="-90.1771200000002" y="415.95216056518535"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="230.2913600000009" x="0.0" y="0.0">cache server</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="101" leftF="101.2913600000009" right="19" rightF="19.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+            <y:GroupNode>
+              <y:Geometry height="50.0" width="50.0" x="106.11424000000068" y="406.03840000000025"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+          </y:Realizers>
+        </y:ProxyAutoBoundsNode>
+      </data>
+      <graph edgedefault="directed" id="n0:">
+        <node id="n0::n0">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.process">
+              <y:Geometry height="40.0" width="80.0" x="26.114240000000706" y="452.61817619018535"/>
+              <y:Fill color="#FF99CC" color2="#FF99CC" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="73.697265625" x="3.1513671875" y="10.93359375">memcached<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+      </graph>
+    </node>
+    <node id="n1" yfiles.foldertype="group">
+      <data key="d4"/>
+      <data key="d6">
+        <y:ProxyAutoBoundsNode>
+          <y:Realizers active="0">
+            <y:GroupNode>
+              <y:Geometry height="91.666015625" width="462.6915199999986" x="150.61151999999902" y="415.95216056518535"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="462.6915199999986" x="0.0" y="0.0">agent server</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="129" leftF="129.44575999999938" right="174" rightF="174.44575999999927" top="0" topF="0.0"/>
+            </y:GroupNode>
+            <y:GroupNode>
+              <y:Geometry height="50.0" width="50.0" x="485.8457599999995" y="441.31238437499997"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+          </y:Realizers>
+        </y:ProxyAutoBoundsNode>
+      </data>
+      <graph edgedefault="directed" id="n1:">
+        <node id="n1::n0">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.terminator">
+              <y:Geometry height="40.0" width="128.79999999999995" x="295.0572799999984" y="452.61817619018535"/>
+              <y:Fill color="#FFCC00" color2="#FFCC00" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="69.0859375" x="29.857031249999977" y="10.93359375">twemproxy<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+      </graph>
+    </node>
+    <node id="n2" yfiles.foldertype="group">
+      <data key="d4"/>
+      <data key="d6">
+        <y:ProxyAutoBoundsNode>
+          <y:Realizers active="0">
+            <y:GroupNode>
+              <y:Geometry height="96.82281562499986" width="703.4801599999979" x="-90.17712000000023" y="310.41238437499993"/>
+              <y:Fill color="#FFCC99" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#FF9900" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="703.4801599999979" x="0.0" y="0.0">zimg server</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="5" bottomF="5.156799999999862" left="2" leftF="2.097120000000473" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+            <y:GroupNode>
+              <y:Geometry height="50.0" width="50.0" x="73.35424000000046" y="433.27840000000003"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+          </y:Realizers>
+        </y:ProxyAutoBoundsNode>
+      </data>
+      <graph edgedefault="directed" id="n2:">
+        <node id="n2::n0">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.terminator">
+              <y:Geometry height="40.0" width="80.0" x="370.4572799999983" y="347.07839999999993"/>
+              <y:Fill color="#99CC00" color2="#99CC00" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="33.033203125" x="23.4833984375" y="10.93359375">zimg<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+        <node id="n2::n1">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.terminator">
+              <y:Geometry height="40.0" width="80.0" x="222.61151999999896" y="347.07839999999993"/>
+              <y:Fill color="#99CC00" color2="#99CC00" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="33.033203125" x="23.4833984375" y="10.93359375">zimg<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+        <node id="n2::n2">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.terminator">
+              <y:Geometry height="40.0" width="80.0" x="74.7657599999996" y="347.07839999999993"/>
+              <y:Fill color="#99CC00" color2="#99CC00" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="33.033203125" x="23.4833984375" y="10.93359375">zimg<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+        <node id="n2::n3">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.terminator">
+              <y:Geometry height="40.0" width="80.0" x="518.3030399999977" y="347.07839999999993"/>
+              <y:Fill color="#99CC00" color2="#99CC00" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="33.033203125" x="23.4833984375" y="10.93359375">zimg<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+        <node id="n2::n4">
+          <data key="d6">
+            <y:GenericNode configuration="com.yworks.flowchart.terminator">
+              <y:Geometry height="40.0" width="80.0" x="-73.07999999999976" y="347.07839999999993"/>
+              <y:Fill color="#99CC00" color2="#99CC00" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="33.033203125" x="23.4833984375" y="10.93359375">zimg<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+            </y:GenericNode>
+          </data>
+        </node>
+      </graph>
+    </node>
+    <node id="n3" yfiles.foldertype="group">
+      <data key="d4"/>
+      <data key="d6">
+        <y:ProxyAutoBoundsNode>
+          <y:Realizers active="0">
+            <y:GroupNode>
+              <y:Geometry height="306.73043125000027" width="703.4801599999978" x="-90.1771200000002" y="516.335136755371"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#FFCC99" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="703.4801599999978" x="0.0" y="0.0">storage server</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+            <y:GroupNode>
+              <y:Geometry height="50.0" width="50.0" x="145.1542400000006" y="530.5463687499999"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="true" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+          </y:Realizers>
+        </y:ProxyAutoBoundsNode>
+      </data>
+      <graph edgedefault="directed" id="n3:">
+        <node id="n3::n0" yfiles.foldertype="group">
+          <data key="d4"/>
+          <data key="d6">
+            <y:ProxyAutoBoundsNode>
+              <y:Realizers active="0">
+                <y:GroupNode>
+                  <y:Geometry height="255.06441562500027" width="158.79999999999995" x="-75.1771200000002" y="553.001152380371"/>
+                  <y:Fill color="#CAECFF84" transparent="false"/>
+                  <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+                  <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="158.79999999999995" x="0.0" y="0.0">disk</y:NodeLabel>
+                  <y:Shape type="roundrectangle"/>
+                  <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+                  <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+                  <y:BorderInsets bottom="69" bottomF="68.73238437500027" left="0" leftF="0.0" right="0" rightF="0.0" top="60" topF="60.0"/>
+                </y:GroupNode>
+                <y:GroupNode>
+                  <y:Geometry height="50.0" width="50.0" x="6.096960000002468" y="595.6783999999999"/>
+                  <y:Fill color="#CAECFF84" transparent="false"/>
+                  <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+                  <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+                  <y:Shape type="roundrectangle"/>
+                  <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+                  <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+                  <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+                </y:GroupNode>
+              </y:Realizers>
+            </y:ProxyAutoBoundsNode>
+          </data>
+          <graph edgedefault="directed" id="n3::n0:">
+            <node id="n3::n0::n0">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.directData">
+                  <y:Geometry height="74.666015625" width="128.79999999999995" x="-60.1771200000002" y="649.667168005371"/>
+                  <y:Fill color="#C0C0C0" color2="#C0C0C0" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="59.03125" x="34.88437499999998" y="28.2666015625">local disk<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+          </graph>
+        </node>
+        <node id="n3::n1" yfiles.foldertype="group">
+          <data key="d4"/>
+          <data key="d6">
+            <y:ProxyAutoBoundsNode>
+              <y:Realizers active="0">
+                <y:GroupNode>
+                  <y:Geometry height="255.06441562500027" width="237.1715199999988" x="361.13151999999883" y="553.001152380371"/>
+                  <y:Fill color="#CAECFF84" transparent="false"/>
+                  <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+                  <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="237.1715199999988" x="0.0" y="0.0">SSDB</y:NodeLabel>
+                  <y:Shape type="roundrectangle"/>
+                  <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+                  <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+                  <y:BorderInsets bottom="46" bottomF="46.07839999999999" left="8" leftF="8.0" right="4" rightF="3.994240000000559" top="27" topF="26.501600000000394"/>
+                </y:GroupNode>
+                <y:GroupNode>
+                  <y:Geometry height="50.0" width="50.0" x="580.8457599999992" y="472.47840000000065"/>
+                  <y:Fill color="#CAECFF84" transparent="false"/>
+                  <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+                  <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+                  <y:Shape type="roundrectangle"/>
+                  <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+                  <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+                  <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+                </y:GroupNode>
+              </y:Realizers>
+            </y:ProxyAutoBoundsNode>
+          </data>
+          <graph edgedefault="directed" id="n3::n1:">
+            <node id="n3::n1::n0">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="384.13151999999883" y="616.1687680053714"/>
+                  <y:Fill color="#33CCCC" color2="#CCFFFF" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="32.265625" modelName="custom" textColor="#000000" visible="true" width="41.04296875" x="9.478515625" y="25.067187499999932">SSDB
+Slave1<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="28.0" y="39.19999999999993">
+                    <y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n1::n1">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="415.45727999999826" y="664.5871680053713"/>
+                  <y:Fill color="#33CCCC" color2="#CCFFFF" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="32.265625" modelName="custom" textColor="#000000" visible="true" width="50.751953125" x="4.6240234375" y="25.067187500000045">SSDB
+Master1<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n1::n2">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="487.9830399999976" y="616.1687680053714"/>
+                  <y:Fill color="#33CCCC" color2="#CCFFFF" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="32.265625" modelName="custom" textColor="#000000" visible="true" width="41.04296875" x="9.478515625" y="25.067187499999932">SSDB
+Slave2<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="28.0" y="39.19999999999993">
+                    <y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n1::n3">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="519.3087999999971" y="664.5871680053713"/>
+                  <y:Fill color="#33CCCC" color2="#CCFFFF" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="32.265625" modelName="custom" textColor="#000000" visible="true" width="50.751953125" x="4.6240234375" y="25.067187500000045">SSDB
+Master2<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+          </graph>
+        </node>
+        <node id="n3::n2" yfiles.foldertype="group">
+          <data key="d4"/>
+          <data key="d6">
+            <y:ProxyAutoBoundsNode>
+              <y:Realizers active="0">
+                <y:GroupNode>
+                  <y:Geometry height="255.06441562500027" width="253.49999999999997" x="95.37719999999925" y="553.001152380371"/>
+                  <y:Fill color="#CAECFF84" transparent="false"/>
+                  <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+                  <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="253.49999999999997" x="0.0" y="0.0">beansdb</y:NodeLabel>
+                  <y:Shape type="roundrectangle"/>
+                  <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+                  <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+                  <y:BorderInsets bottom="0" bottomF="0.0" left="6" leftF="5.582800000000788" right="23" rightF="22.762959999998543" top="15" topF="14.720000000000141"/>
+                </y:GroupNode>
+                <y:GroupNode>
+                  <y:Geometry height="50.0" width="50.0" x="88.55424000000062" y="464.47840000000065"/>
+                  <y:Fill color="#CAECFF84" transparent="false"/>
+                  <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+                  <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+                  <y:Shape type="roundrectangle"/>
+                  <y:State closed="true" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+                  <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+                  <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+                </y:GroupNode>
+              </y:Realizers>
+            </y:ProxyAutoBoundsNode>
+          </data>
+          <graph edgedefault="directed" id="n3::n2:">
+            <node id="n3::n2::n0">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="115.96000000000004" y="664.5871680053713"/>
+                  <y:Fill color="#FF00FF" color2="#FF99CC" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="53.53515625" x="3.232421875" y="32.133593750000045">beansdb<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n2::n1">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.terminator">
+                  <y:Geometry height="40.0" width="80.0" x="121.11424000000068" y="604.3871680053711"/>
+                  <y:Fill color="#FFFF99" color2="#FFFF99" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="58.0703125" x="10.96484375" y="10.93359375">beanseye<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n2::n2">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="141.11424000000068" y="710.6655680053713"/>
+                  <y:Fill color="#FF00FF" color2="#FF99CC" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="53.53515625" x="3.232421875" y="32.13359374999993">beansdb<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n2::n3">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="225.96000000000004" y="664.5871680053713"/>
+                  <y:Fill color="#FF00FF" color2="#FF99CC" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="53.53515625" x="3.232421875" y="32.133593750000045">beansdb<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n2::n4">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.terminator">
+                  <y:Geometry height="40.0" width="80.0" x="231.11424000000068" y="604.3871680053711"/>
+                  <y:Fill color="#FFFF99" color2="#FFFF99" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="58.0703125" x="10.96484375" y="10.93359375">beanseye<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+            <node id="n3::n2::n5">
+              <data key="d6">
+                <y:GenericNode configuration="com.yworks.flowchart.dataBase">
+                  <y:Geometry height="82.39999999999998" width="60.0" x="251.11424000000068" y="710.6655680053713"/>
+                  <y:Fill color="#FF00FF" color2="#FF99CC" transparent="false"/>
+                  <y:BorderStyle color="#000000" type="line" width="1.0"/>
+                  <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="53.53515625" x="3.232421875" y="32.13359374999993">beansdb<y:LabelModel>
+                      <y:SmartNodeLabelModel distance="4.0"/>
+                    </y:LabelModel>
+                    <y:ModelParameter>
+                      <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                    </y:ModelParameter>
+                  </y:NodeLabel>
+                </y:GenericNode>
+              </data>
+            </node>
+          </graph>
+        </node>
+      </graph>
+    </node>
+    <node id="n4" yfiles.foldertype="group">
+      <data key="d4"/>
+      <data key="d6">
+        <y:ProxyAutoBoundsNode>
+          <y:Realizers active="0">
+            <y:GroupNode>
+              <y:Geometry height="132.87607574462893" width="703.4801599999978" x="-90.17712000000023" y="170.00201051635744"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="703.4801599999978" x="0.0" y="0.0">LVS server</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="194" leftF="193.95691843139696" right="413" rightF="412.9067407141086" top="0" topF="0.0"/>
+            </y:GroupNode>
+            <y:GroupNode>
+              <y:Geometry height="50.0" width="50.0" x="408.4572753906248" y="197.99999999999991"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+          </y:Realizers>
+        </y:ProxyAutoBoundsNode>
+      </data>
+      <graph edgedefault="directed" id="n4:">
+        <node id="n4::n0">
+          <data key="d6">
+            <y:SVGNode>
+              <y:Geometry height="59.077247619628906" width="66.61650085449219" x="118.77979843139673" y="206.66802614135744"/>
+              <y:Fill color="#CCCCFF" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="24.70703125" x="20.954734802246094" y="63.077247619628935">LVS<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+              <y:SVGNodeProperties usingVisualBounds="false"/>
+              <y:SVGModel svgBoundsPolicy="0">
+                <y:SVGContent refid="1"/>
+              </y:SVGModel>
+            </y:SVGNode>
+          </data>
+        </node>
+      </graph>
+    </node>
+    <node id="n5" yfiles.foldertype="group">
+      <data key="d4"/>
+      <data key="d6">
+        <y:ProxyAutoBoundsNode>
+          <y:Realizers active="0">
+            <y:GroupNode>
+              <y:Geometry height="124.63427734375001" width="703.4801599999977" x="-90.1771200000002" y="38.36773317260746"/>
+              <y:Fill color="#FFCC99" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#FF9900" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="703.4801599999977" x="0.0" y="0.0">Clients</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="13" leftF="12.847093297119585" right="26" rightF="26.101896811520646" top="0" topF="0.0"/>
+            </y:GroupNode>
+            <y:GroupNode>
+              <y:Geometry height="50.0" width="50.0" x="602.2011431884769" y="66.99999999999997"/>
+              <y:Fill color="#CAECFF84" transparent="false"/>
+              <y:BorderStyle color="#666699" type="dotted" width="1.0"/>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#99CCFF" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="21.666015625" modelName="internal" modelPosition="t" textColor="#000000" visible="true" width="50.0" x="0.0" y="0.0">2</y:NodeLabel>
+              <y:Shape type="roundrectangle"/>
+              <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
+              <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="0" topF="0.0"/>
+            </y:GroupNode>
+          </y:Realizers>
+        </y:ProxyAutoBoundsNode>
+      </data>
+      <graph edgedefault="directed" id="n5:">
+        <node id="n5::n0">
+          <data key="d6">
+            <y:SVGNode>
+              <y:Geometry height="64.96826171875" width="56.554100036621094" x="123.81099884033227" y="75.03374879760746"/>
+              <y:Fill color="#CCCCFF" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="26.277050018310547" y="68.96826171875001">
+                <y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+              <y:SVGNodeProperties usingVisualBounds="true"/>
+              <y:SVGModel svgBoundsPolicy="0">
+                <y:SVGContent refid="2"/>
+              </y:SVGModel>
+            </y:SVGNode>
+          </data>
+        </node>
+        <node id="n5::n1">
+          <data key="d6">
+            <y:SVGNode>
+              <y:Geometry height="62.3191032409668" width="56.554100036621094" x="515.6470431518558" y="76.35832803649903"/>
+              <y:Fill color="#CCCCFF" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="26.277050018310547" y="66.31910324096678">
+                <y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+              <y:SVGNodeProperties usingVisualBounds="true"/>
+              <y:SVGModel svgBoundsPolicy="0">
+                <y:SVGContent refid="3"/>
+              </y:SVGModel>
+            </y:SVGNode>
+          </data>
+        </node>
+        <node id="n5::n2">
+          <data key="d6">
+            <y:SVGNode>
+              <y:Geometry height="64.96826171875" width="80.0" x="308.00607101440454" y="75.03374879760746"/>
+              <y:Fill color="#CCCCFF" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="38.0" y="68.96826171875001">
+                <y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+              <y:SVGNodeProperties usingVisualBounds="false"/>
+              <y:SVGModel svgBoundsPolicy="0">
+                <y:SVGContent refid="4"/>
+              </y:SVGModel>
+            </y:SVGNode>
+          </data>
+        </node>
+        <node id="n5::n3">
+          <data key="d6">
+            <y:SVGNode>
+              <y:Geometry height="64.96826171875" width="58.50005340576172" x="-62.330026702880616" y="75.03374879760746"/>
+              <y:Fill color="#CCCCFF" transparent="false"/>
+              <y:BorderStyle color="#000000" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="27.25002670288086" y="68.96826171875001">
+                <y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+              <y:SVGNodeProperties usingVisualBounds="false"/>
+              <y:SVGModel svgBoundsPolicy="0">
+                <y:SVGContent refid="5"/>
+              </y:SVGModel>
+            </y:SVGNode>
+          </data>
+        </node>
+      </graph>
+    </node>
+    <edge id="n3::n1::e0" source="n3::n1::n0" target="n3::n1::n1">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="367.5912800000022" y="657.3687680053714"/>
+            <y:Point x="397.4342400000008" y="682.4671680053715"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="n3::n1::e1" source="n3::n1::n2" target="n3::n1::n3">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="467.1942400000008" y="657.3687680053713"/>
+            <y:Point x="501.7542400000007" y="685.3071680053713"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="n3::n0::e0" source="n3::n0::n0" target="n3::n0::n0">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="n3::n2::e0" source="n3::n2::n0" target="n3::n2::n2">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="-9.265684609373551" sy="-26.355823516845703" tx="0.0" ty="0.0">
+            <y:Point x="99.69431539062651" y="692.4313444885255"/>
+            <y:Point x="110.69431539062651" y="723.4313444885255"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="n3::n2::e1" source="n3::n2::n2" target="n3::n2::n1">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="13.58007539062578" sy="-24.434223516845805" tx="0.0" ty="20.009765625">
+            <y:Point x="194.69431539062646" y="679.4313444885255"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="n3::n2::e2" source="n3::n2::n3" target="n3::n2::n5">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="-9.265684609373551" sy="-26.355823516845703" tx="0.0" ty="0.0">
+            <y:Point x="209.6943153906265" y="692.4313444885255"/>
+            <y:Point x="220.6943153906265" y="723.4313444885255"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="n3::n2::e3" source="n3::n2::n5" target="n3::n2::n4">
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="13.58007539062578" sy="-24.434223516845805" tx="0.0" ty="20.009765625">
+            <y:Point x="304.69431539062646" y="679.4313444885255"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="e0" source="n2::n4" target="n3::n0::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="-37.30287999999953" ty="-37.31932864990222"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e1" source="n2::n0" target="n1::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e2" source="n1::n0" target="n2::n1">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e3" source="n1::n0" target="n3::n2::n1">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e4" source="n3::n2::n4" target="n1::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e5" source="n3::n1::n2" target="n1::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="-3.5257646093725725" sy="-22.61876800537152" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e6" source="n1::n0" target="n3::n1::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e7" source="n3::n0::n0" target="n2::n4">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="-49.55409483153189" sy="-37.361620493017654" tx="-12.251214831532359" ty="20.024322167968933"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e8" source="n0::n0" target="n2::n2">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="-34.829290039016925" sy="-19.974697710489068" tx="0.0" ty="0.0">
+            <y:Point x="31.28494996098378" y="367.07839999999993"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e9" source="n2::n3" target="n3::n1">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="479.71727999999825" y="367.07839999999993"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e10" source="n5::n0" target="n4::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e11" source="n5::n3" target="n4::n0">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="-21.63077346801782" ty="3.7933500488280174"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e12" source="n4::n0" target="n5::n2">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="33.28475887328386" sy="0.0" tx="-12.548795623779654" ty="-11.517879656982487"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e13" source="n4::n0" target="n5::n3">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="0.0" sy="0.0" tx="29.245869506150484" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e14" source="n2" target="n5::n1">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="197.72888532420478" sy="-48.42722663077569" tx="0.0" ty="0.0">
+            <y:Point x="459.2918453242035" y="107.51787965698243"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e15" source="n5::n1" target="n2">
+      <data key="d10">
+        <y:GenericEdge configuration="com.yworks.edge.framed">
+          <y:Path sx="-21.318380279541543" sy="17.482120343017527" tx="218.15431999999953" ty="-47.823792187499976">
+            <y:Point x="479.71727999999825" y="124.99999999999996"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="3.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:GenericEdge>
+      </data>
+    </edge>
+    <edge id="e16" source="n4::n0" target="n2::n4">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e17" source="n2::n2" target="n4::n0">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e18" source="n4::n0" target="n2::n1">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e19" source="n2::n0" target="n4::n0">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+  </graph>
+  <data key="d0">
+    <y:Resources>
+      <y:Resource id="1">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;svg version="1.1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 x="0px" y="0px" width="68px" height="60px" viewBox="-0.435 -0.869 68 60" enable-background="new -0.435 -0.869 68 60"
+	 xml:space="preserve"&gt;
+&lt;defs&gt;
+&lt;/defs&gt;
+&lt;path fill="#666666" d="M52.462,30.881c-0.021,0-0.037,0.01-0.059,0.012c-0.021-0.002-0.037-0.012-0.059-0.012h-18.5v-7.555
+	c0-0.414-0.335-0.75-0.75-0.75c-0.414,0-0.75,0.336-0.75,0.75v7.555h-18.5c-0.02,0-0.037,0.01-0.057,0.012
+	c-0.02-0.002-0.037-0.012-0.057-0.012c-0.414,0-0.75,0.336-0.75,0.75v3.834c0,0.414,0.336,0.75,0.75,0.75s0.75-0.336,0.75-0.75
+	v-3.084H51.71v3.084c0,0.414,0.336,0.75,0.75,0.75s0.75-0.336,0.75-0.75v-3.834C53.212,31.217,52.876,30.881,52.462,30.881z"/&gt;
+&lt;linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="130.7236" y1="-184.1631" x2="130.7236" y2="-191.9565" gradientTransform="matrix(1 0 0 -1 -97.6001 -158.6377)"&gt;
+	&lt;stop  offset="0" style="stop-color:#9CD7FF"/&gt;
+	&lt;stop  offset="1" style="stop-color:#3C89C9"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_1_)" d="M36.296,29.976c-0.832,0-1.513-0.681-1.513-1.513v-1.424c0-0.832-0.681-1.513-1.513-1.513h-0.214
+	c-0.832,0-1.513,0.681-1.513,1.513v1.424c0,0.832-0.681,1.513-1.513,1.513h-2.499c-0.832,0-1.513,0.681-1.513,1.513v0.317
+	c0,0.832,0.681,1.513,1.513,1.513h11.187c0.832,0,1.513-0.681,1.513-1.513v-0.317c0-0.833-0.681-1.513-1.513-1.513H36.296z"/&gt;
+&lt;linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="605.8877" y1="2040.6665" x2="593.1709" y2="2040.6665" gradientTransform="matrix(1 0 0 1 -585.5996 -1982.4023)"&gt;
+	&lt;stop  offset="0" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_2_)" d="M20.205,57.452c0,0.519-3.619,0.752-6.627,0.752c-2.083,0-5.846-0.186-6.089-0.678
+	c0,0.238,0,0.806,0,0.89c0,0.389,2.573,0.661,6.084,0.661c3.511,0,6.632-0.344,6.632-0.729C20.205,58.264,20.205,57.7,20.205,57.452
+	z"/&gt;
+&lt;path fill="#808080" d="M13.846,56.806c3.512,0,6.358,0.313,6.358,0.699s-2.846,0.763-6.358,0.763c-3.59,0-6.358-0.375-6.358-0.763
+	S10.335,56.806,13.846,56.806z"/&gt;
+&lt;linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="600.833" y1="2037.4702" x2="598.1563" y2="2037.4702" gradientTransform="matrix(1 0 0 1 -585.5996 -1982.4023)"&gt;
+	&lt;stop  offset="0" style="stop-color:#999999"/&gt;
+	&lt;stop  offset="0.0417" style="stop-color:#8D8D8D"/&gt;
+	&lt;stop  offset="0.1617" style="stop-color:#717171"/&gt;
+	&lt;stop  offset="0.2821" style="stop-color:#5D5D5D"/&gt;
+	&lt;stop  offset="0.4021" style="stop-color:#515151"/&gt;
+	&lt;stop  offset="0.5212" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="0.6202" style="stop-color:#565656"/&gt;
+	&lt;stop  offset="0.7817" style="stop-color:#6E6E6E"/&gt;
+	&lt;stop  offset="0.9844" style="stop-color:#969696"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_3_)" d="M15.215,57.657c0,0-0.792,0.053-1.339,0.053s-1.338-0.053-1.338-0.053v-5.231h2.677V57.657z"/&gt;
+&lt;radialGradient id="SVGID_4_" cx="465.1113" cy="2023.4497" r="12.8975" gradientTransform="matrix(1.15 0 0 1 -526.6041 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#F2F2F2"/&gt;
+	&lt;stop  offset="1" style="stop-color:#666666"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_4_)" d="M0.065,36.888c0-0.59,0.482-1.071,1.072-1.071H26.98c0.589,0,1.071,0.481,1.071,1.071v16.108
+	c0,0.589-0.482,1.07-1.071,1.07H1.137c-0.59,0.002-1.072-0.481-1.072-1.07V36.888z"/&gt;
+&lt;path fill="none" stroke="#666666" stroke-width="0.1305" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+	M0.065,36.888c0-0.59,0.482-1.071,1.072-1.071H26.98c0.589,0,1.071,0.481,1.071,1.071v16.108c0,0.589-0.482,1.07-1.071,1.07H1.137
+	c-0.59,0.002-1.072-0.481-1.072-1.07V36.888z"/&gt;
+&lt;radialGradient id="SVGID_5_" cx="439.1309" cy="2019.0845" r="28.5715" fx="461.6079" fy="2015.234" gradientTransform="matrix(1.1935 0 0 1 -509.6013 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_5_)" d="M0.613,37.436c0-0.591,0.482-1.072,1.071-1.072h24.871c0.589,0,1.071,0.481,1.071,1.072v14.893
+	c0,0.59-0.482,1.072-1.071,1.072H1.685c-0.589,0-1.071-0.482-1.071-1.072V37.436z"/&gt;
+&lt;radialGradient id="SVGID_6_" cx="440.0439" cy="2019.1304" r="18.3134" gradientTransform="matrix(1.1923 0 0 1 -510.0601 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#9CD7FF"/&gt;
+	&lt;stop  offset="1" style="stop-color:#3C89C9"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_6_)" d="M0.917,37.679c0-0.59,0.482-1.071,1.072-1.071h24.262c0.589,0,1.071,0.481,1.071,1.071v14.406
+	c0,0.588-0.482,1.069-1.071,1.069H1.989c-0.59,0-1.072-0.481-1.072-1.069V37.679z"/&gt;
+&lt;path opacity="0.24" fill="#F2F2F2" d="M0.917,49.11V37.679c0-0.59,0.482-1.071,1.072-1.071h24.262c0.589,0,1.071,0.481,1.071,1.071
+	v7.252l-12.407,2.646c-0.57,0.146-1.52,0.293-2.107,0.326L0.917,49.11z"/&gt;
+&lt;linearGradient id="SVGID_7_" gradientUnits="userSpaceOnUse" x1="644.3887" y1="2040.6665" x2="631.6719" y2="2040.6665" gradientTransform="matrix(1 0 0 1 -585.5996 -1982.4023)"&gt;
+	&lt;stop  offset="0" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_7_)" d="M58.706,57.452c0,0.518-3.621,0.752-6.627,0.752c-2.084,0-5.848-0.186-6.09-0.678
+	c0,0.237,0,0.805,0,0.889c0,0.389,2.572,0.662,6.084,0.662s6.633-0.344,6.633-0.729C58.706,58.263,58.706,57.7,58.706,57.452z"/&gt;
+&lt;path fill="#808080" d="M52.347,56.805c3.512,0,6.357,0.313,6.357,0.699s-2.847,0.762-6.357,0.762c-3.59,0-6.357-0.373-6.357-0.762
+	C45.989,57.118,48.837,56.805,52.347,56.805z"/&gt;
+&lt;linearGradient id="SVGID_8_" gradientUnits="userSpaceOnUse" x1="639.333" y1="2037.4683" x2="636.6553" y2="2037.4683" gradientTransform="matrix(1 0 0 1 -585.5996 -1982.4023)"&gt;
+	&lt;stop  offset="0" style="stop-color:#999999"/&gt;
+	&lt;stop  offset="0.0417" style="stop-color:#8D8D8D"/&gt;
+	&lt;stop  offset="0.1617" style="stop-color:#717171"/&gt;
+	&lt;stop  offset="0.2821" style="stop-color:#5D5D5D"/&gt;
+	&lt;stop  offset="0.4021" style="stop-color:#515151"/&gt;
+	&lt;stop  offset="0.5212" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="0.6202" style="stop-color:#565656"/&gt;
+	&lt;stop  offset="0.7817" style="stop-color:#6E6E6E"/&gt;
+	&lt;stop  offset="0.9844" style="stop-color:#969696"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_8_)" d="M53.716,57.657c0,0-0.791,0.052-1.34,0.052c-0.547,0-1.338-0.052-1.338-0.052v-5.232h2.678V57.657z"
+	/&gt;
+&lt;radialGradient id="SVGID_9_" cx="498.5898" cy="2023.4487" r="12.8975" gradientTransform="matrix(1.15 0 0 1 -526.6041 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#F2F2F2"/&gt;
+	&lt;stop  offset="1" style="stop-color:#666666"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_9_)" d="M38.566,36.887c0-0.59,0.481-1.072,1.071-1.072h25.844c0.589,0,1.07,0.482,1.07,1.072v16.107
+	c0,0.59-0.481,1.072-1.07,1.072H39.638c-0.59,0-1.071-0.482-1.071-1.072V36.887z"/&gt;
+&lt;path fill="none" stroke="#666666" stroke-width="0.1305" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+	M38.566,36.887c0-0.59,0.481-1.072,1.071-1.072h25.844c0.589,0,1.07,0.482,1.07,1.072v16.107c0,0.59-0.481,1.072-1.07,1.072H39.638
+	c-0.59,0-1.071-0.482-1.071-1.072V36.887z"/&gt;
+&lt;radialGradient id="SVGID_10_" cx="471.3896" cy="2019.0845" r="28.5697" fx="493.8652" fy="2015.2343" gradientTransform="matrix(1.1935 0 0 1 -509.6013 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_10_)" d="M39.114,37.434c0-0.59,0.482-1.072,1.071-1.072h24.87c0.589,0,1.07,0.482,1.07,1.072v14.895
+	c0,0.589-0.481,1.07-1.07,1.07h-24.87c-0.589,0-1.071-0.481-1.071-1.07V37.434z"/&gt;
+&lt;radialGradient id="SVGID_11_" cx="472.334" cy="2019.1294" r="18.3139" gradientTransform="matrix(1.1923 0 0 1 -510.0601 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#9CD7FF"/&gt;
+	&lt;stop  offset="1" style="stop-color:#3C89C9"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_11_)" d="M39.419,37.678c0-0.59,0.481-1.072,1.07-1.072h24.264c0.588,0,1.07,0.482,1.07,1.072v14.406
+	c0,0.588-0.482,1.07-1.07,1.07H40.489c-0.589,0-1.07-0.482-1.07-1.07V37.678z"/&gt;
+&lt;path opacity="0.24" fill="#F2F2F2" d="M39.419,49.108v-11.43c0-0.59,0.481-1.072,1.07-1.072h24.264c0.588,0,1.07,0.482,1.07,1.072
+	v7.252l-12.408,2.645c-0.57,0.146-1.52,0.295-2.106,0.326L39.419,49.108z"/&gt;
+&lt;linearGradient id="SVGID_12_" gradientUnits="userSpaceOnUse" x1="624.8936" y1="2004.9155" x2="612.1787" y2="2004.9155" gradientTransform="matrix(1 0 0 1 -585.5996 -1982.4023)"&gt;
+	&lt;stop  offset="0" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_12_)" d="M39.212,21.701c0,0.518-3.621,0.752-6.626,0.752c-2.083,0-5.847-0.186-6.089-0.678
+	c0,0.238,0,0.805,0,0.889c0,0.389,2.573,0.662,6.084,0.662c3.51,0,6.631-0.344,6.631-0.729
+	C39.212,22.513,39.212,21.949,39.212,21.701z"/&gt;
+&lt;path fill="#808080" d="M32.854,21.055c3.511,0,6.358,0.313,6.358,0.699c0,0.386-2.848,0.762-6.358,0.762
+	c-3.589,0-6.358-0.374-6.358-0.762C26.496,21.367,29.342,21.055,32.854,21.055z"/&gt;
+&lt;linearGradient id="SVGID_13_" gradientUnits="userSpaceOnUse" x1="619.8379" y1="2001.7183" x2="617.1611" y2="2001.7183" gradientTransform="matrix(1 0 0 1 -585.5996 -1982.4023)"&gt;
+	&lt;stop  offset="0" style="stop-color:#999999"/&gt;
+	&lt;stop  offset="0.0417" style="stop-color:#8D8D8D"/&gt;
+	&lt;stop  offset="0.1617" style="stop-color:#717171"/&gt;
+	&lt;stop  offset="0.2821" style="stop-color:#5D5D5D"/&gt;
+	&lt;stop  offset="0.4021" style="stop-color:#515151"/&gt;
+	&lt;stop  offset="0.5212" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="0.6202" style="stop-color:#565656"/&gt;
+	&lt;stop  offset="0.7817" style="stop-color:#6E6E6E"/&gt;
+	&lt;stop  offset="0.9844" style="stop-color:#969696"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/linearGradient&gt;
+&lt;path fill="url(#SVGID_13_)" d="M34.222,21.906c0,0-0.791,0.052-1.338,0.052c-0.547,0-1.338-0.052-1.338-0.052v-5.232h2.677
+	L34.222,21.906L34.222,21.906z"/&gt;
+&lt;radialGradient id="SVGID_14_" cx="481.6387" cy="1987.6978" r="12.8975" gradientTransform="matrix(1.15 0 0 1 -526.6041 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#F2F2F2"/&gt;
+	&lt;stop  offset="1" style="stop-color:#666666"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_14_)" d="M19.072,1.137c0-0.59,0.482-1.072,1.071-1.072h25.843c0.589,0,1.071,0.482,1.071,1.072v16.108
+	c0,0.589-0.482,1.071-1.071,1.071H20.145c-0.589,0-1.071-0.482-1.071-1.071L19.072,1.137L19.072,1.137z"/&gt;
+&lt;path fill="none" stroke="#666666" stroke-width="0.1305" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+	M19.072,1.137c0-0.59,0.482-1.072,1.071-1.072h25.843c0.589,0,1.071,0.482,1.071,1.072v16.108c0,0.589-0.482,1.071-1.071,1.071
+	H20.145c-0.589,0-1.071-0.482-1.071-1.071L19.072,1.137L19.072,1.137z"/&gt;
+&lt;radialGradient id="SVGID_15_" cx="455.0566" cy="1983.3345" r="28.5689" fx="477.5316" fy="1979.4844" gradientTransform="matrix(1.1935 0 0 1 -509.6013 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#4D4D4D"/&gt;
+	&lt;stop  offset="1" style="stop-color:#999999"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_15_)" d="M19.621,1.685c0-0.59,0.482-1.072,1.072-1.072h24.87c0.589,0,1.071,0.482,1.071,1.072v14.894
+	c0,0.589-0.482,1.071-1.071,1.071h-24.87c-0.589,0-1.072-0.482-1.072-1.071V1.685z"/&gt;
+&lt;radialGradient id="SVGID_16_" cx="455.9854" cy="1983.3784" r="18.3134" gradientTransform="matrix(1.1923 0 0 1 -510.0601 -1982.4023)" gradientUnits="userSpaceOnUse"&gt;
+	&lt;stop  offset="0" style="stop-color:#9CD7FF"/&gt;
+	&lt;stop  offset="1" style="stop-color:#3C89C9"/&gt;
+&lt;/radialGradient&gt;
+&lt;path fill="url(#SVGID_16_)" d="M19.924,1.928c0-0.59,0.482-1.072,1.072-1.072h24.262c0.589,0,1.07,0.482,1.07,1.072v14.406
+	c0,0.588-0.481,1.07-1.07,1.07H20.997c-0.589,0-1.072-0.482-1.072-1.07V1.928z"/&gt;
+&lt;path opacity="0.24" fill="#F2F2F2" d="M19.924,13.358V1.928c0-0.59,0.482-1.072,1.072-1.072h24.262c0.589,0,1.07,0.482,1.07,1.072
+	V9.18l-12.408,2.646c-0.569,0.146-1.519,0.294-2.106,0.326L19.924,13.358z"/&gt;
+&lt;/svg&gt;
+</y:Resource>
+      <y:Resource id="2">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="57px" height="65px" viewBox="0 0 57 65" enable-background="new 0 0 57 65" xml:space="preserve"&gt;
+&lt;g&gt;
+	
+		&lt;linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="26.3398" y1="3115.7266" x2="27.5807" y2="3145.5239" gradientTransform="matrix(1 0 0 1 0.3203 -3091.7656)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_1_)" stroke="#ED9135" stroke-miterlimit="10" d="M49.529,51.225c-4.396-4.396-10.951-5.884-12.063-6.109
+		V37.8H19.278c0,0,0.038,6.903,0,6.868c0,0-6.874,0.997-12.308,6.432C1.378,56.691,0.5,62.77,0.5,62.77
+		c0,1.938,1.575,3.492,3.523,3.492h48.51c1.947,0,3.521-1.558,3.521-3.492C56.055,62.768,54.211,55.906,49.529,51.225z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_1_" cx="27.5835" cy="3117.4922" r="23.425" fx="23.0139" fy="3115.0024" gradientTransform="matrix(1 0 0 1 0.3203 -3091.7656)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_3_" fill="url(#face_x5F_white_1_)" stroke="#ED9135" stroke-miterlimit="10" d="M43.676,23.357
+		c0.086,10.2-6.738,18.52-15.25,18.586c-8.5,0.068-15.464-8.146-15.55-18.344C12.794,13.4,19.618,5.079,28.123,5.012
+		C36.627,4.945,43.59,13.158,43.676,23.357z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_1_" gradientUnits="userSpaceOnUse" x1="6468.501" y1="-12291.5195" x2="6492.1304" y2="-12384.9688" gradientTransform="matrix(0.275 0 0 -0.2733 -1752.8849 -3351.7349)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_3_" fill="url(#face_highlight_1_)" d="M28.415,5.625c-6.035,0.047-10.747,4.493-12.787,10.386
+		c-0.664,1.919-0.294,4.043,0.98,5.629c2.73,3.398,5.729,6.283,9.461,8.088c3.137,1.518,7.535,2.385,11.893,1.247
+		c2.274-0.592,3.988-2.459,4.375-4.766c0.187-1.094,0.293-2.289,0.283-3.553C42.54,13.244,36.729,5.56,28.415,5.625z"/&gt;
+	&lt;path id="hair_x5F_gray_3_" fill="#ECECEC" stroke="#9B9B9B" stroke-linecap="round" stroke-linejoin="round" d="M20.278,13.25
+		c0,0,5.321,7.25,15,3.75c2.729-0.563,9.058,1.035,9.058,1.035S40.68,1.865,27.289,2.744C9.403,4.125,12.058,25.678,12.058,25.678
+		s2.768-0.684,5.036-4.802C18.068,19.106,20.278,13.25,20.278,13.25z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_body_1_" cx="14.9609" cy="3148.9336" r="32.4004" gradientTransform="matrix(1 0 0 1 0.3203 -3091.7656)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B0E8FF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_body_3_" fill="url(#collar_x5F_body_1_)" stroke="#5491CF" d="M0.5,62.768c0,1.938,1.575,3.494,3.523,3.494
+		h48.51c1.947,0,3.521-1.559,3.521-3.494c0,0-1.844-6.861-6.525-11.543c-4.815-4.813-11.244-6.146-11.244-6.146
+		c-1.771,1.655-5.61,2.802-10.063,2.802c-4.453,0-8.292-1.146-10.063-2.802c0,0-5.755,0.586-11.189,6.021
+		C1.378,56.689,0.5,62.768,0.5,62.768z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_r_1_" cx="31.2998" cy="3139.0605" r="9.2823" gradientTransform="matrix(1 0 0 1 0.3203 -3091.7656)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_r_3_" fill="url(#collar_x5F_r_1_)" stroke="#5491CF" d="M38.159,41.381c0,0-0.574,2.369-3.013,4.441
+		c-2.108,1.795-5.783,2.072-5.783,2.072l3.974,6.217c0,0,2.957-1.637,5.009-3.848c1.922-2.072,1.37-5.479,1.37-5.479L38.159,41.381z
+		"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_l_1_" cx="18.9375" cy="3139.1016" r="9.2843" gradientTransform="matrix(1 0 0 1 0.3203 -3091.7656)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_l_3_" fill="url(#collar_x5F_l_1_)" stroke="#5491CF" d="M18.63,41.422c0,0,0.576,2.369,3.012,4.441
+		c2.109,1.793,5.785,2.072,5.785,2.072l-3.974,6.217c0,0-2.957-1.637-5.007-3.85c-1.922-2.072-1.37-5.48-1.37-5.48L18.63,41.422z"/&gt;
+	
+		&lt;radialGradient id="Knob2_1_" cx="27.6895" cy="2375.2871" r="0.9669" gradientTransform="matrix(1 0 0 1 0.2402 -2319.0742)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob2_3_" fill="url(#Knob2_1_)" stroke="#5491CF" cx="28.258" cy="56.254" r="0.584"/&gt;
+	
+		&lt;radialGradient id="Knob1_1_" cx="27.7275" cy="2381.5283" r="0.9669" gradientTransform="matrix(1 0 0 1 0.2402 -2319.0742)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob1_3_" fill="url(#Knob1_1_)" stroke="#5491CF" cx="28.297" cy="62.499" r="0.584"/&gt;
+	
+		&lt;radialGradient id="path5135_1_" cx="26.9917" cy="4.1973" r="6.0918" gradientTransform="matrix(1 0 0 -1 0.04 64.1543)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FCB57A"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FF8C36"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="path5135_2_" fill="url(#path5135_1_)" stroke="#E55E03" d="M27.427,55.221c0,0-1.848,2.057-2.079,6.543
+		c-0.231,4.488,0,4.488,0,4.488h6.544c0,0,0.23,0.063-0.152-4.363c-0.399-4.604-2.389-6.668-2.389-6.668H27.427z"/&gt;
+	
+		&lt;radialGradient id="path5131_1_" cx="26.7456" cy="11.9678" r="4.8472" gradientTransform="matrix(1 0 0 -1 0.04 64.1543)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FCB57A"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FF8C36"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="path5131_2_" fill="url(#path5131_1_)" stroke="#E55E03" d="M28.313,48.68h0.122l2.551,4.002
+		c0.517,0.953-1.204,1.797-1.453,2.549l-2.279-0.016c-0.243-0.76-2.257-1.365-1.476-2.584L28.313,48.68z"/&gt;
+&lt;/g&gt;
+&lt;/svg&gt;
+</y:Resource>
+      <y:Resource id="3">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="57px" height="63px" viewBox="0 0 57 63" enable-background="new 0 0 57 63" xml:space="preserve"&gt;
+&lt;g&gt;
+	
+		&lt;linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="26.5" y1="1570.3457" x2="27.741" y2="1600.1431" gradientTransform="matrix(1 0 0 1 0.1602 -1546.3828)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_1_)" stroke="#ED9135" stroke-miterlimit="10" d="M49.529,51.225c-4.396-4.396-10.951-5.884-12.063-6.109
+		V37.8H19.278c0,0,0.038,6.903,0,6.868c0,0-6.874,0.997-12.308,6.432C1.378,56.691,0.5,62.77,0.5,62.77
+		c0,1.938,1.575,3.492,3.523,3.492h48.51c1.947,0,3.521-1.558,3.521-3.492C56.055,62.768,54.211,55.906,49.529,51.225z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_1_" cx="27.7427" cy="1572.1094" r="23.4243" fx="23.1732" fy="1569.6195" gradientTransform="matrix(1 0 0 1 0.1602 -1546.3828)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_3_" fill="url(#face_x5F_white_1_)" stroke="#ED9135" stroke-miterlimit="10" d="M43.676,23.357
+		c0.086,10.2-6.738,18.52-15.247,18.586c-8.502,0.068-15.466-8.146-15.552-18.344C12.794,13.4,19.618,5.079,28.123,5.012
+		C36.627,4.945,43.59,13.158,43.676,23.357z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_1_" gradientUnits="userSpaceOnUse" x1="3646.5117" y1="-6644.2471" x2="3670.1414" y2="-6737.6978" gradientTransform="matrix(0.275 0 0 -0.2733 -977.2951 -1807.6279)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_3_" fill="url(#face_highlight_1_)" d="M27.958,6.333c-6.035,0.047-10.747,4.493-12.787,10.386
+		c-0.664,1.919-0.294,4.043,0.98,5.629c2.73,3.398,5.729,6.283,9.461,8.088c3.137,1.518,7.535,2.384,11.893,1.247
+		c2.274-0.592,3.988-2.459,4.375-4.766c0.183-1.094,0.293-2.289,0.283-3.553C42.083,13.952,36.271,6.268,27.958,6.333z"/&gt;
+	
+		&lt;linearGradient id="body_1_" gradientUnits="userSpaceOnUse" x1="79.9941" y1="-1569.4717" x2="15.6017" y2="-1569.4717" gradientTransform="matrix(0.9852 0 0 -0.9852 -18.8086 -1490.5736)"&gt;
+		&lt;stop  offset="0" style="stop-color:#49AD33"/&gt;
+		&lt;stop  offset="1" style="stop-color:#C2DA92"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="body_11_" fill="url(#body_1_)" stroke="#008D33" d="M0.5,62.768c0,1.938,1.575,3.494,3.523,3.494h48.51
+		c1.947,0,3.521-1.559,3.521-3.494c0,0-1.844-6.861-6.525-11.543c-4.815-4.813-11.244-6.146-11.244-6.146
+		c-1.771,1.655-5.61,2.802-10.063,2.802c-4.453,0-8.292-1.146-10.063-2.802c0,0-5.755,0.586-11.189,6.021
+		C1.378,56.689,0.5,62.768,0.5,62.768z"/&gt;
+	
+		&lt;linearGradient id="turtleneck_1_" gradientUnits="userSpaceOnUse" x1="41.248" y1="1593.0166" x2="15.2274" y2="1593.0166" gradientTransform="matrix(1 0 0 1 0.1602 -1546.3828)"&gt;
+		&lt;stop  offset="0" style="stop-color:#49AD33"/&gt;
+		&lt;stop  offset="1" style="stop-color:#C2DA92"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="turtleneck_8_" fill="url(#turtleneck_1_)" stroke="#008D33" d="M39.715,44.786l-1.557-3.405c0,0-0.574,2.369-3.012,4.441
+		c-2.109,1.795-6.785,2.072-6.785,2.072s-4.753-0.356-6.722-2.031c-2.436-2.072-3.012-4.441-3.012-4.441l-1.555,3.404
+		c0,0-0.552,1.404,1.37,3.479c1.025,1.105,5.203,3.611,9.682,3.582c4.479-0.029,9.264-2.594,10.218-3.623
+		C40.266,46.191,39.715,44.786,39.715,44.786z"/&gt;
+	&lt;path id="wh2_1_" fill="#9B9B9B" stroke="#4B4B4B" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M28.276,15.5c5.635,0,10.826,1.416,14.979,3.794c-1.614-8.228-7.794-14.34-15.132-14.282c-7.272,0.057-13.299,6.155-14.846,14.294
+		C17.434,16.921,22.632,15.5,28.276,15.5z"/&gt;
+	&lt;path id="wh1_1_" fill="#9B9B9B" stroke="#4B4B4B" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M28.278,20.808c5.662,0,11.937,0.811,16.391,2.207c-0.11-2.059-0.274-2.826-0.413-3.72c-4.154-2.379-10.344-3.795-15.98-3.795
+		c-5.644,0-11.842,1.421-16,3.807c-0.228,1.197-0.362,2.436-0.388,3.707C16.343,21.618,22.618,20.808,28.278,20.808z"/&gt;
+&lt;/g&gt;
+&lt;/svg&gt;
+</y:Resource>
+      <y:Resource id="4">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="59px" height="34px" viewBox="0 0 59 34" enable-background="new 0 0 59 34" xml:space="preserve"&gt;
+&lt;g&gt;
+	
+		&lt;linearGradient id="neck_x5F_white_1_" gradientUnits="userSpaceOnUse" x1="13.4722" y1="-3073.124" x2="14.2016" y2="-3090.6384" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="neck_x5F_white_7_" fill="url(#neck_x5F_white_1_)" stroke="#FFAB4F" stroke-width="0.5" stroke-miterlimit="10" d="
+		M9.639,18.898h9.094v10.115c-0.658,0.187-8.587,0.219-9.094,0.086V18.898z"/&gt;
+	
+		&lt;linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="12.9697" y1="-3069.5903" x2="13.5902" y2="-3084.491" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_1_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="M24.765,25.611
+		c-2.197-2.196-5.476-2.94-6.031-3.055v-3.658H9.639c0,0,0.019,3.453,0,3.436c0,0-3.437,0.499-6.154,3.216
+		c-2.796,2.796-3.235,5.835-3.235,5.835c0,0.971,0.788,1.746,1.762,1.746h24.255c0.975,0,1.762-0.777,1.762-1.746
+		C28.028,31.384,27.106,27.953,24.765,25.611z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_1_" cx="13.5923" cy="-3070.4746" r="11.713" fx="11.3074" fy="-3071.7195" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_7_" fill="url(#face_x5F_white_1_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="
+		M21.839,11.679c0.043,5.1-3.369,9.26-7.626,9.293c-4.25,0.033-7.731-4.074-7.774-9.173C6.398,6.7,9.81,2.54,14.062,2.506
+		C18.313,2.473,21.796,6.579,21.839,11.679z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_1_" gradientUnits="userSpaceOnUse" x1="7121.4932" y1="14261.8359" x2="7133.3081" y2="14308.5615" gradientTransform="matrix(0.275 0 0 0.2733 -1945.4338 -3893.9907)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_7_" fill="url(#face_highlight_1_)" d="M14.208,2.813C11.19,2.835,8.834,5.059,7.814,8.006
+		c-0.332,0.959-0.147,2.021,0.49,2.814c1.365,1.699,2.865,3.141,4.73,4.044c1.568,0.759,3.767,1.192,5.947,0.623
+		c1.137-0.296,1.994-1.229,2.188-2.383c0.094-0.547,0.146-1.145,0.141-1.776C21.271,6.622,18.364,2.78,14.208,2.813z"/&gt;
+	
+		&lt;path id="hair_x5F_gray_6_" fill="#CC9869" stroke="#99724F" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="
+		M10.139,6.625c0,0,2.661,3.625,7.5,1.875c1.363-0.281,4.527,0.518,4.527,0.518s-1.826-8.085-8.522-7.646
+		c-8.943,0.69-7.615,11.467-7.615,11.467s1.384-0.342,2.518-2.401C9.034,9.553,10.139,6.625,10.139,6.625z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_body_1_" cx="7.2808" cy="-3086.1948" r="16.2006" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B0E8FF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_body_7_" fill="url(#collar_x5F_body_1_)" stroke="#5491CF" stroke-width="0.5" d="M0.25,31.384
+		c0,0.97,0.788,1.747,1.762,1.747h24.255c0.975,0,1.762-0.779,1.762-1.747c0,0-0.922-3.431-3.264-5.771
+		c-2.408-2.406-5.622-3.072-5.622-3.072c-0.886,0.827-2.806,1.4-5.031,1.4c-2.227,0-4.146-0.573-5.032-1.4
+		c0,0-2.877,0.293-5.594,3.01C0.689,28.346,0.25,31.384,0.25,31.384z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_r_1_" cx="15.4497" cy="-3081.2578" r="4.6415" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_r_7_" fill="url(#collar_x5F_r_1_)" stroke="#5491CF" stroke-width="0.5" d="M19.079,20.689
+		c0,0-0.287,1.186-1.506,2.222c-1.055,0.897-2.892,1.036-2.892,1.036l1.987,3.107c0,0,1.479-0.818,2.504-1.924
+		c0.961-1.035,0.686-2.74,0.686-2.74L19.079,20.689z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_l_1_" cx="9.2686" cy="-3081.2778" r="4.6425" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_l_7_" fill="url(#collar_x5F_l_1_)" stroke="#5491CF" stroke-width="0.5" d="M9.315,20.711
+		c0,0,0.288,1.186,1.506,2.221c1.055,0.896,2.893,1.037,2.893,1.037l-1.987,3.107c0,0-1.479-0.818-2.503-1.926
+		c-0.961-1.035-0.685-2.739-0.685-2.739L9.315,20.711z"/&gt;
+	
+		&lt;radialGradient id="Knob2_1_" cx="13.6846" cy="-2313.0259" r="0.4838" gradientTransform="matrix(1 0 0 -1 0.2803 -2284.9199)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob2_7_" fill="url(#Knob2_1_)" stroke="#5491CF" stroke-width="0.5" cx="14.129" cy="28.127" r="0.292"/&gt;
+	
+		&lt;radialGradient id="Knob1_1_" cx="13.7036" cy="-2316.1479" r="0.4836" gradientTransform="matrix(1 0 0 -1 0.2803 -2284.9199)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob1_7_" fill="url(#Knob1_1_)" stroke="#5491CF" stroke-width="0.5" cx="14.148" cy="31.25" r="0.292"/&gt;
+	&lt;path id="path5135_10_" fill="#D54A30" stroke="#B51A19" stroke-width="0.5" d="M13.722,27.615c0,0-0.926,1.027-1.041,3.271
+		c-0.115,2.243,0,2.243,0,2.243h3.273c0,0,0.115,0.031-0.078-2.185c-0.199-2.301-1.193-3.334-1.193-3.334L13.722,27.615
+		L13.722,27.615z"/&gt;
+	&lt;path id="path5131_10_" fill="#D54A30" stroke="#B51A19" stroke-width="0.5" d="M14.163,24.344h0.063l1.276,2.002
+		c0.258,0.477-0.604,0.898-0.729,1.273l-1.14-0.01c-0.121-0.379-1.13-0.685-0.738-1.291L14.163,24.344z"/&gt;
+	&lt;polygon fill="#353535" stroke="#353535" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" points="
+		52.225,22.842 36.594,25.037 36.139,13.559 51.746,13.873 	"/&gt;
+	
+		&lt;linearGradient id="neck_x5F_white_2_" gradientUnits="userSpaceOnUse" x1="43.3594" y1="-3073.1235" x2="44.0888" y2="-3090.6387" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="neck_x5F_white_5_" fill="url(#neck_x5F_white_2_)" stroke="#FFAB4F" stroke-width="0.5" stroke-miterlimit="10" d="
+		M39.525,18.898h9.096v10.115c-0.658,0.187-8.587,0.219-9.096,0.086V18.898z"/&gt;
+	
+		&lt;linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="42.8584" y1="-3069.5903" x2="43.4789" y2="-3084.491" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_2_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="M54.652,25.611
+		c-2.197-2.196-5.477-2.94-6.031-3.055v-3.658h-9.096c0,0,0.021,3.453,0,3.436c0,0-3.437,0.499-6.152,3.216
+		c-2.796,2.796-3.234,5.835-3.234,5.835c0,0.971,0.786,1.746,1.762,1.746h24.254c0.976,0,1.763-0.777,1.763-1.746
+		C57.916,31.384,56.994,27.953,54.652,25.611z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_2_" cx="43.4795" cy="-3070.4746" r="11.7123" fx="41.1947" fy="-3071.7195" gradientTransform="matrix(1 0 0 -1 0.3604 -3057.6113)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_5_" fill="url(#face_x5F_white_2_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="
+		M51.727,11.679c0.043,5.1-3.369,9.26-7.625,9.293c-4.25,0.033-7.731-4.074-7.774-9.173c-0.041-5.1,3.37-9.26,7.623-9.294
+		C48.201,2.473,51.684,6.579,51.727,11.679z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_2_" gradientUnits="userSpaceOnUse" x1="7230.1748" y1="14261.8359" x2="7241.9893" y2="14308.5596" gradientTransform="matrix(0.275 0 0 0.2733 -1945.4338 -3893.9907)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_5_" fill="url(#face_highlight_2_)" d="M44.096,2.813c-3.018,0.023-5.373,2.247-6.394,5.193
+		c-0.332,0.959-0.147,2.021,0.489,2.814c1.365,1.699,2.865,3.141,4.73,4.044c1.568,0.759,3.768,1.192,5.946,0.623
+		c1.137-0.296,1.993-1.229,2.188-2.383c0.094-0.547,0.146-1.145,0.141-1.776C51.158,6.622,48.252,2.78,44.096,2.813z"/&gt;
+	&lt;path fill="#5C5C5C" stroke="#353535" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="M38.688,21.917
+		c-0.207-1.509-0.308-2.506-0.396-3.933c-0.287-4.673,1.442-8.859,1.442-8.859l0.44-1.039l0.47,1.209l0.938-2.478l-0.023,2.276
+		l0.654-0.374l0.352-0.827L42.745,9l0.526-0.494l1.065-0.364L44.809,8.5l0.238-1.188l0.417,1.277l0.563-0.513l0.84-0.106L47.4,8.656
+		l-0.121-2.123l0.941,1.984L48.693,8.5c0,0,3.014,4.974,1.875,14.213c1.076,0.381,2.24,1.344,3.438,2.324
+		c0.001-0.001,0.007-0.006,0.007-0.006L51.943,9.69c-0.517-3.253-2.68-8.39-7.69-8.366c-11.789-0.04-7.853,19.704-9.894,23.343
+		c-0.004,0.007-0.006,0.013-0.01,0.021C36.034,23.363,37.714,22.173,38.688,21.917z"/&gt;
+	
+		&lt;radialGradient id="body_1_" cx="77.0439" cy="3984.6543" r="16.4227" gradientTransform="matrix(0.9852 0 0 0.9852 -38.3758 -3898.4966)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFC373"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFB448"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="body_21_" fill="url(#body_1_)" stroke="#ED8D00" stroke-width="0.5" d="M30.139,31.384c0,0.97,0.786,1.747,1.762,1.747
+		h24.254c0.976,0,1.763-0.779,1.763-1.747c0,0-0.922-3.431-3.265-5.771c-2.407-2.406-4.121-2.572-4.121-2.572
+		c-0.723,3.49-4.276,4.393-6.504,4.393s-5.66-1.32-5.971-4.72c0,0-2.279,0.601-4.684,2.837
+		C30.577,28.346,30.139,31.384,30.139,31.384z"/&gt;
+&lt;/g&gt;
+&lt;/svg&gt;
+</y:Resource>
+      <y:Resource id="5">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="59px" height="59px" viewBox="0 0 59 59" enable-background="new 0 0 59 59" xml:space="preserve"&gt;
+&lt;g&gt;
+	
+		&lt;linearGradient id="neck_x5F_white_1_" gradientUnits="userSpaceOnUse" x1="13.6323" y1="-1502.7422" x2="14.3617" y2="-1520.2559" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="neck_x5F_white_19_" fill="url(#neck_x5F_white_1_)" stroke="#FFAB4F" stroke-width="0.5" stroke-miterlimit="10" d="
+		M9.639,18.899h9.093v10.115c-0.656,0.186-8.586,0.218-9.093,0.086V18.899z"/&gt;
+	
+		&lt;linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="13.1294" y1="-1499.207" x2="13.75" y2="-1514.1072" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_1_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="M24.766,25.612
+		c-2.199-2.197-5.477-2.941-6.033-3.055v-3.658H9.639c0,0,0.019,3.452,0,3.435c0,0-3.437,0.499-6.154,3.216
+		c-2.796,2.796-3.235,5.835-3.235,5.835c0,0.971,0.788,1.746,1.762,1.746h24.255c0.974,0,1.761-0.777,1.761-1.746
+		C28.027,31.384,27.105,27.953,24.766,25.612z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_1_" cx="13.7515" cy="-1500.0908" r="11.7123" fx="11.4666" fy="-1501.3357" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_19_" fill="url(#face_x5F_white_1_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="
+		M21.838,11.679c0.043,5.1-3.369,9.26-7.623,9.293C9.964,21.006,6.483,16.899,6.44,11.8c-0.042-5.1,3.37-9.261,7.622-9.294
+		C18.314,2.473,21.795,6.579,21.838,11.679z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_1_" gradientUnits="userSpaceOnUse" x1="4300.0391" y1="8522.0703" x2="4311.8545" y2="8568.7988" gradientTransform="matrix(0.275 0 0 0.2733 -1169.7629 -2324.9595)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_19_" fill="url(#face_highlight_1_)" d="M13.979,3.166c-3.018,0.023-5.374,2.247-6.394,5.193
+		c-0.332,0.96-0.147,2.021,0.49,2.814c1.365,1.699,2.865,3.142,4.73,4.044c1.569,0.759,3.767,1.192,5.946,0.624
+		c1.139-0.297,1.994-1.229,2.188-2.383c0.092-0.548,0.146-1.145,0.143-1.777C21.041,6.977,18.137,3.134,13.979,3.166z"/&gt;
+	
+		&lt;path id="Hair_Female_1_Black_9_" fill="#4B4B4B" stroke="#000000" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="
+		M14.187,0.25c-5.418,0-10.052,3.624-9.61,12.813c0.282,3.281,2.931,6.021,4.683,6.766C7.795,14.344,9.107,7.317,8.967,7.064
+		c-0.14-0.252,1.769,3.364,1.769,3.364l1.591-4.155c2.771,2.14,0.197,5.654,0.524,5.528c2.129-0.815,2.67-4.614,2.67-4.614
+		s1.364,1.829,1.35,2.752c-0.025,1.781,1.098-3.033,1.098-3.033l0.514,1.016c3.363,4.911,1.842,8.104,0.826,11.391
+		c7.834-0.352,6.146-5.24,4.83-9.203C21.795,3.046,19.604,0.25,14.187,0.25z"/&gt;
+	
+		&lt;linearGradient id="body_1_" gradientUnits="userSpaceOnUse" x1="53.4854" y1="2393.7295" x2="21.2897" y2="2393.7295" gradientTransform="matrix(0.9852 0 0 0.9852 -22.6981 -2330.2188)"&gt;
+		&lt;stop  offset="0" style="stop-color:#49AD33"/&gt;
+		&lt;stop  offset="1" style="stop-color:#C2DA92"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="body_63_" fill="url(#body_1_)" stroke="#008D33" stroke-width="0.5" d="M0.25,31.384c0,0.97,0.788,1.747,1.762,1.747
+		h24.255c0.974,0,1.761-0.779,1.761-1.747c0,0-0.922-3.431-3.262-5.771c-2.408-2.406-4.123-2.572-4.123-2.572
+		c-0.723,3.491-4.277,4.393-6.503,4.393c-2.227,0-5.75-0.994-6.06-4.393c0,0-1.877-0.207-4.594,2.51
+		C0.689,28.345,0.25,31.384,0.25,31.384z"/&gt;
+	
+		&lt;linearGradient id="neck_x5F_white_3_" gradientUnits="userSpaceOnUse" x1="43.8525" y1="-1502.7417" x2="44.5819" y2="-1520.2552" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="neck_x5F_white_17_" fill="url(#neck_x5F_white_3_)" stroke="#FFAB4F" stroke-width="0.5" stroke-miterlimit="10" d="
+		M39.859,18.899h9.094v10.115c-0.656,0.186-8.586,0.218-9.094,0.086V18.899z"/&gt;
+	
+		&lt;linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="43.3506" y1="-1499.2075" x2="43.9712" y2="-1514.1077" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_2_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="M54.986,25.612
+		c-2.199-2.197-5.478-2.941-6.033-3.055v-3.658h-9.094c0,0,0.02,3.452,0,3.435c0,0-3.438,0.499-6.153,3.216
+		c-2.796,2.796-3.235,5.835-3.235,5.835c0,0.971,0.787,1.746,1.762,1.746h24.256c0.974,0,1.761-0.777,1.761-1.746
+		C58.248,31.384,57.326,27.953,54.986,25.612z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_3_" cx="43.9727" cy="-1500.0908" r="11.7111" fx="41.6881" fy="-1501.3356" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_17_" fill="url(#face_x5F_white_3_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="
+		M52.059,11.679c0.043,5.1-3.369,9.26-7.623,9.293c-4.25,0.034-7.731-4.073-7.774-9.172c-0.042-5.1,3.368-9.261,7.622-9.294
+		C48.536,2.473,52.016,6.579,52.059,11.679z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_3_" gradientUnits="userSpaceOnUse" x1="4409.9326" y1="8522.0703" x2="4421.7476" y2="8568.7969" gradientTransform="matrix(0.275 0 0 0.2733 -1169.7629 -2324.9595)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_17_" fill="url(#face_highlight_3_)" d="M44.2,3.166c-3.019,0.023-5.374,2.247-6.394,5.193
+		c-0.332,0.96-0.147,2.021,0.489,2.814c1.364,1.699,2.864,3.142,4.729,4.044c1.568,0.759,3.768,1.192,5.945,0.624
+		c1.139-0.297,1.994-1.229,2.188-2.383c0.092-0.548,0.146-1.145,0.143-1.777C51.262,6.977,48.357,3.134,44.2,3.166z"/&gt;
+	
+		&lt;path id="hair_x5F_gray_17_" fill="#ECECEC" stroke="#9B9B9B" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="
+		M40.359,6.625c0,0,2.66,3.625,7.5,1.875c1.365-0.281,4.529,0.518,4.529,0.518s-1.828-8.085-8.523-7.646
+		c-8.943,0.69-7.615,11.467-7.615,11.467s1.384-0.342,2.518-2.401C39.255,9.553,40.359,6.625,40.359,6.625z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_body_2_" cx="37.6602" cy="-1515.813" r="16.2003" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B0E8FF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_body_8_" fill="url(#collar_x5F_body_2_)" stroke="#5491CF" stroke-width="0.5" d="M30.471,31.384
+		c0,0.97,0.787,1.747,1.762,1.747h24.256c0.974,0,1.761-0.779,1.761-1.747c0,0-0.922-3.431-3.263-5.771
+		c-2.407-2.406-5.623-3.072-5.623-3.072c-0.885,0.827-2.805,1.4-5.03,1.4s-4.146-0.573-5.031-1.4c0,0-2.878,0.293-5.595,3.01
+		C30.91,28.345,30.471,31.384,30.471,31.384z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_r_2_" cx="45.8311" cy="-1510.8745" r="4.6401" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_r_8_" fill="url(#collar_x5F_r_2_)" stroke="#5491CF" stroke-width="0.5" d="M49.301,20.69
+		c0,0-0.287,1.185-1.506,2.221c-1.055,0.897-2.893,1.036-2.893,1.036l1.986,3.108c0,0,1.479-0.818,2.504-1.924
+		c0.961-1.036,0.686-2.74,0.686-2.74L49.301,20.69z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_l_2_" cx="39.6494" cy="-1510.896" r="4.6426" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_l_8_" fill="url(#collar_x5F_l_2_)" stroke="#5491CF" stroke-width="0.5" d="M39.536,20.711
+		c0,0,0.288,1.185,1.506,2.221c1.056,0.896,2.894,1.036,2.894,1.036l-1.987,3.108c0,0-1.479-0.818-2.505-1.925
+		c-0.961-1.036-0.685-2.74-0.685-2.74L39.536,20.711z"/&gt;
+	
+		&lt;radialGradient id="Knob2_2_" cx="44.0645" cy="-742.6421" r="0.4846" gradientTransform="matrix(1 0 0 -1 0.1201 -714.5371)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob2_8_" fill="url(#Knob2_2_)" stroke="#5491CF" stroke-width="0.5" cx="44.35" cy="28.127" r="0.292"/&gt;
+	
+		&lt;radialGradient id="Knob1_2_" cx="44.083" cy="-745.7642" r="0.4847" gradientTransform="matrix(1 0 0 -1 0.1201 -714.5371)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob1_8_" fill="url(#Knob1_2_)" stroke="#5491CF" stroke-width="0.5" cx="44.369" cy="31.25" r="0.292"/&gt;
+	
+		&lt;radialGradient id="jacket_x5F_body_1_" cx="36.7842" cy="-1515.3755" r="20.459" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#D0D0D0"/&gt;
+		&lt;stop  offset="1" style="stop-color:#9B9B9B"/&gt;
+	&lt;/radialGradient&gt;
+	
+		&lt;path id="jacket_x5F_body_8_" fill="url(#jacket_x5F_body_1_)" stroke="#4B4B4B" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="
+		M54.986,25.612c-2.217-2.217-5.111-2.955-5.557-3.059l-2.695,10.572h-4.43L39.686,22.84c-0.145-0.096-0.271-0.196-0.385-0.301
+		c0,0-2.877,0.293-5.595,3.01c-2.796,2.796-3.233,5.835-3.233,5.835c0,0.97,0.786,1.747,1.76,1.747h24.256
+		c0.975,0,1.761-0.779,1.761-1.747C58.248,31.384,57.326,27.953,54.986,25.612z"/&gt;
+	
+		&lt;polygon id="jacket_x5F_r_8_" fill="#9B9B9B" stroke="#4B4B4B" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" points="
+		49.688,21.038 51.305,23.187 50.615,27.835 48.914,28.25 49.547,29.563 47.509,33.126 46.734,33.126 	"/&gt;
+	
+		&lt;polygon id="jacket_x5F_l_8_" fill="#B2B2B2" stroke="#4B4B4B" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" points="
+		39.354,21.038 37.734,23.187 38.426,27.835 40.127,28.25 39.493,29.563 41.531,33.126 42.307,33.126 	"/&gt;
+	&lt;path id="path5135_8_" fill="#D54A30" stroke="#B51A19" stroke-width="0.5" d="M43.936,27.61c0,0-0.926,1.028-1.041,3.271
+		c-0.115,2.244,0,2.244,0,2.244h3.273c0,0,0.115,0.031-0.077-2.182c-0.2-2.302-1.194-3.334-1.194-3.334L43.936,27.61L43.936,27.61z"
+		/&gt;
+	&lt;path id="path5131_8_" fill="#D54A30" stroke="#B51A19" stroke-width="0.5" d="M44.377,24.34h0.063l1.275,2.001
+		c0.258,0.477-0.604,0.898-0.729,1.274l-1.139-0.008c-0.121-0.38-1.129-0.683-0.738-1.292L44.377,24.34z"/&gt;
+	
+		&lt;linearGradient id="neck_x5F_white_4_" gradientUnits="userSpaceOnUse" x1="43.6328" y1="-1527.7417" x2="44.3621" y2="-1545.2545" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="neck_x5F_white_11_" fill="url(#neck_x5F_white_4_)" stroke="#FFAB4F" stroke-width="0.5" stroke-miterlimit="10" d="
+		M39.639,43.898h9.094v10.115c-0.655,0.187-8.586,0.219-9.094,0.086V43.898z"/&gt;
+	
+		&lt;linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="43.1309" y1="-1524.2065" x2="43.7515" y2="-1539.1072" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)"&gt;
+		&lt;stop  offset="0.2711" style="stop-color:#FFAB4F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFD28F"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path fill="url(#SVGID_3_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="M54.766,50.611
+		c-2.199-2.196-5.477-2.94-6.033-3.055v-3.658h-9.094c0,0,0.021,3.453,0,3.436c0,0-3.437,0.499-6.152,3.216
+		c-2.797,2.796-3.235,5.835-3.235,5.835c0,0.971,0.787,1.746,1.763,1.746h24.254c0.975,0,1.762-0.777,1.762-1.746
+		C58.027,56.384,57.105,52.953,54.766,50.611z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_4_" cx="43.752" cy="-1525.0908" r="11.7114" fx="41.4673" fy="-1526.3356" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFD28F"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFAB4F"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_11_" fill="url(#face_x5F_white_4_)" stroke="#ED9135" stroke-width="0.5" stroke-miterlimit="10" d="
+		M51.838,36.68c0.043,5.1-3.369,9.26-7.623,9.293c-4.251,0.033-7.732-4.074-7.775-9.173c-0.041-5.1,3.369-9.261,7.623-9.294
+		C48.314,27.473,51.795,31.579,51.838,36.68z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_4_" gradientUnits="userSpaceOnUse" x1="4409.1299" y1="8613.5469" x2="4420.9448" y2="8660.2725" gradientTransform="matrix(0.275 0 0 0.2733 -1169.7629 -2324.9595)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.24"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.16"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_11_" fill="url(#face_highlight_4_)" d="M43.979,28.166c-3.018,0.023-5.373,2.247-6.394,5.193
+		c-0.332,0.959-0.147,2.021,0.49,2.813c1.364,1.699,2.864,3.142,4.729,4.044c1.568,0.76,3.768,1.192,5.945,0.624
+		c1.139-0.297,1.994-1.229,2.188-2.383c0.092-0.548,0.146-1.146,0.144-1.776C51.041,31.977,48.137,28.134,43.979,28.166z"/&gt;
+	&lt;path fill="#CC9869" stroke="#99724F" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="M46.107,29.969
+		c0,0,2.845,1.375,3.845,4.062c1.052,2.826,2.062,4.117,2.095,4c0.938-3.395,0.531-10.718-5.086-10.792
+		c-10.229-3.832-12.79,5.98-11.947,9.824c0.539,2.457,1.117,3.344,1.971,4.041C36.982,41.104,37.514,33.781,46.107,29.969z"/&gt;
+	
+		&lt;linearGradient id="body_2_" gradientUnits="userSpaceOnUse" x1="83.9365" y1="2419.1064" x2="51.7404" y2="2419.1064" gradientTransform="matrix(0.9852 0 0 0.9852 -22.6981 -2330.2188)"&gt;
+		&lt;stop  offset="0" style="stop-color:#49AD33"/&gt;
+		&lt;stop  offset="1" style="stop-color:#C2DA92"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="body_35_" fill="url(#body_2_)" stroke="#008D33" stroke-width="0.5" d="M30.25,56.384c0,0.97,0.787,1.747,1.762,1.747
+		h24.256c0.974,0,1.76-0.779,1.76-1.747c0,0-0.922-3.431-3.262-5.771c-2.408-2.406-4.123-2.572-4.123-2.572
+		c-0.723,3.49-4.276,4.393-6.504,4.393c-2.227,0-5.75-0.994-6.059-4.393c0,0-1.878-0.207-4.596,2.51
+		C30.689,53.346,30.25,56.384,30.25,56.384z"/&gt;
+	
+		&lt;radialGradient id="neck_x5F_white_5_" cx="14.0952" cy="-1534.9302" r="5.7236" fx="12.9786" fy="-1535.5386" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B38E5D"/&gt;
+		&lt;stop  offset="1" style="stop-color:#805126"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="neck_x5F_white_2_" fill="url(#neck_x5F_white_5_)" stroke="#5B453B" stroke-width="0.5" stroke-miterlimit="10" d="
+		M9.859,43.898h9.094v6.615c-0.656,0.187-8.586,0.219-9.094,0.086V43.898z"/&gt;
+	
+		&lt;radialGradient id="SVGID_4_" cx="13.8213" cy="-1539.1084" r="15.5272" fx="10.7923" fy="-1540.7589" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B38E5D"/&gt;
+		&lt;stop  offset="1" style="stop-color:#805126"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path fill="url(#SVGID_4_)" stroke="#5B453B" stroke-width="0.5" stroke-miterlimit="10" d="M24.986,50.611
+		c-2.199-2.196-5.477-2.94-6.033-3.055v-3.658H9.859c0,0,0.02,3.453,0,3.436c0,0-3.437,0.499-6.153,3.216
+		c-2.796,2.796-3.235,5.835-3.235,5.835c0,0.971,0.787,1.746,1.762,1.746h24.255c0.974,0,1.761-0.777,1.761-1.746
+		C28.248,56.384,27.326,52.953,24.986,50.611z"/&gt;
+	
+		&lt;radialGradient id="face_x5F_white_5_" cx="13.9722" cy="-1525.0908" r="11.7123" fx="11.6873" fy="-1526.3357" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B38E5D"/&gt;
+		&lt;stop  offset="1" style="stop-color:#805126"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="face_x5F_white_2_" fill="url(#face_x5F_white_5_)" stroke="#5B453B" stroke-width="0.5" stroke-miterlimit="10" d="
+		M22.059,36.68c0.043,5.1-3.369,9.26-7.623,9.293c-4.251,0.033-7.732-4.074-7.775-9.173c-0.042-5.1,3.369-9.261,7.622-9.294
+		C18.536,27.473,22.016,31.579,22.059,36.68z"/&gt;
+	
+		&lt;linearGradient id="face_highlight_5_" gradientUnits="userSpaceOnUse" x1="4300.8428" y1="8613.5449" x2="4312.6582" y2="8660.2734" gradientTransform="matrix(0.275 0 0 0.2733 -1169.7629 -2324.9595)"&gt;
+		&lt;stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0.42"/&gt;
+		&lt;stop  offset="1" style="stop-color:#FFFFFF;stop-opacity:0.12"/&gt;
+	&lt;/linearGradient&gt;
+	&lt;path id="face_highlight_2_" fill="url(#face_highlight_5_)" d="M14.2,28.166c-3.018,0.023-5.374,2.247-6.394,5.193
+		c-0.332,0.959-0.147,2.021,0.49,2.813c1.364,1.699,2.864,3.142,4.73,4.044c1.568,0.76,3.767,1.192,5.945,0.624
+		c1.139-0.297,1.994-1.229,2.188-2.383c0.092-0.548,0.146-1.146,0.143-1.776C21.262,31.977,18.357,28.134,14.2,28.166z"/&gt;
+	
+		&lt;path id="Hair_Young_Black_1_" fill="#4B4B4B" stroke="#000000" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" d="
+		M10.359,31.625c1.709,2.166,4.667,3.459,4.667,3.459l-0.708-1.75c0,0,3.547,2.346,4.041,2.166c0.484-0.1-0.541-1.902-0.541-1.902
+		s1.568,0.896,2.428,1.983c0.9,1.14,2.143,1.752,2.143,1.752s1.346-10.974-8.523-10.961C4.359,26.354,6.25,38.839,6.25,38.839
+		L7.568,33.5c0,0,0.457,2.879,0.699,2.438C9.151,32.605,9.651,30.75,10.359,31.625z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_body_3_" cx="7.6602" cy="-1540.813" r="16.2003" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#B0E8FF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_body_1_" fill="url(#collar_x5F_body_3_)" stroke="#5491CF" stroke-width="0.5" d="M0.471,56.384
+		c0,0.97,0.787,1.747,1.762,1.747h24.255c0.974,0,1.761-0.779,1.761-1.747c0,0-0.922-3.431-3.262-5.771
+		c-2.408-2.406-5.623-3.072-5.623-3.072c-0.885,0.827-2.805,1.4-5.031,1.4s-4.146-0.573-5.031-1.4c0,0-2.878,0.293-5.595,3.01
+		C0.91,53.346,0.471,56.384,0.471,56.384z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_r_3_" cx="15.8306" cy="-1535.874" r="4.6412" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_r_1_" fill="url(#collar_x5F_r_3_)" stroke="#5491CF" stroke-width="0.5" d="M19.301,45.689
+		c0,0-0.287,1.186-1.506,2.222c-1.055,0.897-2.893,1.036-2.893,1.036l1.986,3.107c0,0,1.479-0.818,2.504-1.924
+		c0.961-1.035,0.686-2.74,0.686-2.74L19.301,45.689z"/&gt;
+	
+		&lt;radialGradient id="collar_x5F_l_3_" cx="9.6494" cy="-1535.896" r="4.6422" gradientTransform="matrix(1 0 0 -1 0.2002 -1487.2285)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;path id="collar_x5F_l_1_" fill="url(#collar_x5F_l_3_)" stroke="#5491CF" stroke-width="0.5" d="M9.536,45.711
+		c0,0,0.288,1.186,1.506,2.221c1.055,0.896,2.893,1.037,2.893,1.037l-1.987,3.107c0,0-1.479-0.818-2.504-1.926
+		c-0.961-1.035-0.685-2.739-0.685-2.739L9.536,45.711z"/&gt;
+	
+		&lt;radialGradient id="Knob2_3_" cx="14.0645" cy="-767.6421" r="0.4842" gradientTransform="matrix(1 0 0 -1 0.1201 -714.5371)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob2_1_" fill="url(#Knob2_3_)" stroke="#5491CF" stroke-width="0.5" cx="14.35" cy="53.127" r="0.292"/&gt;
+	
+		&lt;radialGradient id="Knob1_3_" cx="14.0835" cy="-770.7642" r="0.4844" gradientTransform="matrix(1 0 0 -1 0.1201 -714.5371)" gradientUnits="userSpaceOnUse"&gt;
+		&lt;stop  offset="0" style="stop-color:#80CCFF"/&gt;
+		&lt;stop  offset="1" style="stop-color:#74AEEE"/&gt;
+	&lt;/radialGradient&gt;
+	&lt;circle id="Knob1_1_" fill="url(#Knob1_3_)" stroke="#5491CF" stroke-width="0.5" cx="14.369" cy="56.25" r="0.292"/&gt;
+	&lt;path id="path5135_1_" fill="#D54A30" stroke="#B51A19" stroke-width="0.5" d="M13.935,52.609c0,0-0.925,1.029-1.04,3.271
+		c-0.115,2.244,0,2.244,0,2.244h3.273c0,0,0.115,0.031-0.077-2.182c-0.2-2.303-1.194-3.334-1.194-3.334H13.935L13.935,52.609z"/&gt;
+	&lt;path id="path5131_1_" fill="#D54A30" stroke="#B51A19" stroke-width="0.5" d="M14.377,49.34h0.062l1.276,2.001
+		c0.258,0.478-0.604,0.897-0.728,1.274l-1.14-0.008c-0.121-0.381-1.128-0.684-0.738-1.293L14.377,49.34z"/&gt;
+&lt;/g&gt;
+&lt;/svg&gt;
+</y:Resource>
+    </y:Resources>
+  </data>
+</graphml>

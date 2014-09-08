@@ -1,10 +1,34 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <html>
+    <head>
+        <script>
+            function changetext()
+            {
+                var newItemText=document.createTextNode("Choose file:")
+                var newItemInput=document.createElement("input")
+                newItemInput.name="userfile"
+                newItemInput.type="file"
+                var addfile=document.getElementById("bt_addfile")
+                var submit=document.getElementById("bt_submit")
+                var newItemBr=document.createElement("br")
+
+                var myform=document.getElementById("upform")
+                myform.appendChild(newItemText);
+                myform.appendChild(newItemInput);
+                myform.appendChild(addfile);
+                myform.appendChild(newItemBr);
+                myform.appendChild(submit);
+            }
+        </script>
+    </head>
     <h1>Welcome to zimg world!</h1>
-    <p>Upload an image to zimg:<p>
-    <form enctype="multipart/form-data" action="upload" method=post>
-    Choose file:
-    <input name="userfile" type="file">
-    <input type="submit" value="upload">
+    <p>Upload image(s) to zimg:</p>
+    <form enctype="multipart/form-data" action="upload" method=post target=_blank id="upform">
+        Choose file:<input name="userfile" type="file">
+        <input type="button" value="+" onclick="changetext()" id="bt_addfile">
+        </br>
+        <input type="submit" value="upload" id="bt_submit">
     </form>
+    <p>More infomation: <a href="http://zimg.buaa.us">zimg.buaa.us</a></p>
 </html>
+

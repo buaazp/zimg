@@ -12,12 +12,11 @@
 
 /**
  * @file zaccess.h
- * @brief header file of zaccess.c
+ * @brief IP access control module in zimg header.
  * @author 招牌疯子 zp@buaa.us
- * @version 2.1.0
- * @date 2014-05-19
+ * @version 3.0.0
+ * @date 2014-08-14
  */
-
 
 #ifndef ZACCESS_H
 #define ZACCESS_H
@@ -32,7 +31,6 @@
 #ifndef INADDR_NONE  /* Solaris */
 #define INADDR_NONE  ((unsigned int) -1)
 #endif
-
 
 typedef struct zimg_rules_s zimg_rules_t;
 
