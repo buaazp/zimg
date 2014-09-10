@@ -36,7 +36,9 @@ Varied config options for operation and maintenance.
 Support lua scripts to deal with customize compressing strategy.
 
 ### Build:
-You should build dependences above and make sure the beansdb, beanseye or ssdb backend is working well.   
+You should build dependences first. If you want to use distributed storage, make sure the optional storage backends beansdb(memcached protocol), or ssdb(redis protocol) is working well.  
+More infomation for building zimg:
+[Install Guide](http://zimg.buaa.us/documents/install/) 
  
 ```
 git clone https://github.com/buaazp/zimg -b master --depth=1
@@ -46,8 +48,6 @@ cd bin
 ./zimg conf/zimg.lua
 ```
 
-More infomation for building zimg:
-[Install Guide](http://zimg.buaa.us/documents/install/) 
 
 ### Thanks to:
 > We stand on the shoulders of giants.  
