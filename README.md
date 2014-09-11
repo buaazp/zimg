@@ -1,7 +1,7 @@
 #zimg#
 
 
-Project zimg is a light image storage and processing system. It's written by C and it has high performance in image field. The zimg is designed for high concurrency image server. It supports many features for storing and processing images.  
+Project zimg is a light image storage and processing system. It's written in C and it has high performance in image field. The zimg is designed for high concurrency image server. It supports many features for storing and processing images.  
 
 Homepage: [zimg.buaa.us](http://zimg.buaa.us/)  
 Author: [@招牌疯子](http://weibo.com/819880808)  
@@ -23,8 +23,8 @@ http://demo.buaa.us/5f189d8ec57f5a5a0d3dcba47fa797e2?w=500&h=500&g=1&x=0&y=0&r=4
 And you can get the information of image in zimg server like this:  
 http://demo.buaa.us/info?md5=5f189d8ec57f5a5a0d3dcba47fa797e2
 
-- If you want to customize the transform rule of image you can write a zimg-lua script. Use `t=type` parameter in your URL to get the special image:  
-[http://demo.buaa.us/5f189d8ec57f5a5a0d3dcba47fa797e2?t=webp500](http://demo.buaa.us/5f189d8ec57f5a5a0d3dcba47fa797e2?t=webp500)
+- If you want to customize the transform rule of image you can write a zimg-lua script. Goto [API of zimg-lua](http://zimg.buaa.us/documents/api_of_zimg_lua/) for more information. Use `t=type` parameter in your URL to get the special image:  
+http://demo.buaa.us/5f189d8ec57f5a5a0d3dcba47fa797e2?t=webp500
 
 - The concurrent I/O, distributed storage and in time processing ability of zimg is excellent. You needn't nginx in your image server any more. In the benchmark test, zimg can deal with 3000+ image downloading task per second and 90000+ HTTP echo request per second on a high concurrency level. The performance is higher than PHP or other image processing server. More infomation of zimg is in the documents below.
 
@@ -35,10 +35,11 @@ Support memcached and redis protocols to save images into distributed storage ba
 Varied config options for operation and maintenance.  
 Support lua scripts to deal with customize compressing strategy.
 
+More usages in [Guidebook of zimg](http://zimg.buaa.us/documents/guidebook/).
+
 ### Build:
 You should build dependences first. If you want to use distributed storage, make sure the optional storage backends beansdb(memcached protocol), or ssdb(redis protocol) is working well.  
-More infomation for building zimg:
-[Install Guide](http://zimg.buaa.us/documents/install/) 
+More infomation of building zimg in [Install Guide](http://zimg.buaa.us/documents/install/).
  
 ```
 git clone https://github.com/buaazp/zimg -b master --depth=1

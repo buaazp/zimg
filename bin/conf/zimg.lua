@@ -8,7 +8,7 @@ ip              = '0.0.0.0'
 --端口
 port            = 4869
 --运行线程数，默认值为服务器CPU数
---thread_num=4
+--thread_num    = 4
 backlog_num     = 1024
 max_keepalives  = 1
 retry           = 3
@@ -79,6 +79,9 @@ quality         = 75
 
 --storage config
 --zimg support 3 ways for storage images
+--value 1 is for local disk storage;
+--value 2 is for memcached protocol storage like beansdb;
+--value 3 is for redis protocol storage like SSDB.
 --存储后端类型，1为本地存储，2为memcached协议后端如beansdb，3为redis协议后端如SSDB
 mode            = 1
 --save_new value: 0.don't save any 1.save all 2.only save types in lua script
