@@ -1,11 +1,3 @@
-License & copyright
-All code except src/dict.h, src/dict.c and all code in deps folder is released under the MIT License.
-
-(C) copyright: 2012 Igor Afonov
-
-
-The MIT License (MIT)
-[OSI Approved License]
 The MIT License (MIT)
 
 Copyright (c) 2012 Igor Afonov

@@ -31,15 +31,15 @@ http://demo.buaa.us/5f189d8ec57f5a5a0d3dcba47fa797e2?t=webp500
 ### Supplying:
 Uploading, downloading and processing images through HTTP protocol.  
 High performance in concurrency I/O and compressing image.  
+Support lua scripts to deal with customize compressing strategy.  
 Support memcached and redis protocols to save images into distributed storage backends.  
 Varied config options for operation and maintenance.  
-Support lua scripts to deal with customize compressing strategy.
 
-More usages in [Guidebook of zimg](http://zimg.buaa.us/documents/guidebook/).
+More usages are in [Guidebook of zimg](http://zimg.buaa.us/documents/guidebook/).
 
 ### Build:
 You should build dependences first. If you want to use distributed storage, make sure the optional storage backends beansdb(memcached protocol), or ssdb(redis protocol) is working well.  
-More infomation of building zimg in [Install Guide](http://zimg.buaa.us/documents/install/).
+More infomation of building zimg is in [Install Guide](http://zimg.buaa.us/documents/install/).
  
 ```
 git clone https://github.com/buaazp/zimg -b master --depth=1
@@ -59,7 +59,8 @@ cd bin
 [hiredis](https://github.com/redis/hiredis): Hiredis is a minimalistic C client library for the Redis database.  
 [libmemcached](https://github.com/trondn/libmemcached): LibMemcached is designed to provide the greatest number of options to use Memcached.  
 
-#### [Optional] For Storage:  
+**[Optional] For Storage:**
+
 [memcached](https://github.com/memcached/memcached): A distributed memory object caching system.  
 [beansdb](https://github.com/douban/beansdb): Beansdb is a distributed key-value storage system designed for large scale online system, aiming for high avaliablility and easy management.  
 [beanseye](https://github.com/douban/beanseye): Beanseye is proxy and monitor for beansdb, written in Go.  
@@ -79,7 +80,7 @@ The source code is licensed under a BSD-like License.
 All versions on [Github](https://github.com/buaazp/zimg/releases).  
 
 ### Feedback:
-If you have any question, please submit comment here or mention me on [Weibo](http://weibo.com/819880808).  
-Technical issues are also welcomed to be submitted on [GitHub](https://github.com/buaazp/zimg/issues).
+If you have any question, please submit comment in my [BLOG](http://blog.buaa.us/) or mention me on [Weibo](http://weibo.com/819880808), [twitter](https://twitter.com/buaazp).  
+Technical issues are also welcomed to be submitted on [GitHub Issues](https://github.com/buaazp/zimg/issues).
 
 
