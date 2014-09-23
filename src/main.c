@@ -600,8 +600,8 @@ int main(int argc, char **argv)
 
     //init magickwand
     MagickCoreGenesis((char *) NULL, MagickFalse);
+    /*
     ExceptionInfo *exception=AcquireExceptionInfo();
-
     MagickInfo *jpeg_info = (MagickInfo *)GetMagickInfo("JPEG", exception);
     if(jpeg_info->thread_support != MagickTrue)
         LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
@@ -610,6 +610,7 @@ int main(int argc, char **argv)
         LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
     MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
     jpg_info->thread_support = MagickTrue;
+    */
 
     //begin to start httpd...
     LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");
