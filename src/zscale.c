@@ -124,6 +124,34 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
         ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
         //ret = MagickScaleImage(im, cols, rows);
     }
+    else if (p_type == 4)
+    {
+        if (cols == 0 || rows == 0)
+        {
+            if (cols > 0)
+            {
+                rows = (uint32_t)round(((double)cols / im_cols) * im_rows);
+            }
+            else
+            {
+                cols = (uint32_t)round(((double)rows / im_rows) * im_cols);
+            }
+            LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            //ret = MagickScaleImage(im, cols, rows);
+        }
+        else
+        {
+            double rate_col = (double)cols / im_cols;
+            double rate_row = (double)rows / im_rows;
+            double rate = rate_col < rate_row ? rate_col : rate_row;
+
+            cols = (uint32_t)round(im_cols * rate);
+            rows = (uint32_t)round(im_rows * rate);
+            LOG_PRINT(LOG_DEBUG, "p=4, wi_scale(im, %d, %d)", cols, rows);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+        }
+    }
 
 	return ret;
 }
