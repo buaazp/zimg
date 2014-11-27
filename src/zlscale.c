@@ -111,7 +111,7 @@ static int rotate_wi (lua_State *L) {
 static int gray_wi (lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = MagickSetImageType(larg->img, GrayscaleType);
-    LOG_PRINT(LOG_INFO, "gray_wi: ret = %d", ret);
+    LOG_PRINT(LOG_DEBUG, "gray_wi: ret = %d", ret);
     lua_pushnumber(L, ret);
     return 1;
 }
