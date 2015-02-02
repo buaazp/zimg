@@ -113,20 +113,25 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     snprintf(save_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
     LOG_PRINT(LOG_DEBUG, "save_path: %s", save_path);
 
-    if(is_dir(save_path) == 1)
+    if(is_dir(save_path) != 1)
+    {
+        if(mk_dirs(save_path) == -1)
+        {
+            LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Failed!", save_path);
+            goto done;
+        }
+        LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Finish.", save_path);
+    }
+
+    snprintf(save_name, 512, "%s/0*0", save_path);
+    LOG_PRINT(LOG_DEBUG, "save_name-->: %s", save_name);
+
+    if(is_file(save_name) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Check File Exist. Needn't Save.");
         goto cache;
     }
 
-    if(mk_dirs(save_path) == -1)
-    {
-        LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Failed!", save_path);
-        goto done;
-    }
-    LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Finish.", save_path);
-    snprintf(save_name, 512, "%s/0*0", save_path);
-    LOG_PRINT(LOG_DEBUG, "save_name-->: %s", save_name);
     if(new_img(buff, len, save_name) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Save Image[%s] Failed!", save_name);

@@ -401,9 +401,9 @@ int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, cons
         LOG_PRINT(LOG_DEBUG, "Execut ssdb command failure");
         return -1;
     }
-    if( !(r->type == REDIS_REPLY_STATUS && strcasecmp(r->str,"OK")==0))
+    if( !(r->type == REDIS_REPLY_STATUS && strcasecmp(r->str,"OK") == 0))
     {
-        LOG_PRINT(LOG_DEBUG, "Failed to execute save [%s] to ssdb.", cache_key);
+        LOG_PRINT(LOG_DEBUG, "Failed to execute save [%s] to ssdb: %s", cache_key, r->str);
         freeReplyObject(r);
         return -1;
     }

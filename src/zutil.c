@@ -269,8 +269,6 @@ int is_file(const char *filename)
     return -1;
 }
 
-
-
 /**
  * @brief is_img Check a file is a image we support(jpg, png, gif).
  *
