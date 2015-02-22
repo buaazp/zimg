@@ -59,7 +59,7 @@ static int get_wi_format(lua_State *L) {
     return 1;
 }
 
-static int scale_wi (lua_State *L) {
+static int scale_wi(lua_State *L) {
     double cols = lua_tonumber(L, 1);
     double rows = lua_tonumber(L, 2);
 
@@ -71,7 +71,7 @@ static int scale_wi (lua_State *L) {
     return 1;
 }
 
-static int crop_wi (lua_State *L) {
+static int crop_wi(lua_State *L) {
     double    x = lua_tonumber(L, 1);
     double    y = lua_tonumber(L, 2);
     double cols = lua_tonumber(L, 3);
@@ -83,7 +83,7 @@ static int crop_wi (lua_State *L) {
     return 1;
 }
 
-static int rotate_wi (lua_State *L) {
+static int rotate_wi(lua_State *L) {
     int ret = -1;
     double rotate = lua_tonumber(L, 1);
 
@@ -108,7 +108,7 @@ static int rotate_wi (lua_State *L) {
     return 1;
 }
 
-static int gray_wi (lua_State *L) {
+static int gray_wi(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = MagickSetImageType(larg->img, GrayscaleType);
     LOG_PRINT(LOG_DEBUG, "gray_wi: ret = %d", ret);
@@ -116,7 +116,7 @@ static int gray_wi (lua_State *L) {
     return 1;
 }
 
-static int set_wi_quality (lua_State *L) {
+static int set_wi_quality(lua_State *L) {
     int quality = lua_tonumber(L, 1);
     
     lua_arg *larg = pthread_getspecific(thread_key);
@@ -125,7 +125,7 @@ static int set_wi_quality (lua_State *L) {
     return 1;
 }
 
-static int set_wi_format (lua_State *L) {
+static int set_wi_format(lua_State *L) {
     const char *format = lua_tostring(L, 1);
     
     lua_arg *larg = pthread_getspecific(thread_key);
