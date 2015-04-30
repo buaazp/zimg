@@ -48,6 +48,12 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
+    if (settings.disable_zoom_up == 1)
+    {
+        cols = cols > im_cols ? im_cols : cols;
+        rows = rows > im_rows ? im_rows : rows;
+    }
+
     if (p_type == 1)
     {
         if (cols == 0 || rows == 0)
