@@ -92,6 +92,7 @@ struct setting{
     char admin_path[512];
     int disable_args;
     int disable_type;
+    int disable_zoom_up;
     int script_on;
     char script_name[512];
     char format[16];

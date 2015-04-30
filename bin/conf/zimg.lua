@@ -67,6 +67,8 @@ admin_path      = pwd .. '/www/admin.html'
 disable_args    = 0
 --禁用lua脚本图片处理
 disable_type    = 0
+--禁用图片放大
+disable_zoom_up = 0
 --lua process script
 --lua脚本文件路径
 script_name     = pwd .. '/script/process.lua'
