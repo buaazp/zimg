@@ -693,7 +693,16 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-    strncpy(address, inet_ntoa(ss->sin_addr), 16);
+
+    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
+    if(xff_address)
+    {
+        strncpy(address, xff_address, 16);
+    }
+    else
+    {
+        strncpy(address, inet_ntoa(ss->sin_addr), 16);
+    }
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
@@ -849,7 +858,16 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-    strncpy(address, inet_ntoa(ss->sin_addr), 16);
+
+    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
+    if(xff_address)
+    {
+        strncpy(address, xff_address, 16);
+    }
+    else
+    {
+        strncpy(address, inet_ntoa(ss->sin_addr), 16);
+    }
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
@@ -1143,7 +1161,16 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-    strncpy(address, inet_ntoa(ss->sin_addr), 16);
+
+    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
+    if(xff_address)
+    {
+        strncpy(address, xff_address, 16);
+    }
+    else
+    {
+        strncpy(address, inet_ntoa(ss->sin_addr), 16);
+    }
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
@@ -1324,7 +1351,16 @@ void info_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-    strncpy(address, inet_ntoa(ss->sin_addr), 16);
+
+    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
+    if(xff_address)
+    {
+        strncpy(address, xff_address, 16);
+    }
+    else
+    {
+        strncpy(address, inet_ntoa(ss->sin_addr), 16);
+    }
 
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
