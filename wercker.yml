@@ -1,0 +1,56 @@
+# This references a standard debian container from the
+# Docker Hub https://registry.hub.docker.com/_/debian/
+# Read more about containers on our dev center
+# http://devcenter.wercker.com/docs/containers/index.html
+box: ubuntu
+# You can also use services such as databases. Read more on our dev center:
+# http://devcenter.wercker.com/docs/services/index.html
+# services:
+    # - postgres
+    # http://devcenter.wercker.com/docs/services/postgresql.html
+
+    # - mongodb
+    # http://devcenter.wercker.com/docs/services/mongodb.html
+
+# This is the build pipeline. Pipelines are the core of wercker
+# Read more about pipelines on our dev center
+# http://devcenter.wercker.com/docs/pipelines/index.html
+build:
+    # Steps make up the actions in your pipeline
+    # Read more about steps on our dev center:
+    # http://devcenter.wercker.com/docs/steps/index.html
+  steps:
+    # Update the apt-get
+    - script:
+        name: apt-get update
+        code: |
+          sudo apt-get update -qq
+
+    # Get the dependencies
+    - script:
+        name: apt-get install
+        code: |
+            sudo apt-get install -y build-essential
+            sudo apt-get install -y openssl cmake libevent-dev libjpeg-dev libgif-dev libpng-dev libwebp-dev libmagickwand-dev libmemcached-dev
+
+    # Build the program
+    - script:
+        name: make
+        code: |
+          make
+
+    # Run the program
+    - script:
+        name: run
+        code: |
+          cd bin
+          ./zimg conf/zimg.lua
+
+    # Check the program
+    - script:
+        name: check
+        code: |
+          cd bin
+          ls -l
+          ps aux|grep zimg
+
