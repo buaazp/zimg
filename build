@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+pwd=$PWD
+export GOPATH=$GOPATH:$pwd/Godeps/_workspace
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+eval $(go env)
+
+GIT_SHA=`git rev-parse --short HEAD || echo "GitNotFound"`
+WHEN=`date '+%Y-%m-%d_%H:%M:%S'`
+
+CGO_ENABLED=0 go build -a -v -installsuffix cgo -ldflags "-s -X main.GitSHA ${GIT_SHA} -X main.BuildTime ${WHEN}" -o bin/zimg
