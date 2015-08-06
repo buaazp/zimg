@@ -1,0 +1,40 @@
+# Object files
+*.o
+*.s
+*.lo
+
+# Libraries
+*.lib
+*.a
+*.la
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.c.swp
+*.DS_Store
+
+tags
+
+*.swp
+*.pc
+
+*.log
+*.dSYM
+
+doc/html/
+
+bin/img/
+bin/log/
+bin/zimg
+bin/conf/debug.json
+
+
+*.tmp
