@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 
 	"zimg/conf"
+
+	"github.com/BurntSushi/toml"
 )
 
 var cmdConfig = &Command{
@@ -21,25 +22,21 @@ type defaultConfig struct {
 	config   interface{}
 }
 
-func exportDefaultConf(conf defaultConfig) error {
-	f, err := os.Create(conf.fileName)
+func exportDefaultConf(c defaultConfig) error {
+	f, err := os.Create(c.fileName)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	data, err := json.Marshal(conf.config)
+	var buf bytes.Buffer
+	enc := toml.NewEncoder(&buf)
+	err = enc.Encode(c.config)
 	if err != nil {
 		return err
 	}
 
-	var output bytes.Buffer
-	err = json.Indent(&output, data, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	_, err = f.Write(output.Bytes())
+	_, err = f.Write(buf.Bytes())
 	return err
 }
 
@@ -50,7 +47,7 @@ func runConfig(cmd *Command, args []string) {
 	}
 	defaultConfigs := []defaultConfig{
 		defaultConfig{
-			fileName: path.Join(filePath, "zimg.json"),
+			fileName: path.Join(filePath, "zimg.toml"),
 			config:   conf.DefaultServerConf,
 		},
 	}

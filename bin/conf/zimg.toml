@@ -1,0 +1,22 @@
+host = "0.0.0.0:4869"
+timeout = "5s"
+log_file = ""
+debug = true
+mode = "local"
+save_new = true
+max_size = 104857600
+allowed_types = ["jpeg", "jpg", "gif", "png", "webp"]
+img_path = "./img"
+backends = ["127.0.0.1:22122", "127.0.0.1:6379"]
+cache_host = "127.0.0.1:11211"
+default_format = "jpeg"
+default_quality = 75
+disable_args = false
+disable_type = false
+disable_zoom_up = false
+thumbs_conf = "./conf/thumbs.toml"
+etag = true
+
+[headers]
+  Cache-Control = "max-age=7776000"
+  Server = "zimg v4.0.0"
