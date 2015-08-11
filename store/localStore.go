@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"zimg/conf"
+	"github.com/buaazp/zimg/conf"
 )
 
 const (

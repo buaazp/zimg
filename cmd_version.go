@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"zimg/util"
+	"github.com/buaazp/zimg/util"
 )
 
 var (

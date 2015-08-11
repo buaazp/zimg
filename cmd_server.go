@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"zimg/conf"
-	"zimg/server"
-	"zimg/util"
+	"github.com/buaazp/zimg/conf"
+	"github.com/buaazp/zimg/server"
+	"github.com/buaazp/zimg/util"
 )
 
 func init() {

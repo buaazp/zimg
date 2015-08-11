@@ -15,11 +15,10 @@ import (
 	"sync"
 	"time"
 
-	"zimg/conf"
-	"zimg/store"
-	"zimg/util"
-
 	"github.com/BurntSushi/toml"
+	"github.com/buaazp/zimg/conf"
+	"github.com/buaazp/zimg/store"
+	"github.com/buaazp/zimg/util"
 	"github.com/gorilla/mux"
 )
 
@@ -234,7 +233,7 @@ func (s *Server) Serve() error {
 	err := http.ListenAndServe(s.c.Host, s.r)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println("😭\nplz try again!")
+		fmt.Println("😭\nplease try again!")
 	}
 	return err
 }

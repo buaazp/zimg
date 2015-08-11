@@ -6,9 +6,8 @@ import (
 	"os"
 	"path"
 
-	"zimg/conf"
-
 	"github.com/BurntSushi/toml"
+	"github.com/buaazp/zimg/conf"
 )
 
 var cmdConfig = &Command{
