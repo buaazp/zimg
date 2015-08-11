@@ -11,7 +11,7 @@ var (
 	cmdVersion = &Command{
 		Run:       runVersion,
 		UsageLine: "version",
-		Short:     "print mosaic version",
+		Short:     "print zimg version",
 	}
 	// Git SHA Value will be set during build
 	GitSHA    = "Not provided (use ./build instead of go build)"
@@ -19,7 +19,7 @@ var (
 )
 
 func runVersion(cmd *Command, args []string) {
-	fmt.Printf("mosaic v%s\n", util.VERSION)
+	fmt.Printf("zimg v%s\n", util.VERSION)
 	fmt.Printf("%10s : %s\n", "Built by", runtime.Version())
 	fmt.Printf("%10s : %s\n", "Built at", BuildTime)
 	fmt.Printf("%10s : %s\n", "Git SHA", GitSHA)
