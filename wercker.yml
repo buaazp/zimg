@@ -34,6 +34,11 @@ build:
         code: |
             sudo apt-get install -y pkg-config
             sudo apt-get install -y libjpeg-dev libgif-dev libpng-dev libwebp-dev libmagickcore-dev libmagickwand-dev
+
+    # Get the dependencies
+    - script:
+        name: test imagemagick
+        code: |
             pkg-config --libs --cflags MagickWand MagickCore
             identify -version
             ldd `which identify`
