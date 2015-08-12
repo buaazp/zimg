@@ -22,6 +22,22 @@ build:
   # Read more about steps on our dev center:
   # http://devcenter.wercker.com/docs/steps/index.html
   steps:
+    # Update the apt-get
+    - script:
+        name: apt-get update
+        code: |
+          sudo apt-get update -qq
+
+    # Get the dependencies
+    - script:
+        name: apt-get install
+        code: |
+            sudo apt-get install -y pkg-config
+            sudo apt-get install -y libjpeg-dev libgif-dev libpng-dev libwebp-dev libmagickcore-dev libmagickwand-dev
+            pkg-config --libs --cflags MagickWand MagickCore
+            identify -version
+            ldd `which identify`
+
     # Sets the go workspace and places you package
     # at the right place in the workspace tree
     - setup-go-workspace

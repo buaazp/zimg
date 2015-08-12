@@ -34,7 +34,7 @@ doc/html/
 bin/img/
 bin/log/
 bin/zimg
-bin/conf/debug.json
+bin/conf/debug.toml
 
 
 *.tmp
