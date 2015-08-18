@@ -25,6 +25,7 @@ type ServerConf struct {
 	DisableZoomUp bool              `toml:"disable_zoom_up"`
 	ThumbsConf    string            `toml:"thumbs_conf"`
 	Etag          bool              `toml:"etag"`
+	MaxAge        int64             `toml:"max_age"`
 	Headers       map[string]string `toml:"headers"`
 }
 
@@ -35,7 +36,7 @@ var DefaultServerConf = ServerConf{
 	Debug:         true,
 	StorageMode:   "local",
 	SaveNew:       true,
-	MaxSize:       100 * 1024 * 1024,
+	MaxSize:       100 * 1024 * 1024, // 100MB
 	AllowedTypes:  []string{"jpeg", "jpg", "gif", "png", "webp"},
 	ImagePath:     "./img",
 	Backends:      []string{"127.0.0.1:22122", "127.0.0.1:6379"},
@@ -47,6 +48,7 @@ var DefaultServerConf = ServerConf{
 	DisableZoomUp: false,
 	ThumbsConf:    "./conf/thumbs.toml",
 	Etag:          true,
+	MaxAge:        3600 * 24 * 90, // 90 days
 	Headers: map[string]string{
 		"Server":        "zimg v4.0.0",
 		"Cache-Control": "max-age=7776000",

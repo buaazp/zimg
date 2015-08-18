@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/buaazp/zimg/conf"
 )
@@ -66,6 +67,24 @@ func WriteImage(dirPath string, data []byte) error {
 	}
 	origPath := filepath.Join(dirPath, OrigName)
 	err = ioutil.WriteFile(origPath, data, 0664)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *LocalStore) Put(key string, data []byte) error {
+	parts := strings.Split(key, ",")
+	if len(parts) == 3 {
+		key = fmt.Sprintf("%s,%s", parts[0], parts[1])
+	}
+
+	dirPath, err := s.calcPath(key)
+	if err != nil {
+		return err
+	}
+
+	err = WriteImage(dirPath, data)
 	if err != nil {
 		return err
 	}

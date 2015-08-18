@@ -8,6 +8,7 @@ const (
 
 type Storage interface {
 	Set(data []byte) (string, error)
+	Put(key string, data []byte) error
 	Get(key string) ([]byte, error)
 	Del(key string) error
 }

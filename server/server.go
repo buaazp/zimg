@@ -22,6 +22,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	DefaultThumbType = "JPEG"
+)
+
 type Server struct {
 	mu   sync.RWMutex
 	exit chan int
@@ -66,6 +70,7 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 
 	s.r.HandleFunc(`/images`, s.apiUploadImage).Methods("POST")
 	sub := s.r.Path(`/images/{filename}`).Subrouter()
+	sub.Methods("PUT").HandlerFunc(s.apiUpdateImage)
 	sub.Methods("HEAD", "GET").HandlerFunc(s.apiGetImage)
 	sub.Methods("DELETE").HandlerFunc(s.apiDelImage)
 	s.r.HandleFunc(`/info/{filename}`, s.apiInfoImage).Methods("GET")
@@ -75,10 +80,6 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 		util.APIResponse(w, 400, "zimg api uri error")
 	})
 	return s, nil
-}
-
-type UploadResp struct {
-	Key string `json:"key"`
 }
 
 func (s *Server) readUploadBody(r *http.Request) ([]byte, error) {
@@ -96,6 +97,10 @@ func (s *Server) readUploadBody(r *http.Request) ([]byte, error) {
 }
 
 func (s *Server) AllowedType(ctype string) bool {
+	if len(s.c.AllowedTypes) == 0 ||
+		s.c.AllowedTypes[0] == "all" {
+		return true
+	}
 	if ctype == "" {
 		return false
 	}
@@ -126,16 +131,21 @@ func (s *Server) apiUploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	imgResult, err := ImagickInfo(data)
+	if err != nil {
+		util.APIResponse(w, 400, err)
+		return
+	}
+
 	key, err := s.storage.Set(data)
 	if err != nil {
 		util.APIResponse(w, 500, err)
 		log.Printf("%s upload fail 500 %s %d %s", r.RemoteAddr, key, len(data), err)
 		return
 	}
+	imgResult.Key = key
 
-	var resp UploadResp
-	resp.Key = key
-	util.APIResponse(w, 200, resp)
+	util.APIResponse(w, 200, imgResult)
 	log.Printf("%s upload succ 200 %s %d -", r.RemoteAddr, key, len(data))
 	return
 }
@@ -153,6 +163,10 @@ func checkAndSetEtag(w http.ResponseWriter, r *http.Request, sha1sum string) boo
 	w.Header().Set("ETag", sha1sum)
 	w.WriteHeader(200)
 	return false
+}
+
+func (s *Server) apiUpdateImage(w http.ResponseWriter, r *http.Request) {
+	return
 }
 
 func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
@@ -182,6 +196,9 @@ func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if s.c.MaxAge > 0 {
+		w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", s.c.MaxAge))
+	}
 	sha1sum := fmt.Sprintf("%x", sha1.Sum(data))
 	done := checkAndSetEtag(w, r, sha1sum)
 	if done {
