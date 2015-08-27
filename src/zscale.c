@@ -50,8 +50,16 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
 
     if (settings.disable_zoom_up == 1)
     {
-        cols = cols > im_cols ? im_cols : cols;
-        rows = rows > im_rows ? im_rows : rows;
+        if (p_type == 3)
+        {
+            cols = cols > 100 ? 100 : cols;
+            rows = rows > 100 ? 100 : rows;
+        }
+        else
+        {
+            cols = cols > im_cols ? im_cols : cols;
+            rows = rows > im_rows ? im_rows : rows;
+        }
     }
 
     if (p_type == 1)
@@ -101,7 +109,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
         uint32_t x, y;
         x = (uint32_t)floor((im_cols - cols) / 2.0);
         y = (uint32_t)floor((im_rows - rows) / 2.0);
-        LOG_PRINT(LOG_DEBUG, "p=3, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
+        LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
         ret = MagickCropImage(im, cols, rows, x, y);
     }
     else if (p_type == 3)
