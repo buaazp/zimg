@@ -130,6 +130,9 @@ static void settings_init(void)
     settings.mp_set = callbacks;
     settings.get_img = NULL;
     settings.info_img = NULL;
+    
+    settings.privfile[0] = '\0';
+    settings.cafile[0] = '\0';
 }
 
 static void set_callback(int mode)
@@ -657,7 +660,7 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
     evhtp_set_gencb(htp, get_request_cb, NULL);
 
-    if (settings.pemfile != NULL) {
+    if (strlen(settings.pemfile) != 0) {
         evhtp_ssl_cfg_t scfg = {
             .pemfile = settings.pemfile,
             .privfile = settings.privfile,
