@@ -15,7 +15,7 @@ INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckTypeSize)
 
 # -DEVHTP_DISABLE_SSL:STRING=ON
-OPTION(EVHTP_DISABLE_SSL        "Disable ssl support"           ON)
+OPTION(EVHTP_DISABLE_SSL        "Disable ssl support"           OFF)
 
 # -DEVHTP_DISABLE_EVTHR:STRING=ON
 OPTION(EVHTP_DISABLE_EVTHR      "Disable evthread support"      OFF)

@@ -109,6 +109,10 @@ struct setting{
 	int (*get_img)(zimg_req_t *, evhtp_request_t *);
     int (*info_img)(evhtp_request_t *, thr_arg_t *, char *);
     int (*admin_img)(evhtp_request_t *, thr_arg_t *, char *, int);
+    char pemfile[512];
+    char privfile[512];
+    char cafile[512];
+    char capath[512];
 } settings;
 
 #define LOG_FATAL       0           /* System is unusable */
