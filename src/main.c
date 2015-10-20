@@ -130,11 +130,6 @@ static void settings_init(void)
     settings.mp_set = callbacks;
     settings.get_img = NULL;
     settings.info_img = NULL;
-//    settings.admin_img = NULL;
-//    settings.pemfile = NULL;
-//    settings.privfile = NULL;
-//    settings.cafile = NULL;
-//    settings.capath = NULL;
 }
 
 static void set_callback(int mode)
@@ -369,10 +364,6 @@ static int load_conf(const char *conf)
         str_lcpy(settings.cafile, lua_tostring(L, -1), sizeof(settings.cafile));
     lua_pop(L, 1);
     
-    lua_getglobal(L, "capath");
-    if(lua_isstring(L, -1))
-        str_lcpy(settings.capath, lua_tostring(L, -1), sizeof(settings.capath));
-    lua_pop(L, 1);
 
     settings.L = L;
     //lua_close(L);
@@ -666,30 +657,30 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
     evhtp_set_gencb(htp, get_request_cb, NULL);
 
-    
-    
-    evhtp_ssl_cfg_t scfg = {
-        .pemfile = settings.pemfile,
-        .privfile = settings.privfile,
-        .cafile = settings.cafile,
-        .capath = settings.capath,
-        .ciphers = "ALL:!eNULL:!aNULL",
-        .ssl_opts = SSL_OP_ALL,
-        .ssl_ctx_timeout = 60 * 60 * 48,
-        .verify_peer = SSL_VERIFY_PEER,
-        .verify_depth = 42,
-        .x509_verify_cb = dummy_ssl_verify_callback,
-        .x509_chk_issued_cb = dummy_check_issued_cb,
-        .scache_type = evhtp_ssl_scache_type_internal,
-        .scache_size = 1024,
-        .scache_timeout = 1024,
-        .scache_init = NULL,
-        .scache_add = NULL,
-        .scache_get = NULL,
-        .scache_del = NULL,
-    };
-    
-    evhtp_ssl_init(htp, &scfg);
+    if (settings.pemfile != NULL) {
+        evhtp_ssl_cfg_t scfg = {
+            .pemfile = settings.pemfile,
+            .privfile = settings.privfile,
+            .cafile = settings.cafile,
+            .capath = NULL,
+            .ciphers = "RC4-MD5",
+            .ssl_opts = SSL_OP_ALL,
+            .ssl_ctx_timeout = 60 * 60 * 48,
+            .verify_peer = SSL_VERIFY_PEER,
+            .verify_depth = 42,
+            .x509_verify_cb = dummy_ssl_verify_callback,
+            .x509_chk_issued_cb = dummy_check_issued_cb,
+            .scache_type = evhtp_ssl_scache_type_internal,
+            .scache_size = 1024,
+            .scache_timeout = 1024,
+            .scache_init = NULL,
+            .scache_add = NULL,
+            .scache_get = NULL,
+            .scache_del = NULL,
+        };
+
+        evhtp_ssl_init(htp, &scfg);
+    }
     
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);

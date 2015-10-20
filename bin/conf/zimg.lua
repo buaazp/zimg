@@ -111,10 +111,9 @@ ssdb_ip         = '127.0.0.1'
 ssdb_port       = 8888
 
 --SSL
-pemfile = ""
-privfile = ""
-cafile = ""
-capath = ""
+pemfile = "server.crt"
+privfile = "server.key"
+cafile = "ca.crt"
 
 --lua conf functions
 --部分与配置有关的函数在lua中实现，对性能影响不大
