@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zcache.c
  * @brief memcached functions
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include "zcache.h"
@@ -50,9 +50,9 @@ void retry_cache(thr_arg_t *thr_arg)
     memcached_server_push(memc, servers);
     memcached_server_list_free(servers);
     memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1); 
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1);
     thr_arg->cache_conn = memc;
 
     evthr_set_aux(thr_arg->thread, thr_arg);
@@ -82,7 +82,7 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
     char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
     //rc = memcached_exist(memc, key, strlen(key));
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Exist.", key);
         rst = 1;
@@ -123,7 +123,7 @@ int find_cache(memcached_st *memc, const char *key, char *value)
 
     char *pvalue = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Cache Find Key[%s] Value: %s", key, pvalue);
         str_lcpy(value, pvalue, sizeof(value));
@@ -163,7 +163,7 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
 
     rc = memcached_set(memc, key, strlen(key), value, strlen(value), 0, 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Cache Set Successfully. Key[%s] Value: %s", key, value);
         rst = 1;
@@ -210,7 +210,7 @@ int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t
 
     *value_ptr = memcached_get(memc, key, strlen(key), len, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Find Key[%s], Len: %d.", key, *len);
         rst = 1;
@@ -258,7 +258,7 @@ int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const 
 
     rc = memcached_set(memc, key, strlen(key), value, len, 0, 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
@@ -301,7 +301,7 @@ int del_cache(thr_arg_t *thr_arg, const char *key)
 
     rc = memcached_delete(memc, key, strlen(key), 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Delete Successfully.", key);
         rst = 1;

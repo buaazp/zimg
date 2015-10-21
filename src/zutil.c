@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zutil.c
  * @brief the util functions used by zimg.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <sys/syscall.h>
@@ -118,28 +118,28 @@ str_lcat(char       *dst,       /* O - Destination string */
     /*
     * Figure out how much room is left...
     */
-    
+
     dstlen = strlen(dst);
     size   -= dstlen + 1;
-    
+
     if (!size)
       return (dstlen);          /* No room, return immediately... */
-    
+
     /*
     * Figure out how much room is needed...
     */
-    
+
     srclen = strlen(src);
     /*
     * Copy the appropriate amount...
     */
-    
+
     if (srclen > size)
       srclen = size;
-    
+
     memcpy(dst + dstlen, src, srclen);
     dst[dstlen + srclen] = '\0';
-    
+
     return (dstlen + srclen);
 }
 
@@ -157,16 +157,16 @@ str_lcpy(char           *dst,       /* O - Destination string */
     */
     size --;
     srclen = strlen(src);
-    
+
     /*
     * Copy the appropriate amount...
     */
     if (srclen > size)
       srclen = size;
-    
+
     memcpy(dst, src, srclen);
     dst[srclen] = '\0';
-    
+
     return (srclen);
 }
 
@@ -434,7 +434,7 @@ int mk_dirs(const char *dir)
         }
     }
     return 1;
-} 
+}
 
 /**
  * @brief mk_dirf Mkdirs for a full path filename
@@ -480,27 +480,27 @@ int delete_file(const char *path)
     char file_path[PATH_MAX_SIZE];
     int ret = -1;
     if(is_file(path) == 1)
-    {   
+    {
         remove(path);
         ret = 1;
-    }   
+    }
     if(is_dir(path) == 1)
-    {   
+    {
         if((dir = opendir(path)) == NULL)
-            return ret; 
+            return ret;
         ret = 1;
         while((dir_info = readdir(dir)) != NULL)
-        {   
+        {
             get_file_path(path, dir_info->d_name, file_path);
             if(is_special_dir(dir_info->d_name) == 1)
                 continue;
             ret = delete_file(file_path);
-            if(ret == -1) 
+            if(ret == -1)
                 break;
-        }   
+        }
         if(ret == 1)
             ret = rmdir(path);
-    }   
+    }
     return ret;
 }
 
@@ -617,6 +617,3 @@ int gen_key(char *key, char *md5, ...)
     LOG_PRINT(LOG_DEBUG, "key: %s", key);
     return 1;
 }
-
-
-

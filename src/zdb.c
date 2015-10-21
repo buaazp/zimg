@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zdb.c
  * @brief Get and save image for ssdb/redis and beansdb/memcachedb backend functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <string.h>
@@ -153,7 +153,7 @@ done:
         int save_new = 0;
         if(to_save == true)
         {
-            if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
+            if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL))
             {
                 save_new = 1;
             }
@@ -240,7 +240,7 @@ int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_
 
     *value_ptr = memcached_get(memc, key, strlen(key), len, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Binary Beansdb Find Key[%s], Len: %d.", key, *len);
         rst = 1;
@@ -364,7 +364,7 @@ int save_img_beansdb(memcached_st *memc, const char *key, const char *value, con
 
     rc = memcached_set(memc, key, strlen(key), value, len, 0, 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Binary Beansdb Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
@@ -442,7 +442,7 @@ int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t
         if(del_db(thr_arg, cache_key) != -1)
         {
             result = 1;
-            evbuffer_add_printf(req->buffer_out, 
+            evbuffer_add_printf(req->buffer_out,
                 "<html><body><h1>Admin Command Successful!</h1> \
                 <p>MD5: %s</p> \
                 <p>Command Type: %d</p> \
@@ -554,7 +554,7 @@ int exist_beansdb(memcached_st *memc, const char *key)
 
     char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Exist.", key);
         free(value);
@@ -589,7 +589,7 @@ int exist_ssdb(redisContext* c, const char *cache_key)
         LOG_PRINT(LOG_DEBUG, "ssdb key %s exist %d", cache_key, r->integer);
         rst = 1;
     }
-    
+
     freeReplyObject(r);
     return rst;
 }
@@ -644,7 +644,7 @@ int del_beansdb(memcached_st *memc, const char *key)
 
     rc = memcached_delete(memc, key, strlen(key), 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
+    if (rc == MEMCACHED_SUCCESS)
     {
         LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Delete Successfully.", key);
         rst = 1;
@@ -680,7 +680,7 @@ int del_ssdb(redisContext* c, const char *cache_key)
         LOG_PRINT(LOG_DEBUG, "ssdb key %s deleted %d", cache_key, r->integer);
         rst = 1;
     }
-    
+
     freeReplyObject(r);
     return rst;
 }

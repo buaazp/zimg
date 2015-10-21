@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zimg.c
  * @brief Convert, get and save image functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <stdio.h>
@@ -226,7 +226,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     char whole_path[512];
     snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, req->md5);
     LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
-    
+
     if(is_dir(whole_path) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image %s is not existed!", req->md5);
@@ -262,10 +262,10 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     {
         char name[128];
         snprintf(name, 128, "%d*%d_p%d_g%d_%d*%d_r%d_q%d.%s", req->width, req->height,
-                req->proportion, 
-                req->gray, 
-                req->x, req->y, 
-                req->rotate, 
+                req->proportion,
+                req->gray,
+                req->x, req->y,
+                req->rotate,
                 req->quality,
                 req->fmt);
 
@@ -394,7 +394,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     int save_new = 0;
     if(to_save == true)
     {
-        if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) 
+        if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL))
         {
             save_new = 1;
         }
@@ -471,7 +471,7 @@ int admin_img(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t)
         if(delete_file(whole_path) != -1)
         {
             result = 1;
-            evbuffer_add_printf(req->buffer_out, 
+            evbuffer_add_printf(req->buffer_out,
                 "<html><body><h1>Admin Command Successful!</h1> \
                 <p>MD5: %s</p> \
                 <p>Command Type: %d</p> \
@@ -502,7 +502,7 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     int lvl2 = str_hash(md5 + 3);
     snprintf(whole_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5);
     LOG_PRINT(LOG_DEBUG, "whole_path: %s", whole_path);
-    
+
     if(is_dir(whole_path) == -1)
     {
         result = 0;

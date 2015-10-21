@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zspinlock.c
  * @brief Spinlock functions used for log.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include "zspinlock.h"
@@ -89,5 +89,3 @@ int spin_is_lock(spin_lock_t* lock)
     return __sync_add_and_fetch((long*)&lock->spin_,0);
 #endif
 }
-
-

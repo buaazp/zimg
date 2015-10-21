@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zmd5.h
  * @brief calculate md5 functions header.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #ifndef ZMD5_H
@@ -48,13 +48,13 @@ typedef uint32_t md5_word_t; /* 32-bit word */
 
 /* Define the state of the MD5 Algorithm. */
 typedef struct md5_state_s {
-    md5_word_t count[2];	/* message length in bits, lsw first */
-    md5_word_t abcd[4];		/* digest buffer */
-    md5_byte_t buf[64];		/* accumulate block */
+    md5_word_t count[2];    /* message length in bits, lsw first */
+    md5_word_t abcd[4];     /* digest buffer */
+    md5_byte_t buf[64];     /* accumulate block */
 } md5_state_t;
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 

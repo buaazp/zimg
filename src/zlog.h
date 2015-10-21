@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zlog.h
  * @brief zimg log functions header.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #ifndef ZLOG_H
@@ -26,11 +26,11 @@
 #include "zspinlock.h"
 
 #define MAX_LOGS        100
- 
+
 #define LOG_INVALID     -1
 #define LOG_SYSTEM      0
 #define LOG_USER        1
- 
+
 enum LOG_LEVEL{
     LOG_LEVEL_FATAL = 0,                    /* System is unusable */
     LOG_LEVEL_ALERT,                        /* Action must be taken immediately */

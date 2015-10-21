@@ -14,8 +14,8 @@
  * @file zcommon.h
  * @brief common data structs header.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #ifndef ZCOMMON_H

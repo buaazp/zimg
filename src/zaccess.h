@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zaccess.h
  * @brief IP access control module in zimg header.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #ifndef ZACCESS_H
@@ -37,7 +37,7 @@ typedef struct zimg_rules_s zimg_rules_t;
 typedef struct {
     in_addr_t mask;
     in_addr_t addr;
-    uint deny;	/* unsigned  deny:1; */
+    uint deny;  /* unsigned  deny:1; */
 } zimg_rule_t;
 
 struct zimg_rules_s {

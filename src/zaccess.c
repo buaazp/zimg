@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zaccess.c
  * @brief IP access control module in zimg.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <stdio.h>
@@ -205,7 +205,7 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
         return NULL;
     acconf->n = 0;
     acconf->rules = NULL;
-    size_t acc_len = strlen(acc_str); 
+    size_t acc_len = strlen(acc_str);
     char *acc = (char *)malloc(acc_len);
     if(acc == NULL)
     {

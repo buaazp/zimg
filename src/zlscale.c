@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zlscale.c
  * @brief processing image with lua script.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <lua.h>
@@ -76,7 +76,7 @@ static int crop_wi(lua_State *L) {
     double    y = lua_tonumber(L, 2);
     double cols = lua_tonumber(L, 3);
     double rows = lua_tonumber(L, 4);
-    
+
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = MagickCropImage(larg->img, cols, rows, x, y);
     lua_pushnumber(L, ret);
@@ -118,7 +118,7 @@ static int gray_wi(lua_State *L) {
 
 static int set_wi_quality(lua_State *L) {
     int quality = lua_tonumber(L, 1);
-    
+
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = MagickSetImageCompressionQuality(larg->img, quality);
     lua_pushnumber(L, ret);
@@ -127,7 +127,7 @@ static int set_wi_quality(lua_State *L) {
 
 static int set_wi_format(lua_State *L) {
     const char *format = lua_tostring(L, 1);
-    
+
     lua_arg *larg = pthread_getspecific(thread_key);
     int ret = MagickSetImageFormat(larg->img, format);
     LOG_PRINT(LOG_DEBUG, "set_wi_format: %s ret = %d", format, ret);

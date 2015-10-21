@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zscale.c
  * @brief scale image functions by graphicsmagick.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <stdio.h>
@@ -44,7 +44,7 @@ int convert(MagickWand *im, zimg_req_t *req);
  */
 static int proportion(MagickWand *im, int p_type, int cols, int rows)
 {
-	int ret = -1;
+    int ret = -1;
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
@@ -157,7 +157,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
         ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
     }
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -243,7 +243,7 @@ int convert(MagickWand *im, zimg_req_t *req)
         if (ret != MagickTrue) return -1;
     }
 
-	/* set quality */
+    /* set quality */
     /*
     int quality = 100;
     int im_quality = MagickGetImageCompressionQuality(im);
@@ -255,7 +255,7 @@ int convert(MagickWand *im, zimg_req_t *req)
     ret = MagickSetImageCompressionQuality(im, req->quality);
     if (ret != MagickTrue) return -1;
 
-	/* set format */
+    /* set format */
     if (strncmp(req->fmt, "none", 4) != 0) {
         LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
         ret = MagickSetImageFormat(im, req->fmt);
@@ -263,6 +263,6 @@ int convert(MagickWand *im, zimg_req_t *req)
     }
 
     LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);
-	return result;
+    return result;
 }
 

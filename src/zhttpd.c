@@ -1,21 +1,21 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
  * @file zhttpd.c
  * @brief http protocol parse functions.
  * @author 招牌疯子 zp@buaa.us
- * @version 3.0.0
- * @date 2014-08-14
+ * @version 3.2.0
+ * @date 2015-10-24
  */
 
 #include <stdio.h>
@@ -46,7 +46,7 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
 void free_headers_conf(zimg_headers_conf_t *hcf);
 static evthr_t * get_request_thr(evhtp_request_t *request);
-static int print_headers(evhtp_header_t * header, void * arg); 
+static int print_headers(evhtp_header_t * header, void * arg);
 void add_info(MagickWand *im, evhtp_request_t *req);
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_request_cb(evhtp_request_t *req, void *arg);
@@ -157,7 +157,7 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
         return NULL;
     hdrconf->n = 0;
     hdrconf->headers = NULL;
-    size_t hdr_len = strlen(hdr_str); 
+    size_t hdr_len = strlen(hdr_str);
     char *hdr = (char *)malloc(hdr_len);
     if(hdr == NULL)
     {
@@ -273,12 +273,12 @@ static evthr_t * get_request_thr(evhtp_request_t *request)
 /*
 static const char * guess_type(const char *type)
 {
-	const struct table_entry *ent;
-	for (ent = &content_type_table[0]; ent->extension; ++ent) {
-		if (!evutil_ascii_strcasecmp(ent->extension, type))
-			return ent->content_type;
-	}
-	return "application/misc";
+    const struct table_entry *ent;
+    for (ent = &content_type_table[0]; ent->extension; ++ent) {
+        if (!evutil_ascii_strcasecmp(ent->extension, type))
+            return ent->content_type;
+    }
+    return "application/misc";
 }
 */
 
@@ -293,19 +293,19 @@ static const char * guess_type(const char *type)
 /*
 static const char * guess_content_type(const char *path)
 {
-	const char *last_period, *extension;
-	const struct table_entry *ent;
-	last_period = strrchr(path, '.');
-	if (!last_period || strchr(last_period, '/'))
-		goto not_found;
-	extension = last_period + 1;
-	for (ent = &content_type_table[0]; ent->extension; ++ent) {
-		if (!evutil_ascii_strcasecmp(ent->extension, extension))
-			return ent->content_type;
-	}
+    const char *last_period, *extension;
+    const struct table_entry *ent;
+    last_period = strrchr(path, '.');
+    if (!last_period || strchr(last_period, '/'))
+        goto not_found;
+    extension = last_period + 1;
+    for (ent = &content_type_table[0]; ent->extension; ++ent) {
+        if (!evutil_ascii_strcasecmp(ent->extension, extension))
+            return ent->content_type;
+    }
 
 not_found:
-	return "application/misc";
+    return "application/misc";
 }
 */
 
@@ -317,7 +317,7 @@ not_found:
  *
  * @return It always return 1 for success.
  */
-static int print_headers(evhtp_header_t * header, void * arg) 
+static int print_headers(evhtp_header_t * header, void * arg)
 {
     evbuf_t * buf = arg;
 
@@ -325,7 +325,7 @@ static int print_headers(evhtp_header_t * header, void * arg)
     evbuffer_add(buf, ": ", 2);
     evbuffer_add(buf, header->val, header->vlen);
     evbuffer_add(buf, "\r\n", 2);
-	return 1;
+    return 1;
 }
 
 /**
@@ -371,28 +371,28 @@ void dump_request_cb(evhtp_request_t *req, void *arg)
 {
     const char *uri = req->uri->path->full;
 
-	//switch (evhtp_request_t_get_command(req)) {
+    //switch (evhtp_request_t_get_command(req)) {
     int req_method = evhtp_request_get_method(req);
     if(req_method >= 16)
         req_method = 16;
 
-	LOG_PRINT(LOG_DEBUG, "Received a %s request for %s", method_strmap[req_method], uri);
+    LOG_PRINT(LOG_DEBUG, "Received a %s request for %s", method_strmap[req_method], uri);
     evbuffer_add_printf(req->buffer_out, "uri : %s\r\n", uri);
     evbuffer_add_printf(req->buffer_out, "query : %s\r\n", req->uri->query_raw);
     evhtp_headers_for_each(req->uri->query, print_headers, req->buffer_out);
     evbuffer_add_printf(req->buffer_out, "Method : %s\n", method_strmap[req_method]);
     evhtp_headers_for_each(req->headers_in, print_headers, req->buffer_out);
 
-	evbuf_t *buf = req->buffer_in;;
-	puts("Input data: <<<");
-	while (evbuffer_get_length(buf)) {
-		int n;
-		char cbuf[128];
-		n = evbuffer_remove(buf, cbuf, sizeof(buf)-1);
-		if (n > 0)
-			(void) fwrite(cbuf, 1, n, stdout);
-	}
-	puts(">>>");
+    evbuf_t *buf = req->buffer_in;;
+    puts("Input data: <<<");
+    while (evbuffer_get_length(buf)) {
+        int n;
+        char cbuf[128];
+        n = evbuffer_remove(buf, cbuf, sizeof(buf)-1);
+        if (n > 0)
+            (void) fwrite(cbuf, 1, n, stdout);
+    }
+    puts(">>>");
 
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/plain", 0, 0));
@@ -460,7 +460,7 @@ int on_header_value(multipart_parser* p, const char *at, size_t length)
         if(filename[0] != '\0' && mp_arg->check_name == -1)
         {
             LOG_PRINT(LOG_ERROR, "%s fail post type", mp_arg->address);
-            evbuffer_add_printf(mp_arg->req->buffer_out, 
+            evbuffer_add_printf(mp_arg->req->buffer_out,
                 "<h1>File: %s</h1>\n"
                 "<p>File type is not supported!</p>\n",
                 filename
@@ -492,7 +492,7 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
     {
         LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", mp_arg->address);
-        evbuffer_add_printf(mp_arg->req->buffer_out, 
+        evbuffer_add_printf(mp_arg->req->buffer_out,
             "<h1>Failed!</h1>\n"
             "<p>File save failed!</p>\n"
             );
@@ -501,7 +501,7 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
     {
         mp_arg->succno++;
         LOG_PRINT(LOG_INFO, "%s succ post pic:%s size:%d", mp_arg->address, md5sum, length);
-        evbuffer_add_printf(mp_arg->req->buffer_out, 
+        evbuffer_add_printf(mp_arg->req->buffer_out,
             "<h1>MD5: %s</h1>\n"
             "Image upload successfully! You can get this image via this address:<br/><br/>\n"
             "<a href=\"/%s\">http://yourhostname:%d/%s</a>?w=width&h=height&g=isgray&x=position_x&y=position_y&r=rotate&q=quality&f=format\n",
@@ -578,7 +578,7 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     int boundary_len = 0;
     mp_arg_t *mp_arg = NULL;
 
-    evbuffer_add_printf(req->buffer_out, 
+    evbuffer_add_printf(req->buffer_out,
             "<html>\n<head>\n"
             "<title>Upload Result</title>\n"
             "</head>\n"
@@ -597,24 +597,24 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
     boundary++;
     boundary_len = strlen(boundary);
 
-    if(boundary[0] == '"') 
+    if(boundary[0] == '"')
     {
         boundary++;
         boundary_end = strchr(boundary, '"');
-        if (!boundary_end) 
+        if (!boundary_end)
         {
             LOG_PRINT(LOG_DEBUG, "Invalid boundary in multipart/form-data POST data");
             LOG_PRINT(LOG_ERROR, "%s fail post parse", address);
             err_no = 6;
             goto done;
         }
-    } 
-    else 
+    }
+    else
     {
         /* search for the end of the boundary */
         boundary_end = strpbrk(boundary, ",;");
     }
-    if (boundary_end) 
+    if (boundary_end)
     {
         boundary_end[0] = '\0';
         boundary_len = boundary_end-boundary;
@@ -764,7 +764,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         err_no = 6;
         goto err;
     }
-	evbuf_t *buf;
+    evbuf_t *buf;
     buf = req->buffer_in;
     buff = (char *)malloc(post_size);
     if(buff == NULL)
@@ -823,7 +823,7 @@ forbidden:
 err:
     if(ret_json == 0)
     {
-        evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1></body></html>"); 
+        evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1></body></html>");
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     }
     else
@@ -848,8 +848,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
 {
     char *md5 = NULL, *fmt = NULL, *type = NULL;
     zimg_req_t *zimg_req = NULL;
-	char *buff = NULL;
-	size_t len;
+    char *buff = NULL;
+    size_t len;
 
     evhtp_connection_t *ev_conn = evhtp_request_get_connection(req);
     struct sockaddr *saddr = ev_conn->saddr;
@@ -873,7 +873,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         post_request_cb(req, NULL);
         return;
     }
-	else if(strcmp(method_strmap[req_method], "GET") != 0)
+    else if(strcmp(method_strmap[req_method], "GET") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
         LOG_PRINT(LOG_INFO, "%s refuse method", address);
@@ -899,8 +899,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         }
     }
 
-	const char *uri;
-	uri = req->uri->path->full;
+    const char *uri;
+    uri = req->uri->path->full;
 
     if(strlen(uri) == 1 && uri[0] == '/')
     {
@@ -944,17 +944,17 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         evhtp_send_reply(req, EVHTP_RES_OK);
         goto done;
     }
-	LOG_PRINT(LOG_DEBUG, "Got a GET request for <%s>",  uri);
+    LOG_PRINT(LOG_DEBUG, "Got a GET request for <%s>",  uri);
 
-	/* Don't allow any ".."s in the path, to avoid exposing stuff outside
-	 * of the docroot.  This test is both overzealous and underzealous:
-	 * it forbids aceptable paths like "/this/one..here", but it doesn't
-	 * do anything to prevent symlink following." */
-	if (strstr(uri, ".."))
+    /* Don't allow any ".."s in the path, to avoid exposing stuff outside
+     * of the docroot.  This test is both overzealous and underzealous:
+     * it forbids aceptable paths like "/this/one..here", but it doesn't
+     * do anything to prevent symlink following." */
+    if (strstr(uri, ".."))
     {
         LOG_PRINT(LOG_DEBUG, "attempt to upper dir!");
         LOG_PRINT(LOG_INFO, "%s refuse directory", address);
-		goto forbidden;
+        goto forbidden;
     }
 
     size_t md5_len = strlen(uri) + 1;
@@ -969,14 +969,14 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         str_lcpy(md5, uri+1, md5_len);
     else
         str_lcpy(md5, uri, md5_len);
-	LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
+    LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Url is Not a zimg Request.");
         LOG_PRINT(LOG_INFO, "%s refuse url illegal", address);
         goto err;
     }
-	/* This holds the content we're sending. */
+    /* This holds the content we're sending. */
 
     evthr_t *thread = get_request_thr(req);
     thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
@@ -1055,7 +1055,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     }
 
     quality = (quality != 0 ? quality : settings.quality);
-    zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t)); 
+    zimg_req = (zimg_req_t *)malloc(sizeof(zimg_req_t));
     if(zimg_req == NULL)
     {
         LOG_PRINT(LOG_DEBUG, "zimg_req malloc failed!");
@@ -1086,7 +1086,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
             LOG_PRINT(LOG_ERROR, "%s fail pic:%s t:%s", address, md5, type);
         else
             LOG_PRINT(LOG_ERROR, "%s fail pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s",
-                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt); 
+                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt);
         goto err;
     }
     if(get_img_rst == 2)
@@ -1096,7 +1096,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
             LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s t:%s", address, md5, type);
         else
             LOG_PRINT(LOG_INFO, "%s succ 304 pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s",
-                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt); 
+                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt);
         evhtp_send_reply(req, EVHTP_RES_NOTMOD);
         goto done;
     }
@@ -1110,16 +1110,16 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     zimg_headers_add(req, settings.headers);
     evhtp_send_reply(req, EVHTP_RES_OK);
     if(type)
-        LOG_PRINT(LOG_INFO, "%s succ pic:%s t:%s size:%d", address, md5, type, len); 
+        LOG_PRINT(LOG_INFO, "%s succ pic:%s t:%s size:%d", address, md5, type, len);
     else
-        LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s size:%d", 
-                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt, 
+        LOG_PRINT(LOG_INFO, "%s succ pic:%s w:%d h:%d p:%d g:%d x:%d y:%d r:%d q:%d f:%s size:%d",
+                address, md5, width, height, proportion, gray, x, y, rotate, quality, zimg_req->fmt,
                 len);
     LOG_PRINT(LOG_DEBUG, "============get_request_cb() DONE!===============");
     goto done;
 
 forbidden:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
@@ -1173,7 +1173,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
         post_request_cb(req, NULL);
         return;
     }
-	else if(strcmp(method_strmap[req_method], "GET") != 0)
+    else if(strcmp(method_strmap[req_method], "GET") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
         LOG_PRINT(LOG_INFO, "%s refuse method", address);
@@ -1199,8 +1199,8 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
         }
     }
 
-	const char *uri;
-	uri = req->uri->path->full;
+    const char *uri;
+    uri = req->uri->path->full;
 
     if(strstr(uri, "favicon.ico"))
     {
@@ -1212,7 +1212,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
         return;
     }
 
-	LOG_PRINT(LOG_DEBUG, "Got a Admin request for <%s>",  uri);
+    LOG_PRINT(LOG_DEBUG, "Got a Admin request for <%s>",  uri);
     int t;
     evhtp_kvs_t *params;
     params = req->uri->query;
@@ -1279,31 +1279,31 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
 
     if(admin_img_rst == -1)
     {
-        evbuffer_add_printf(req->buffer_out, 
+        evbuffer_add_printf(req->buffer_out,
             "<html><body><h1>Admin Command Failed!</h1> \
             <p>MD5: %s</p> \
             <p>Command Type: %d</p> \
             <p>Command Failed.</p> \
             </body></html>",
             md5, t);
-        LOG_PRINT(LOG_ERROR, "%s fail admin pic:%s t:%d", address, md5, t); 
+        LOG_PRINT(LOG_ERROR, "%s fail admin pic:%s t:%d", address, md5, t);
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     }
     else if(admin_img_rst == 2)
     {
-        evbuffer_add_printf(req->buffer_out, 
+        evbuffer_add_printf(req->buffer_out,
             "<html><body><h1>Admin Command Failed!</h1> \
             <p>MD5: %s</p> \
             <p>Command Type: %d</p> \
             <p>Image Not Found.</p> \
             </body></html>",
             md5, t);
-        LOG_PRINT(LOG_ERROR, "%s 404 admin pic:%s t:%d", address, md5, t); 
+        LOG_PRINT(LOG_ERROR, "%s 404 admin pic:%s t:%d", address, md5, t);
         evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     }
     else
     {
-        LOG_PRINT(LOG_INFO, "%s succ admin pic:%s t:%d", address, md5, t); 
+        LOG_PRINT(LOG_INFO, "%s succ admin pic:%s t:%d", address, md5, t);
     }
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_send_reply(req, EVHTP_RES_OK);
@@ -1311,7 +1311,7 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     return;
 
 forbidden:
-    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>"); 
+    evbuffer_add_printf(req->buffer_out, "<html><body><h1>403 Forbidden!</h1></body></html>");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_FORBIDDEN);
@@ -1354,7 +1354,7 @@ void info_request_cb(evhtp_request_t *req, void *arg)
     if(req_method >= 16)
         req_method = 16;
     LOG_PRINT(LOG_DEBUG, "Method: %d", req_method);
-	if(strcmp(method_strmap[req_method], "GET") != 0)
+    if(strcmp(method_strmap[req_method], "GET") != 0)
     {
         err_no = 2;
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
@@ -1401,18 +1401,18 @@ void info_request_cb(evhtp_request_t *req, void *arg)
     {
         err_no = 9;
         LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Info Failed!", md5);
-        LOG_PRINT(LOG_ERROR, "%s refuse info 404", address); 
+        LOG_PRINT(LOG_ERROR, "%s refuse info 404", address);
         goto err;
     }
     else if(info_img_rst == -1)
     {
         err_no = 0;
         LOG_PRINT(LOG_DEBUG, "zimg Requset Get Image[MD5: %s] Info Failed!", md5);
-        LOG_PRINT(LOG_ERROR, "%s fail info pic:%s", address, md5); 
+        LOG_PRINT(LOG_ERROR, "%s fail info pic:%s", address, md5);
         goto err;
     }
 
-    LOG_PRINT(LOG_INFO, "%s succ info pic:%s", address, md5); 
+    LOG_PRINT(LOG_INFO, "%s succ info pic:%s", address, md5);
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "application/json", 0, 0));
     evhtp_send_reply(req, EVHTP_RES_OK);
