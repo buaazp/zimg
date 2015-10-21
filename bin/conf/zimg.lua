@@ -2,7 +2,7 @@
 
 --server config
 --是否后台运行
-is_daemon       = 0
+is_daemon       = 1
 --绑定IP
 ip              = '0.0.0.0'
 --端口
@@ -110,10 +110,11 @@ ssdb_ip         = '127.0.0.1'
 --SSDB服务器端口
 ssdb_port       = 8888
 
---SSL
-pemfile = "server.crt"
-privfile = "server.key"
-cafile = "ca.crt"
+--SSL config
+--HTTPS配置文件路径
+--pemfile       = "conf/server.crt"
+--privfile      = "conf/server.key"
+--cafile        = "conf/ca.crt"
 
 --lua conf functions
 --部分与配置有关的函数在lua中实现，对性能影响不大
