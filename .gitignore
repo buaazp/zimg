@@ -37,8 +37,11 @@ bin/log/
 bin/zimg
 
 bin/conf/debug.lua
+bin/conf/ssl/
 build/
 
 #luaJIT headers
 deps/LuaJIT-2.0.3/
 
+nbproject/
+src/CMakeFiles/

@@ -1,13 +1,13 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
@@ -35,7 +35,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include "libevhtp/evhtp.h"
+#include <openssl/ssl.h>
 #include "zcommon.h"
 #include "zhttpd.h"
 #include "zimg.h"
@@ -50,13 +50,13 @@
 extern int daemon(int, int);
 #endif
 
-#define _STR(s) #s   
+#define _STR(s) #s
 #define STR(s) _STR(s)
 
 
 void usage(int argc, char **argv);
-static void settings_init(void); 
-static int load_conf(const char *conf); 
+static void settings_init(void);
+static int load_conf(const char *conf);
 static void sighandler(int signal, siginfo_t *siginfo, void *arg);
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg);
 int main(int argc, char **argv);
@@ -83,7 +83,7 @@ void usage(int argc, char **argv)
 /**
  * @brief settings_init Init the setting with default values.
  */
-static void settings_init(void) 
+static void settings_init(void)
 {
     settings.L = NULL;
     settings.is_daemon = 0;
@@ -131,6 +131,8 @@ static void settings_init(void)
     settings.get_img = NULL;
     settings.info_img = NULL;
     settings.admin_img = NULL;
+    settings.privfile[0] = '\0';
+    settings.cafile[0] = '\0';
 }
 
 static void set_callback(int mode)
@@ -350,6 +352,21 @@ static int load_conf(const char *conf)
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
+    lua_getglobal(L, "pemfile");
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.pemfile, lua_tostring(L, -1), sizeof(settings.pemfile));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "privfile");
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.privfile, lua_tostring(L, -1), sizeof(settings.privfile));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "cafile");
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.cafile, lua_tostring(L, -1), sizeof(settings.cafile));
+    lua_pop(L, 1);
+
     settings.L = L;
     //lua_close(L);
 
@@ -399,9 +416,9 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         memcached_server_st *servers = memcached_servers_parse(mserver);
         memcached_server_push(memc, servers);
         memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1); 
-        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1);
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1);
+        memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1);
         thr_args->cache_conn = memc;
         LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
         memcached_server_list_free(servers);
@@ -418,8 +435,8 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         servers = memcached_servers_parse(mserver);
         memcached_server_push(beans, servers);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
-        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1);
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1);
         thr_args->beansdb_conn = beans;
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
         memcached_server_list_free(servers);
@@ -440,7 +457,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         }
     }
 
-    thr_args->L = luaL_newstate(); 
+    thr_args->L = luaL_newstate();
     LOG_PRINT(LOG_DEBUG, "luaL_newstate alloc");
     if(thr_args->L != NULL)
     {
@@ -452,6 +469,16 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     lua_pcall(thr_args->L, 0, 0, 0);
 
     evthr_set_aux(thread, thr_args);
+}
+
+static int dummy_ssl_verify_callback(int ok, X509_STORE_CTX * x509_store)
+{
+    return 1;
+}
+
+static int dummy_check_issued_cb(X509_STORE_CTX * ctx, X509 * x, X509 * issuer)
+{
+    return 1;
 }
 
 /**
@@ -517,6 +544,61 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    if(settings.script_name[0] != '\0')
+    {
+        if(is_file(settings.script_name) == -1)
+        {
+            fprintf(stderr, "%s open failed!\n", settings.script_name);
+            return -1;
+        }
+        settings.script_on = 1;
+    }
+
+    if(settings.pemfile[0] != '\0')
+    {
+        if(settings.privfile[0] == '\0')
+        {
+            fprintf(stderr, "ssl privfile not found!\n");
+            return -1;
+        }
+        if(settings.cafile[0] == '\0')
+        {
+            fprintf(stderr, "ssl cafile not found!\n");
+            return -1;
+        }
+        if(is_file(settings.pemfile) == -1)
+        {
+            fprintf(stderr, "ssl pemfile %s open failed!\n", settings.pemfile);
+            return -1;
+        }
+        if(is_file(settings.privfile) == -1)
+        {
+            fprintf(stderr, "ssl privfile %s open failed!\n", settings.privfile);
+            return -1;
+        }
+        if(is_file(settings.cafile) == -1)
+        {
+            fprintf(stderr, "ssl cafile %s open failed!\n", settings.cafile);
+            return -1;
+        }
+    }
+
+    //init the Path zimg need to use.
+    if(is_dir(settings.img_path) != 1)
+    {
+        if(mk_dirs(settings.img_path) != 1)
+        {
+            fprintf(stderr, "%s Create Failed!\n", settings.img_path);
+            return -1;
+        }
+    }
+
+    if(mk_dirf(settings.log_name) != 1)
+    {
+        fprintf(stderr, "%s log path create failed!\n", settings.log_name);
+        return -1;
+    }
+
     if(settings.is_daemon == 1)
     {
         if(daemon(1, 1) < 0)
@@ -531,34 +613,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "\n");
         }
     }
-    //init the Path zimg need to use.
-    //start log module... ./log/zimg.log
-    if(mk_dirf(settings.log_name) != 1)
-    {
-        fprintf(stderr, "%s log path create failed!\n", settings.log_name);
-        return -1;
-    }
     log_init();
-
-    if(settings.script_name[0] != '\0')
-    {
-        if(is_file(settings.script_name) == -1)
-        {
-            fprintf(stderr, "%s open failed!\n", settings.script_name);
-            return -1;
-        }
-        settings.script_on = 1;
-    }
-
-    if(is_dir(settings.img_path) != 1)
-    {
-        if(mk_dirs(settings.img_path) != 1)
-        {
-            LOG_PRINT(LOG_DEBUG, "img_path[%s] Create Failed!", settings.img_path);
-            fprintf(stderr, "%s Create Failed!\n", settings.img_path);
-            return -1;
-        }
-    }
     LOG_PRINT(LOG_DEBUG,"Paths Init Finished.");
 
     if(settings.mode == 2)
@@ -572,8 +627,8 @@ int main(int argc, char **argv)
         memcached_server_push(beans, servers);
         memcached_server_list_free(servers);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 0);
-        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1);
+        memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1);
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
         if(set_cache(beans, "zimg", "1") == -1)
         {
@@ -630,6 +685,33 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/info", info_request_cb, NULL);
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
     evhtp_set_gencb(htp, get_request_cb, NULL);
+
+    if(settings.pemfile[0] != '\0')
+    {
+        evhtp_ssl_cfg_t scfg = {
+            .pemfile = settings.pemfile,
+            .privfile = settings.privfile,
+            .cafile = settings.cafile,
+            .capath = NULL,
+            .ciphers = "RC4-MD5",
+            .ssl_opts = SSL_OP_ALL,
+            .ssl_ctx_timeout = 60 * 60 * 48,
+            .verify_peer = SSL_VERIFY_PEER,
+            .verify_depth = 42,
+            .x509_verify_cb = dummy_ssl_verify_callback,
+            .x509_chk_issued_cb = dummy_check_issued_cb,
+            .scache_type = evhtp_ssl_scache_type_internal,
+            .scache_size = 1024,
+            .scache_timeout = 1024,
+            .scache_init = NULL,
+            .scache_add = NULL,
+            .scache_get = NULL,
+            .scache_del = NULL,
+        };
+
+        evhtp_ssl_init(htp, &scfg);
+    }
+
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
 #endif

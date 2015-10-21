@@ -110,6 +110,12 @@ ssdb_ip         = '127.0.0.1'
 --SSDB服务器端口
 ssdb_port       = 8888
 
+--SSL config
+--HTTPS配置文件路径
+--pemfile       = "conf/server.crt"
+--privfile      = "conf/server.key"
+--cafile        = "conf/ca.crt"
+
 --lua conf functions
 --部分与配置有关的函数在lua中实现，对性能影响不大
 function is_img(type_name)
