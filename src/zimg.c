@@ -351,7 +351,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         if(settings.script_on == 1 && req->type != NULL)
             ret = lua_convert(im, req);
         else
-            ret = convert(im, req);
+            ret = convert(&im, req);
         if(ret == -1) goto err;
         if(ret == 0) to_save = false;
 

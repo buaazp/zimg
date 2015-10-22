@@ -30,7 +30,7 @@
 
 static int proportion(MagickWand *im, int p_type, int cols, int rows);
 static int crop(MagickWand *im, int x, int y, int cols, int rows);
-int convert(MagickWand *im, zimg_req_t *req);
+int convert(MagickWand **im, zimg_req_t *req);
 
 /**
  * @brief proportion proportion function
@@ -194,23 +194,67 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows)
  *
  * @return 1 for OK and -1 for fail
  */
-int convert(MagickWand *im, zimg_req_t *req)
+int convert(MagickWand **im, zimg_req_t *req)
 {
     int result = 1, ret = -1;
 
-    MagickResetIterator(im);
-    MagickSetImageOrientation(im, TopLeftOrientation);
+    ret = MagickAutoOrientImage(*im);
+    if (ret != MagickTrue) return -1;
+
+    char *format = MagickGetImageFormat(*im);
+    if (strncmp(format, "GIF", 3) == 0) {
+        // Composites a set of images while respecting any page
+        // offsets and disposal methods
+        LOG_PRINT(LOG_DEBUG, "coalesce_images()");
+        MagickWand *gifim = MagickCoalesceImages(*im);
+        if (gifim == NULL) {
+            free(format);
+            return -1;
+        }
+        DestroyMagickWand(*im);
+        *im = gifim;
+    } else if (strncmp(format, "PNG", 3) == 0) {
+        // convert transparent to white background
+        LOG_PRINT(LOG_DEBUG, "wi_set_background_color()");
+        PixelWand *background = NewPixelWand();
+        if (background == NULL) {
+            free(format);
+            return -1;
+        }
+        ret = PixelSetColor(background, "white");
+        LOG_PRINT(LOG_DEBUG, "pixelSetColor() ret = %d", ret);
+        if (ret != MagickTrue) {
+            DestroyPixelWand(background);
+            free(format);
+            return -1;
+        }
+        ret = MagickSetImageBackgroundColor(*im, background);
+        LOG_PRINT(LOG_DEBUG, "setBackgroudColor() ret = %d", ret);
+        DestroyPixelWand(background);
+        if (ret != MagickTrue) {
+            free(format);
+            return -1;
+        }
+        MagickWand *pngim = MagickMergeImageLayers(*im, FlattenLayer);
+        if (pngim == NULL) {
+            free(format);
+            return -1;
+        }
+        DestroyMagickWand(*im);
+        *im = pngim;
+    }
+    free(format);
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (!(cols == 0 && rows == 0)) {
         /* crop and scale */
         if (x == -1 && y == -1) {
             LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
-            ret = proportion(im, req->proportion, cols, rows);
+            ret = proportion(*im, req->proportion, cols, rows);
             if (ret != MagickTrue) return -1;
         } else {
             LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
-            ret = crop(im, x, y, cols, rows);
+            ret = crop(*im, x, y, cols, rows);
             if (ret != MagickTrue) return -1;
         }
     }
@@ -225,7 +269,7 @@ int convert(MagickWand *im, zimg_req_t *req)
             DestroyPixelWand(background);
             return -1;
         }
-        ret = MagickRotateImage(im, background, req->rotate);
+        ret = MagickRotateImage(*im, background, req->rotate);
         LOG_PRINT(LOG_DEBUG, "rotate() ret = %d", ret);
         DestroyPixelWand(background);
         if (ret != MagickTrue) return -1;
@@ -235,10 +279,10 @@ int convert(MagickWand *im, zimg_req_t *req)
     if (req->gray == 1) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
         //several ways to grayscale an image:
-        //ret = MagickSetImageColorspace(im, GRAYColorspace);
-        //ret = MagickQuantizeImage(im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
-        //ret = MagickSeparateImageChannel(im, GrayChannel);
-        ret = MagickSetImageType(im, GrayscaleType);
+        //ret = MagickSetImageColorspace(*im, GRAYColorspace);
+        //ret = MagickQuantizeImage(*im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
+        //ret = MagickSeparateImageChannel(*im, GrayChannel);
+        ret = MagickSetImageType(*im, GrayscaleType);
         LOG_PRINT(LOG_DEBUG, "gray() ret = %d", ret);
         if (ret != MagickTrue) return -1;
     }
@@ -246,19 +290,19 @@ int convert(MagickWand *im, zimg_req_t *req)
     /* set quality */
     /*
     int quality = 100;
-    int im_quality = MagickGetImageCompressionQuality(im);
+    int im_quality = MagickGetImageCompressionQuality(*im);
     im_quality = (im_quality == 0 ? 100 : im_quality);
     LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
     quality = req->quality < im_quality ? req->quality : im_quality;
     */
     LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-    ret = MagickSetImageCompressionQuality(im, req->quality);
+    ret = MagickSetImageCompressionQuality(*im, req->quality);
     if (ret != MagickTrue) return -1;
 
     /* set format */
     if (strncmp(req->fmt, "none", 4) != 0) {
         LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
-        ret = MagickSetImageFormat(im, req->fmt);
+        ret = MagickSetImageFormat(*im, req->fmt);
         if (ret != MagickTrue) return -1;
     }
 

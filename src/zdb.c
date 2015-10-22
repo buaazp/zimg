@@ -125,7 +125,7 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
     if(settings.script_on == 1 && req->type != NULL)
         result = lua_convert(im, req);
     else
-        result = convert(im, req);
+        result = convert(&im, req);
     if(result == -1) goto err;
     if(result == 0) to_save = false;
 
