@@ -336,7 +336,12 @@ static int print_headers(evhtp_header_t * header, void * arg)
 */
 void add_info(MagickWand *im, evhtp_request_t *req)
 {
-    MagickSizeType size = MagickGetImageSize(im);
+    MagickSizeType size;
+    int ret = MagickGetImageLength(im, &size);
+    if (ret != MagickTrue)
+    {
+        LOG_PRINT(LOG_DEBUG, "Get Image Length Failed!");
+    }
     unsigned long width = MagickGetImageWidth(im);
     unsigned long height = MagickGetImageHeight(im);
     size_t quality = MagickGetImageCompressionQuality(im);

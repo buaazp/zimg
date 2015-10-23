@@ -72,9 +72,6 @@ find_package (PNG REQUIRED)
 
 set (DEPS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../deps")
 
-message (${OPENSSL_INCLUDE_DIR})
-message (${OPENSSL_LIBRARIES})
-
 if (NOT OPENSSL_FOUND)
     message ("Diabling SSL")
     set (EVHTP_DISABLE_SSL ON)
@@ -112,14 +109,15 @@ set (ZIMG_EXTERNAL_LIBS
     ${LIBEVENT_PTHREADS_LIBRARY}
     ${LIBEVENT_OPENSSL_LIBRARY}
     ${LIBMEMCACHED_LIBRARIES}
+    ${ImageMagick_MagickCore_LIBRARY}
+    ${ImageMagick_MagickWand_LIBRARY}
     ${LUAJIT_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${GIF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${ImageMagick_MagickCore_LIBRARY}
-    ${ImageMagick_MagickWand_LIBRARY}
     "m"
+    "z"
     "dl"
 )
 

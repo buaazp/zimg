@@ -129,7 +129,7 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
     if(result == -1) goto err;
     if(result == 0) to_save = false;
 
-    buff = (char *)MagickWriteImageBlob(im, &img_size);
+    buff = (char *)MagickGetImageBlob(im, &img_size);
     if (buff == NULL) {
         LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
         goto err;

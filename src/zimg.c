@@ -304,12 +304,18 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
                 }
                 else
                 {
-                    MagickSizeType size = MagickGetImageSize(im);
+                    MagickSizeType size;
+                    ret = MagickGetImageLength(im, &size);
+                    if (ret != MagickTrue)
+                    {
+                        LOG_PRINT(LOG_DEBUG, "Get Image Length Failed!");
+                        goto err;
+                    }
                     LOG_PRINT(LOG_DEBUG, "image size = %d", size);
                     if(size < CACHE_MAX_SIZE)
                     {
                         MagickResetIterator(im);
-                        char *new_buff = (char *)MagickWriteImageBlob(im, &len);
+                        char *new_buff = (char *)MagickGetImageBlob(im, &len);
                         if (new_buff == NULL) {
                             LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
                             goto err;
@@ -332,12 +338,18 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
             }
             else
             {
-                MagickSizeType size = MagickGetImageSize(im);
+                MagickSizeType size;
+                ret = MagickGetImageLength(im, &size);
+                if (ret != MagickTrue)
+                {
+                    LOG_PRINT(LOG_DEBUG, "Get Image Length Failed!");
+                    goto err;
+                }
                 LOG_PRINT(LOG_DEBUG, "image size = %d", size);
                 if(size < CACHE_MAX_SIZE)
                 {
                     MagickResetIterator(im);
-                    char *new_buff = (char *)MagickWriteImageBlob(im, &len);
+                    char *new_buff = (char *)MagickGetImageBlob(im, &len);
                     if (new_buff == NULL) {
                         LOG_PRINT(LOG_DEBUG, "Webimg Get Original Blob Failed!");
                         goto err;
@@ -355,7 +367,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
         if(ret == -1) goto err;
         if(ret == 0) to_save = false;
 
-        buff = (char *)MagickWriteImageBlob(im, &len);
+        buff = (char *)MagickGetImageBlob(im, &len);
         if (buff == NULL) {
             LOG_PRINT(LOG_DEBUG, "Webimg Get Blob Failed!");
             goto err;
