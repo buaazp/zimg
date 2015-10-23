@@ -33,7 +33,7 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...);
 void log_flush(int log_id);
 void log_close(int log_id);
 
-struct log_level_desc{
+struct log_level_desc {
     enum LOG_LEVEL  level;
     char*           endesc;
     wchar_t*        cndesc;
@@ -50,8 +50,8 @@ static struct log_level_desc log_level_descs[] = {
     { LOG_LEVEL_DEBUG,      "DEBUG",        L"调试" },
 };
 
-static FILE* log_files[MAX_LOGS+1];
-static spin_lock_t log_locks[MAX_LOGS+1];
+static FILE* log_files[MAX_LOGS + 1];
+static spin_lock_t log_locks[MAX_LOGS + 1];
 
 /**
  * @brief log_valid check log is valid
@@ -60,8 +60,7 @@ static spin_lock_t log_locks[MAX_LOGS+1];
  *
  * @return 1 for OK and 0 for fail
  */
-static int log_valid(int log_id)
-{
+static int log_valid(int log_id) {
     if (log_id < 0 || log_id > MAX_LOGS)
         return 0;
 
@@ -71,12 +70,10 @@ static int log_valid(int log_id)
 /**
  * @brief log_init init log
  */
-void log_init(void)
-{
+void log_init(void) {
     int i;
 
-    for (i = 0; i < MAX_LOGS+1; i++)
-    {
+    for (i = 0; i < MAX_LOGS + 1; i++) {
         log_files[i] = NULL;
         spin_init(&log_locks[i], NULL);
     }
@@ -90,20 +87,16 @@ void log_init(void)
  *
  * @return log open id for OK and -1 for fail
  */
-int log_open(const char *path, const char* mode)
-{
+int log_open(const char *path, const char* mode) {
     int i;
 
-    for (i = LOG_USER; i < MAX_LOGS+1; i++)
-    {
+    for (i = LOG_USER; i < MAX_LOGS + 1; i++) {
         spin_lock(&log_locks[i]);
 
-        if (log_files[i] == NULL)
-        {
+        if (log_files[i] == NULL) {
             log_files[i] = fopen(path, mode);
 
-            if (log_files[i])
-            {
+            if (log_files[i]) {
                 spin_unlock(&log_locks[i]);
                 return i;
             }
@@ -121,16 +114,15 @@ int log_open(const char *path, const char* mode)
  * We actually use this only for signals that are not fatal from the point
  * of view of Redis. Signals that are going to kill the server anyway and
  * where we need printf-alike features are served by redisLog(). */
-void log_handler(const char *msg)
-{
+void log_handler(const char *msg) {
     int fd;
     int log_to_stdout = settings.log_level == -1;
 
     fd = log_to_stdout ? STDOUT_FILENO :
-        open(settings.log_name, O_APPEND|O_CREAT|O_WRONLY, 0644);
+         open(settings.log_name, O_APPEND | O_CREAT | O_WRONLY, 0644);
     if (fd == -1) return;
-    if (write(fd,msg,strlen(msg)) == -1) goto err;
-    if (write(fd,"\n",1) == -1) goto err;
+    if (write(fd, msg, strlen(msg)) == -1) goto err;
+    if (write(fd, "\n", 1) == -1) goto err;
 err:
     if (!log_to_stdout) close(fd);
 }
@@ -143,8 +135,7 @@ err:
  * @param fmt format of string
  * @param ... other args
  */
-void log_printf0(int log_id, int log_level, const char *fmt, ...)
-{
+void log_printf0(int log_id, int log_level, const char *fmt, ...) {
     FILE *fp;
     time_t t;
     char tmbuf[30];
@@ -154,11 +145,9 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
 
     if (!log_valid(log_id))
         fp = stdout;
-    else
-    {
+    else {
         spin_lock(&log_locks[log_id]);
-        if (!(fp = log_files[log_id]))
-        {
+        if (!(fp = log_files[log_id])) {
             spin_unlock(&log_locks[log_id]);
             return;
         }
@@ -193,8 +182,7 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
         fputc('\n', fp);
 
 
-    if (log_valid(log_id))
-    {
+    if (log_valid(log_id)) {
         fflush(fp);
         spin_unlock(&log_locks[log_id]);
     }
@@ -205,8 +193,7 @@ void log_printf0(int log_id, int log_level, const char *fmt, ...)
  *
  * @param log_id log id
  */
-void log_flush(int log_id)
-{
+void log_flush(int log_id) {
     if (!log_valid(log_id))
         return;
 
@@ -223,15 +210,13 @@ void log_flush(int log_id)
  *
  * @param log_id the log id
  */
-void log_close(int log_id)
-{
+void log_close(int log_id) {
     if (!log_valid(log_id))
         return;
 
     spin_lock(&log_locks[log_id]);
 
-    if (log_files[log_id])
-    {
+    if (log_files[log_id]) {
         fclose(log_files[log_id]);
         log_files[log_id] = NULL;
     }

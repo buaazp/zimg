@@ -67,7 +67,7 @@ typedef struct zimg_req_s {
     thr_arg_t *thr_arg;
 } zimg_req_t;
 
-struct setting{
+struct setting {
     lua_State *L;
     int is_daemon;
     char ip[128];
@@ -124,7 +124,7 @@ struct setting{
 #define LOG_DEBUG       7           /* DEBUG message */
 
 #ifdef DEBUG
-  #define LOG_PRINT(level, fmt, ...)            \
+#define LOG_PRINT(level, fmt, ...)            \
     do { \
         int log_id = log_open(settings.log_name, "a"); \
         log_printf0(log_id, level, "%s:%d %s() "fmt,   \
@@ -133,7 +133,7 @@ struct setting{
         log_close(log_id); \
     }while(0)
 #else
-  #define LOG_PRINT(level, fmt, ...)            \
+#define LOG_PRINT(level, fmt, ...)            \
     do { \
         if (level <= settings.log_level) { \
             int log_id = log_open(settings.log_name, "a"); \

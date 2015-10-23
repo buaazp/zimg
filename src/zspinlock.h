@@ -26,7 +26,7 @@
 typedef struct {
     volatile long spin_;
     volatile long flag_;
-}spin_lock_t;
+} spin_lock_t;
 
 void spin_init(spin_lock_t* lock, long* flag);
 void spin_lock(spin_lock_t* lock);

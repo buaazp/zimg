@@ -31,7 +31,7 @@
 #define LOG_SYSTEM      0
 #define LOG_USER        1
 
-enum LOG_LEVEL{
+enum LOG_LEVEL {
     LOG_LEVEL_FATAL = 0,                    /* System is unusable */
     LOG_LEVEL_ALERT,                        /* Action must be taken immediately */
     LOG_LEVEL_CRIT,                         /* Critical conditions */

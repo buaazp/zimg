@@ -134,16 +134,14 @@ static int set_wi_format(lua_State *L) {
     return 1;
 }
 
-static int zimg_type(lua_State *L)
-{
+static int zimg_type(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     lua_pushstring(L, larg->trans_type);
     LOG_PRINT(LOG_DEBUG, "zimg_type: %s", larg->trans_type);
     return 1;
 }
 
-static int zimg_ret(lua_State *L)
-{
+static int zimg_ret(lua_State *L) {
     lua_arg *larg = pthread_getspecific(thread_key);
     larg->lua_ret = lua_tonumber(L, 1);
     return 0;
@@ -166,8 +164,7 @@ const struct luaL_reg zimg_lib[] = {
     {NULL,                  NULL                }
 };
 
-static int lua_log_print(lua_State *L)
-{
+static int lua_log_print(lua_State *L) {
     int log_level = lua_tonumber(L, 1);
     const char *log_str = lua_tostring(L, 2);
     LOG_PRINT(log_level, "zimg_lua: %s", log_str);
@@ -187,17 +184,15 @@ const struct luaL_Reg loglib[] = {
  *
  * @return 1 for OK and -1 for fail
  */
-int lua_convert(MagickWand *im, zimg_req_t *req)
-{
+int lua_convert(MagickWand *im, zimg_req_t *req) {
     int ret = -1;
     LOG_PRINT(LOG_DEBUG, "lua_convert: %s", req->type);
     MagickResetIterator(im);
     MagickSetImageOrientation(im, TopLeftOrientation);
 
-    if(req->thr_arg->L != NULL)
-    {
+    if (req->thr_arg->L != NULL) {
         lua_arg *larg = (lua_arg *)malloc(sizeof(lua_arg));
-        if(larg == NULL)
+        if (larg == NULL)
             return -1;
         larg->lua_ret = ret;
         larg->trans_type = req->type;
@@ -205,15 +200,13 @@ int lua_convert(MagickWand *im, zimg_req_t *req)
         pthread_setspecific(thread_key, larg);
         //luaL_dofile(req->thr_arg->L, settings.script_name);
         lua_getglobal(req->thr_arg->L, "f");
-        if(lua_pcall(req->thr_arg->L, 0, 0, 0) != 0)
-        {
+        if (lua_pcall(req->thr_arg->L, 0, 0, 0) != 0) {
             LOG_PRINT(LOG_WARNING, "lua f() failed!");
         }
 
         ret = larg->lua_ret;
         free(larg);
-    }
-    else
+    } else
         LOG_PRINT(LOG_WARNING, "no lua_stats, lua_convert failed!");
 
     return ret;

@@ -54,8 +54,7 @@ int del_ssdb(redisContext* c, const char *cache_key);
  *
  * @return 1 for OK, 2 for 304 not modify and -1 for failed
  */
-int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
-{
+int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request) {
     int result = -1;
     char rsp_cache_key[CACHE_KEY_SIZE];
     char *buff = NULL;
@@ -66,34 +65,29 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
 
     LOG_PRINT(LOG_DEBUG, "get_img() start processing zimg request...");
 
-    if(exist_db(req->thr_arg, req->md5) == -1)
-    {
+    if (exist_db(req->thr_arg, req->md5) == -1) {
         LOG_PRINT(LOG_DEBUG, "Image [%s] is not existed.", req->md5);
         goto err;
     }
 
-    if(settings.script_on == 1 && req->type != NULL)
+    if (settings.script_on == 1 && req->type != NULL)
         snprintf(rsp_cache_key, CACHE_KEY_SIZE, "%s:%s", req->md5, req->type);
-    else
-    {
-        if(req->proportion == 0 && req->width == 0 && req->height == 0)
+    else {
+        if (req->proportion == 0 && req->width == 0 && req->height == 0)
             str_lcpy(rsp_cache_key, req->md5, CACHE_KEY_SIZE);
         else
             gen_key(rsp_cache_key, req->md5, 9, req->width, req->height, req->proportion, req->gray, req->x, req->y, req->rotate, req->quality, req->fmt);
     }
 
-    if(find_cache_bin(req->thr_arg, rsp_cache_key, &buff, &img_size) == 1)
-    {
+    if (find_cache_bin(req->thr_arg, rsp_cache_key, &buff, &img_size) == 1) {
         LOG_PRINT(LOG_DEBUG, "Hit Cache[Key: %s].", rsp_cache_key);
         to_save = false;
         goto done;
     }
     LOG_PRINT(LOG_DEBUG, "Start to Find the Image...");
-    if(get_img_db(req->thr_arg, rsp_cache_key, &buff, &img_size) == 1)
-    {
+    if (get_img_db(req->thr_arg, rsp_cache_key, &buff, &img_size) == 1) {
         LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db succ.", rsp_cache_key);
-        if(img_size < CACHE_MAX_SIZE)
-        {
+        if (img_size < CACHE_MAX_SIZE) {
             set_cache_bin(req->thr_arg, rsp_cache_key, buff, img_size);
         }
         to_save = false;
@@ -103,31 +97,26 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
     im = NewMagickWand();
     if (im == NULL) goto err;
 
-    if(find_cache_bin(req->thr_arg, req->md5, &orig_buff, &img_size) == -1)
-    {
-        if(get_img_db(req->thr_arg, req->md5, &orig_buff, &img_size) == -1)
-        {
+    if (find_cache_bin(req->thr_arg, req->md5, &orig_buff, &img_size) == -1) {
+        if (get_img_db(req->thr_arg, req->md5, &orig_buff, &img_size) == -1) {
             LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", req->md5);
             goto err;
-        }
-        else if(img_size < CACHE_MAX_SIZE)
-        {
+        } else if (img_size < CACHE_MAX_SIZE) {
             set_cache_bin(req->thr_arg, req->md5, orig_buff, img_size);
         }
     }
 
     result = MagickReadImageBlob(im, (const unsigned char *)orig_buff, img_size);
-    if (result != MagickTrue)
-    {
+    if (result != MagickTrue) {
         LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
         goto err;
     }
-    if(settings.script_on == 1 && req->type != NULL)
+    if (settings.script_on == 1 && req->type != NULL)
         result = lua_convert(im, req);
     else
         result = convert(&im, req);
-    if(result == -1) goto err;
-    if(result == 0) to_save = false;
+    if (result == -1) goto err;
+    if (result == 0) to_save = false;
 
     buff = (char *)MagickGetImageBlob(im, &img_size);
     if (buff == NULL) {
@@ -135,42 +124,35 @@ int get_img_mode_db(zimg_req_t *req, evhtp_request_t *request)
         goto err;
     }
 
-    if(img_size < CACHE_MAX_SIZE)
-    {
+    if (img_size < CACHE_MAX_SIZE) {
         set_cache_bin(req->thr_arg, rsp_cache_key, buff, img_size);
     }
 
 done:
-    if(settings.etag == 1)
-    {
+    if (settings.etag == 1) {
         result = zimg_etag_set(request, buff, img_size);
-        if(result == 2)
+        if (result == 2)
             goto err;
     }
     result = evbuffer_add(request->buffer_out, buff, img_size);
-    if(result != -1)
-    {
+    if (result != -1) {
         int save_new = 0;
-        if(to_save == true)
-        {
-            if(req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL))
-            {
+        if (to_save == true) {
+            if (req->sv == 1 || settings.save_new == 1 || (settings.save_new == 2 && req->type != NULL)) {
                 save_new = 1;
             }
         }
 
-        if(save_new == 1)
-        {
+        if (save_new == 1) {
             LOG_PRINT(LOG_DEBUG, "Image [%s] Saved to Storage.", rsp_cache_key);
             save_img_db(req->thr_arg, rsp_cache_key, buff, img_size);
-        }
-        else
+        } else
             LOG_PRINT(LOG_DEBUG, "Image [%s] Needn't to Storage.", rsp_cache_key);
         result = 1;
     }
 
 err:
-    if(im != NULL)
+    if (im != NULL)
         DestroyMagickWand(im);
     free(buff);
     free(orig_buff);
@@ -187,13 +169,12 @@ err:
  *
  * @return 1 for succ or -1 for failed.
  */
-int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len)
-{
+int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *len) {
     int ret = -1;
 
-    if(settings.mode == 2 && thr_arg->beansdb_conn != NULL)
+    if (settings.mode == 2 && thr_arg->beansdb_conn != NULL)
         ret = get_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
-    else if(settings.mode == 3 && thr_arg->ssdb_conn != NULL)
+    else if (settings.mode == 3 && thr_arg->ssdb_conn != NULL)
         ret = get_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
 
     /*
@@ -229,10 +210,9 @@ int get_img_db(thr_arg_t *thr_arg, const char *cache_key, char **buff, size_t *l
 *
 * @return 1 for success and -1 for fail.
 */
-int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_t *len)
-{
+int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_t *len) {
     int rst = -1;
-    if(memc == NULL)
+    if (memc == NULL)
         return rst;
 
     uint32_t  flags;
@@ -240,18 +220,13 @@ int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_
 
     *value_ptr = memcached_get(memc, key, strlen(key), len, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS)
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Binary Beansdb Find Key[%s], Len: %d.", key, *len);
         rst = 1;
-    }
-    else if (rc == MEMCACHED_NOTFOUND)
-    {
+    } else if (rc == MEMCACHED_NOTFOUND) {
         LOG_PRINT(LOG_DEBUG, "Binary Beansdb Key[%s] Not Find!", key);
         rst = -1;
-    }
-    else
-    {
+    } else {
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
     }
@@ -269,19 +244,16 @@ int get_img_beansdb(memcached_st *memc, const char *key, char **value_ptr, size_
  *
  * @return 1 for success and -1 for fail
  */
-int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *len)
-{
-    if(c == NULL)
+int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *len) {
+    if (c == NULL)
         return -1;
 
     redisReply *r = (redisReply*)redisCommand(c, "GET %s", cache_key);
-    if( NULL == r)
-    {
+    if ( NULL == r) {
         LOG_PRINT(LOG_DEBUG, "Execut ssdb command failure");
         return -1;
     }
-    if( r->type != REDIS_REPLY_STRING )
-    {
+    if ( r->type != REDIS_REPLY_STRING ) {
         LOG_PRINT(LOG_DEBUG, "Failed to execute get [%s] from ssdb.", cache_key);
         freeReplyObject(r);
         return -1;
@@ -289,8 +261,7 @@ int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *le
 
     *len = r->len;
     *buff = (char *)malloc(r->len);
-    if(buff == NULL)
-    {
+    if (buff == NULL) {
         LOG_PRINT(LOG_DEBUG, "buff malloc failed!");
         return -1;
     }
@@ -313,12 +284,11 @@ int get_img_ssdb(redisContext* c, const char *cache_key, char **buff, size_t *le
  *
  * @return 1 for succ or -1 for fialed.
  */
-int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, const size_t len)
-{
+int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, const size_t len) {
     int ret = -1;
-    if(settings.mode == 2)
+    if (settings.mode == 2)
         ret = save_img_beansdb(thr_arg->beansdb_conn, cache_key, buff, len);
-    else if(settings.mode == 3)
+    else if (settings.mode == 3)
         ret = save_img_ssdb(thr_arg->ssdb_conn, cache_key, buff, len);
 
     /*
@@ -354,23 +324,19 @@ int save_img_db(thr_arg_t *thr_arg, const char *cache_key, const char *buff, con
 *
 * @return 1 for success and -1 for fial.
 */
-int save_img_beansdb(memcached_st *memc, const char *key, const char *value, const size_t len)
-{
+int save_img_beansdb(memcached_st *memc, const char *key, const char *value, const size_t len) {
     int rst = -1;
-    if(memc == NULL)
+    if (memc == NULL)
         return rst;
 
     memcached_return rc;
 
     rc = memcached_set(memc, key, strlen(key), value, len, 0, 0);
 
-    if (rc == MEMCACHED_SUCCESS)
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Binary Beansdb Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
-    }
-    else
-    {
+    } else {
         LOG_PRINT(LOG_DEBUG, "Binary beansdb Set Key: [%s] Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
@@ -390,19 +356,16 @@ int save_img_beansdb(memcached_st *memc, const char *key, const char *value, con
  *
  * @return 1 for success and -1 for fail
  */
-int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, const size_t len)
-{
-    if(c == NULL)
+int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, const size_t len) {
+    if (c == NULL)
         return -1;
 
     redisReply *r = (redisReply*)redisCommand(c, "SET %s %b", cache_key, buff, len);
-    if( NULL == r)
-    {
+    if ( NULL == r) {
         LOG_PRINT(LOG_DEBUG, "Execut ssdb command failure");
         return -1;
     }
-    if( !(r->type == REDIS_REPLY_STATUS && strcasecmp(r->str,"OK") == 0))
-    {
+    if ( !(r->type == REDIS_REPLY_STATUS && strcasecmp(r->str, "OK") == 0)) {
         LOG_PRINT(LOG_DEBUG, "Failed to execute save [%s] to ssdb: %s", cache_key, r->str);
         freeReplyObject(r);
         return -1;
@@ -423,8 +386,7 @@ int save_img_ssdb(redisContext* c, const char *cache_key, const char *buff, cons
  *
  * @return 1 for OK, 2 for 404 not found and -1 for fail
  */
-int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t)
-{
+int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t) {
     int result = -1;
 
     LOG_PRINT(LOG_DEBUG, "admin_img_mode_db() start processing admin request...");
@@ -434,20 +396,18 @@ int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t
     LOG_PRINT(LOG_DEBUG, "original key: %s", cache_key);
 
     result = exist_db(thr_arg, cache_key);
-    if(result == -1)
+    if (result == -1)
         return 2;
 
-    if(t == 1)
-    {
-        if(del_db(thr_arg, cache_key) != -1)
-        {
+    if (t == 1) {
+        if (del_db(thr_arg, cache_key) != -1) {
             result = 1;
             evbuffer_add_printf(req->buffer_out,
-                "<html><body><h1>Admin Command Successful!</h1> \
+                                "<html><body><h1>Admin Command Successful!</h1> \
                 <p>MD5: %s</p> \
                 <p>Command Type: %d</p> \
                 </body></html>",
-                md5, t);
+                                md5, t);
             evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/html", 0, 0));
         }
     }
@@ -463,8 +423,7 @@ int admin_img_mode_db(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t
  *
  * @return 1 for OK and -1 for fail
  */
-int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
-{
+int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5) {
     int result = -1;
 
     LOG_PRINT(LOG_DEBUG, "info_img() start processing info request...");
@@ -474,8 +433,7 @@ int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     LOG_PRINT(LOG_DEBUG, "original key: %s", md5);
 
     size_t size = 0;
-    if(get_img_db(thr_arg, md5, &orig_buff, &size) == -1)
-    {
+    if (get_img_db(thr_arg, md5, &orig_buff, &size) == -1) {
         result = 0;
         LOG_PRINT(LOG_DEBUG, "Get image [%s] from backend db failed.", md5);
         goto err;
@@ -486,8 +444,7 @@ int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
 
     int ret = -1;
     ret = MagickReadImageBlob(im, (const unsigned char *)orig_buff, size);
-    if (ret != MagickTrue)
-    {
+    if (ret != MagickTrue) {
         LOG_PRINT(LOG_DEBUG, "Webimg Read Blob Failed!");
         goto err;
     }
@@ -496,7 +453,7 @@ int info_img_mode_db(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5)
     result = 1;
 
 err:
-    if(im != NULL)
+    if (im != NULL)
         DestroyMagickWand(im);
     free(orig_buff);
     return result;
@@ -510,24 +467,18 @@ err:
  *
  * @return 1 for OK and -1 for fail
  */
-int exist_db(thr_arg_t *thr_arg, const char *cache_key)
-{
+int exist_db(thr_arg_t *thr_arg, const char *cache_key) {
     int result = -1;
-    if(settings.mode == 2)
-    {
-        if(exist_beansdb(thr_arg->beansdb_conn, cache_key) == 1)
+    if (settings.mode == 2) {
+        if (exist_beansdb(thr_arg->beansdb_conn, cache_key) == 1)
             result = 1;
-        else
-        {
+        else {
             LOG_PRINT(LOG_DEBUG, "key: %s is not exist!", cache_key);
         }
-    }
-    else if(settings.mode == 3)
-    {
-        if(exist_ssdb(thr_arg->ssdb_conn, cache_key) == 1)
+    } else if (settings.mode == 3) {
+        if (exist_ssdb(thr_arg->ssdb_conn, cache_key) == 1)
             result = 1;
-        else
-        {
+        else {
             LOG_PRINT(LOG_DEBUG, "key: %s is not exist!", cache_key);
         }
     }
@@ -542,10 +493,9 @@ int exist_db(thr_arg_t *thr_arg, const char *cache_key)
  *
  * @return 1 for success and -1 for fail
  */
-int exist_beansdb(memcached_st *memc, const char *key)
-{
+int exist_beansdb(memcached_st *memc, const char *key) {
     int rst = -1;
-    if(memc == NULL)
+    if (memc == NULL)
         return rst;
 
     size_t valueLen;
@@ -554,14 +504,11 @@ int exist_beansdb(memcached_st *memc, const char *key)
 
     char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS)
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Exist.", key);
         free(value);
         rst = 1;
-    }
-    else
-    {
+    } else {
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
     }
@@ -577,15 +524,13 @@ int exist_beansdb(memcached_st *memc, const char *key)
  *
  * @return 1 for OK and -1 for fail
  */
-int exist_ssdb(redisContext* c, const char *cache_key)
-{
+int exist_ssdb(redisContext* c, const char *cache_key) {
     int rst = -1;
-    if(c == NULL)
+    if (c == NULL)
         return rst;
 
     redisReply *r = (redisReply*)redisCommand(c, "EXISTS %s", cache_key);
-    if (r && r->type != REDIS_REPLY_NIL && r->type == REDIS_REPLY_INTEGER && r->integer == 1)
-    {
+    if (r && r->type != REDIS_REPLY_NIL && r->type == REDIS_REPLY_INTEGER && r->integer == 1) {
         LOG_PRINT(LOG_DEBUG, "ssdb key %s exist %d", cache_key, r->integer);
         rst = 1;
     }
@@ -602,25 +547,17 @@ int exist_ssdb(redisContext* c, const char *cache_key)
  *
  * @return 1 for OK and -1 for fail
  */
-int del_db(thr_arg_t *thr_arg, const char *cache_key)
-{
+int del_db(thr_arg_t *thr_arg, const char *cache_key) {
     int result = -1;
-    if(settings.mode == 2)
-    {
-        if(del_beansdb(thr_arg->beansdb_conn, cache_key) == -1)
-        {
+    if (settings.mode == 2) {
+        if (del_beansdb(thr_arg->beansdb_conn, cache_key) == -1) {
             LOG_PRINT(LOG_DEBUG, "delete key: %s failed!", cache_key);
-        }
-        else
+        } else
             result = 1;
-    }
-    else if(settings.mode == 3)
-    {
-        if(del_ssdb(thr_arg->ssdb_conn, cache_key) == -1)
-        {
+    } else if (settings.mode == 3) {
+        if (del_ssdb(thr_arg->ssdb_conn, cache_key) == -1) {
             LOG_PRINT(LOG_DEBUG, "delete key: %s failed!", cache_key);
-        }
-        else
+        } else
             result = 1;
     }
     return result;
@@ -634,23 +571,19 @@ int del_db(thr_arg_t *thr_arg, const char *cache_key)
 *
 * @return 1 for success and -1 for fail.
 */
-int del_beansdb(memcached_st *memc, const char *key)
-{
+int del_beansdb(memcached_st *memc, const char *key) {
     int rst = -1;
-    if(memc == NULL)
+    if (memc == NULL)
         return rst;
 
     memcached_return rc;
 
     rc = memcached_delete(memc, key, strlen(key), 0);
 
-    if (rc == MEMCACHED_SUCCESS)
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Delete Successfully.", key);
         rst = 1;
-    }
-    else
-    {
+    } else {
         LOG_PRINT(LOG_DEBUG, "Beansdb Key[%s] Delete Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Beansdb Result: %s", str_rc);
@@ -668,15 +601,13 @@ int del_beansdb(memcached_st *memc, const char *key)
  *
  * @return 1 for OK and -1 for fail
  */
-int del_ssdb(redisContext* c, const char *cache_key)
-{
+int del_ssdb(redisContext* c, const char *cache_key) {
     int rst = -1;
-    if(c == NULL)
+    if (c == NULL)
         return rst;
 
     redisReply *r = (redisReply*)redisCommand(c, "DEL %s", cache_key);
-    if (r && r->type != REDIS_REPLY_NIL && r->type == REDIS_REPLY_INTEGER && r->integer == 1)
-    {
+    if (r && r->type != REDIS_REPLY_NIL && r->type == REDIS_REPLY_INTEGER && r->integer == 1) {
         LOG_PRINT(LOG_DEBUG, "ssdb key %s deleted %d", cache_key, r->integer);
         rst = 1;
     }

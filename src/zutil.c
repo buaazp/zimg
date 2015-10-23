@@ -63,8 +63,7 @@ int gen_key(char *key, char *md5, ...);
  *
  * @return the char position or 0
  */
-char * strnchr(const char *p, char c, size_t n)
-{
+char * strnchr(const char *p, char c, size_t n) {
     if (!p)
         return 0;
 
@@ -85,8 +84,7 @@ char * strnchr(const char *p, char c, size_t n)
  *
  * @return the position of sub string or NULL
  */
-char * strnstr(const char *s, const char *find, size_t slen)
-{
+char * strnstr(const char *s, const char *find, size_t slen) {
     char c, sc;
     size_t len;
 
@@ -110,9 +108,8 @@ char * strnstr(const char *s, const char *find, size_t slen)
  */
 size_t                          /* O - Length of string */
 str_lcat(char       *dst,       /* O - Destination string */
-        const char  *src,       /* I - Source string */
-        size_t      size)       /* I - Size of destination string buffer */
-{
+         const char  *src,       /* I - Source string */
+         size_t      size) {     /* I - Size of destination string buffer */
     size_t    srclen;           /* Length of source string */
     size_t    dstlen;           /* Length of destination string */
     /*
@@ -123,7 +120,7 @@ str_lcat(char       *dst,       /* O - Destination string */
     size   -= dstlen + 1;
 
     if (!size)
-      return (dstlen);          /* No room, return immediately... */
+        return (dstlen);          /* No room, return immediately... */
 
     /*
     * Figure out how much room is needed...
@@ -135,7 +132,7 @@ str_lcat(char       *dst,       /* O - Destination string */
     */
 
     if (srclen > size)
-      srclen = size;
+        srclen = size;
 
     memcpy(dst + dstlen, src, srclen);
     dst[dstlen + srclen] = '\0';
@@ -148,9 +145,8 @@ str_lcat(char       *dst,       /* O - Destination string */
  */
 size_t                              /* O - Length of string */
 str_lcpy(char           *dst,       /* O - Destination string */
-        const char      *src,       /* I - Source string */
-        size_t          size)       /* I - Size of destination string buffer */
-{
+         const char      *src,       /* I - Source string */
+         size_t          size) {     /* I - Size of destination string buffer */
     size_t    srclen;               /* Length of source string */
     /*
     * Figure out how much room is needed...
@@ -162,7 +158,7 @@ str_lcpy(char           *dst,       /* O - Destination string */
     * Copy the appropriate amount...
     */
     if (srclen > size)
-      srclen = size;
+        srclen = size;
 
     memcpy(dst, src, srclen);
     dst[srclen] = '\0';
@@ -177,23 +173,19 @@ str_lcpy(char           *dst,       /* O - Destination string */
  *
  * @return 1 for OK or -1 for binded
  */
-int bind_check(int port)
-{
+int bind_check(int port) {
     int mysocket, ret = -1;
     struct sockaddr_in my_addr;
-    if((mysocket = socket(AF_INET, SOCK_STREAM,0)) < 0)
-    {
+    if ((mysocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         return ret;
     }
-    bzero(&my_addr,sizeof(my_addr));
+    bzero(&my_addr, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
     my_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    if(connect(mysocket, (const struct sockaddr *)&my_addr, sizeof(my_addr)) < 0)
-    {
-        if(errno == ECONNREFUSED)
-        {
+    if (connect(mysocket, (const struct sockaddr *)&my_addr, sizeof(my_addr)) < 0) {
+        if (errno == ECONNREFUSED) {
             ret = 1;
         }
     }
@@ -206,8 +198,7 @@ int bind_check(int port)
  *
  * @return pid
  */
-pid_t gettid(void)
-{
+pid_t gettid(void) {
     return syscall(SYS_gettid);
 }
 
@@ -216,8 +207,7 @@ pid_t gettid(void)
  *
  * @return the cpu core number
  */
-int get_cpu_cores(void)
-{
+int get_cpu_cores(void) {
     return (int)sysconf(_SC_NPROCESSORS_CONF);
 }
 
@@ -229,16 +219,13 @@ int get_cpu_cores(void)
  *
  * @return 1 for success and -1 for fail.
  */
-int get_type(const char *filename, char *type)
-{
+int get_type(const char *filename, char *type) {
     char *flag, *tmp;
-    if((flag = strchr(filename, '.')) == 0)
-    {
+    if ((flag = strchr(filename, '.')) == 0) {
         LOG_PRINT(LOG_DEBUG, "FileName [%s] Has No '.' in It.", filename);
         return -1;
     }
-    while((tmp = strchr(flag + 1, '.')) != 0)
-    {
+    while ((tmp = strchr(flag + 1, '.')) != 0) {
         flag = tmp;
     }
     flag++;
@@ -253,16 +240,13 @@ int get_type(const char *filename, char *type)
  *
  * @return 1 for yes and -1 for no.
  */
-int is_file(const char *filename)
-{
+int is_file(const char *filename) {
     struct stat st;
-    if(stat(filename, &st)<0)
-    {
+    if (stat(filename, &st) < 0) {
         LOG_PRINT(LOG_DEBUG, "File[%s] is Not Existed!", filename);
         return -1;
     }
-    if(S_ISREG(st.st_mode))
-    {
+    if (S_ISREG(st.st_mode)) {
         LOG_PRINT(LOG_DEBUG, "File[%s] is A File.", filename);
         return 1;
     }
@@ -276,45 +260,37 @@ int is_file(const char *filename)
  *
  * @return  1 for success and 0 for fail.
  */
-int is_img(const char *filename)
-{
+int is_img(const char *filename) {
     int isimg = -1;
 
     lua_getglobal(settings.L, "is_img");
     lua_pushstring(settings.L, filename);
-    if(lua_pcall(settings.L, 1, 1, 0) != 0)
-    {
+    if (lua_pcall(settings.L, 1, 1, 0) != 0) {
         LOG_PRINT(LOG_WARNING, "lua is_img() failed!");
         return isimg;
     }
     isimg = (int)lua_tonumber(settings.L, -1);
     lua_pop(settings.L, 1);
 
-    /*
-    char *imgType[] = {"jpg", "jpeg", "png", "gif", "webp"};
-    char *lower= (char *)malloc(strlen(filename) + 1);
-    if(lower == NULL)
-    {
-        return -1;
-    }
-    char *tmp;
-    int i;
-    for(i = 0; i < strlen(filename); i++)
-    {
-        lower[i] = tolower(filename[i]);
-    }
-    lower[strlen(filename)] = '\0';
-    for(i = 0; i < 5; i++)
-    {
-        LOG_PRINT(LOG_DEBUG, "compare %s - %s.", lower, imgType[i]);
-        if((tmp = strstr(lower, imgType[i])) == lower)
-        {
-            isimg = 1;
-            break;
-        }
-    }
-    free(lower);
-    */
+    // char *imgType[] = {"jpg", "jpeg", "png", "gif", "webp"};
+    // char *lower = (char *)malloc(strlen(filename) + 1);
+    // if (lower == NULL) {
+    //     return -1;
+    // }
+    // char *tmp;
+    // int i;
+    // for (i = 0; i < strlen(filename); i++) {
+    //     lower[i] = tolower(filename[i]);
+    // }
+    // lower[strlen(filename)] = '\0';
+    // for (i = 0; i < 5; i++) {
+    //     LOG_PRINT(LOG_DEBUG, "compare %s - %s.", lower, imgType[i]);
+    //     if ((tmp = strstr(lower, imgType[i])) == lower) {
+    //         isimg = 1;
+    //         break;
+    //     }
+    // }
+    // free(lower);
     return isimg;
 }
 
@@ -325,20 +301,16 @@ int is_img(const char *filename)
  *
  * @return 1 for yes and -1 for no.
  */
-int is_dir(const char *path)
-{
+int is_dir(const char *path) {
     struct stat st;
-    if(stat(path, &st)<0)
-    {
+    if (stat(path, &st) < 0) {
         LOG_PRINT(LOG_DEBUG, "Path[%s] is Not Existed!", path);
         return -1;
     }
-    if(S_ISDIR(st.st_mode))
-    {
+    if (S_ISDIR(st.st_mode)) {
         LOG_PRINT(LOG_DEBUG, "Path[%s] is A Dir.", path);
         return 1;
-    }
-    else
+    } else
         return -1;
 }
 
@@ -349,9 +321,8 @@ int is_dir(const char *path)
  *
  * @return 1 for yes and -1 for not
  */
-int is_special_dir(const char *path)
-{
-    if(strcmp(path, ".") == 0 || strcmp(path, "..") == 0)
+int is_special_dir(const char *path) {
+    if (strcmp(path, ".") == 0 || strcmp(path, "..") == 0)
         return 1;
     else
         return -1;
@@ -364,10 +335,9 @@ int is_special_dir(const char *path)
  * @param file_name the file name
  * @param file_path the full path of the file
  */
-void get_file_path(const char *path, const char *file_name, char *file_path)
-{
+void get_file_path(const char *path, const char *file_name, char *file_path) {
     strcpy(file_path, path);
-    if(file_path[strlen(path) - 1] != '/')
+    if (file_path[strlen(path) - 1] != '/')
         str_lcat(file_path, "/", PATH_MAX_SIZE);
     str_lcat(file_path, file_name, PATH_MAX_SIZE);
 }
@@ -380,21 +350,16 @@ void get_file_path(const char *path, const char *file_name, char *file_path)
  *
  * @return  1 for success and -1 for fail.
  */
-int mk_dir(const char *path)
-{
-    if(access(path, 0) == -1)
-    {
+int mk_dir(const char *path) {
+    if (access(path, 0) == -1) {
         int status = mkdir(path, 0755);
-        if(status == -1)
-        {
+        if (status == -1) {
             LOG_PRINT(LOG_DEBUG, "mkdir[%s] Failed!", path);
             return -1;
         }
         LOG_PRINT(LOG_DEBUG, "mkdir[%s] sucessfully!", path);
         return 1;
-    }
-    else
-    {
+    } else {
         LOG_PRINT(LOG_DEBUG, "Path[%s] is Existed!", path);
         return -1;
     }
@@ -407,25 +372,20 @@ int mk_dir(const char *path)
  *
  * @return  1 for success and -1 for fail.
  */
-int mk_dirs(const char *dir)
-{
+int mk_dirs(const char *dir) {
     char tmp[256];
     str_lcpy(tmp, dir, sizeof(tmp));
     int i, len = strlen(tmp);
-    if(tmp[len-1] != '/')
+    if (tmp[len - 1] != '/')
         str_lcat(tmp, "/", sizeof(tmp));
 
     len = strlen(tmp);
 
-    for(i=1; i<len; i++)
-    {
-        if(tmp[i] == '/')
-        {
+    for (i = 1; i < len; i++) {
+        if (tmp[i] == '/') {
             tmp[i] = 0;
-            if(access(tmp, 0) != 0)
-            {
-                if(mkdir(tmp, 0755) == -1)
-                {
+            if (access(tmp, 0) != 0) {
+                if (mkdir(tmp, 0755) == -1) {
                     fprintf(stderr, "mk_dirs: tmp=%s\n", tmp);
                     return -1;
                 }
@@ -443,10 +403,9 @@ int mk_dirs(const char *dir)
  *
  * @return 1 for succ and -1 for fail
  */
-int mk_dirf(const char *filename)
-{
+int mk_dirf(const char *filename) {
     int ret = 1;
-    if(access(filename, 0) == 0)
+    if (access(filename, 0) == 0)
         return ret;
     size_t len = strlen(filename);
     char str[256];
@@ -454,13 +413,12 @@ int mk_dirf(const char *filename)
     str[len] = '\0';
     char *end = str;
     char *start = strchr(end, '/');
-    while(start){
+    while (start) {
         end = start + 1;
         start = strchr(end, '/');
     }
-    if(end != str)
-    {
-        str[end-str] = '\0';
+    if (end != str) {
+        str[end - str] = '\0';
         ret = mk_dirs(str);
     }
     return ret;
@@ -473,32 +431,28 @@ int mk_dirf(const char *filename)
  *
  * @return 1 for OK or -1 for fail
  */
-int delete_file(const char *path)
-{
+int delete_file(const char *path) {
     DIR *dir;
     struct dirent *dir_info;
     char file_path[PATH_MAX_SIZE];
     int ret = -1;
-    if(is_file(path) == 1)
-    {
+    if (is_file(path) == 1) {
         remove(path);
         ret = 1;
     }
-    if(is_dir(path) == 1)
-    {
-        if((dir = opendir(path)) == NULL)
+    if (is_dir(path) == 1) {
+        if ((dir = opendir(path)) == NULL)
             return ret;
         ret = 1;
-        while((dir_info = readdir(dir)) != NULL)
-        {
+        while ((dir_info = readdir(dir)) != NULL) {
             get_file_path(path, dir_info->d_name, file_path);
-            if(is_special_dir(dir_info->d_name) == 1)
+            if (is_special_dir(dir_info->d_name) == 1)
                 continue;
             ret = delete_file(file_path);
-            if(ret == -1)
+            if (ret == -1)
                 break;
         }
-        if(ret == 1)
+        if (ret == 1)
             ret = rmdir(path);
     }
     return ret;
@@ -511,14 +465,12 @@ int delete_file(const char *path)
  *
  * @return 1 for yes and -1 for no.
  */
-int is_md5(char *s)
-{
+int is_md5(char *s) {
     int rst = -1;
     int i = 0;
-    for (; (s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f') || (s[i] >='A' && s[i] <= 'F');++i)
-    {
+    for (; (s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f') || (s[i] >= 'A' && s[i] <= 'F'); ++i) {
     }
-    if(i == 32 && s[i] == '\0')
+    if (i == 32 && s[i] == '\0')
         rst = 1;
     return rst;
 }
@@ -531,33 +483,23 @@ int is_md5(char *s)
  *
  * @return The number in the string.
  */
-/*
-static int htoi(char s[])
-{
-    int i;
-    int n = 0;
-    if (s[0] == '0' && (s[1]=='x' || s[1]=='X'))
-    {
-        i = 2;
-    }
-    else
-    {
-        i = 0;
-    }
-    for (; (s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'z') || (s[i] >='A' && s[i] <= 'Z');++i)
-    {
-        if (s[i] > '9')
-        {
-            n = 16 * n + (10 + s[i] - 'a');
-        }
-        else
-        {
-            n = 16 * n + (s[i] - '0');
-        }
-    }
-    return n;
-}
-*/
+// static int htoi(char s[]) {
+//     int i;
+//     int n = 0;
+//     if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+//         i = 2;
+//     } else {
+//         i = 0;
+//     }
+//     for (; (s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z'); ++i) {
+//         if (s[i] > '9') {
+//             n = 16 * n + (10 + s[i] - 'a');
+//         } else {
+//             n = 16 * n + (s[i] - '0');
+//         }
+//     }
+//     return n;
+// }
 
 
 /**
@@ -567,8 +509,7 @@ static int htoi(char s[])
  *
  * @return The number less than 1024.
  */
-int str_hash(const char *str)
-{
+int str_hash(const char *str) {
     char c[4];
     str_lcpy(c, str, 4);
     //LOG_PRINT(LOG_DEBUG, "str = %s.", c);
@@ -591,19 +532,16 @@ int str_hash(const char *str)
  *
  * @return Generate result.
  */
-int gen_key(char *key, char *md5, ...)
-{
+int gen_key(char *key, char *md5, ...) {
     snprintf(key, CACHE_KEY_SIZE, "%s", md5);
     va_list arg_ptr;
     va_start(arg_ptr, md5);
     int argc = va_arg(arg_ptr, int);
     char tmp[CACHE_KEY_SIZE];
     //LOG_PRINT(LOG_DEBUG, "argc: %d", argc);
-    if(argc > 1)
-    {
+    if (argc > 1) {
         int i, argv;
-        for(i = 0; i<argc-1; i++)
-        {
+        for (i = 0; i < argc - 1; i++) {
             argv = va_arg(arg_ptr, int);
             snprintf(tmp, CACHE_KEY_SIZE, "%s:%d", key, argv);
             snprintf(key, CACHE_KEY_SIZE, "%s", tmp);

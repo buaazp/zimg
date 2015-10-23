@@ -72,8 +72,7 @@ extern const struct luaL_Reg loglib[];
  * @param argc the arg count
  * @param argv the args
  */
-void usage(int argc, char **argv)
-{
+void usage(int argc, char **argv) {
     printf("Usage:\n");
     printf("    %s [-d] /path/to/zimg.lua\n", argv[0]);
     printf("Options:\n");
@@ -83,8 +82,7 @@ void usage(int argc, char **argv)
 /**
  * @brief settings_init Init the setting with default values.
  */
-static void settings_init(void)
-{
+static void settings_init(void) {
     settings.L = NULL;
     settings.is_daemon = 0;
     str_lcpy(settings.ip, "0.0.0.0", sizeof(settings.ip));
@@ -135,16 +133,12 @@ static void settings_init(void)
     settings.cafile[0] = '\0';
 }
 
-static void set_callback(int mode)
-{
-    if(mode == 1)
-    {
+static void set_callback(int mode) {
+    if (mode == 1) {
         settings.get_img = get_img;
         settings.info_img = info_img;
         settings.admin_img = admin_img;
-    }
-    else
-    {
+    } else {
         settings.get_img = get_img_mode_db;
         settings.info_img = info_img_mode_db;
         settings.admin_img = admin_img_mode_db;
@@ -158,54 +152,58 @@ static void set_callback(int mode)
  *
  * @return 1 for OK and -1 for fail
  */
-static int load_conf(const char *conf)
-{
+static int load_conf(const char *conf) {
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    if (luaL_loadfile(L, conf) || lua_pcall(L, 0, 0, 0))
-    {
+    if (luaL_loadfile(L, conf) || lua_pcall(L, 0, 0, 0)) {
         lua_close(L);
         return -1;
     }
 
     lua_getglobal(L, "is_daemon"); //stack index: -12
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.is_daemon = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "ip");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.ip, lua_tostring(L, -1), sizeof(settings.ip));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "port");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.port = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "thread_num");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.num_threads = (int)lua_tonumber(L, -1);         /* N workers */
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "backlog_num");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.backlog = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "max_keepalives");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.max_keepalives = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "retry");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.retry = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "system");
-    if(lua_isstring(L, -1))
-    {
+    if (lua_isstring(L, -1)) {
         char tmp[128];
         snprintf(tmp, 128, "%s %s", settings.server_name, lua_tostring(L, -1));
         snprintf(settings.server_name, 128, "%s", tmp);
@@ -213,158 +211,179 @@ static int load_conf(const char *conf)
     lua_pop(L, 1);
 
     lua_getglobal(L, "headers");
-    if(lua_isstring(L, -1))
-    {
+    if (lua_isstring(L, -1)) {
         settings.headers = conf_get_headers(lua_tostring(L, -1));
     }
     lua_pop(L, 1);
 
     lua_getglobal(L, "etag");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.etag = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "upload_rule");
-    if(lua_isstring(L, -1))
-    {
+    if (lua_isstring(L, -1)) {
         settings.up_access = conf_get_rules(lua_tostring(L, -1));
     }
     lua_pop(L, 1);
 
     lua_getglobal(L, "download_rule");
-    if(lua_isstring(L, -1))
-    {
+    if (lua_isstring(L, -1)) {
         settings.down_access = conf_get_rules(lua_tostring(L, -1));
     }
     lua_pop(L, 1);
 
     lua_getglobal(L, "admin_rule");
-    if(lua_isstring(L, -1))
-    {
+    if (lua_isstring(L, -1)) {
         settings.admin_access = conf_get_rules(lua_tostring(L, -1));
     }
     lua_pop(L, 1);
 
     lua_getglobal(L, "cache");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.cache_on = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "mc_ip");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.cache_ip, lua_tostring(L, -1), sizeof(settings.cache_ip));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "mc_port");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.cache_port = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_level");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.log_level = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "log_name"); //stack index: -1
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.log_name, lua_tostring(L, -1), sizeof(settings.log_name));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "root_path");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.root_path, lua_tostring(L, -1), sizeof(settings.root_path));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "admin_path");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.admin_path, lua_tostring(L, -1), sizeof(settings.admin_path));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "disable_args");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.disable_args = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "disable_type");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.disable_type = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "disable_zoom_up");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.disable_zoom_up = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "script_name"); //stack index: -1
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.script_name, lua_tostring(L, -1), sizeof(settings.script_name));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "format");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.format, lua_tostring(L, -1), sizeof(settings.format));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "quality");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.quality = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "mode");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.mode = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     set_callback(settings.mode);
 
     lua_getglobal(L, "save_new");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.save_new = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "max_size");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.max_size = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "img_path");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.img_path, lua_tostring(L, -1), sizeof(settings.img_path));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "beansdb_ip");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.beansdb_ip, lua_tostring(L, -1), sizeof(settings.beansdb_ip));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "beansdb_port");
-    if(lua_isnumber(L, -1))
-        settings.beansdb_port= (int)lua_tonumber(L, -1);
+    if (lua_isnumber(L, -1)) {
+        settings.beansdb_port = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "ssdb_ip");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.ssdb_ip, lua_tostring(L, -1), sizeof(settings.ssdb_ip));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "ssdb_port");
-    if(lua_isnumber(L, -1))
+    if (lua_isnumber(L, -1)) {
         settings.ssdb_port = (int)lua_tonumber(L, -1);
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "pemfile");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.pemfile, lua_tostring(L, -1), sizeof(settings.pemfile));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "privfile");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.privfile, lua_tostring(L, -1), sizeof(settings.privfile));
+    }
     lua_pop(L, 1);
 
     lua_getglobal(L, "cafile");
-    if(lua_isstring(L, -1))
+    if (lua_isstring(L, -1)) {
         str_lcpy(settings.cafile, lua_tostring(L, -1), sizeof(settings.cafile));
+    }
     lua_pop(L, 1);
 
     settings.L = L;
@@ -379,8 +398,7 @@ static int load_conf(const char *conf)
  * @param siginfo signal info
  * @param arg the arg for handler
  */
-static void sighandler(int signal, siginfo_t *siginfo, void *arg)
-{
+static void sighandler(int signal, siginfo_t *siginfo, void *arg) {
     char msg[128];
     msg[0] = '\0';
     str_lcat(msg, "----/--/-- --:--:--:------ [INFO] signal Terminal received zimg shutting down", sizeof(msg));
@@ -400,8 +418,7 @@ static void sighandler(int signal, siginfo_t *siginfo, void *arg)
  * @param thread the current thread
  * @param arg the arg for init
  */
-void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
-{
+void init_thread(evhtp_t *htp, evthr_t *thread, void *arg) {
     thr_arg_t *thr_args;
     thr_args = calloc(1, sizeof(thr_arg_t));
     LOG_PRINT(LOG_DEBUG, "thr_args alloc");
@@ -409,8 +426,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 
     char mserver[32];
 
-    if(settings.cache_on == true)
-    {
+    if (settings.cache_on == true) {
         memcached_st *memc = memcached_create(NULL);
         snprintf(mserver, 32, "%s:%d", settings.cache_ip, settings.cache_port);
         memcached_server_st *servers = memcached_servers_parse(mserver);
@@ -422,12 +438,11 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         thr_args->cache_conn = memc;
         LOG_PRINT(LOG_DEBUG, "Memcached Connection Init Finished.");
         memcached_server_list_free(servers);
-    }
-    else
+    } else {
         thr_args->cache_conn = NULL;
+    }
 
-    if(settings.mode == 2)
-    {
+    if (settings.mode == 2) {
         thr_args->ssdb_conn = NULL;
         memcached_st *beans = memcached_create(NULL);
         snprintf(mserver, 32, "%s:%d", settings.beansdb_ip, settings.beansdb_port);
@@ -440,18 +455,13 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
         thr_args->beansdb_conn = beans;
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
         memcached_server_list_free(servers);
-    }
-    else if(settings.mode == 3)
-    {
+    } else if (settings.mode == 3) {
         thr_args->beansdb_conn = NULL;
         redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
-        if(c->err)
-        {
+        if (c->err) {
             redisFree(c);
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
-        }
-        else
-        {
+        } else {
             thr_args->ssdb_conn = c;
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
         }
@@ -459,8 +469,7 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
 
     thr_args->L = luaL_newstate();
     LOG_PRINT(LOG_DEBUG, "luaL_newstate alloc");
-    if(thr_args->L != NULL)
-    {
+    if (thr_args->L != NULL) {
         luaL_openlibs(thr_args->L);
         luaL_openlib(thr_args->L, "zimg", zimg_lib, 0);
         luaL_openlib(thr_args->L, "log", loglib, 0);
@@ -471,13 +480,11 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     evthr_set_aux(thread, thr_args);
 }
 
-static int dummy_ssl_verify_callback(int ok, X509_STORE_CTX * x509_store)
-{
+static int dummy_ssl_verify_callback(int ok, X509_STORE_CTX * x509_store) {
     return 1;
 }
 
-static int dummy_check_issued_cb(X509_STORE_CTX * ctx, X509 * x, X509 * issuer)
-{
+static int dummy_check_issued_cb(X509_STORE_CTX * ctx, X509 * x, X509 * issuer) {
     return 1;
 }
 
@@ -489,8 +496,7 @@ static int dummy_check_issued_cb(X509_STORE_CTX * ctx, X509 * x, X509 * issuer)
  *
  * @return It returns a int to system.
  */
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     /* Set signal handlers */
     sigset_t sigset;
     sigemptyset(&sigset);
@@ -502,8 +508,7 @@ int main(int argc, char **argv)
     sigaction(SIGINT, &siginfo, NULL);
     sigaction(SIGTERM, &siginfo, NULL);
 
-    if(argc < 2)
-    {
+    if (argc < 2) {
         usage(argc, argv);
         return -1;
     }
@@ -511,113 +516,92 @@ int main(int argc, char **argv)
     settings_init();
     const char *conf_file = NULL;
     int i;
-    for(i=1; i<argc; i++)
-    {
-        if(strcmp(argv[i], "-d") == 0){
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-d") == 0) {
             settings.is_daemon = 1;
-        }else{
+        } else {
             conf_file = argv[i];
         }
     }
 
-    if(conf_file == NULL)
-    {
+    if (conf_file == NULL) {
         usage(argc, argv);
         return -1;
     }
 
-    if(is_file(conf_file) == -1)
-    {
+    if (is_file(conf_file) == -1) {
         fprintf(stderr, "'%s' is not a file or not exists!\n", conf_file);
         return -1;
     }
 
-    if(load_conf(conf_file) == -1)
-    {
+    if (load_conf(conf_file) == -1) {
         fprintf(stderr, "'%s' load failed!\n", conf_file);
         return -1;
     }
 
-    if(bind_check(settings.port) == -1)
-    {
+    if (bind_check(settings.port) == -1) {
         fprintf(stderr, "Port %d bind failed!\n", settings.port);
         return -1;
     }
 
-    if(settings.script_name[0] != '\0')
-    {
-        if(is_file(settings.script_name) == -1)
-        {
+    if (settings.script_name[0] != '\0') {
+        if (is_file(settings.script_name) == -1) {
             fprintf(stderr, "%s open failed!\n", settings.script_name);
             return -1;
         }
         settings.script_on = 1;
     }
 
-    if(settings.pemfile[0] != '\0')
-    {
-        if(settings.privfile[0] == '\0')
-        {
+    if (settings.pemfile[0] != '\0') {
+        if (settings.privfile[0] == '\0') {
             fprintf(stderr, "ssl privfile not found!\n");
             return -1;
         }
-        if(settings.cafile[0] == '\0')
-        {
+        if (settings.cafile[0] == '\0') {
             fprintf(stderr, "ssl cafile not found!\n");
             return -1;
         }
-        if(is_file(settings.pemfile) == -1)
-        {
+        if (is_file(settings.pemfile) == -1) {
             fprintf(stderr, "ssl pemfile %s open failed!\n", settings.pemfile);
             return -1;
         }
-        if(is_file(settings.privfile) == -1)
-        {
+        if (is_file(settings.privfile) == -1) {
             fprintf(stderr, "ssl privfile %s open failed!\n", settings.privfile);
             return -1;
         }
-        if(is_file(settings.cafile) == -1)
-        {
+        if (is_file(settings.cafile) == -1) {
             fprintf(stderr, "ssl cafile %s open failed!\n", settings.cafile);
             return -1;
         }
     }
 
     //init the Path zimg need to use.
-    if(is_dir(settings.img_path) != 1)
-    {
-        if(mk_dirs(settings.img_path) != 1)
-        {
+    if (is_dir(settings.img_path) != 1) {
+        if (mk_dirs(settings.img_path) != 1) {
             fprintf(stderr, "%s Create Failed!\n", settings.img_path);
             return -1;
         }
     }
 
-    if(mk_dirf(settings.log_name) != 1)
-    {
+    if (mk_dirf(settings.log_name) != 1) {
         fprintf(stderr, "%s log path create failed!\n", settings.log_name);
         return -1;
     }
 
-    if(settings.is_daemon == 1)
-    {
-        if(daemon(1, 1) < 0)
-        {
+    if (settings.is_daemon == 1) {
+        if (daemon(1, 1) < 0) {
             fprintf(stderr, "Create daemon failed!\n");
             return -1;
-        }
-        else
-        {
+        } else {
             fprintf(stdout, "zimg %s\n", settings.version);
             fprintf(stdout, "Copyright (c) 2013-2014 zimg.buaa.us\n");
             fprintf(stderr, "\n");
         }
     }
     log_init();
-    LOG_PRINT(LOG_DEBUG,"Paths Init Finished.");
+    LOG_PRINT(LOG_DEBUG, "Paths Init Finished.");
 
-    if(settings.mode == 2)
-    {
+    if (settings.mode == 2) {
         LOG_PRINT(LOG_DEBUG, "Begin to Test Memcached Connection...");
         memcached_st *beans = memcached_create(NULL);
         char mserver[32];
@@ -630,31 +614,23 @@ int main(int argc, char **argv)
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_NO_BLOCK, 1);
         memcached_behavior_set(beans, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1);
         LOG_PRINT(LOG_DEBUG, "beansdb Connection Init Finished.");
-        if(set_cache(beans, "zimg", "1") == -1)
-        {
+        if (set_cache(beans, "zimg", "1") == -1) {
             LOG_PRINT(LOG_DEBUG, "Beansdb[%s] Connect Failed!", mserver);
             fprintf(stderr, "Beansdb[%s] Connect Failed!\n", mserver);
             memcached_free(beans);
             return -1;
-        }
-        else
-        {
+        } else {
             LOG_PRINT(LOG_DEBUG, "beansdb connected to: %s", mserver);
         }
         memcached_free(beans);
-    }
-    else if(settings.mode == 3)
-    {
+    } else if (settings.mode == 3) {
         redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
-        if(c->err)
-        {
+        if (c->err) {
             redisFree(c);
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
             fprintf(stderr, "SSDB[%s:%d] Connect Failed!\n", settings.ssdb_ip, settings.ssdb_port);
             return -1;
-        }
-        else
-        {
+        } else {
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
         }
     }
@@ -686,8 +662,7 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
     evhtp_set_gencb(htp, get_request_cb, NULL);
 
-    if(settings.pemfile[0] != '\0')
-    {
+    if (settings.pemfile[0] != '\0') {
         evhtp_ssl_cfg_t scfg = {
             .pemfile = settings.pemfile,
             .privfile = settings.privfile,

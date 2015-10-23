@@ -40,8 +40,7 @@ void free_access_conf(zimg_access_conf_t *cf);
  *
  * @return int
  */
-static int zimg_atoi(u_char *line, size_t n)
-{
+static int zimg_atoi(u_char *line, size_t n) {
     int value;
 
     if (n == 0) {
@@ -52,16 +51,13 @@ static int zimg_atoi(u_char *line, size_t n)
         if (*line < '0' || *line > '9') {
             return ZIMG_ERROR;
         }
-
         value = value * 10 + (*line - '0');
     }
 
     if (value < 0) {
         return ZIMG_ERROR;
-
-    } else {
-        return value;
     }
+    return value;
 }
 
 /**
@@ -73,17 +69,13 @@ static int zimg_atoi(u_char *line, size_t n)
  *
  * @return postion of char, NULL for not found
  */
-static u_char * zimg_strlchr(u_char *p, u_char *last, u_char c)
-{
+static u_char * zimg_strlchr(u_char *p, u_char *last, u_char c) {
     while (p < last) {
-
         if (*p == c) {
             return p;
         }
-
         p++;
     }
-
     return NULL;
 }
 
@@ -96,8 +88,7 @@ static u_char * zimg_strlchr(u_char *p, u_char *last, u_char c)
  *
  * @return in_addr_t
  */
-static in_addr_t zimg_inet_addr(u_char *text, size_t len)
-{
+static in_addr_t zimg_inet_addr(u_char *text, size_t len) {
     u_char *p, c;
     in_addr_t addr;
     uint octet, n;
@@ -107,9 +98,7 @@ static in_addr_t zimg_inet_addr(u_char *text, size_t len)
     n = 0;
 
     for (p = text; p < text + len; p++) {
-
         c = *p;
-
         if (c >= '0' && c <= '9') {
             octet = octet * 10 + (c - '0');
             continue;
@@ -139,8 +128,7 @@ static in_addr_t zimg_inet_addr(u_char *text, size_t len)
  *
  * @return 0 for succ and -1 for failed
  */
-static int stor(u_char *text, size_t text_len, zimg_rule_t *rule)
-{
+static int stor(u_char *text, size_t text_len, zimg_rule_t *rule) {
     u_char *addr, *mask, *last;
     size_t len;
     int shift;
@@ -153,7 +141,6 @@ static int stor(u_char *text, size_t text_len, zimg_rule_t *rule)
     rule->addr = zimg_inet_addr(addr, len);
 
     if (rule->addr != INADDR_NONE) {
-
         if (mask == NULL) {
             rule->mask = 0xffffffff;
             return ZIMG_OK;
@@ -196,31 +183,25 @@ static int stor(u_char *text, size_t text_len, zimg_rule_t *rule)
  *
  * @return zimg conf
  */
-zimg_access_conf_t * conf_get_rules(const char *acc_str)
-{
-    if(acc_str == NULL)
-        return NULL;
+zimg_access_conf_t * conf_get_rules(const char *acc_str) {
+    if (acc_str == NULL) return NULL;
     zimg_access_conf_t *acconf = (zimg_access_conf_t *)malloc(sizeof(zimg_access_conf_t));
-    if(acconf == NULL)
-        return NULL;
+    if (acconf == NULL) return NULL;
     acconf->n = 0;
     acconf->rules = NULL;
     size_t acc_len = strlen(acc_str);
     char *acc = (char *)malloc(acc_len);
-    if(acc == NULL)
-    {
+    if (acc == NULL) {
         return NULL;
     }
     strncpy(acc, acc_str, acc_len);
     char *start = acc, *end;
-    while(start <= acc+acc_len)
-    {
+    while (start <= acc + acc_len) {
         end = strchr(start, ';');
-        end = (end) ? end : acc+acc_len;
+        end = (end) ? end : acc + acc_len;
         char *mode = start;
         char *range = strchr(mode, ' ');
-        if (range)
-        {
+        if (range) {
             zimg_rule_t *this_rule = (zimg_rule_t *)malloc(sizeof(zimg_rule_t));
             if (this_rule == NULL) {
                 start = end + 1;
@@ -249,7 +230,7 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
                 continue;
             }
 
-            rules->value= this_rule;
+            rules->value = this_rule;
             rules->next = acconf->rules;
             acconf->rules = rules;
             acconf->n++;
@@ -269,18 +250,15 @@ zimg_access_conf_t * conf_get_rules(const char *acc_str)
  *
  * @return 0 for allow and -1 for forbidden
  */
-int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
-{
+int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr) {
     zimg_rules_t *rules = cf->rules;
-    if(rules == NULL)
-    {
+    if (rules == NULL) {
         LOG_PRINT(LOG_DEBUG, "rules nil");
         return ZIMG_OK;
     }
     LOG_PRINT(LOG_DEBUG, "rules: %p", rules);
 
-    while(rules)
-    {
+    while (rules) {
         LOG_PRINT(LOG_DEBUG, "addr: %d", addr);
         LOG_PRINT(LOG_DEBUG, "rules->value->addr: %d", rules->value->addr);
         LOG_PRINT(LOG_DEBUG, "rules->value->mask: %d", rules->value->mask);
@@ -303,13 +281,10 @@ int zimg_access_inet(zimg_access_conf_t *cf, in_addr_t addr)
  *
  * @param cf the conf to free
  */
-void free_access_conf(zimg_access_conf_t *cf)
-{
-    if(cf == NULL)
-        return;
+void free_access_conf(zimg_access_conf_t *cf) {
+    if (cf == NULL) return;
     zimg_rules_t *rules = cf->rules;
-    while(rules)
-    {
+    while (rules) {
         cf->rules = rules->next;
         free(rules->value);
         free(rules);
