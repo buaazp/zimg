@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us
  *
- *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2015, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *
  *   Use and distribution licensed under the BSD license.
@@ -162,11 +162,6 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows) {
 int convert(MagickWand **im, zimg_req_t *req) {
     int result = 1, ret = -1;
 
-    if (settings.disable_auto_orient == 0) {
-        ret = MagickAutoOrientImage(*im);
-        if (ret != MagickTrue) return -1;
-    }
-
     char *format = MagickGetImageFormat(*im);
     LOG_PRINT(LOG_DEBUG, "format: %s", format);
     if (strncmp(format, "GIF", 3) == 0) {
@@ -189,14 +184,14 @@ int convert(MagickWand **im, zimg_req_t *req) {
             return -1;
         }
         ret = PixelSetColor(background, "white");
-        LOG_PRINT(LOG_DEBUG, "pixelSetColor() ret = %d", ret);
+        LOG_PRINT(LOG_DEBUG, "pixel_set_color() ret = %d", ret);
         if (ret != MagickTrue) {
             DestroyPixelWand(background);
             MagickRelinquishMemory(format);
             return -1;
         }
         ret = MagickSetImageBackgroundColor(*im, background);
-        LOG_PRINT(LOG_DEBUG, "setBackgroudColor() ret = %d", ret);
+        LOG_PRINT(LOG_DEBUG, "set_backgroud_color() ret = %d", ret);
         DestroyPixelWand(background);
         if (ret != MagickTrue) {
             MagickRelinquishMemory(format);
@@ -209,18 +204,6 @@ int convert(MagickWand **im, zimg_req_t *req) {
         }
         DestroyMagickWand(*im);
         *im = pngim;
-    } else if (strncmp(format, "JPEG", 4) == 0) {
-        if (settings.disable_progressive == 0) {
-            LOG_PRINT(LOG_DEBUG, "convert to progressive jpeg");
-            // convert image to progressive jpeg
-            // progressive reduce jpeg size incidentally
-            // but convert elapsed time increase about 10%
-            ret = MagickSetInterlaceScheme(*im, PlaneInterlace);
-            if (ret != MagickTrue) {
-                MagickRelinquishMemory(format);
-                return -1;
-            }
-        }
     }
     MagickRelinquishMemory(format);
 
@@ -228,7 +211,8 @@ int convert(MagickWand **im, zimg_req_t *req) {
     if (!(cols == 0 && rows == 0)) {
         /* crop and scale */
         if (x == -1 && y == -1) {
-            LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
+            LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)",
+                      req->proportion, cols, rows);
             ret = proportion(*im, req->proportion, cols, rows);
             if (ret != MagickTrue) return -1;
         } else {
@@ -238,6 +222,22 @@ int convert(MagickWand **im, zimg_req_t *req) {
         }
     }
 
+    /* set gray */
+    if (req->gray == 1) {
+        LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
+        //several ways to grayscale an image:
+        //ret = MagickSetImageColorspace(*im, GRAYColorspace);
+        //ret = MagickQuantizeImage(*im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
+        //ret = MagickSeparateImageChannel(*im, GrayChannel);
+        ret = MagickSetImageType(*im, GrayscaleType);
+        LOG_PRINT(LOG_DEBUG, "gray() ret = %d", ret);
+        if (ret != MagickTrue) return -1;
+    }
+
+    if (settings.disable_auto_orient == 0) {
+        ret = MagickAutoOrientImage(*im);
+        if (ret != MagickTrue) return -1;
+    }
     /* rotate image */
     if (req->rotate != 0) {
         LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d)", req->rotate);
@@ -254,18 +254,6 @@ int convert(MagickWand **im, zimg_req_t *req) {
         if (ret != MagickTrue) return -1;
     }
 
-    /* set gray */
-    if (req->gray == 1) {
-        LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
-        //several ways to grayscale an image:
-        //ret = MagickSetImageColorspace(*im, GRAYColorspace);
-        //ret = MagickQuantizeImage(*im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
-        //ret = MagickSeparateImageChannel(*im, GrayChannel);
-        ret = MagickSetImageType(*im, GrayscaleType);
-        LOG_PRINT(LOG_DEBUG, "gray() ret = %d", ret);
-        if (ret != MagickTrue) return -1;
-    }
-
     /* set quality */
     // int quality = 100;
     // int im_quality = MagickGetImageCompressionQuality(*im);
@@ -277,7 +265,21 @@ int convert(MagickWand **im, zimg_req_t *req) {
     if (ret != MagickTrue) return -1;
 
     /* set format */
+    LOG_PRINT(LOG_DEBUG, "req->fmt: %s", req->fmt);
     if (strncmp(req->fmt, "none", 4) != 0) {
+        if (settings.disable_progressive == 0 &&
+                ((strncmp(req->fmt, "jpeg", 4) == 0) ||
+                 (strncmp(req->fmt, "jpg", 3) == 0))) {
+            LOG_PRINT(LOG_DEBUG, "convert to progressive jpeg");
+            // convert image to progressive jpeg
+            // progressive reduce jpeg size incidentally
+            // but convert elapsed time increase about 10%
+            ret = MagickSetInterlaceScheme(*im, PlaneInterlace);
+            if (ret != MagickTrue) {
+                MagickRelinquishMemory(format);
+                return -1;
+            }
+        }
         LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
         ret = MagickSetImageFormat(*im, req->fmt);
         if (ret != MagickTrue) return -1;
@@ -286,4 +288,3 @@ int convert(MagickWand **im, zimg_req_t *req) {
     LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);
     return result;
 }
-

@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us
  *
- *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2015, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *
  *   Use and distribution licensed under the BSD license.
@@ -934,8 +934,7 @@ void get_request_cb(evhtp_request_t *req, void *arg) {
             if (str_f) {
                 size_t fmt_len = strlen(str_f) + 1;
                 fmt = (char *)malloc(fmt_len);
-                if (fmt != NULL)
-                    str_lcpy(fmt, str_f, fmt_len);
+                if (fmt != NULL) str_lcpy(fmt, str_f, fmt_len);
                 LOG_PRINT(LOG_DEBUG, "fmt = %s", fmt);
             }
         }
@@ -971,7 +970,11 @@ void get_request_cb(evhtp_request_t *req, void *arg) {
     zimg_req -> y = y;
     zimg_req -> rotate = rotate;
     zimg_req -> quality = quality;
-    zimg_req -> fmt = (fmt != NULL ? fmt : settings.format);
+    char *req_fmt = (fmt != NULL ? fmt : settings.format);
+    for (int i = 0; req_fmt[i]; i++) {
+        req_fmt[i] = tolower(req_fmt[i]);
+    }
+    zimg_req -> fmt = req_fmt;
     zimg_req -> sv = sv;
     zimg_req -> thr_arg = thr_arg;
 

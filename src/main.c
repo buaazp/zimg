@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us
  *
- *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2015, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *
  *   Use and distribution licensed under the BSD license.
@@ -608,7 +608,7 @@ int main(int argc, char **argv) {
             return -1;
         } else {
             fprintf(stdout, "zimg %s\n", settings.version);
-            fprintf(stdout, "Copyright (c) 2013-2014 zimg.buaa.us\n");
+            fprintf(stdout, "Copyright (c) 2013-2015 zimg.buaa.us\n");
             fprintf(stderr, "\n");
         }
     }

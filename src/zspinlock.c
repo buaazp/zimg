@@ -2,7 +2,7 @@
  *   zimg - high performance image storage and processing system.
  *       http://zimg.buaa.us
  *
- *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
+ *   Copyright (c) 2013-2015, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
  *
  *   Use and distribution licensed under the BSD license.
