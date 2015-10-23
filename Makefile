@@ -1,23 +1,27 @@
 PREFIX=/usr/local/zimg
 PWP=$(shell pwd)
 
+libwebp=./deps/libwebp-0.4.3/src/.libs/libwebp.a
 libimagickwand=./deps/ImageMagick-6.9.1-10/wand/.libs/libMagickWand-6.Q8.a
 libluajit=./deps/LuaJIT-2.0.3/src/libluajit.a
-deps=$(libimagickwand) $(libluajit)
+deps=$(libwebp) $(libimagickwand) $(libluajit)
 
 all: $(deps)
 	mkdir -p build/zimg
-	cd build/zimg; cmake $(PWD)/src; make; cp zimg $(PWD)/bin
+	cd build/zimg; cmake $(PWD)/src; make -j 4; cp zimg $(PWD)/bin
 
 debug: $(deps)
 	mkdir -p build/zimg
 	cd build/zimg; cmake -DCMAKE_BUILD_TYPE=Debug $(PWD)/src; make; cp zimg $(PWD)/bin
 
+$(libwebp):
+	cd deps; tar zxvf libwebp-0.4.3.tar.gz; cd libwebp-0.4.3; ./configure --enable-shared=no --enable-static=yes; make -j 4
+
 $(libimagickwand):
-	cd deps; tar zxf ImageMagick.tar.gz; cd ImageMagick-6.9.1-10; ./configure --disable-dependency-tracking --disable-openmp --disable-shared --without-magick-plus-plus --without-fftw --without-fpx --without-djvu --without-fontconfig --without-freetype --without-gslib --without-gvc --without-jbig --without-lcms --without-openjp2 --without-lqr --without-lzma --without-openexr --without-pango --without-rsvg --without-tiff --without-bzlib --without-wmf --without-xml --without-dps --without-x --enable-delegate-build --with-quantum-depth=8; make -j 4
+	cd deps; tar zxf ImageMagick.tar.gz; cd ImageMagick-6.9.1-10; ./configure --disable-dependency-tracking --disable-openmp --disable-shared --without-magick-plus-plus --without-fftw --without-fpx --without-djvu --without-fontconfig --without-freetype --without-gslib --without-gvc --without-jbig --without-lcms --without-openjp2 --without-lqr --without-lzma --without-openexr --without-pango --without-rsvg --without-tiff --without-bzlib --without-wmf --without-xml --without-dps --without-x --enable-delegate-build --with-quantum-depth=8 "CFLAGS=-I$(PWD)/deps/libwebp-0.4.3/src" "LDFLAGS=-L$(PWD)/deps/libwebp-0.4.3/src/.libs -lwebp"; make -j 4
 
 $(libluajit):
-	cd deps; tar zxf LuaJIT-2.0.3.tar.gz; cd LuaJIT-2.0.3; make
+	cd deps; tar zxf LuaJIT-2.0.3.tar.gz; cd LuaJIT-2.0.3; make -j 4
 
 clean:
 	rm -rf build
@@ -26,5 +30,6 @@ clean:
 cleanall:
 	rm -rf build
 	rm -f bin/zimg
+	rm -rf deps/libwebp-0.4.3
 	rm -rf deps/ImageMagick-6.9.1-10
 	rm -rf deps/LuaJIT-2.0.3

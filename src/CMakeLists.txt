@@ -66,7 +66,7 @@ find_package (LibMemcached REQUIRED)
 find_package (JPEG REQUIRED)
 find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
-find_package (WEBP REQUIRED)
+#find_package (WebP REQUIRED)
 #find_package (ImageMagick COMPONENTS MagickCore REQUIRED)
 #find_package (ImageMagick COMPONENTS MagickWand REQUIRED)
 
@@ -83,6 +83,9 @@ if (NOT OPENSSL_FOUND)
     set (OPENSSL_LIBRARIES "")
     set (LIBEVENT_OPENSSL_LIBRARY "")
 endif()
+
+set (WEBP_INCLUDE_DIRS ${DEPS_SOURCE_DIR}/libwebp-0.4.3/src)
+set (WEBP_LIBRARIES ${DEPS_SOURCE_DIR}/libwebp-0.4.3/src/.libs/libwebp.a)
 
 set (ImageMagick_INCLUDE_DIRS ${DEPS_SOURCE_DIR}/ImageMagick-6.9.1-10)
 set (ImageMagick_MagickCore_LIBRARY ${DEPS_SOURCE_DIR}/ImageMagick-6.9.1-10/wand/.libs/libMagickWand-6.Q8.a)

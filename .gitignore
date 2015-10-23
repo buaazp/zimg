@@ -40,8 +40,9 @@ bin/conf/debug.lua
 bin/conf/ssl/
 build/
 
-#luaJIT headers
+# 3rd deps build files
 deps/LuaJIT-2.0.3/
+deps/libwebp-0.4.3/
 deps/ImageMagick-6.9.1-10/
 
 nbproject/
