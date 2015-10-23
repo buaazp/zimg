@@ -75,8 +75,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
                 cols = (uint32_t)round(((double)rows / im_rows) * im_cols);
             }
             LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
-            //ret = MagickScaleImage(im, cols, rows);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
         }
         else
         {
@@ -97,8 +96,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
                 x = (uint32_t)floor((s_cols - cols) / 2.0);
             }
             LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
-            ret = MagickResizeImage(im, s_cols, s_rows, UndefinedFilter, 1.0);
-            //ret = MagickScaleImage(im, s_cols, s_rows);
+            ret = MagickResizeImage(im, s_cols, s_rows, LanczosFilter, 0.8);
 
             LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
             ret = MagickCropImage(im, cols, rows, x, y);
@@ -120,23 +118,20 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
             rows = (uint32_t)round(im_rows * (double)rate / 100);
             cols = (uint32_t)round(im_cols * (double)rate / 100);
             LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
-            //ret = MagickScaleImage(im, cols, rows);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
         }
         else
         {
             rows = (uint32_t)round(im_rows * (double)rows / 100);
             cols = (uint32_t)round(im_cols * (double)cols / 100);
             LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
-            //ret = MagickScaleImage(im, cols, rows);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
         }
     }
     else if (p_type == 0)
     {
         LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d)", cols, rows);
-        ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
-        //ret = MagickScaleImage(im, cols, rows);
+        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
     }
     else if (p_type == 4)
     {
@@ -154,7 +149,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
         cols = (uint32_t)round(im_cols * rate);
         rows = (uint32_t)round(im_rows * rate);
         LOG_PRINT(LOG_DEBUG, "p=4, wi_scale(im, %d, %d)", cols, rows);
-        ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
+        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
     }
 
     return ret;
