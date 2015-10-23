@@ -108,6 +108,8 @@ static void settings_init(void) {
     settings.disable_args = 0;
     settings.disable_type = 0;
     settings.disable_zoom_up = 0;
+    settings.disable_auto_orient = 0;
+    settings.disable_progressive = 0;
     settings.script_on = 0;
     settings.script_name[0] = '\0';
     str_lcpy(settings.format, "none", sizeof(settings.format));
@@ -297,6 +299,18 @@ static int load_conf(const char *conf) {
     lua_getglobal(L, "disable_zoom_up");
     if (lua_isnumber(L, -1)) {
         settings.disable_zoom_up = (int)lua_tonumber(L, -1);
+    }
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "disable_auto_orient");
+    if (lua_isnumber(L, -1)) {
+        settings.disable_auto_orient = (int)lua_tonumber(L, -1);
+    }
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "disable_progressive");
+    if (lua_isnumber(L, -1)) {
+        settings.disable_progressive = (int)lua_tonumber(L, -1);
     }
     lua_pop(L, 1);
 
@@ -637,17 +651,15 @@ int main(int argc, char **argv) {
 
     //init magickwand
     MagickCoreGenesis((char *) NULL, MagickFalse);
-    /*
-    ExceptionInfo *exception=AcquireExceptionInfo();
-    MagickInfo *jpeg_info = (MagickInfo *)GetMagickInfo("JPEG", exception);
-    if(jpeg_info->thread_support != MagickTrue)
-        LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
-    jpeg_info->thread_support = MagickTrue;
-    if(jpeg_info->thread_support != MagickTrue)
-        LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
-    MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
-    jpg_info->thread_support = MagickTrue;
-    */
+    // ExceptionInfo *exception = AcquireExceptionInfo();
+    // MagickInfo *jpeg_info = (MagickInfo *)GetMagickInfo("JPEG", exception);
+    // if (jpeg_info->thread_support != MagickTrue)
+    //     LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
+    // jpeg_info->thread_support = MagickTrue;
+    // if (jpeg_info->thread_support != MagickTrue)
+    //     LOG_PRINT(LOG_DEBUG, "thread_support != MagickTrue");
+    // MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
+    // jpg_info->thread_support = MagickTrue;
 
     //begin to start httpd...
     LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");

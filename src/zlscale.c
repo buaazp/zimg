@@ -55,7 +55,7 @@ static int get_wi_format(lua_State *L) {
     char *format = MagickGetImageFormat(larg->img);
     LOG_PRINT(LOG_DEBUG, "get_wi_format: %s", format);
     lua_pushstring(L, format);
-    free(format);
+    MagickRelinquishMemory(format);
     return 1;
 }
 

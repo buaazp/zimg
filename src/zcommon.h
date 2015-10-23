@@ -93,6 +93,8 @@ struct setting {
     int disable_args;
     int disable_type;
     int disable_zoom_up;
+    int disable_auto_orient;
+    int disable_progressive;
     int script_on;
     char script_name[512];
     char format[16];

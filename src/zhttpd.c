@@ -343,6 +343,7 @@ void add_info(MagickWand *im, evhtp_request_t *req) {
     cJSON_Delete(j_ret);
     free(ret_str_unformat);
     free(format);
+    MagickRelinquishMemory(format);
 }
 
 /**

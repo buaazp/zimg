@@ -162,17 +162,20 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows) {
 int convert(MagickWand **im, zimg_req_t *req) {
     int result = 1, ret = -1;
 
-    ret = MagickAutoOrientImage(*im);
-    if (ret != MagickTrue) return -1;
+    if (settings.disable_auto_orient == 0) {
+        ret = MagickAutoOrientImage(*im);
+        if (ret != MagickTrue) return -1;
+    }
 
     char *format = MagickGetImageFormat(*im);
+    LOG_PRINT(LOG_DEBUG, "format: %s", format);
     if (strncmp(format, "GIF", 3) == 0) {
         // Composites a set of images while respecting any page
         // offsets and disposal methods
         LOG_PRINT(LOG_DEBUG, "coalesce_images()");
         MagickWand *gifim = MagickCoalesceImages(*im);
         if (gifim == NULL) {
-            free(format);
+            MagickRelinquishMemory(format);
             return -1;
         }
         DestroyMagickWand(*im);
@@ -182,32 +185,44 @@ int convert(MagickWand **im, zimg_req_t *req) {
         LOG_PRINT(LOG_DEBUG, "wi_set_background_color()");
         PixelWand *background = NewPixelWand();
         if (background == NULL) {
-            free(format);
+            MagickRelinquishMemory(format);
             return -1;
         }
         ret = PixelSetColor(background, "white");
         LOG_PRINT(LOG_DEBUG, "pixelSetColor() ret = %d", ret);
         if (ret != MagickTrue) {
             DestroyPixelWand(background);
-            free(format);
+            MagickRelinquishMemory(format);
             return -1;
         }
         ret = MagickSetImageBackgroundColor(*im, background);
         LOG_PRINT(LOG_DEBUG, "setBackgroudColor() ret = %d", ret);
         DestroyPixelWand(background);
         if (ret != MagickTrue) {
-            free(format);
+            MagickRelinquishMemory(format);
             return -1;
         }
         MagickWand *pngim = MagickMergeImageLayers(*im, FlattenLayer);
         if (pngim == NULL) {
-            free(format);
+            MagickRelinquishMemory(format);
             return -1;
         }
         DestroyMagickWand(*im);
         *im = pngim;
+    } else if (strncmp(format, "JPEG", 4) == 0) {
+        if (settings.disable_progressive == 0) {
+            LOG_PRINT(LOG_DEBUG, "convert to progressive jpeg");
+            // convert image to progressive jpeg
+            // progressive reduce jpeg size incidentally
+            // but convert elapsed time increase about 10%
+            ret = MagickSetInterlaceScheme(*im, PlaneInterlace);
+            if (ret != MagickTrue) {
+                MagickRelinquishMemory(format);
+                return -1;
+            }
+        }
     }
-    free(format);
+    MagickRelinquishMemory(format);
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (!(cols == 0 && rows == 0)) {
@@ -252,13 +267,11 @@ int convert(MagickWand **im, zimg_req_t *req) {
     }
 
     /* set quality */
-    /*
-    int quality = 100;
-    int im_quality = MagickGetImageCompressionQuality(*im);
-    im_quality = (im_quality == 0 ? 100 : im_quality);
-    LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
-    quality = req->quality < im_quality ? req->quality : im_quality;
-    */
+    // int quality = 100;
+    // int im_quality = MagickGetImageCompressionQuality(*im);
+    // im_quality = (im_quality == 0 ? 100 : im_quality);
+    // LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
+    // quality = req->quality < im_quality ? req->quality : im_quality;
     LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
     ret = MagickSetImageCompressionQuality(*im, req->quality);
     if (ret != MagickTrue) return -1;
