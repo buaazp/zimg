@@ -63,11 +63,12 @@ else()
 endif()
 
 find_package (LibMemcached REQUIRED)
-#find_package (JPEG REQUIRED)
-#find_package (GIF REQUIRED)
-#find_package (PNG REQUIRED)
-find_package (ImageMagick COMPONENTS MagickCore REQUIRED)
-find_package (ImageMagick COMPONENTS MagickWand REQUIRED)
+find_package (JPEG REQUIRED)
+find_package (GIF REQUIRED)
+find_package (PNG REQUIRED)
+find_package (WEBP REQUIRED)
+#find_package (ImageMagick COMPONENTS MagickCore REQUIRED)
+#find_package (ImageMagick COMPONENTS MagickWand REQUIRED)
 
 set (DEPS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../deps")
 
@@ -83,6 +84,10 @@ if (NOT OPENSSL_FOUND)
     set (LIBEVENT_OPENSSL_LIBRARY "")
 endif()
 
+set (ImageMagick_INCLUDE_DIRS ${DEPS_SOURCE_DIR}/ImageMagick-6.9.1-10)
+set (ImageMagick_MagickCore_LIBRARY ${DEPS_SOURCE_DIR}/ImageMagick-6.9.1-10/wand/.libs/libMagickWand-6.Q8.a)
+set (ImageMagick_MagickWand_LIBRARY ${DEPS_SOURCE_DIR}/ImageMagick-6.9.1-10/magick/.libs/libMagickCore-6.Q8.a)
+
 set (LUAJIT_INCLUDE_DIR ${DEPS_SOURCE_DIR}/LuaJIT-2.0.3/src)
 set (LUAJIT_LIBRARIES ${DEPS_SOURCE_DIR}/LuaJIT-2.0.3/src/libluajit.a)
 
@@ -91,9 +96,10 @@ include_directories(
     ${LIBEVENT_INCLUDE_DIR}
     ${LIBMEMCACHED_INCLUDE_DIRS}
     ${LUAJIT_INCLUDE_DIR}
-    #${JPEG_INCLUDE_DIRS}
-    #${GIF_INCLUDE_DIRS}
-    #${PNG_INCLUDE_DIRS}
+    ${JPEG_INCLUDE_DIRS}
+    ${GIF_INCLUDE_DIRS}
+    ${PNG_INCLUDE_DIRS}
+    ${WEBP_INCLUDE_DIRS}
     ${ImageMagick_INCLUDE_DIRS}
 )
 
@@ -104,11 +110,10 @@ set (ZIMG_EXTERNAL_LIBS
     ${LIBEVENT_OPENSSL_LIBRARY}
     ${LIBMEMCACHED_LIBRARIES}
     ${LUAJIT_LIBRARIES}
-    #${JPEG_LIBRARIES}
-    #${GIF_LIBRARIES}
-    #${PNG_LIBRARIES}
-    #${MAGICK_LIBRARIES}
-    #${MAGICKWAND_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${GIF_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${WEBP_LIBRARIES}
     ${ImageMagick_MagickCore_LIBRARY}
     ${ImageMagick_MagickWand_LIBRARY}
     "m"

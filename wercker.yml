@@ -31,8 +31,7 @@ build:
         name: apt-get install
         code: |
             sudo apt-get install -y build-essential
-            sudo apt-get install -y openssl cmake libevent-dev libjpeg-dev libgif-dev libpng-dev libwebp-dev libmagickwand-dev libmemcached-dev libssl-dev
-
+            sudo apt-get install -y openssl libssl-dev cmake libevent-dev libjpeg-dev libgif-dev libpng-dev libwebp-dev libmemcached-dev
     # Build the program
     - script:
         name: make
