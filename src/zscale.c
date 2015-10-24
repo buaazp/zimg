@@ -97,14 +97,19 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows) {
             int rate = cols > 0 ? cols : rows;
             rows = (uint32_t)round(im_rows * (double)rate / 100);
             cols = (uint32_t)round(im_cols * (double)rate / 100);
-            LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
         } else {
             rows = (uint32_t)round(im_rows * (double)rows / 100);
             cols = (uint32_t)round(im_cols * (double)cols / 100);
-            LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
         }
+        if ((settings.max_pixel > 0) &&
+                (rows > settings.max_pixel ||
+                 cols > settings.max_pixel)) {
+            LOG_PRINT(LOG_ERROR, "p=3, resize(%d, %d) max_pixel: %d",
+                      cols, rows, settings.max_pixel);
+            return -1;
+        }
+        LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
+        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
     } else if (p_type == 0) {
         LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d)", cols, rows);
         ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
@@ -137,7 +142,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows) {
  *
  * @return 0 for OK and -1 for fail
  */
-static int crop(MagickWand *im, int x, int y, int cols, int rows) {
+static int crop(MagickWand * im, int x, int y, int cols, int rows) {
     int ret = -1;
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
