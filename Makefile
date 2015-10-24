@@ -16,7 +16,7 @@ debug: $(deps)
 	cd build/zimg; cmake -DCMAKE_BUILD_TYPE=Debug $(PWD)/src; make; cp zimg $(PWD)/bin
 
 $(libjpeg-turbo):
-	cd deps; tar zxvf libjpeg-turbo-1.4.2.tar.gz; cd libjpeg-turbo-1.4.2; ./configure --enable-shared=no --enable-static=yes; make -j 4
+	cd deps; tar zxvf libjpeg-turbo-1.4.2.tar.gz; cd libjpeg-turbo-1.4.2; autoreconf -fiv; ./configure --enable-shared=no --enable-static=yes; make -j 4
 
 $(libwebp):
 	cd deps; tar zxvf libwebp-0.4.3.tar.gz; cd libwebp-0.4.3; ./configure --enable-shared=no --enable-static=yes --with-jpegincludedir=$(PWD)/deps/libjpeg-turbo-1.4.2 --with-jpeglibdir=$(PWD)/deps/libjpeg-turbo-1.4.2/.libs; make -j 4

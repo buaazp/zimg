@@ -9,7 +9,7 @@ branches:
 before_install:
     - sudo apt-get update -qq
 install:
-    - sudo apt-get install -y openssl libssl-dev cmake libevent-dev libjpeg-dev libgif-dev libpng-dev libmemcached-dev
+    - sudo apt-get install -y nasm openssl libssl-dev cmake libevent-dev libgif-dev libpng-dev libmemcached-dev
 script:
     - make
     - cd bin
