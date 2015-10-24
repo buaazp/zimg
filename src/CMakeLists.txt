@@ -63,7 +63,7 @@ else()
 endif()
 
 find_package (LibMemcached REQUIRED)
-find_package (JPEG REQUIRED)
+#find_package (JPEG REQUIRED)
 find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
 #find_package (WebP REQUIRED)
@@ -80,6 +80,9 @@ if (NOT OPENSSL_FOUND)
     set (OPENSSL_LIBRARIES "")
     set (LIBEVENT_OPENSSL_LIBRARY "")
 endif()
+
+set (JPEG_INCLUDE_DIRS ${DEPS_SOURCE_DIR}/libjpeg-turbo-1.4.2)
+set (JPEG_LIBRARIES ${DEPS_SOURCE_DIR}/libjpeg-turbo-1.4.2/.libs/libjpeg.a)
 
 set (WEBP_INCLUDE_DIRS ${DEPS_SOURCE_DIR}/libwebp-0.4.3/src)
 set (WEBP_LIBRARIES ${DEPS_SOURCE_DIR}/libwebp-0.4.3/src/.libs/libwebp.a)
@@ -112,10 +115,10 @@ set (ZIMG_EXTERNAL_LIBS
     ${ImageMagick_MagickCore_LIBRARY}
     ${ImageMagick_MagickWand_LIBRARY}
     ${LUAJIT_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${GIF_LIBRARIES}
-    ${PNG_LIBRARIES}
     ${WEBP_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${GIF_LIBRARIES}
+    ${JPEG_LIBRARIES}
     "m"
     "z"
     "dl"
