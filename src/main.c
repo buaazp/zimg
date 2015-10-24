@@ -110,6 +110,7 @@ static void settings_init(void) {
     settings.disable_zoom_up = 0;
     settings.disable_auto_orient = 0;
     settings.disable_progressive = 0;
+    settings.max_pixel = 0;
     settings.script_on = 0;
     settings.script_name[0] = '\0';
     str_lcpy(settings.format, "none", sizeof(settings.format));
@@ -311,6 +312,12 @@ static int load_conf(const char *conf) {
     lua_getglobal(L, "disable_progressive");
     if (lua_isnumber(L, -1)) {
         settings.disable_progressive = (int)lua_tonumber(L, -1);
+    }
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "max_pixel");
+    if (lua_isnumber(L, -1)) {
+        settings.max_pixel = (int)lua_tonumber(L, -1);
     }
     lua_pop(L, 1);
 

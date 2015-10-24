@@ -73,6 +73,9 @@ disable_zoom_up     = 0
 disable_auto_orient = 0
 --禁用progressive jpeg
 disable_progressive = 0
+--max pixel for w and h in args
+--允许返回的最大尺寸，超过将返回错误
+max_pixel           = 2000
 --lua process script
 --lua脚本文件路径
 script_name         = pwd .. '/script/process.lua'

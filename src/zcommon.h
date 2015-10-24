@@ -95,6 +95,7 @@ struct setting {
     int disable_zoom_up;
     int disable_auto_orient;
     int disable_progressive;
+    int max_pixel;
     int script_on;
     char script_name[512];
     char format[16];

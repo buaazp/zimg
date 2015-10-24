@@ -908,6 +908,13 @@ void get_request_cb(evhtp_request_t *req, void *arg) {
             const char *str_h = evhtp_kv_find(params, "h");
             width = (str_w) ? atoi(str_w) : 0;
             height = (str_h) ? atoi(str_h) : 0;
+            if (settings.max_pixel > 0) {
+                if (width > settings.max_pixel || height > settings.max_pixel) {
+                    LOG_PRINT(LOG_INFO, "%s fail pic:%s w:%d h:%d max_pixel: %d",
+                              address, md5, width, height, settings.max_pixel);
+                    goto err;
+                }
+            }
 
             const char *str_p = evhtp_kv_find(params, "p");
             proportion = (str_p) ? atoi(str_p) : 1;
