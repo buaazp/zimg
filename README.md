@@ -11,6 +11,7 @@ Contact me: zp@buaa.us
 [![Build Status](https://travis-ci.org/buaazp/zimg.svg?branch=master)](https://travis-ci.org/buaazp/zimg) [![wercker status](https://app.wercker.com/status/88aead2017ceb80b32fad3dc8997227a/s "wercker status")](https://app.wercker.com/project/bykey/88aead2017ceb80b32fad3dc8997227a) [![Join the chat at https://gitter.im/buaazp/zimg](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/buaazp/zimg?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### Versions:
+- 10/24/2015 - zimg 3.2.0 Release. Support HTTPS and easy build.
 - 09/09/2014 - zimg 3.1.0 Release. New generation.
 - 04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.
 - 08/01/2013 - zimg 1.0.0 Release.

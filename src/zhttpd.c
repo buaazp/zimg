@@ -342,7 +342,6 @@ void add_info(MagickWand *im, evhtp_request_t *req) {
     evbuffer_add_printf(req->buffer_out, "%s", ret_str_unformat);
     cJSON_Delete(j_ret);
     free(ret_str_unformat);
-    free(format);
     MagickRelinquishMemory(format);
 }
 
