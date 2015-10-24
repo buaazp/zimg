@@ -13,4 +13,5 @@ install:
 script:
     - make
     - cd bin
+    - ldd zimg
     - ./zimg conf/zimg.lua

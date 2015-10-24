@@ -30,7 +30,7 @@ build:
     - script:
         name: apt-get install
         code: |
-            sudo apt-get install -y build-essential
+            sudo apt-get install -y build-essential pkg-config
             sudo apt-get install -y nasm openssl libssl-dev cmake libevent-dev libgif-dev libpng-dev libmemcached-dev
     # Build the program
     - script:
@@ -50,6 +50,7 @@ build:
         name: check
         code: |
           cd bin
+          ldd zimg
           ls -l
           ps aux|grep zimg
 
