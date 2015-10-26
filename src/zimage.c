@@ -11,26 +11,20 @@
  */
 
 /**
- * @file zscale.c
- * @brief scale image functions by graphicsmagick.
+ * @file zimage.c
+ * @brief Image convert interface.
  * @author 招牌疯子 zp@buaa.us
  * @version 3.2.0
  * @date 2015-10-24
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <string.h>
-#include <wand/magick_wand.h>
+#include "zrestful.h"
+#include "zimage.h"
 #include "zlog.h"
-#include "zcommon.h"
-#include "zscale.h"
 
 static int proportion(MagickWand *im, int p_type, int cols, int rows);
 static int crop(MagickWand *im, int x, int y, int cols, int rows);
-int convert(MagickWand **im, zimg_req_t *req);
+int convert2(zreq_t *zreq);
 
 /**
  * @brief proportion proportion function
@@ -43,7 +37,7 @@ int convert(MagickWand **im, zimg_req_t *req);
  * @return 0 for OK and -1 for fail
  */
 static int proportion(MagickWand *im, int p_type, int cols, int rows) {
-    int ret = -1;
+    MagickBooleanType ret = MagickFalse;
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
@@ -106,7 +100,7 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows) {
                  cols > settings.max_pixel)) {
             LOG_PRINT(LOG_ERROR, "p=3, resize(%d, %d) max_pixel: %d",
                       cols, rows, settings.max_pixel);
-            return -1;
+            return api_err_pixel_over;
         }
         LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
         ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
@@ -128,7 +122,10 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows) {
         ret = MagickResizeImage(im, cols, rows, LanczosFilter, 0.8);
     }
 
-    return ret;
+    if (ret != MagickTrue) {
+        return api_err_imagick;
+    }
+    return api_ok;
 }
 
 /**
@@ -143,154 +140,189 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows) {
  * @return 0 for OK and -1 for fail
  */
 static int crop(MagickWand * im, int x, int y, int cols, int rows) {
-    int ret = -1;
+    MagickBooleanType ret = MagickFalse;
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
     if (x < 0) x = 0;
     if (y < 0) y = 0;
-    if (x >= im_cols || y >= im_rows) return -1;
+    if (x >= im_cols || y >= im_rows) return api_err_pixel_over;
     if (cols == 0 || im_cols < x + cols) cols = im_cols - x;
     if (rows == 0 || im_rows < y + rows) rows = im_rows - y;
     LOG_PRINT(LOG_DEBUG, "wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
     ret = MagickCropImage(im, cols, rows, x, y);
-    return ret;
+    if (ret != MagickTrue) {
+        return api_err_imagick;
+    }
+    return api_ok;
 }
 
-/**
- * @brief convert convert image function
- *
- * @param im the image
- * @param req the zimg request
- *
- * @return 1 for OK and -1 for fail
- */
-int convert(MagickWand **im, zimg_req_t *req) {
-    int result = 1, ret = -1;
+int convert2(zreq_t *zreq) {
+    MagickWand *im = NewMagickWand();
+    if (im == NULL) return api_err_imagick;
 
-    char *format = MagickGetImageFormat(*im);
+    MagickBooleanType ret = MagickReadImageBlob(im,
+                            (const unsigned char *)zreq->buff_in->buff,
+                            zreq->buff_in->len);
+    if (ret != MagickTrue) {
+        LOG_PRINT(LOG_ERROR, "%s magick read image blob failed", zreq->md5);
+        DestroyMagickWand(im);
+        return api_err_imagick;
+    }
+
+    char *format = MagickGetImageFormat(im);
     LOG_PRINT(LOG_DEBUG, "format: %s", format);
     if (strncmp(format, "GIF", 3) == 0) {
         // Composites a set of images while respecting any page
         // offsets and disposal methods
         LOG_PRINT(LOG_DEBUG, "coalesce_images()");
-        MagickWand *gifim = MagickCoalesceImages(*im);
+        MagickWand *gifim = MagickCoalesceImages(im);
         if (gifim == NULL) {
             MagickRelinquishMemory(format);
-            return -1;
+            DestroyMagickWand(im);
+            return api_err_imagick;
         }
-        DestroyMagickWand(*im);
-        *im = gifim;
+        DestroyMagickWand(im);
+        im = gifim;
     } else if (strncmp(format, "PNG", 3) == 0) {
         // convert transparent to white background
         LOG_PRINT(LOG_DEBUG, "wi_set_background_color()");
         PixelWand *background = NewPixelWand();
         if (background == NULL) {
             MagickRelinquishMemory(format);
-            return -1;
+            DestroyMagickWand(im);
+            return api_err_imagick;
         }
         ret = PixelSetColor(background, "white");
         LOG_PRINT(LOG_DEBUG, "pixel_set_color() ret = %d", ret);
         if (ret != MagickTrue) {
             DestroyPixelWand(background);
             MagickRelinquishMemory(format);
-            return -1;
+            DestroyMagickWand(im);
+            return api_err_imagick;
         }
-        ret = MagickSetImageBackgroundColor(*im, background);
+        ret = MagickSetImageBackgroundColor(im, background);
         LOG_PRINT(LOG_DEBUG, "set_backgroud_color() ret = %d", ret);
         DestroyPixelWand(background);
         if (ret != MagickTrue) {
             MagickRelinquishMemory(format);
-            return -1;
+            DestroyMagickWand(im);
+            return api_err_imagick;
         }
-        MagickWand *pngim = MagickMergeImageLayers(*im, FlattenLayer);
+        MagickWand *pngim = MagickMergeImageLayers(im, FlattenLayer);
         if (pngim == NULL) {
             MagickRelinquishMemory(format);
-            return -1;
+            DestroyMagickWand(im);
+            return api_err_imagick;
         }
-        DestroyMagickWand(*im);
-        *im = pngim;
+        DestroyMagickWand(im);
+        im = pngim;
     }
     MagickRelinquishMemory(format);
 
-    int x = req->x, y = req->y, cols = req->width, rows = req->height;
+    int x = zreq->x, y = zreq->y, cols = zreq->width, rows = zreq->height;
     if (!(cols == 0 && rows == 0)) {
         /* crop and scale */
         if (x == -1 && y == -1) {
             LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)",
-                      req->proportion, cols, rows);
-            ret = proportion(*im, req->proportion, cols, rows);
-            if (ret != MagickTrue) return -1;
+                      zreq->proportion, cols, rows);
+            int ecode = proportion(im, zreq->proportion, cols, rows);
+            if (ecode != api_ok) {
+                DestroyMagickWand(im);
+                return ecode;
+            }
         } else {
             LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
-            ret = crop(*im, x, y, cols, rows);
-            if (ret != MagickTrue) return -1;
+            int ecode = crop(im, x, y, cols, rows);
+            if (ecode != api_ok) {
+                DestroyMagickWand(im);
+                return ecode;
+            }
         }
     }
 
     /* set gray */
-    if (req->gray == 1) {
+    if (zreq->gray == 1) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
         //several ways to grayscale an image:
-        //ret = MagickSetImageColorspace(*im, GRAYColorspace);
-        //ret = MagickQuantizeImage(*im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
-        //ret = MagickSeparateImageChannel(*im, GrayChannel);
-        ret = MagickSetImageType(*im, GrayscaleType);
+        //ret = MagickSetImageColorspace(im, GRAYColorspace);
+        //ret = MagickQuantizeImage(im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
+        //ret = MagickSeparateImageChannel(im, GrayChannel);
+        ret = MagickSetImageType(im, GrayscaleType);
         LOG_PRINT(LOG_DEBUG, "gray() ret = %d", ret);
-        if (ret != MagickTrue) return -1;
+        if (ret != MagickTrue) {
+            DestroyMagickWand(im);
+            return api_err_imagick;
+        }
     }
 
     if (settings.disable_auto_orient == 0) {
-        ret = MagickAutoOrientImage(*im);
-        if (ret != MagickTrue) return -1;
+        ret = MagickAutoOrientImage(im);
+        if (ret != MagickTrue) {
+            DestroyMagickWand(im);
+            return api_err_imagick;
+        }
     }
     /* rotate image */
-    if (req->rotate != 0) {
-        LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d)", req->rotate);
+    if (zreq->rotate != 0) {
+        LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d)", zreq->rotate);
         PixelWand *background = NewPixelWand();
-        if (background == NULL) return -1;
+        if (background == NULL) {
+            DestroyMagickWand(im);
+            return api_err_imagick;
+        }
         ret = PixelSetColor(background, "white");
         if (ret != MagickTrue) {
             DestroyPixelWand(background);
-            return -1;
+            return api_err_imagick;
         }
-        ret = MagickRotateImage(*im, background, req->rotate);
+        ret = MagickRotateImage(im, background, zreq->rotate);
         LOG_PRINT(LOG_DEBUG, "rotate() ret = %d", ret);
         DestroyPixelWand(background);
-        if (ret != MagickTrue) return -1;
+        if (ret != MagickTrue) {
+            DestroyMagickWand(im);
+            return api_err_imagick;
+        }
     }
 
     /* set quality */
     // int quality = 100;
-    // int im_quality = MagickGetImageCompressionQuality(*im);
+    // int im_quality = MagickGetImageCompressionQuality(im);
     // im_quality = (im_quality == 0 ? 100 : im_quality);
     // LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
-    // quality = req->quality < im_quality ? req->quality : im_quality;
-    LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-    ret = MagickSetImageCompressionQuality(*im, req->quality);
-    if (ret != MagickTrue) return -1;
+    // quality = zreq->quality < im_quality ? zreq->quality : im_quality;
+    LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", zreq->quality);
+    ret = MagickSetImageCompressionQuality(im, zreq->quality);
+    if (ret != MagickTrue) {
+        DestroyMagickWand(im);
+        return api_err_imagick;
+    }
 
     /* set format */
-    LOG_PRINT(LOG_DEBUG, "req->fmt: %s", req->fmt);
-    char *target_fmt = req->fmt ? req->fmt : settings.format;
+    char *target_fmt = zreq->fmt ? zreq->fmt : settings.format;
+    LOG_PRINT(LOG_DEBUG, "target_fmt: %s", target_fmt);
     if (strncmp(target_fmt, "none", 4) != 0) {
         if (settings.disable_progressive == 0 &&
-                ((strncmp(req->fmt, "jpeg", 4) == 0) ||
-                 (strncmp(req->fmt, "jpg", 3) == 0))) {
+                ((strncmp(target_fmt, "jpeg", 4) == 0) ||
+                 (strncmp(target_fmt, "jpg", 3) == 0))) {
             LOG_PRINT(LOG_DEBUG, "convert to progressive jpeg");
             // convert image to progressive jpeg
             // progressive reduce jpeg size incidentally
             // but convert elapsed time increase about 10%
-            ret = MagickSetInterlaceScheme(*im, PlaneInterlace);
+            ret = MagickSetInterlaceScheme(im, PlaneInterlace);
             if (ret != MagickTrue) {
-                MagickRelinquishMemory(format);
-                return -1;
+                DestroyMagickWand(im);
+                return api_err_imagick;
             }
         }
-        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
-        ret = MagickSetImageFormat(*im, req->fmt);
-        if (ret != MagickTrue) return -1;
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", target_fmt);
+        ret = MagickSetImageFormat(im, zreq->fmt);
+        if (ret != MagickTrue) {
+            DestroyMagickWand(im);
+            return api_err_imagick;
+        }
     }
 
-    LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);
-    return result;
+    DestroyMagickWand(im);
+    LOG_PRINT(LOG_DEBUG, "convert succ");
+    return api_ok;
 }

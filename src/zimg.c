@@ -33,6 +33,7 @@
 #include "zdb.h"
 #include "zscale.h"
 #include "zhttpd.h"
+#include "zrestful.h"
 #include "zlscale.h"
 #include "cjson/cJSON.h"
 

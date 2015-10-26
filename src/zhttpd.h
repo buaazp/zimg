@@ -48,6 +48,7 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length);
 int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 void free_headers_conf(zimg_headers_conf_t *hcf);
+evthr_t * get_request_thr(evhtp_request_t *request);
 void add_info(MagickWand *im, evhtp_request_t *req);
 void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_cb(evhtp_request_t *req, void *arg);

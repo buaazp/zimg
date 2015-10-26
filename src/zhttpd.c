@@ -45,7 +45,7 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len);
 zimg_headers_conf_t * conf_get_headers(const char *hdr_str);
 static int zimg_headers_add(evhtp_request_t *req, zimg_headers_conf_t *hcf);
 void free_headers_conf(zimg_headers_conf_t *hcf);
-static evthr_t * get_request_thr(evhtp_request_t *request);
+evthr_t * get_request_thr(evhtp_request_t *request);
 static int print_headers(evhtp_header_t * header, void * arg);
 void add_info(MagickWand *im, evhtp_request_t *req);
 void dump_request_cb(evhtp_request_t *req, void *arg);
@@ -68,7 +68,7 @@ static const char * post_error_list[] = {
     "Image not existed."
 };
 
-static const char * method_strmap[] = {
+const char *method_strmap[] = {
     "GET",
     "HEAD",
     "POST",
@@ -237,7 +237,7 @@ void free_headers_conf(zimg_headers_conf_t *hcf) {
  *
  * @return the thread dealing with the request
  */
-static evthr_t * get_request_thr(evhtp_request_t *request) {
+evthr_t * get_request_thr(evhtp_request_t *request) {
     evhtp_connection_t * htpconn;
     evthr_t            * thread;
 
@@ -1299,5 +1299,3 @@ err:
 done:
     return;
 }
-
-

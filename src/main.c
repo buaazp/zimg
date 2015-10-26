@@ -44,6 +44,7 @@
 #include "zlog.h"
 #include "zcache.h"
 #include "zlscale.h"
+#include "zrestful.h"
 
 #if __APPLE__
 #undef daemon
@@ -330,6 +331,9 @@ static int load_conf(const char *conf) {
     lua_getglobal(L, "format");
     if (lua_isstring(L, -1)) {
         str_lcpy(settings.format, lua_tostring(L, -1), sizeof(settings.format));
+        for (int i = 0; settings.format[i]; i++) {
+            settings.format[i] = tolower(settings.format[i]);
+        }
     }
     lua_pop(L, 1);
 
@@ -674,6 +678,7 @@ int main(int argc, char **argv) {
     evbase = event_base_new();
     evhtp_t *htp = evhtp_new(evbase, NULL);
 
+    evhtp_set_cb(htp, "/images/", get_image_cb, NULL);
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);
