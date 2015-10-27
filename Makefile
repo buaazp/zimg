@@ -13,8 +13,9 @@ libimagickwand=./deps/ImageMagick-6.9.1-10/wand/.libs/libMagickWand-6.Q8.a
 libluajit=./deps/LuaJIT-2.0.3/src/libluajit.a
 
 ifeq ($(SYSTEM),Darwin)
-	deps=$(libluajit)
+	deps=$(libimagickwand) $(libluajit)
 else
+	EXTRA_FLAGS="CFLAGS=-I$(PWD)/deps/libjpeg-turbo-1.4.2 -I$(PWD)/deps/libwebp-0.4.3/src" "LDFLAGS=-L$(PWD)/deps/libjpeg-turbo-1.4.2/.libs -ljpeg -L$(PWD)/deps/libwebp-0.4.3/src/.libs -lwebp"
 	deps=$(libjpeg-turbo) $(libwebp) $(libimagickwand) $(libluajit)
 endif
 
@@ -33,7 +34,7 @@ $(libwebp):
 	cd deps; tar zxvf libwebp-0.4.3.tar.gz; cd libwebp-0.4.3; ./configure --enable-shared=no --enable-static=yes --with-jpegincludedir=$(PWD)/deps/libjpeg-turbo-1.4.2 --with-jpeglibdir=$(PWD)/deps/libjpeg-turbo-1.4.2/.libs; make -j 4
 
 $(libimagickwand):
-	cd deps; tar zxf ImageMagick.tar.gz; cd ImageMagick-6.9.1-10; ./configure --disable-dependency-tracking --disable-openmp --disable-shared --without-magick-plus-plus --without-fftw --without-fpx --without-djvu --without-fontconfig --without-freetype --without-gslib --without-gvc --without-jbig --without-lcms --without-openjp2 --without-lqr --without-lzma --without-openexr --without-pango --without-rsvg --without-tiff --without-bzlib --without-wmf --without-xml --without-dps --without-x --enable-delegate-build --with-quantum-depth=8 "CFLAGS=-I$(PWD)/deps/libjpeg-turbo-1.4.2 -I$(PWD)/deps/libwebp-0.4.3/src" "LDFLAGS=-L$(PWD)/deps/libjpeg-turbo-1.4.2/.libs -ljpeg -L$(PWD)/deps/libwebp-0.4.3/src/.libs -lwebp"; make -j 4
+	cd deps; tar zxf ImageMagick.tar.gz; cd ImageMagick-6.9.1-10; ./configure --disable-dependency-tracking --disable-openmp --disable-shared --without-magick-plus-plus --without-fftw --without-fpx --without-djvu --without-fontconfig --without-freetype --without-gslib --without-gvc --without-jbig --without-lcms --without-openjp2 --without-lqr --without-lzma --without-openexr --without-pango --without-rsvg --without-tiff --without-bzlib --without-wmf --without-xml --without-dps --without-x --enable-delegate-build --with-quantum-depth=8 $(EXTRA_FLAGS); make -j 4
 
 $(libluajit):
 	cd deps; tar zxf LuaJIT-2.0.3.tar.gz; cd LuaJIT-2.0.3; make -j 4

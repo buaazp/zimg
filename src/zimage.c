@@ -164,7 +164,7 @@ int convert2(zreq_t *zreq) {
                             (const unsigned char *)zreq->buff_in->buff,
                             zreq->buff_in->len);
     if (ret != MagickTrue) {
-        LOG_PRINT(LOG_ERROR, "%s magick read image blob failed", zreq->md5);
+        LOG_PRINT(LOG_ERROR, "%s magick read image blob failed", zreq->key);
         DestroyMagickWand(im);
         return api_err_imagick;
     }
@@ -243,10 +243,6 @@ int convert2(zreq_t *zreq) {
     /* set gray */
     if (zreq->gray == 1) {
         LOG_PRINT(LOG_DEBUG, "wi_gray(im)");
-        //several ways to grayscale an image:
-        //ret = MagickSetImageColorspace(im, GRAYColorspace);
-        //ret = MagickQuantizeImage(im, 256, GRAYColorspace, 0, MagickFalse, MagickFalse);
-        //ret = MagickSeparateImageChannel(im, GrayChannel);
         ret = MagickSetImageType(im, GrayscaleType);
         LOG_PRINT(LOG_DEBUG, "gray() ret = %d", ret);
         if (ret != MagickTrue) {
@@ -254,6 +250,7 @@ int convert2(zreq_t *zreq) {
             return api_err_imagick;
         }
     }
+
 
     if (settings.disable_auto_orient == 0) {
         ret = MagickAutoOrientImage(im);
@@ -298,12 +295,11 @@ int convert2(zreq_t *zreq) {
     }
 
     /* set format */
-    char *target_fmt = zreq->fmt ? zreq->fmt : settings.format;
-    LOG_PRINT(LOG_DEBUG, "target_fmt: %s", target_fmt);
-    if (strncmp(target_fmt, "none", 4) != 0) {
+    LOG_PRINT(LOG_DEBUG, "zreq->fmt: %s", zreq->fmt);
+    if (strncmp(zreq->fmt, "none", 4) != 0) {
         if (settings.disable_progressive == 0 &&
-                ((strncmp(target_fmt, "jpeg", 4) == 0) ||
-                 (strncmp(target_fmt, "jpg", 3) == 0))) {
+                ((strncmp(zreq->fmt, "jpeg", 4) == 0) ||
+                 (strncmp(zreq->fmt, "jpg", 3) == 0))) {
             LOG_PRINT(LOG_DEBUG, "convert to progressive jpeg");
             // convert image to progressive jpeg
             // progressive reduce jpeg size incidentally
@@ -314,13 +310,25 @@ int convert2(zreq_t *zreq) {
                 return api_err_imagick;
             }
         }
-        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", target_fmt);
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", zreq->fmt);
         ret = MagickSetImageFormat(im, zreq->fmt);
         if (ret != MagickTrue) {
             DestroyMagickWand(im);
             return api_err_imagick;
         }
     }
+
+    size_t len = 0;
+    MagickResetIterator(im);
+    char *new_buff = (char *)MagickGetImageBlob(im, &len);
+    if (new_buff == NULL) {
+        LOG_PRINT(LOG_DEBUG, "%s imagick get image blob failed", zreq->key);
+        DestroyMagickWand(im);
+        return api_err_imagick;
+    }
+    LOG_PRINT(LOG_DEBUG, "%s new image size = %d", zreq->key, len);
+    zreq->buff_out->len = len;
+    zreq->buff_out->buff = new_buff;
 
     DestroyMagickWand(im);
     LOG_PRINT(LOG_DEBUG, "convert succ");

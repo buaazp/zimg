@@ -36,6 +36,10 @@ typedef enum {
     api_err_open_file = 8,
     api_err_read_file = 9,
     api_err_imagick = 10,
+    api_err_content_len = 11,
+    api_err_content_read = 12,
+    api_err_mkdir = 13,
+    api_err_new_file = 14,
 } api_error_code;
 
 typedef enum {
@@ -66,7 +70,7 @@ typedef struct {
 typedef struct {
     evhtp_request_t *req;
     char *ip;
-    char *md5;
+    char *key;
     char *type;
     int width;
     int height;
@@ -84,5 +88,6 @@ typedef struct {
 } zreq_t;
 
 void get_image_cb(evhtp_request_t *req, void *arg);
+void post_image_cb(evhtp_request_t *req, void *arg);
 
 #endif

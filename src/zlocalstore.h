@@ -18,4 +18,6 @@
  * @date 2015-10-24
  */
 
+int local_set(zreq_t *zreq);
 int local_get(zreq_t *zreq);
+int local_put(zreq_t *zreq);

@@ -679,6 +679,7 @@ int main(int argc, char **argv) {
     evhtp_t *htp = evhtp_new(evbase, NULL);
 
     evhtp_set_cb(htp, "/images/", get_image_cb, NULL);
+    evhtp_set_cb(htp, "/images", post_image_cb, NULL);
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);

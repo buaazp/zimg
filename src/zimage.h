@@ -19,3 +19,4 @@
  */
 
 int convert2(zreq_t *zreq);
+int thumbnail(zreq_t *zreq);
