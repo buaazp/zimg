@@ -72,7 +72,7 @@ if (NOT OPENSSL_FOUND)
 endif()
 
 find_package (LibMemcached REQUIRED)
-find_package (GIF REQUIRED)
+#find_package (GIF REQUIRED)
 find_package (PNG REQUIRED)
 #find_package (ImageMagick COMPONENTS MagickCore REQUIRED)
 #find_package (ImageMagick COMPONENTS MagickWand REQUIRED)
