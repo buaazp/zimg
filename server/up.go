@@ -5,7 +5,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/gographics/imagick/imagick"
+	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 const (
@@ -16,11 +16,6 @@ var (
 	MaxConfThumb     Thumb
 	DefaultThumbType = "JPEG"
 )
-
-func init() {
-	imagick.Initialize()
-	// defer imagick.Terminate()
-}
 
 func ImagickInfo(blob []byte) (rst ImageResult, err error) {
 	// log.Printf("%s imagick info...", key)
