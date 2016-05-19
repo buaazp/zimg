@@ -4,38 +4,40 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+
+	"github.com/buaazp/zimg/util"
+	"github.com/gorilla/mux"
 )
 
-type ConvertModeType uint32
+type ConvertModeType uint
 
 const (
 	ModeFill ConvertModeType = iota
 	ModeFit
 	ModeStretch
 	ModeThumb
-	MaxUint32 = uint32((1 << 32) - 1)
 )
 
-var ConvertModeTypeName = map[uint32]string{
-	0: "ModeFill",
-	1: "ModeFit",
-	2: "ModeStretch",
-	3: "ModeThumb",
+var ConvertModeTypeName = map[ConvertModeType]string{
+	ModeFill:    "ModeFill",
+	ModeFit:     "ModeFit",
+	ModeStretch: "ModeStretch",
+	ModeThumb:   "ModeThumb",
 }
 
 func (t ConvertModeType) String() string {
-	str, ok := ConvertModeTypeName[uint32(t)]
+	str, ok := ConvertModeTypeName[t]
 	if !ok {
 		return strconv.Itoa(int(t))
 	}
 	return str
 }
 
-type GravityType uint32
+type GravityType uint
 
 const (
-	Face GravityType = iota
-	Center
+	Center GravityType = iota
 	North
 	South
 	West
@@ -46,21 +48,20 @@ const (
 	SouthEast
 )
 
-var GravityTypeName = map[uint32]string{
-	0: "Face",
-	1: "Center",
-	2: "North",
-	3: "South",
-	4: "West",
-	5: "East",
-	6: "NorthWest",
-	7: "NorthEast",
-	8: "SouthWest",
-	9: "SouthEast",
+var GravityTypeName = map[GravityType]string{
+	Center:    "Center",
+	North:     "North",
+	South:     "South",
+	West:      "West",
+	East:      "East",
+	NorthWest: "NorthWest",
+	NorthEast: "NorthEast",
+	SouthWest: "SouthWest",
+	SouthEast: "SouthEast",
 }
 
 func (t GravityType) String() string {
-	str, ok := GravityTypeName[uint32(t)]
+	str, ok := GravityTypeName[t]
 	if !ok {
 		return strconv.Itoa(int(t))
 	}
@@ -68,99 +69,175 @@ func (t GravityType) String() string {
 }
 
 type ConvertParam struct {
-	Key       string          `json:"key,omitempty"`
-	Mode      ConvertModeType `json:"mode"`
-	Width     uint32          `json:"width"`
-	Height    uint32          `json:"height"`
-	Gravity   GravityType     `json:"gravity,omitempty"`
-	Angle     uint32          `json:"angle,omitempty"`
-	HasPoint1 bool            `json:"has_point1,omitempty"`
-	X1        uint32          `json:"x1,omitempty"`
-	Y1        uint32          `json:"y1,omitempty"`
-	HasPoint2 bool            `json:"has_point2,omitempty"`
-	X2        uint32          `json:"x2,omitempty"`
-	Y2        uint32          `json:"y2,omitempty"`
+	Key        string          `json:"key,omitempty"`
+	Mode       ConvertModeType `json:"mode"`
+	Width      uint            `json:"width"`
+	Height     uint            `json:"height"`
+	LongSide   uint            `json:"long_side,omitempty"`
+	ShortSide  uint            `json:"short_side,omitempty"`
+	Gravity    GravityType     `json:"gravity,omitempty"`
+	Angle      float64         `json:"angle,omitempty"`
+	RelativeX  float64         `json:"relative_x,omitempty"`
+	RelativeY  float64         `json:"relative_y,omitempty"`
+	RelativeW  float64         `json:"relative_w,omitempty"`
+	RelativeH  float64         `json:"relative_h,omitempty"`
+	Format     string          `json:"format"`
+	FormatOnly bool            `json:"format_only"`
 }
 
-func GetConvertParam(r *http.Request) (*ConvertParam, error) {
+func parseKey(r *http.Request) (string, string, error) {
+	fKey := mux.Vars(r)["key"]
+	if fKey == "" {
+		return "", "", ErrNoKey
+	}
+	parts := strings.Split(fKey, ".")
+	key := parts[0]
+	ext := DefaultOutputFormat
+	if len(parts) > 1 {
+		ext = parts[1]
+	}
+	return key, ext, nil
+}
+
+var (
+	paramNames = []string{"m", "w", "h", "ls", "ss", "g", "a", "rx", "ry", "rw", "rh"}
+)
+
+func GetConvertParam(r *http.Request, key, ext string) (*ConvertParam, error) {
 	var cp ConvertParam
-	paramNames := []string{"m", "w", "h", "g", "a", "x1", "y1", "x2", "y2"}
+	cp.Key = key
+
+	hasFormat := false
+	if ext != "" {
+		format := util.GetImageType(ext)
+		if format == "" {
+			return nil, fmt.Errorf("convert param image type [%s] not supported", ext)
+		}
+		cp.Format = format
+		hasFormat = true
+	}
+
 	hasParam := false
 	for _, name := range paramNames {
 		pstr := r.FormValue(name)
 		if pstr != "" {
-			pint, err := strconv.ParseInt(pstr, 10, 0)
+			pf, err := strconv.ParseFloat(pstr, 0)
 			if err != nil {
 				return nil, err
 			}
-			if pint < 0 || pint >= int64(MaxUint32) {
-				return nil, fmt.Errorf("convert param %s illegal %d", name, pint)
+			if pf < 0 {
+				return nil, fmt.Errorf("convert param %s illegal %f", name, pf)
 			}
-			value := uint32(pint)
 			hasParam = true
 
 			switch name {
 			case "m":
-				if int(value) >= len(ConvertModeTypeName) {
-					return nil, fmt.Errorf("illegal convert mode: %v", value)
+				if int(pf) >= len(ConvertModeTypeName) {
+					return nil, fmt.Errorf("illegal convert mode: %v", pf)
 				}
-				mt := ConvertModeType(value)
+				mt := ConvertModeType(pf)
 				cp.Mode = mt
 			case "w":
-				cp.Width = value
+				cp.Width = uint(pf)
 			case "h":
-				cp.Height = value
+				cp.Height = uint(pf)
+			case "ls":
+				cp.LongSide = uint(pf)
+			case "ss":
+				cp.ShortSide = uint(pf)
 			case "g":
-				if int(value) >= len(GravityTypeName) {
-					return nil, fmt.Errorf("illegal gravity type: %v", value)
+				if int(pf) >= len(GravityTypeName) {
+					return nil, fmt.Errorf("illegal gravity type: %v", pf)
 				}
-				gt := GravityType(value)
+				gt := GravityType(pf)
 				cp.Gravity = gt
 			case "a":
-				if value > 360 {
-					return nil, fmt.Errorf("convert param %s illegal %d", name, pint)
+				if pf > 360 {
+					return nil, fmt.Errorf("convert param %s illegal %f", name, pf)
 				}
-				cp.Angle = value
-			case "x1":
-				cp.HasPoint1 = true
-				cp.X1 = value
-			case "y1":
-				cp.HasPoint1 = true
-				cp.Y1 = value
-			case "x2":
-				cp.HasPoint2 = true
-				cp.X2 = value
-			case "y2":
-				cp.HasPoint2 = true
-				cp.Y2 = value
+				cp.Angle = pf
+			case "rx":
+				if pf > 1.1 {
+					return nil, fmt.Errorf("convert param %s illegal %f", name, pf)
+				} else if pf > 1.0 {
+					cp.RelativeX = 1.0
+				} else {
+					cp.RelativeX = pf
+				}
+			case "ry":
+				if pf > 1.1 {
+					return nil, fmt.Errorf("convert param %s illegal %f", name, pf)
+				} else if pf > 1.0 {
+					cp.RelativeY = 1.0
+				} else {
+					cp.RelativeY = pf
+				}
+			case "rw":
+				if pf > 1.1 {
+					return nil, fmt.Errorf("convert param %s illegal %f", name, pf)
+				} else if pf > 1.0 {
+					cp.RelativeW = 1.0
+				} else {
+					cp.RelativeW = pf
+				}
+			case "rh":
+				if pf > 1.1 {
+					return nil, fmt.Errorf("convert param %s illegal %f", name, pf)
+				} else if pf > 1.0 {
+					cp.RelativeH = 1.0
+				} else {
+					cp.RelativeH = pf
+				}
 			default:
 				return nil, fmt.Errorf("uncached param name: %s", name)
 			}
 		}
 	}
-	if cp.HasPoint2 {
-		if !cp.HasPoint1 {
-			return nil, fmt.Errorf("point1 should provide when point2 is set")
-		}
-		if cp.X1 >= cp.X2 || cp.Y1 >= cp.Y2 {
-			return nil, fmt.Errorf("point2 [%d,%d] should bigger than point1 [%d,%d]", cp.X2, cp.Y2, cp.X1, cp.Y1)
+
+	if cp.NeedCrop() && cp.LackCrop() {
+		return nil, fmt.Errorf("convert param rw/rh should > 0")
+	}
+	if !hasFormat && !hasParam {
+		return nil, nil
+	}
+	if !hasParam && hasFormat {
+		cp.FormatOnly = true
+	}
+	if (cp.LongSide != 0 || cp.ShortSide != 0) && cp.Mode != ModeFit {
+		if cp.Width == 0 && cp.Height == 0 {
+			cp.Mode = ModeFit
 		}
 	}
 
-	if !hasParam {
-		return nil, nil
-	}
 	return &cp, nil
+}
+
+func (cp *ConvertParam) NeedCrop() bool {
+	return cp.RelativeW+cp.RelativeH > 0
+}
+
+func (cp *ConvertParam) LackCrop() bool {
+	return cp.RelativeW*cp.RelativeH == 0
+}
+
+func (cp *ConvertParam) OutOfSize(limit uint) bool {
+	return cp.Width > limit || cp.Height > limit
 }
 
 type Property map[string]string
 
+// ObjectResult the repsonse of object PUT / POST / DELETE api
+type ObjectResult struct {
+	Key   string `json:"key"`   // result of ObjectParam.Encode()
+	MTime int64  `json:"mtime"` // UnixNano of the Object
+}
+
 type ImageResult struct {
-	Key        string   `json:"key"`                  // key of the image
-	Previews   []string `json:"previews,omitempty"`   // previews of the image
-	MTime      int64    `json:"mtime"`                // UnixNano of the image
-	Width      uint     `json:"width"`                // width of the image
-	Height     uint     `json:"height"`               // height of the image
-	Format     string   `json:"format"`               // format of the image
-	Properties Property `json:"properties,omitempty"` // Properties of the Image
+	Key        string            `json:"key"`                  // key of the image
+	MTime      int64             `json:"mtime,omitempty"`      // unixnano timestamp of the image
+	Width      uint              `json:"width"`                // width of the image
+	Height     uint              `json:"height"`               // height of the image
+	Format     string            `json:"format"`               // format of the image
+	Thumbs     map[string]string `json:"thumbs,omitempty"`     // thumb fids of the image
+	Properties Property          `json:"properties,omitempty"` // properties of the Image
 }

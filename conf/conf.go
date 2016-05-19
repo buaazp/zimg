@@ -22,7 +22,7 @@ type ServerConf struct {
 	Backends      []string          `yaml:"backends"`
 	CacheHost     string            `yaml:"cache_host"`
 	Format        string            `yaml:"default_format"`
-	Quality       int               `yaml:"default_quality"`
+	Quality       uint              `yaml:"default_quality"`
 	DisableArgs   bool              `yaml:"disable_args"`
 	DisableType   bool              `yaml:"disable_type"`
 	DisableZoomUp bool              `yaml:"disable_zoom_up"`

@@ -5,17 +5,16 @@ import (
 	"log"
 	"math"
 
-	"m2cv/service/face"
-
 	"github.com/gographics/imagick/imagick"
 )
 
 const (
-	NormalRatio float64 = 3.0
+	NormalRatio = 3.0
 )
 
 var (
-	MaxConfThumb Thumb
+	MaxConfThumb     Thumb
+	DefaultThumbType = "JPEG"
 )
 
 func init() {
@@ -28,7 +27,7 @@ func ImagickInfo(blob []byte) (rst ImageResult, err error) {
 	im := imagick.NewMagickWand()
 	defer im.Destroy()
 
-	err = im.ReadImageBlob(blob)
+	err = im.PingImageBlob(blob)
 	if err != nil {
 		return
 	}
@@ -126,7 +125,9 @@ func ImConvert(blob []byte, thumbs []Thumb, key string) (map[string][]byte, erro
 	case "GIF":
 		// Composites a set of images while respecting any page
 		// offsets and disposal methods
-		im = im.CoalesceImages()
+		gifim := im.CoalesceImages()
+		defer gifim.Destroy()
+		im = gifim
 		// log.Printf("convert coalesce: %v", time.Since(start))
 		// Maybe not needed:
 		// select the smallest cropped image to replace each frame
@@ -150,7 +151,9 @@ func ImConvert(blob []byte, thumbs []Thumb, key string) (map[string][]byte, erro
 		if err != nil {
 			return nil, err
 		}
-		im = im.MergeImageLayers(imagick.IMAGE_LAYER_FLATTEN)
+		pngim := im.MergeImageLayers(imagick.IMAGE_LAYER_FLATTEN)
+		defer pngim.Destroy()
+		im = pngim
 		// log.Printf("convert set white background: %v", time.Since(start))
 	default:
 	}
@@ -326,86 +329,8 @@ func ImJustResize(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
 	return im.GetImageBlob(), nil
 }
 
-func outOfImage(cols, rows, x, y uint) bool {
-	return x > cols || y > rows
-}
-
 func ImFillReduce(im *imagick.MagickWand, tb Thumb, key string) ([]byte, error) {
-	if tb.Gravity == Face {
-		return imFillFace(im, tb, key)
-	}
-
 	return imFillResize(im, tb)
-}
-
-func imFillFace(im *imagick.MagickWand, tb Thumb, key string) ([]byte, error) {
-	// step 1: resize image to the size contains target
-	imCols := im.GetImageWidth()
-	imRows := im.GetImageHeight()
-	// log.Println("old size: ", imCols, imRows)
-
-	var cols, rows uint
-	xf := float64(tb.Width) / float64(imCols)
-	yf := float64(tb.Height) / float64(imRows)
-	if xf > yf {
-		cols = tb.Width
-		rows = uint(math.Floor(float64(imRows) * xf))
-	} else if yf > xf {
-		cols = uint(math.Floor(float64(imCols) * yf))
-		rows = tb.Height
-	} else {
-		cols = tb.Width
-		rows = tb.Height
-	}
-
-	err := im.ResizeImage(cols, rows, imagick.FILTER_LANCZOS, 0.8)
-	if err != nil {
-		return nil, err
-	}
-	// log.Println("new size: ", cols, rows)
-	data := im.GetImageBlob()
-	// step 2: send to cv service to get the postion of face
-	resp, err := face.FaceDetectThrift(data, key)
-	if err != nil {
-		return nil, err
-	}
-	// step 3: calculate the target range and crop it
-	var x, y uint
-	faceNum := resp.GetFaceNum()
-	if faceNum >= 1 && faceNum <= 3 {
-		x1 := uint(resp.GetLeft())
-		y1 := uint(resp.GetTop())
-		x2 := uint(resp.GetRight())
-		y2 := uint(resp.GetBottom())
-		// log.Println("face ", x1, y1, x2, y2)
-		faceCols := x2 - x1
-		faceRows := y2 - y1
-		if cols > tb.Width {
-			croped := cols - tb.Width
-			if cols > faceCols {
-				padding := cols - faceCols
-				x = uint(math.Floor(float64(croped) * float64(x1) / float64(padding)))
-			} else {
-				x = 0
-			}
-			y = 0
-		} else if rows > tb.Height {
-			croped := rows - tb.Height
-			if rows > faceRows {
-				padding := rows - faceRows
-				y = uint(math.Floor(float64(croped) * float64(y1) / float64(padding)))
-			} else {
-				y = 0
-			}
-			x = 0
-		}
-	} else {
-		x = (cols - tb.Width) / 2
-		y = (rows - tb.Height) / 2
-	}
-
-	// log.Println("crop ", tb.X1, tb.Y1, tb.Width, tb.Height)
-	return imJustCrop(im, tb, x, y)
 }
 
 func imJustCrop(im *imagick.MagickWand, tb Thumb, x, y uint) ([]byte, error) {

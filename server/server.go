@@ -22,10 +22,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	DefaultThumbType = "JPEG"
-)
-
 type Server struct {
 	mu   sync.RWMutex
 	exit chan int
@@ -50,6 +46,9 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 		return nil, err
 	}
 
+	DefaultOutputFormat = c.Format
+	DefaultCompressionQuality = c.Quality
+
 	s := &Server{}
 	s.storage = storage
 	s.c = c
@@ -65,11 +64,11 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 	s.r = mux.NewRouter()
 	// for images
 	s.r.HandleFunc(`/images`, s.apiUploadImage).Methods("POST")
-	sub := s.r.Path(`/images/{filename}`).Subrouter()
+	sub := s.r.Path(`/images/{key}`).Subrouter()
 	sub.Methods("PUT").HandlerFunc(s.apiUpdateImage)
 	sub.Methods("HEAD", "GET").HandlerFunc(s.apiGetImage)
 	sub.Methods("DELETE").HandlerFunc(s.apiDelImage)
-	s.r.HandleFunc(`/info/{filename}`, s.apiInfoImage).Methods("GET")
+	s.r.HandleFunc(`/info/{key}`, s.apiInfoImage).Methods("GET")
 
 	// for config
 	s.r.HandleFunc(`/conf`, s.apiGetConf).Methods("GET")
@@ -197,28 +196,64 @@ func checkAndSetEtag(w http.ResponseWriter, r *http.Request, sha1sum string) boo
 }
 
 func (s *Server) apiUpdateImage(w http.ResponseWriter, r *http.Request) {
+	key, _, err := parseKey(r)
+	if err != nil {
+		util.APIResponse(w, 400, err)
+		log.Printf("%s put fail 400 - - %s", r.RemoteAddr, err)
+		return
+	}
+	log.Printf("%s put succ 200 %s - -", r.RemoteAddr, key)
 	return
 }
 
 func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
-	key := mux.Vars(r)["filename"]
-	if key == "" {
-		util.APIResponse(w, 400, ErrNoKey)
-		log.Printf("%s head succ 400 %s - %s", r.RemoteAddr, key, ErrNoKey)
+	key, ext, err := parseKey(r)
+	if err != nil {
+		util.APIResponse(w, 400, err)
+		log.Printf("%s get fail 400 - - %s", r.RemoteAddr, err)
 		return
 	}
 
-	data, err := s.storage.Get(key)
+	cp, err := GetConvertParam(r, key, ext)
+	if err != nil {
+		util.APIResponse(w, 400, err)
+		log.Printf("%s get fail 400 %s - %s", r.RemoteAddr, key, err)
+		return
+	}
+
+	origin, err := s.storage.Get(key)
 	if err != nil {
 		util.APIResponse(w, 500, err)
-		log.Printf("%s head succ 500 %s - %s", r.RemoteAddr, key, err)
+		log.Printf("%s get fail 500 %s - %s", r.RemoteAddr, key, err)
 		return
+	}
+
+	var (
+		data  []byte
+		ctype string
+	)
+	if cp != nil {
+		key = cp.Key
+		var (
+			format string
+			code   int
+		)
+		format, data, err, code = Convert(origin, cp)
+		if err != nil {
+			util.APIResponse(w, code, err)
+			log.Printf("%s get fail %d %s - %s", r.RemoteAddr, code, key, err)
+			return
+		}
+		ctype = util.GetMimeType(format)
+	} else {
+		data = origin
+		ctype = http.DetectContentType(data)
 	}
 
 	for k, v := range s.c.Headers {
 		w.Header().Set(k, v)
 	}
-	w.Header().Set("Content-Type", http.DetectContentType(data))
+	w.Header().Set("Content-Type", ctype)
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 	if r.Method == "HEAD" {
 		w.WriteHeader(200)
@@ -242,14 +277,14 @@ func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) apiDelImage(w http.ResponseWriter, r *http.Request) {
-	key := mux.Vars(r)["filename"]
-	if key == "" {
-		util.APIResponse(w, 400, ErrNoKey)
-		log.Printf("%s delete error 400 %s - %s", r.RemoteAddr, key, ErrNoKey)
+	key, _, err := parseKey(r)
+	if err != nil {
+		util.APIResponse(w, 400, err)
+		log.Printf("%s delete error 400 %s - %s", r.RemoteAddr, key, err)
 		return
 	}
 
-	err := s.storage.Del(key)
+	err = s.storage.Del(key)
 	if err != nil {
 		util.APIResponse(w, 500, err)
 		log.Printf("%s delete error 500 %s - %s", r.RemoteAddr, key, err)
@@ -261,7 +296,13 @@ func (s *Server) apiDelImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) apiInfoImage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("info error: %s", ErrNotImplement)
+	key, _, err := parseKey(r)
+	if err != nil {
+		util.APIResponse(w, 400, err)
+		log.Printf("%s info fail 400 - - %s", r.RemoteAddr, err)
+		return
+	}
+	log.Printf("%s info succ 200 %s - -", r.RemoteAddr, key)
 	util.APIResponse(w, 400, ErrNotImplement)
 }
 
