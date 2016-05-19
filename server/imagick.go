@@ -5,7 +5,7 @@ import (
 	"log"
 	"math"
 
-	"mimg/face"
+	"m2cv/service/face"
 
 	"github.com/gographics/imagick/imagick"
 )
@@ -365,7 +365,7 @@ func imFillFace(im *imagick.MagickWand, tb Thumb, key string) ([]byte, error) {
 	// log.Println("new size: ", cols, rows)
 	data := im.GetImageBlob()
 	// step 2: send to cv service to get the postion of face
-	resp, err := face.FaceThrift(data, key)
+	resp, err := face.FaceDetectThrift(data, key)
 	if err != nil {
 		return nil, err
 	}

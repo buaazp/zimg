@@ -1,32 +1,35 @@
 package conf
 
 import (
+	"io/ioutil"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v2"
 )
 
 type ServerConf struct {
-	Host          string            `toml:"host"`
-	Timeout       duration          `toml:"timeout"`
-	LogFile       string            `toml:"log_file"`
-	Debug         bool              `toml:"debug"`
-	StorageMode   string            `toml:"mode"`
-	SaveNew       bool              `toml:"save_new"`
-	MaxSize       int64             `toml:"max_size"`
-	AllowedTypes  []string          `toml:"allowed_types"`
-	ImagePath     string            `toml:"img_path"`
-	Backends      []string          `toml:"backends"`
-	CacheHost     string            `toml:"cache_host"`
-	Format        string            `toml:"default_format"`
-	Quality       int               `toml:"default_quality"`
-	DisableArgs   bool              `toml:"disable_args"`
-	DisableType   bool              `toml:"disable_type"`
-	DisableZoomUp bool              `toml:"disable_zoom_up"`
-	ThumbsConf    string            `toml:"thumbs_conf"`
-	Etag          bool              `toml:"etag"`
-	MaxAge        int64             `toml:"max_age"`
-	Headers       map[string]string `toml:"headers"`
+	Host          string            `yaml:"host"`
+	Timeout       duration          `yaml:"timeout"`
+	LogFile       string            `yaml:"log_file"`
+	Debug         bool              `yaml:"debug"`
+	StorageMode   string            `yaml:"mode"`
+	SaveNew       bool              `yaml:"save_new"`
+	MultipartKey  string            `yaml:"multipart_key"`
+	MaxSize       int64             `yaml:"max_size"`
+	AllowedTypes  []string          `yaml:"allowed_types"`
+	ConfPath      string            `yaml:"conf_path"`
+	ImagePath     string            `yaml:"img_path"`
+	Backends      []string          `yaml:"backends"`
+	CacheHost     string            `yaml:"cache_host"`
+	Format        string            `yaml:"default_format"`
+	Quality       int               `yaml:"default_quality"`
+	DisableArgs   bool              `yaml:"disable_args"`
+	DisableType   bool              `yaml:"disable_type"`
+	DisableZoomUp bool              `yaml:"disable_zoom_up"`
+	ThumbsConf    string            `yaml:"thumbs_conf"`
+	Etag          bool              `yaml:"etag"`
+	MaxAge        int64             `yaml:"max_age"`
+	Headers       map[string]string `yaml:"headers"`
 }
 
 var DefaultServerConf = ServerConf{
@@ -36,8 +39,10 @@ var DefaultServerConf = ServerConf{
 	Debug:         true,
 	StorageMode:   "local",
 	SaveNew:       true,
+	MultipartKey:  "uploadfile",
 	MaxSize:       100 * 1024 * 1024, // 100MB
 	AllowedTypes:  []string{"jpeg", "jpg", "gif", "png", "webp"},
+	ConfPath:      "conf/zimg.yaml",
 	ImagePath:     "./img",
 	Backends:      []string{"127.0.0.1:22122", "127.0.0.1:6379"},
 	CacheHost:     "127.0.0.1:11211",
@@ -46,7 +51,7 @@ var DefaultServerConf = ServerConf{
 	DisableArgs:   false,
 	DisableType:   false,
 	DisableZoomUp: false,
-	ThumbsConf:    "./conf/thumbs.toml",
+	ThumbsConf:    "./conf/thumbs.yaml",
 	Etag:          true,
 	MaxAge:        3600 * 24 * 90, // 90 days
 	Headers: map[string]string{
@@ -56,8 +61,12 @@ var DefaultServerConf = ServerConf{
 }
 
 func LoadServerConf(f string) (ServerConf, error) {
+	data, err := ioutil.ReadFile(f)
+	if err != nil {
+		return DefaultServerConf, err
+	}
 	var c ServerConf
-	if _, err := toml.DecodeFile(f, &c); err != nil {
+	if err := yaml.Unmarshal(data, &c); err != nil {
 		return DefaultServerConf, err
 	}
 

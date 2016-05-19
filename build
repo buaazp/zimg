@@ -1,12 +1,18 @@
 #!/bin/bash -e
+GO_VERSION=`go version | grep -e 'go.\..' -o`
+if [ "$GO_VERSION" \< "go1.5" ]; then
+    echo "only go1.5 or later version is supported."
+    exit 1
+fi
 
-pwd=$PWD
-export GOPATH=$GOPATH:$pwd/Godeps/_workspace
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-
-eval $(go env)
+export GO15VENDOREXPERIMENT=1
+git submodule update --init --recursive
 
 GIT_SHA=`git rev-parse --short HEAD || echo "GitNotFound"`
+GIT_BRANCH=`git branch 2>/dev/null | grep "^\*" | sed -e "s/^\*\ //"`
+if [ "${GIT_BRANCH}" != "" ]; then
+    GIT_SHA=$GIT_SHA"($GIT_BRANCH)"
+fi
 WHEN=`date '+%Y-%m-%d_%H:%M:%S'`
 
-CGO_ENABLED=0 go build -a -v -installsuffix cgo -ldflags "-s -X main.GitSHA ${GIT_SHA} -X main.BuildTime ${WHEN}" -o bin/zimg
+CGO_ENABLED=1 go build -a -v -installsuffix cgo -ldflags "-s -X main.GitSHA=${GIT_SHA} -X main.BuildTime=${WHEN}" -o bin/zimg

@@ -3,7 +3,7 @@ package server
 import "errors"
 
 var (
-	ErrNotDone        = errors.New("this function is not come true")
+	ErrNotImplement   = errors.New("no implement")
 	ErrNoKey          = errors.New("no key in url")
 	ErrNotAllowed     = errors.New("file type is not allowed")
 	ErrObjectTooLarge = errors.New("object too large")

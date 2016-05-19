@@ -1,13 +1,13 @@
 package server
 
 type Thumb struct {
-	Name    string          `toml:"name"`
-	ID      int             `toml:"id"`
-	Mode    ConvertModeType `toml:"mode"`
-	Gravity GravityType     `toml:"gravity,omitempty"`
-	Width   uint            `toml:"width"`
-	Height  uint            `toml:"height"`
-	Pixels  uint            `toml:"pixels,omitempty"`
+	Name    string          `yaml:"name"`
+	ID      int             `yaml:"id"`
+	Mode    ConvertModeType `yaml:"mode"`
+	Gravity GravityType     `yaml:"gravity,omitempty"`
+	Width   uint            `yaml:"width"`
+	Height  uint            `yaml:"height"`
+	Pixels  uint            `yaml:"pixels,omitempty"`
 }
 
 func (t *Thumb) String() string {

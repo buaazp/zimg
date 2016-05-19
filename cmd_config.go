@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path"
 
-	"github.com/BurntSushi/toml"
 	"github.com/buaazp/zimg/conf"
+	"gopkg.in/yaml.v2"
 )
 
 var cmdConfig = &Command{
@@ -28,14 +27,12 @@ func exportDefaultConf(c defaultConfig) error {
 	}
 	defer f.Close()
 
-	var buf bytes.Buffer
-	enc := toml.NewEncoder(&buf)
-	err = enc.Encode(c.config)
+	data, err := yaml.Marshal(c.config)
 	if err != nil {
 		return err
 	}
 
-	_, err = f.Write(buf.Bytes())
+	_, err = f.Write(data)
 	return err
 }
 
@@ -46,7 +43,7 @@ func runConfig(cmd *Command, args []string) {
 	}
 	defaultConfigs := []defaultConfig{
 		defaultConfig{
-			fileName: path.Join(filePath, "zimg.toml"),
+			fileName: path.Join(filePath, "zimg.yaml"),
 			config:   conf.DefaultServerConf,
 		},
 	}

@@ -79,7 +79,6 @@ func OnExitSignal(fn func()) {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	log.SetPrefix("[zimg] ")
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 
 	flag.Usage = usage

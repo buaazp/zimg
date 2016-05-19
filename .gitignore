@@ -34,7 +34,9 @@ doc/html/
 bin/img/
 bin/log/
 bin/zimg
-bin/conf/debug.toml
+bin/conf/debug.yaml
 
 
 *.tmp
+
+zimg

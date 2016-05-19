@@ -1,73 +1,85 @@
 # the host zimg server listens on
-host = "0.0.0.0:4869"
+host: 0.0.0.0:4869
 
 # default http requests' timeout
-timeout = "5s"
+timeout: 5s
 
 # filename of log file
 # keep blank will output logs to stdout/stderr
-log_file = ""
+log_file: ""
 
 # if debug is true,
 # zimg will output more detailed log
-debug = true
+debug: true
 
 # the storage mode of images
 # you can shoose one from this list:
 # [local, beansdb, ssdb]
-mode = "local"
+mode: local
 
 # if save_new is true,
 # zimg will store every new images
-save_new = true
+save_new: true
+
+# the multipart key in your form html
+multipart_key: uploadfile
 
 # the max_size of file that zimg allows upload
-max_size = 104857600
+max_size: 104857600
 
 # allowed file types for uploading
 # if this list is blank or the first value is "all",
 # zimg will allow all types of file to upload
-allowed_types = ["jpeg", "jpg", "gif", "png", "webp"]
+allowed_types:
+- jpeg
+- jpg
+- gif
+- png
+- webp
+
+# config file path
+conf_path: conf/zimg.yaml
 
 # image store path when you
 # using local storage mode
-img_path = "./img"
+img_path: ./img
 
 # backend storage server hosts if you
 # using remote storage mode
-backends = ["127.0.0.1:22122", "127.0.0.1:6379"]
+backends:
+- 127.0.0.1:22122
+- 127.0.0.1:6379
 
 # the host of cache server
-cache_host = "127.0.0.1:11211"
+cache_host: 127.0.0.1:11211
+
+# the default image is a converted image
+# flags below set the default options of this image
+default_format: jpeg
+default_quality: 75
 
 # if you don't want others use args in url to
 # get processed image, you can set disable_args ture
-disable_args = false
+disable_args: false
 # if you don't want others use type in url to
 # get processed image, you can set disable_type ture
-disable_type = false
+disable_type: false
 # if you don't want zimg zoom up images,
 # you can set disable_type ture
-disable_zoom_up = false
+disable_zoom_up: false
 
-# the default image is a resized image
-# flags below set the default options of this image
-default_format = "jpeg"
-default_quality = 75
+# thumbs are processing types you use frequently
+thumbs_conf: ./conf/thumbs.yaml
 
 # etag is used for brower caching files
 # if etag is true, files not modified will return 304
-etag = true
+etag: true
 # max-age is the cache time of brower
 # default value 7776000s is 90 days
-max_age = 7776000
-
-# thumbs are processing types you use frequently
-thumbs_conf = "./conf/thumbs.toml"
+max_age: 7776000
 
 # you can set some key-value piars as http response's
 # headers that zimg send back to clients
-[headers]
-  Cache-Control = ""
-  Server = "zimg v4.0.0"
-
+headers:
+  Cache-Control: max-age=7776000
+  Server: zimg v4.0.0

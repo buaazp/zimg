@@ -55,9 +55,10 @@ func (s *LocalStore) calcPath(md5sum string) (string, error) {
 	}
 	l1 := strconv.FormatUint(level1/4, 10)
 	l2 := strconv.FormatUint(level2/4, 10)
-	dirPath := filepath.Join(s.Path, l1, l2, md5sum)
-	log.Printf("img path: %s", dirPath)
-	return dirPath, nil
+	relativePath := filepath.Join(l1, l2, md5sum)
+	absolutePath := filepath.Join(s.Path, relativePath)
+	log.Printf("img path: %s", relativePath)
+	return absolutePath, nil
 }
 
 func WriteImage(dirPath string, data []byte) error {
