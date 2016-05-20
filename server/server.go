@@ -1,18 +1,17 @@
 package server
 
 import (
+	"bytes"
 	"crypto/sha1"
 	_ "expvar"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	httpprof "net/http/pprof"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/buaazp/zimg/conf"
@@ -23,12 +22,9 @@ import (
 )
 
 type Server struct {
-	mu   sync.RWMutex
-	exit chan int
-
-	RoundTripper http.RoundTripper
-	c            conf.ServerConf
-	r            *mux.Router
+	http.RoundTripper
+	c conf.ServerConf
+	r *mux.Router
 
 	storage store.Storage
 }
@@ -46,12 +42,13 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 		return nil, err
 	}
 
-	DefaultOutputFormat = c.Format
-	DefaultCompressionQuality = c.Quality
-
 	s := &Server{}
 	s.storage = storage
 	s.c = c
+	DefaultOutputFormat = c.Format
+	DefaultCompressionQuality = c.Quality
+	LongImageSideRatio = c.LongImageRatio
+	LongImageSideRatioInverse = 1 / LongImageSideRatio
 	s.RoundTripper = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		Dial: (&net.Dialer{
@@ -63,8 +60,8 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 
 	s.r = mux.NewRouter()
 	// for images
-	s.r.HandleFunc(`/images`, s.apiUploadImage).Methods("POST")
-	sub := s.r.Path(`/images/{key}`).Subrouter()
+	s.r.HandleFunc(`/obj`, s.apiUploadImage).Methods("POST")
+	sub := s.r.Path(`/obj/{key}`).Subrouter()
 	sub.Methods("PUT").HandlerFunc(s.apiUpdateImage)
 	sub.Methods("HEAD", "GET").HandlerFunc(s.apiGetImage)
 	sub.Methods("DELETE").HandlerFunc(s.apiDelImage)
@@ -72,7 +69,6 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 
 	// for config
 	s.r.HandleFunc(`/conf`, s.apiGetConf).Methods("GET")
-	s.r.HandleFunc(`/conf`, s.apiReloadConf).Methods("POST")
 
 	// for debugging
 	s.r.HandleFunc(`/debug/pprof/cmdline`, httpprof.Cmdline)
@@ -88,40 +84,6 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 		util.APIResponse(w, 400, "zimg api uri error")
 	})
 	return s, nil
-}
-
-func (s *Server) readUploadBody(r *http.Request) ([]byte, error) {
-	if r.ContentLength > s.c.MaxSize {
-		return nil, ErrObjectTooLarge
-	}
-
-	var (
-		body []byte
-		err  error
-	)
-	ctype := r.Header.Get("Content-Type")
-	if strings.Contains(ctype, "multipart/form-data") {
-		// multipart form upload
-		err := r.ParseMultipartForm(s.c.MaxSize)
-		if err != nil {
-			return nil, err
-		}
-		file, _, err := r.FormFile(s.c.MultipartKey)
-		if err != nil {
-			return nil, err
-		}
-		body, err = ioutil.ReadAll(file)
-	} else {
-		// raw-post upload
-		body, err = ioutil.ReadAll(io.LimitReader(r.Body, s.c.MaxSize))
-	}
-	if err != nil && err != io.EOF {
-		return nil, err
-	}
-	if int64(len(body)) >= s.c.MaxSize {
-		return nil, ErrObjectTooLarge
-	}
-	return body, nil
 }
 
 func (s *Server) AllowedType(ctype string) bool {
@@ -140,40 +102,105 @@ func (s *Server) AllowedType(ctype string) bool {
 	return false
 }
 
-func (s *Server) apiUploadImage(w http.ResponseWriter, r *http.Request) {
-	data, err := s.readUploadBody(r)
-	if err != nil {
-		code := 500
-		if err == ErrObjectTooLarge {
-			code = http.StatusRequestEntityTooLarge
+func (s *Server) readAndDetect(r io.Reader) (b []byte, ctype string, err error, code int) {
+	// If the buffer overflows, we will get bytes.ErrTooLarge.
+	// Return that as an error. Any other panic remains.
+	defer func() {
+		e := recover()
+		if e == nil {
+			return
 		}
+		if panicErr, ok := e.(error); ok && panicErr == bytes.ErrTooLarge {
+			err = panicErr
+		} else {
+			panic(e)
+		}
+	}()
+
+	p := make([]byte, bytes.MinRead)
+	_, e := r.Read(p)
+	if e != nil && e != io.EOF {
+		err = e
+		code = 500
+		return
+	}
+
+	ctype = http.DetectContentType(p)
+	if !s.AllowedType(ctype) {
+		err = ErrNotAllowed
+		code = http.StatusUnsupportedMediaType
+		return
+	}
+
+	buf := bytes.NewBuffer(p)
+	_, err = buf.ReadFrom(r)
+	if err != nil {
+		code = 500
+		return
+	}
+	return buf.Bytes(), ctype, nil, 200
+}
+
+func (s *Server) readUploadBody(r *http.Request) ([]byte, string, error, int) {
+	if r.ContentLength > s.c.MaxSize {
+		return nil, "", ErrObjectTooLarge, http.StatusRequestEntityTooLarge
+	}
+
+	var rd io.Reader
+	if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
+		// multipart form upload
+		err := r.ParseMultipartForm(s.c.MaxSize)
+		if err != nil {
+			return nil, "", err, 500
+		}
+		file, _, err := r.FormFile(s.c.MultipartKey)
+		if err != nil {
+			return nil, "", err, 500
+		}
+		rd = file
+	} else {
+		// raw-post upload
+		rd = io.LimitReader(r.Body, s.c.MaxSize)
+	}
+	body, ctype, err, code := s.readAndDetect(rd)
+	if err != nil {
+		return nil, "", err, code
+	}
+	if int64(len(body)) > s.c.MaxSize {
+		return nil, "", ErrObjectTooLarge, http.StatusRequestEntityTooLarge
+	}
+	return body, ctype, nil, 200
+}
+
+func (s *Server) apiUploadImage(w http.ResponseWriter, r *http.Request) {
+	data, ctype, err, code := s.readUploadBody(r)
+	if err != nil {
 		util.APIResponse(w, code, err)
 		log.Printf("%s upload fail %d - - %s", r.RemoteAddr, code, err)
 		return
 	}
 
-	// TODO: detect http content type only read the head part
-	btype := http.DetectContentType(data)
-	if !s.AllowedType(btype) {
-		util.APIResponse(w, 400, ErrNotAllowed)
-		log.Printf("%s upload fail 400 - - %s", r.RemoteAddr, fmt.Sprintf("type [%s] not allowed", btype))
-		return
+	var imgResult ImageResult
+	if format := util.GetFileType(ctype); format == "images" {
+		// image type files
+		imgResult, err = ImagickInfo(data)
+		if err != nil {
+			util.APIResponse(w, 400, err)
+			return
+		}
+	} else {
+		// other type files
+		imgResult.Format = format
 	}
 
-	imgResult, err := ImagickInfo(data)
-	if err != nil {
-		util.APIResponse(w, 400, err)
-		return
-	}
-
-	key, err := s.storage.Set(data)
+	key, mtime, err := s.storage.Set(data)
 	if err != nil {
 		util.APIResponse(w, 500, err)
 		log.Printf("%s upload fail 500 %s %d %s", r.RemoteAddr, key, len(data), err)
 		return
 	}
 	imgResult.Key = key
-	imgResult.MTime = time.Now().UnixNano()
+	imgResult.MTime = mtime
 
 	util.APIResponse(w, 200, imgResult)
 	log.Printf("%s upload succ 200 %s %d -", r.RemoteAddr, key, len(data))
@@ -186,12 +213,10 @@ func checkAndSetEtag(w http.ResponseWriter, r *http.Request, sha1sum string) boo
 			h := w.Header()
 			delete(h, "Content-Type")
 			delete(h, "Content-Length")
-			w.WriteHeader(304)
 			return true
 		}
 	}
 	w.Header().Set("ETag", sha1sum)
-	w.WriteHeader(200)
 	return false
 }
 
@@ -221,37 +246,33 @@ func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	origin, err := s.storage.Get(key)
+	origin, mtime, err := s.storage.Get(key)
 	if err != nil {
 		util.APIResponse(w, 500, err)
 		log.Printf("%s get fail 500 %s - %s", r.RemoteAddr, key, err)
 		return
 	}
 
-	var (
-		data  []byte
-		ctype string
-	)
-	if cp != nil {
-		key = cp.Key
-		var (
-			format string
-			code   int
-		)
+	var data []byte
+	ctype := http.DetectContentType(origin)
+	format := util.GetFileType(ctype)
+	if format == "images" && cp != nil {
+		var code int
 		format, data, err, code = Convert(origin, cp)
 		if err != nil {
 			util.APIResponse(w, code, err)
 			log.Printf("%s get fail %d %s - %s", r.RemoteAddr, code, key, err)
 			return
 		}
-		ctype = util.GetMimeType(format)
 	} else {
 		data = origin
-		ctype = http.DetectContentType(data)
 	}
 
 	for k, v := range s.c.Headers {
 		w.Header().Set(k, v)
+	}
+	if s.c.MaxAge > 0 {
+		w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", s.c.MaxAge))
 	}
 	w.Header().Set("Content-Type", ctype)
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
@@ -261,17 +282,16 @@ func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.c.MaxAge > 0 {
-		w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", s.c.MaxAge))
-	}
 	sha1sum := fmt.Sprintf("%x", sha1.Sum(data))
 	done := checkAndSetEtag(w, r, sha1sum)
 	if done {
+		w.WriteHeader(304)
 		log.Printf("%s down succ 304 %s - -", r.RemoteAddr, key)
 		return
 	}
-	// TODO: support http bytes range
-	w.Write(data)
+
+	reader := util.NewByteReadSeeker(data)
+	http.ServeContent(w, r, "", util.CTime(mtime), reader)
 	log.Printf("%s down succ 200 %s %d -", r.RemoteAddr, key, len(data))
 	return
 }
@@ -302,41 +322,41 @@ func (s *Server) apiInfoImage(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s info fail 400 - - %s", r.RemoteAddr, err)
 		return
 	}
+
+	var imgResult ImageResult
+	imgResult.Key = key
+	origin, mtime, err := s.storage.Get(key)
+	if err != nil {
+		util.APIResponse(w, 500, err)
+		log.Printf("%s info fail 500 %s - %s", r.RemoteAddr, key, err)
+		return
+	}
+	imgResult.MTime = mtime
+
+	ctype := http.DetectContentType(origin)
+	if format := util.GetFileType(ctype); format == "images" {
+		// image type files
+		imgResult, err = ImagickInfo(origin)
+		if err != nil {
+			util.APIResponse(w, 500, err)
+			return
+		}
+	} else {
+		// other type files
+		imgResult.Format = format
+	}
+
 	log.Printf("%s info succ 200 %s - -", r.RemoteAddr, key)
-	util.APIResponse(w, 400, ErrNotImplement)
+	util.APIResponse(w, 200, imgResult)
 }
 
 func (s *Server) apiGetConf(w http.ResponseWriter, r *http.Request) {
-	s.mu.RLock()
 	data, err := yaml.Marshal(s.c)
-	s.mu.RUnlock()
 	if err != nil {
 		util.APIResponse(w, 500, fmt.Errorf("yaml encode: %s", err))
 		return
 	}
 	log.Printf("%s get succ 200 /conf - -", r.RemoteAddr)
-	util.APIResponse(w, 200, data)
-}
-
-func (s *Server) apiReloadConf(w http.ResponseWriter, r *http.Request) {
-	cp := r.FormValue("conf_path")
-	if cp == "" {
-		cp = s.c.ConfPath
-	}
-	c, err := conf.LoadServerConf(cp)
-	if err != nil {
-		util.APIResponse(w, 500, fmt.Errorf("load conf err: %s", err))
-		return
-	}
-	s.mu.Lock()
-	s.c = c
-	s.mu.Unlock()
-	data, err := yaml.Marshal(c)
-	if err != nil {
-		util.APIResponse(w, 500, fmt.Errorf("yaml encode err: %s", err))
-		return
-	}
-	log.Printf("%s post succ 200 /conf - -", r.RemoteAddr)
 	util.APIResponse(w, 200, data)
 }
 

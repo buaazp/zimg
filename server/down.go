@@ -12,9 +12,6 @@ var (
 	DefaultOutputFormat       string  = "JPEG"
 	DefaultCompressionQuality uint    = 75
 	LongImageSideRatio        float64 = 2.5
-)
-
-var (
 	LongImageSideRatioInverse float64 = 1 / LongImageSideRatio
 )
 
@@ -36,10 +33,11 @@ func Convert(blob []byte, cp *ConvertParam) (string, []byte, error, int) {
 		return "", nil, err, 400
 	}
 
-	// GIF special processing section
 	format := im.GetImageFormat()
 	// log.Printf("orgin fomart %s", format)
-	if format == "GIF" {
+	switch format {
+	case "GIF":
+		// GIF special processing section
 		if cp.Format == "" || cp.Format == "GIF" {
 			return format, blob, nil, 200
 		}
@@ -48,32 +46,25 @@ func Convert(blob []byte, cp *ConvertParam) (string, []byte, error, int) {
 		gifim := im.CoalesceImages()
 		defer gifim.Destroy()
 		im = gifim
-	} else {
-		if format == "PNG" {
-			// convert transparent to white background
-			background := imagick.NewPixelWand()
-			defer background.Destroy()
-			if succ := background.SetColor("white"); !succ {
-				log.Printf("[warn] %s png set color white err", cp.Key)
+	case "PNG":
+		// PNG special processing section
+		// convert transparent to white background
+		background := imagick.NewPixelWand()
+		defer background.Destroy()
+		if succ := background.SetColor("white"); !succ {
+			log.Printf("[warn] %s png set color white err", cp.Key)
+		} else {
+			if err := im.SetImageBackgroundColor(background); err != nil {
+				log.Printf("[warn] %s png set background color err: %s", cp.Key, err)
 			} else {
-				if err := im.SetImageBackgroundColor(background); err != nil {
-					log.Printf("[warn] %s png set background color err: %s", cp.Key, err)
-				} else {
-					pngim := im.MergeImageLayers(imagick.IMAGE_LAYER_FLATTEN)
-					defer pngim.Destroy()
-					im = pngim
-				}
+				pngim := im.MergeImageLayers(imagick.IMAGE_LAYER_FLATTEN)
+				defer pngim.Destroy()
+				im = pngim
 			}
 		}
-		if cp.Format == "GIF" {
-			log.Printf("[warn] cannot convert [%s] to GIF, use %s", format, DefaultOutputFormat)
-			cp.Format = DefaultOutputFormat
-		}
+	default:
 	}
 
-	if cp.Format == "" {
-		cp.Format = DefaultOutputFormat
-	}
 	if cp.FormatOnly {
 		if cp.Format == format {
 			return format, blob, nil, 200
@@ -106,13 +97,14 @@ func Convert(blob []byte, cp *ConvertParam) (string, []byte, error, int) {
 		}
 	}
 
-	newFormat := im.GetImageFormat()
 	quality := im.GetImageCompressionQuality()
 	if quality > DefaultCompressionQuality || quality == 0 {
 		if err := im.SetImageCompressionQuality(DefaultCompressionQuality); err != nil {
 			log.Printf("[warn] %s set quality %d err: %s", cp.Key, DefaultCompressionQuality, err)
 		}
 	}
+
+	newFormat := im.GetImageFormat()
 	body := im.GetImageBlob()
 	return newFormat, body, nil, 200
 }
@@ -196,6 +188,12 @@ func fiFillCrop(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *ConvertPa
 			rows = imRows
 		} else {
 			return nil, 200
+		}
+
+		imRatio := float64(imCols) / float64(imRows)
+		if imRatio > LongImageSideRatio || imRatio < LongImageSideRatioInverse {
+			// crop a long image use gravity north-west
+			cp.Gravity = NorthWest
 		}
 
 		switch cp.Gravity {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 )
@@ -50,14 +49,6 @@ func APIResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Length", strconv.Itoa(len(response)))
 	w.WriteHeader(code)
 	w.Write(response)
-}
-
-func FormValues2Map(fv url.Values) map[string]string {
-	ret := make(map[string]string)
-	for k, v := range fv {
-		ret[k] = v[0]
-	}
-	return ret
 }
 
 func CopyHeaders(dst, src http.Header) {
@@ -202,4 +193,15 @@ func GetImageType(ext string) string {
 		return ""
 	}
 	return ftype
+}
+
+func GetFileType(ctype string) string {
+	parts := strings.Split(ctype, "/")
+	if parts[0] == "images" {
+		return parts[0]
+	}
+	if len(parts) > 1 {
+		return parts[len(parts)-1]
+	}
+	return ctype
 }

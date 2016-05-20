@@ -7,8 +7,9 @@ const (
 )
 
 type Storage interface {
-	Set(data []byte) (string, error)
-	Put(key string, data []byte) error
-	Get(key string) ([]byte, error)
+	// TODO: return http code in interfaces
+	Set(data []byte) (string, int64, error)
+	Put(key string, data []byte) (int64, error)
+	Get(key string) ([]byte, int64, error)
 	Del(key string) error
 }

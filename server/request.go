@@ -16,14 +16,12 @@ const (
 	ModeFill ConvertModeType = iota
 	ModeFit
 	ModeStretch
-	ModeThumb
 )
 
 var ConvertModeTypeName = map[ConvertModeType]string{
 	ModeFill:    "ModeFill",
 	ModeFit:     "ModeFit",
 	ModeStretch: "ModeStretch",
-	ModeThumb:   "ModeThumb",
 }
 
 func (t ConvertModeType) String() string {
@@ -234,10 +232,10 @@ type ObjectResult struct {
 
 type ImageResult struct {
 	Key        string            `json:"key"`                  // key of the image
-	MTime      int64             `json:"mtime,omitempty"`      // unixnano timestamp of the image
-	Width      uint              `json:"width"`                // width of the image
-	Height     uint              `json:"height"`               // height of the image
 	Format     string            `json:"format"`               // format of the image
+	MTime      int64             `json:"mtime,omitempty"`      // unixnano timestamp of the image
+	Width      uint              `json:"width,omitempty"`      // width of the image
+	Height     uint              `json:"height,omitempty"`     // height of the image
 	Thumbs     map[string]string `json:"thumbs,omitempty"`     // thumb fids of the image
 	Properties Property          `json:"properties,omitempty"` // properties of the Image
 }

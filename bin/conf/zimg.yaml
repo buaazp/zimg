@@ -31,14 +31,12 @@ max_size: 104857600
 # if this list is blank or the first value is "all",
 # zimg will allow all types of file to upload
 allowed_types:
+- all
 - jpeg
 - jpg
 - gif
 - png
 - webp
-
-# config file path
-conf_path: conf/zimg.yaml
 
 # image store path when you
 # using local storage mode

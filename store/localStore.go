@@ -1,9 +1,10 @@
 package store
 
 import (
+	"bytes"
 	"crypto/md5"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -31,17 +32,17 @@ func NewLocalStore(c conf.ServerConf) (*LocalStore, error) {
 	return s, nil
 }
 
-func (s *LocalStore) Set(data []byte) (string, error) {
+func (s *LocalStore) Set(data []byte) (string, int64, error) {
 	md5sum := fmt.Sprintf("%x", md5.Sum(data))
 	dirPath, err := s.calcPath(md5sum)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
-	err = WriteImage(dirPath, data)
+	mtime, err := WriteData(dirPath, data)
 	if err != nil {
-		return "", err
+		return "", mtime, err
 	}
-	return md5sum, nil
+	return md5sum, mtime, nil
 }
 
 func (s *LocalStore) calcPath(md5sum string) (string, error) {
@@ -61,20 +62,32 @@ func (s *LocalStore) calcPath(md5sum string) (string, error) {
 	return absolutePath, nil
 }
 
-func WriteImage(dirPath string, data []byte) error {
+func WriteData(dirPath string, data []byte) (int64, error) {
 	err := os.MkdirAll(dirPath, 0755)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	origPath := filepath.Join(dirPath, OrigName)
-	err = ioutil.WriteFile(origPath, data, 0664)
+
+	f, err := os.OpenFile(origPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0664)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	defer f.Close()
+	if n, err := f.Write(data); err != nil {
+		return 0, err
+	} else if n < len(data) {
+		return 0, io.ErrShortWrite
+	}
+	stat, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	mtime := stat.ModTime().UnixNano()
+	return mtime, err
 }
 
-func (s *LocalStore) Put(key string, data []byte) error {
+func (s *LocalStore) Put(key string, data []byte) (int64, error) {
 	parts := strings.Split(key, ",")
 	if len(parts) == 3 {
 		key = fmt.Sprintf("%s,%s", parts[0], parts[1])
@@ -82,27 +95,56 @@ func (s *LocalStore) Put(key string, data []byte) error {
 
 	dirPath, err := s.calcPath(key)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	err = WriteImage(dirPath, data)
-	if err != nil {
-		return err
-	}
-	return nil
+	return WriteData(dirPath, data)
 }
 
-func (s *LocalStore) Get(key string) ([]byte, error) {
+func readAll(r io.Reader, capacity int64) (b []byte, err error) {
+	buf := bytes.NewBuffer(make([]byte, 0, capacity))
+	// If the buffer overflows, we will get bytes.ErrTooLarge.
+	// Return that as an error. Any other panic remains.
+	defer func() {
+		e := recover()
+		if e == nil {
+			return
+		}
+		if panicErr, ok := e.(error); ok && panicErr == bytes.ErrTooLarge {
+			err = panicErr
+		} else {
+			panic(e)
+		}
+	}()
+	_, err = buf.ReadFrom(r)
+	return buf.Bytes(), err
+}
+
+func (s *LocalStore) Get(key string) ([]byte, int64, error) {
 	dirPath, err := s.calcPath(key)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	origPath := filepath.Join(dirPath, OrigName)
-	data, err := ioutil.ReadFile(origPath)
+	f, err := os.Open(origPath)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return data, nil
+	defer f.Close()
+	stat, err := f.Stat()
+	if err != nil {
+		return nil, 0, err
+	}
+	mtime := stat.ModTime().UnixNano()
+	var n int64
+	if size := stat.Size(); size < 1e9 {
+		n = size
+	}
+	data, err := readAll(f, n+bytes.MinRead)
+	if err != nil {
+		return nil, mtime, err
+	}
+	return data, mtime, nil
 }
 
 func (s *LocalStore) Del(key string) error {
