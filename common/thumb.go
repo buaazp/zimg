@@ -1,4 +1,4 @@
-package server
+package common
 
 type Thumb struct {
 	Name    string          `json:"name" yaml:"name"`

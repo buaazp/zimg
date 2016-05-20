@@ -66,9 +66,6 @@ disable_type: false
 # you can set disable_type ture
 disable_zoom_up: false
 
-# thumbs are processing types you use frequently
-thumbs_conf: ./conf/thumbs.yaml
-
 # etag is used for brower caching files
 # if etag is true, files not modified will return 304
 etag: true
@@ -81,3 +78,36 @@ max_age: 7776000
 headers:
   Cache-Control: max-age=7776000
   Server: zimg v4.0.0
+
+# thumbs used for uploading convert
+thumbs:
+- name: 1080p
+  id: 1
+  mode: 1
+  width: 1920
+  height: 1080
+  pixels: 2073600
+- name: 720p
+  id: 2
+  mode: 1
+  width: 1280
+  height: 720
+  pixels: 921600
+- name: 480p
+  id: 3
+  mode: 1
+  width: 854
+  height: 480
+  pixels: 409920
+- name: 360p
+  id: 4
+  mode: 1
+  width: 640
+  height: 360
+  pixels: 230400
+- name: 240p
+  id: 5
+  mode: 1
+  width: 427
+  height: 240
+  pixels: 102480

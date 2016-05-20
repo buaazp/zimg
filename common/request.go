@@ -1,13 +1,11 @@
-package server
+package common
 
 import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/buaazp/zimg/util"
-	"github.com/gorilla/mux"
 )
 
 type ConvertModeType uint
@@ -81,20 +79,6 @@ type ConvertParam struct {
 	RelativeH  float64         `json:"relative_h,omitempty"`
 	Format     string          `json:"format"`
 	FormatOnly bool            `json:"format_only"`
-}
-
-func parseKey(r *http.Request) (string, string, error) {
-	fKey := mux.Vars(r)["key"]
-	if fKey == "" {
-		return "", "", ErrNoKey
-	}
-	parts := strings.Split(fKey, ".")
-	key := parts[0]
-	ext := DefaultOutputFormat
-	if len(parts) > 1 {
-		ext = parts[1]
-	}
-	return key, ext, nil
 }
 
 var (

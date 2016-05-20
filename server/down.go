@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 
+	"github.com/buaazp/zimg/common"
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
@@ -15,16 +16,11 @@ var (
 	LongImageSideRatioInverse float64 = 1 / LongImageSideRatio
 )
 
-func init() {
-	imagick.Initialize()
-	// defer imagick.Terminate()
-}
-
 func outOfImage(cols, rows, x, y uint) bool {
 	return x > cols || y > rows
 }
 
-func Convert(blob []byte, cp *ConvertParam) (string, []byte, error, int) {
+func Convert(blob []byte, cp *common.ConvertParam) (string, []byte, error, int) {
 	im := imagick.NewMagickWand()
 	defer im.Destroy()
 
@@ -76,11 +72,11 @@ func Convert(blob []byte, cp *ConvertParam) (string, []byte, error, int) {
 
 		var code int
 		switch cp.Mode {
-		case ModeFill:
+		case common.ModeFill:
 			err, code = FiConvertFill(im, cp)
-		case ModeFit:
+		case common.ModeFit:
 			err, code = FiConvertFit(im, cp)
-		case ModeStretch:
+		case common.ModeStretch:
 			err, code = FiConvertStretch(im, cp)
 		default:
 			return "", nil, fmt.Errorf("unknown convert mode: %+v", cp.Mode), 400
@@ -109,7 +105,7 @@ func Convert(blob []byte, cp *ConvertParam) (string, []byte, error, int) {
 	return newFormat, body, nil, 200
 }
 
-func cropPostion(im *imagick.MagickWand, cp *ConvertParam) (x, y, w, h uint, err error, code int) {
+func cropPostion(im *imagick.MagickWand, cp *common.ConvertParam) (x, y, w, h uint, err error, code int) {
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
 
@@ -134,7 +130,7 @@ func cropPostion(im *imagick.MagickWand, cp *ConvertParam) (x, y, w, h uint, err
 	return
 }
 
-func fiJustCrop(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiJustCrop(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("just croping...")
 	x, y, w, h, err, code := cropPostion(im, cp)
 	if err != nil {
@@ -148,7 +144,7 @@ func fiJustCrop(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return nil, 200
 }
 
-func FiConvertFill(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func FiConvertFill(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	if cp.NeedCrop() {
 		if cp.Width == 0 && cp.Height == 0 {
 			return fiJustCrop(im, cp)
@@ -160,7 +156,7 @@ func FiConvertFill(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return fiFillResize(im, cp)
 }
 
-func fiFillCrop(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *ConvertParam) (error, int) {
+func fiFillCrop(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fill croping...")
 	if cp.Width == 0 && cp.Height == 0 {
 		return fmt.Errorf("both width and height are not set"), 400
@@ -193,35 +189,35 @@ func fiFillCrop(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *ConvertPa
 		imRatio := float64(imCols) / float64(imRows)
 		if imRatio > LongImageSideRatio || imRatio < LongImageSideRatioInverse {
 			// crop a long image use gravity north-west
-			cp.Gravity = NorthWest
+			cp.Gravity = common.NorthWest
 		}
 
 		switch cp.Gravity {
-		case Center:
+		case common.Center:
 			x += (imCols - cols) / 2
 			y += (imRows - rows) / 2
-		case North:
+		case common.North:
 			x += (imCols - cols) / 2
 			y += 0
-		case South:
+		case common.South:
 			x += (imCols - cols) / 2
 			y += imRows - rows
-		case West:
+		case common.West:
 			x += 0
 			y += (imRows - rows) / 2
-		case East:
+		case common.East:
 			x += imCols - cols
 			y += (imRows - rows) / 2
-		case NorthWest:
+		case common.NorthWest:
 			x += 0
 			y += 0
-		case NorthEast:
+		case common.NorthEast:
 			x += imCols - cols
 			y += 0
-		case SouthWest:
+		case common.SouthWest:
 			x += 0
 			y += imRows - rows
-		case SouthEast:
+		case common.SouthEast:
 			x += imCols - cols
 			y += imRows - rows
 		default:
@@ -238,7 +234,7 @@ func fiFillCrop(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *ConvertPa
 	return nil, 200
 }
 
-func fiCropAndFillResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiCropAndFillResize(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fill crop and resizing...")
 	x, y, w, h, err, code := cropPostion(im, cp)
 	if err != nil {
@@ -277,7 +273,7 @@ func fiCropAndFillResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) 
 	return nil, 200
 }
 
-func fiFillResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiFillResize(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fill resizing...")
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
@@ -314,7 +310,7 @@ func fiFillResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return nil, 200
 }
 
-func FiConvertFit(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func FiConvertFit(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	if cp.NeedCrop() {
 		if cp.Width == 0 && cp.Height == 0 {
 			return fiJustCrop(im, cp)
@@ -326,7 +322,7 @@ func FiConvertFit(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return fiFitResize(im, cp)
 }
 
-func fiFitScale(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *ConvertParam) (error, int) {
+func fiFitScale(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fit scaling...")
 	if cp.Width == 0 {
 		cp.Width = imCols
@@ -367,7 +363,7 @@ func fiFitScale(im *imagick.MagickWand, imCols, imRows, x, y uint, cp *ConvertPa
 	return nil, 200
 }
 
-func fiCropAndFitResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiCropAndFitResize(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fit crop and resizing...")
 	x, y, w, h, err, code := cropPostion(im, cp)
 	if err != nil {
@@ -382,7 +378,7 @@ func fiCropAndFitResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return fiFitScale(im, w, h, x, y, cp)
 }
 
-func fiFitSideScale(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiFitSideScale(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fit side scaling...")
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
@@ -430,7 +426,7 @@ func fiFitSideScale(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return nil, 200
 }
 
-func fiFitResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiFitResize(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("fit resizing...")
 	if cp.LongSide > 0 || cp.ShortSide > 0 {
 		return fiFitSideScale(im, cp)
@@ -446,7 +442,7 @@ func fiFitResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return fiFitScale(im, imCols, imRows, 0, 0, cp)
 }
 
-func FiConvertStretch(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func FiConvertStretch(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	if cp.NeedCrop() {
 		if cp.Width == 0 && cp.Height == 0 {
 			return fiJustCrop(im, cp)
@@ -458,7 +454,7 @@ func FiConvertStretch(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
 	return fiStretchResize(im, cp)
 }
 
-func fiCropAndStretchResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiCropAndStretchResize(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("stretch crop and resizing...")
 	x, y, w, h, err, code := cropPostion(im, cp)
 	if err != nil {
@@ -473,7 +469,7 @@ func fiCropAndStretchResize(im *imagick.MagickWand, cp *ConvertParam) (error, in
 	return fiStretchResize(im, cp)
 }
 
-func fiStretchResize(im *imagick.MagickWand, cp *ConvertParam) (error, int) {
+func fiStretchResize(im *imagick.MagickWand, cp *common.ConvertParam) (error, int) {
 	// log.Printf("stretch resizing...")
 	if cp.Width == 0 && cp.Height == 0 {
 		return fmt.Errorf("both width and height are not set"), 400

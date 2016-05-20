@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/buaazp/zimg/common"
 	"github.com/buaazp/zimg/conf"
 	"github.com/buaazp/zimg/store"
 	"github.com/buaazp/zimg/util"
@@ -58,6 +59,22 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 		ResponseHeaderTimeout: c.Timeout.Duration,
 	}
 
+	var maxPixels uint
+	var maxThumbID int = -1
+	for i, tb := range c.Thumbs {
+		pixels := tb.Width * tb.Height
+		if pixels > maxPixels {
+			maxThumbID = i
+		}
+		c.Thumbs[i].Pixels = pixels
+	}
+	if maxThumbID != -1 {
+		MaxConfThumb = c.Thumbs[maxPixels]
+	}
+	if MaxConfThumb.IsIllegal() {
+		return nil, fmt.Errorf("max thumb illegal: %+v", MaxConfThumb)
+	}
+
 	s.r = mux.NewRouter()
 	// for images
 	s.r.HandleFunc(`/obj`, s.apiUploadImage).Methods("POST")
@@ -84,6 +101,20 @@ func NewServer(c conf.ServerConf) (*Server, error) {
 		util.APIResponse(w, 400, "zimg api uri error")
 	})
 	return s, nil
+}
+
+func parseKey(r *http.Request) (string, string, error) {
+	fKey := mux.Vars(r)["key"]
+	if fKey == "" {
+		return "", "", ErrNoKey
+	}
+	parts := strings.Split(fKey, ".")
+	key := parts[0]
+	ext := DefaultOutputFormat
+	if len(parts) > 1 {
+		ext = parts[1]
+	}
+	return key, ext, nil
 }
 
 func (s *Server) AllowedType(ctype string) bool {
@@ -173,6 +204,7 @@ func (s *Server) readUploadBody(r *http.Request) ([]byte, string, error, int) {
 }
 
 func (s *Server) apiUploadImage(w http.ResponseWriter, r *http.Request) {
+	t0 := time.Now()
 	data, ctype, err, code := s.readUploadBody(r)
 	if err != nil {
 		util.APIResponse(w, code, err)
@@ -180,13 +212,67 @@ func (s *Server) apiUploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var imgResult ImageResult
-	if format := util.GetFileType(ctype); format == "images" {
+	now := strconv.FormatInt(t0.UTC().UnixNano(), 16)
+	log.Printf("%s origin nBody: %d", now, len(data))
+
+	var imgResult common.ImageResult
+	format := util.GetFileType(ctype)
+	if format == "image" {
 		// image type files
-		imgResult, err = ImagickInfo(data)
+		imgResult, err = ImagickInfo(now, data)
 		if err != nil {
 			util.APIResponse(w, 400, err)
 			return
+		}
+
+		var thumbs []common.Thumb
+		thumbStr := r.FormValue("thumbs")
+		if thumbStr != "" {
+			if thumbStr == "all" {
+				thumbs = s.c.Thumbs
+			} else {
+				parts := strings.Split(thumbStr, ",")
+				for _, v := range parts {
+					for _, tb := range s.c.Thumbs {
+						if v == tb.Name {
+							thumbs = append(thumbs, tb)
+						}
+					}
+				}
+			}
+		}
+
+		if len(thumbs) > 0 {
+			t1 := time.Now()
+			tBody, err := ImConvert(data, thumbs, now)
+			if err != nil {
+				if err == ErrBadimg {
+					util.APIResponse(w, http.StatusUnsupportedMediaType, ErrBadimg)
+					return
+				}
+				log.Printf("%s imagick convert err: %s", now, err)
+				util.APIResponse(w, 500, err)
+				return
+			} else {
+				log.Printf("%s imagick convert elapsed: %v", now, time.Since(t1))
+				imgResult.Thumbs = make(map[string]string)
+			L1:
+				for i, nBody := range tBody {
+					if nBody == nil {
+						continue L1
+					}
+					tb := thumbs[i]
+					t2 := time.Now()
+					nKey, _, err := s.storage.Set(nBody)
+					if err != nil {
+						util.APIResponse(w, 500, err)
+						log.Printf("%s upload fail 500 %s %d %s", r.RemoteAddr, nKey, len(nBody), err)
+						return
+					}
+					log.Printf("%s %s store set %s elapsed: %v", now, tb.Name, nKey, time.Since(t2))
+					imgResult.Thumbs[tb.Name] = nKey
+				}
+			}
 		}
 	} else {
 		// other type files
@@ -239,7 +325,7 @@ func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cp, err := GetConvertParam(r, key, ext)
+	cp, err := common.GetConvertParam(r, key, ext)
 	if err != nil {
 		util.APIResponse(w, 400, err)
 		log.Printf("%s get fail 400 %s - %s", r.RemoteAddr, key, err)
@@ -256,7 +342,7 @@ func (s *Server) apiGetImage(w http.ResponseWriter, r *http.Request) {
 	var data []byte
 	ctype := http.DetectContentType(origin)
 	format := util.GetFileType(ctype)
-	if format == "images" && cp != nil {
+	if format == "image" && cp != nil {
 		var code int
 		format, data, err, code = Convert(origin, cp)
 		if err != nil {
@@ -323,7 +409,7 @@ func (s *Server) apiInfoImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var imgResult ImageResult
+	var imgResult common.ImageResult
 	imgResult.Key = key
 	origin, mtime, err := s.storage.Get(key)
 	if err != nil {
@@ -334,9 +420,10 @@ func (s *Server) apiInfoImage(w http.ResponseWriter, r *http.Request) {
 	imgResult.MTime = mtime
 
 	ctype := http.DetectContentType(origin)
-	if format := util.GetFileType(ctype); format == "images" {
+	format := util.GetFileType(ctype)
+	if format == "image" {
 		// image type files
-		imgResult, err = ImagickInfo(origin)
+		imgResult, err = ImagickInfo(key, origin)
 		if err != nil {
 			util.APIResponse(w, 500, err)
 			return
@@ -361,6 +448,7 @@ func (s *Server) apiGetConf(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Serve() error {
+	MagickInit()
 	log.Printf("serving at %s\n", s.c.Host)
 	err := http.ListenAndServe(s.c.Host, s.r)
 	if err != nil {
@@ -373,4 +461,5 @@ func (s *Server) Serve() error {
 func (s *Server) Close() {
 	log.Printf("Server closing...")
 	fmt.Println("😝\nbyebye!")
+	MagickTerm()
 }

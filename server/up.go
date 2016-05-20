@@ -4,29 +4,41 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sync"
 
+	"github.com/buaazp/zimg/common"
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 const (
-	NormalRatio = 3.0
+	MiddleChannelFormat = "BMP"
 )
 
 var (
-	MaxConfThumb     Thumb
-	DefaultThumbType = "JPEG"
+	MaxConfThumb common.Thumb
+	SamplePixel  uint    = 5000 * 5000
+	NormalRatio  float64 = 3.0
 )
 
-func ImagickInfo(blob []byte) (rst ImageResult, err error) {
+func MagickInit() {
+	imagick.Initialize()
+}
+
+func MagickTerm() {
+	imagick.Terminate()
+}
+
+func ImagickInfo(key string, data []byte) (rst common.ImageResult, err error) {
 	// log.Printf("%s imagick info...", key)
 	im := imagick.NewMagickWand()
 	defer im.Destroy()
 
-	err = im.PingImageBlob(blob)
+	err = im.PingImageBlob(data)
 	if err != nil {
 		return
 	}
 
+	im.ResetIterator()
 	ppt := imGetExif(im)
 	rst.Width = im.GetImageWidth()
 	rst.Height = im.GetImageHeight()
@@ -35,8 +47,8 @@ func ImagickInfo(blob []byte) (rst ImageResult, err error) {
 	return
 }
 
-func imGetExif(im *imagick.MagickWand) Property {
-	ppt := make(Property)
+func imGetExif(im *imagick.MagickWand) common.Property {
+	ppt := make(common.Property)
 	pNames := im.GetImageProperties("*")
 	for _, name := range pNames {
 		pValue := im.GetImageProperty(name)
@@ -46,55 +58,67 @@ func imGetExif(im *imagick.MagickWand) Property {
 	return ppt
 }
 
-func ImConvert(blob []byte, thumbs []Thumb, key string) (map[string][]byte, error) {
+func ImConvert(blob []byte, thumbs []common.Thumb, key string) ([][]byte, error) {
 	// start := time.Now()
-	// log.Printf("convert start: %v", time.Since(start))
 	im := imagick.NewMagickWand()
-	// log.Printf("convert new wand: %v", time.Since(start))
 	defer im.Destroy()
+	// log.Printf("%s convert new wand: %v", key, time.Since(start))
 
+	// start = time.Now()
 	err := im.ReadImageBlob(blob)
 	if err != nil {
-		return nil, err
+		log.Printf("%s read blob err: %s", key, err)
+		return nil, ErrBadimg
 	}
-	// log.Printf("convert read blob: %v", time.Since(start))
+	// log.Printf("%s convert read blob: %v", key, time.Since(start))
 
-	imCols := im.GetImageWidth()
-	imRows := im.GetImageHeight()
-	// log.Printf("cols=%d, rows=%d", imCols, imRows)
-	var imRatio float64
-	if imCols > imRows {
-		imRatio = float64(imCols) / float64(imRows)
+	longSide := im.GetImageWidth()
+	shortSide := im.GetImageHeight()
+	// log.Printf("%s cols=%d, rows=%d", key, longSide, shortSide)
+	if longSide < shortSide {
+		longSide, shortSide = shortSide, longSide
+	}
+	imRatio := float64(longSide) / float64(shortSide)
+
+	var standardThumb common.Thumb
+	if len(thumbs) == 1 {
+		standardThumb = thumbs[0]
 	} else {
-		imRatio = float64(imRows) / float64(imCols)
+		standardThumb = MaxConfThumb
 	}
 
-	imPixels := imCols * imRows
+	// start = time.Now()
 	if imRatio < NormalRatio {
-		if imCols > MaxConfThumb.Width || imRows > MaxConfThumb.Height {
-			err = ImFitSideResize(im, MaxConfThumb)
+		if longSide > standardThumb.Width || shortSide > standardThumb.Height {
+			err = ImFitSideResize(im, standardThumb)
 		}
 	} else {
-		if imPixels > MaxConfThumb.Pixels {
-			err = ImFitPixelResize(im, MaxConfThumb)
+		imPixels := longSide * shortSide
+		if imPixels > standardThumb.Pixels {
+			err = ImFitPixelResize(im, standardThumb)
 		}
 	}
 	if err != nil {
 		return nil, err
 	}
+	// log.Printf("%s convert %s resize: %v", key, standardThumb.Name, time.Since(start))
 
 	// image auto-orient
-	err = autoRotate(im)
+	// orientation := im.GetImageOrientation()
+	// log.Printf("%s orientation: %v", key, orientation)
+	// start := time.Now()
+	err = im.AutoOrientImage()
 	if err != nil {
-		return nil, err
+		log.Printf("%s auto orient image err: %s", key, err)
 	}
-	// log.Printf("convert rotate: %v", time.Since(start))
+	// log.Printf("%s convert rotate: %v", key, time.Since(start))
 
 	// convert CMYK's icc to sRGB
+	// start = time.Now()
 	// profiles := im.GetImageProfiles("*")
-	// log.Printf("profiles: %+v", profiles)
+	// log.Printf("%s profiles: %+v", key, profiles)
 	iccProfile := im.GetImageProfile("icc")
-	// log.Printf("icc: %+v", len(iccProfile))
+	// log.Printf("%s icc: %+v", key, len(iccProfile))
 	if iccProfile != "" && iccProfile != srgbIcc {
 		// if colorspace is CMYK and has ICC,
 		// the colorspace will convert to sRGB
@@ -102,121 +126,185 @@ func ImConvert(blob []byte, thumbs []Thumb, key string) (map[string][]byte, erro
 		// log.Printf("%s has a private icc profile: %d", key, len(iccProfile))
 		err = im.ProfileImage("icc", _srgbIcc)
 		if err != nil {
-			return nil, err
+			// log.Printf("%s profile image err: %s", key, err)
 		}
 	}
-	// log.Printf("convert profile: %v", time.Since(start))
+	// log.Printf("%s convert profile: %v", key, time.Since(start))
 
 	// strip all infomation of image
+	// start = time.Now()
 	err = im.StripImage()
 	if err != nil {
-		return nil, err
+		log.Printf("%s strip image err: %s", key, err)
 	}
-	// log.Printf("convert strip: %v", time.Since(start))
+	// log.Printf("%s convert strip: %v", key, time.Since(start))
 
-	format := im.GetImageFormat()
-	// log.Printf("format: %s", format)
-	switch format {
-	case "GIF":
-		// Composites a set of images while respecting any page
-		// offsets and disposal methods
-		gifim := im.CoalesceImages()
-		defer gifim.Destroy()
-		im = gifim
-		// log.Printf("convert coalesce: %v", time.Since(start))
-		// Maybe not needed:
-		// select the smallest cropped image to replace each frame
-		// im = im.OptimizeImageLayers()
-		// log.Printf("convert optimize layer: %v", time.Since(start))
-		// w, h, x, y, err := im.GetImagePage()
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// log.Println(w, h, x, y)
-		// err = im.ResetImagePage("0x0+0+15!")
-	case "PNG":
-		// convert transparent to white background
-		background := imagick.NewPixelWand()
-		defer background.Destroy()
-		succ := background.SetColor("white")
-		if !succ {
-			return nil, fmt.Errorf("PNG set color white failed")
-		}
-		err = im.SetImageBackgroundColor(background)
-		if err != nil {
-			return nil, err
-		}
-		pngim := im.MergeImageLayers(imagick.IMAGE_LAYER_FLATTEN)
-		defer pngim.Destroy()
-		im = pngim
-		// log.Printf("convert set white background: %v", time.Since(start))
-	default:
-	}
+	// format := im.GetImageFormat()
+	// // log.Printf("%s format: %s", key, format)
+	// switch format {
+	// // case "JPEG":
+	// // TODO: jpeg convert here
+	// case "GIF":
+	// 	// Composites a set of images while respecting any page
+	// 	// offsets and disposal methods
+	// 	gifim := im.CoalesceImages()
+	// 	defer gifim.Destroy()
+	// 	im = gifim
+	// 	// log.Printf("%s convert coalesce: %v", key, time.Since(start))
+	// 	// case "PNG":
+	// 	// 	// convert transparent to white background
+	// 	// 	background := imagick.NewPixelWand()
+	// 	// 	defer background.Destroy()
+	// 	// 	succ := background.SetColor("white")
+	// 	// 	if !succ {
+	// 	// 		return nil, fmt.Errorf("PNG set color white failed")
+	// 	// 	}
+	// 	// 	err = im.SetImageBackgroundColor(background)
+	// 	// 	if err != nil {
+	// 	// 		return nil, err
+	// 	// 	}
+	// 	// 	pngim := im.MergeImageLayers(imagick.IMAGE_LAYER_FLATTEN)
+	// 	// 	defer pngim.Destroy()
+	// 	// 	im = pngim
+	// 	// 	// log.Printf("%s convert set white background: %v", key, time.Since(start))
+	// }
 
 	// colorspcae := im.GetImageColorspace()
-	// log.Printf("colorspace: %+v", colorspcae)
-	// log.Printf("convert colorspace to: %+v", imagick.COLORSPACE_RGB)
+	// log.Printf("%s colorspace: %+v", key, colorspcae)
+	// log.Printf("%s convert colorspace to: %+v", key, imagick.COLORSPACE_RGB)
 	// err = im.SetImageColorspace(imagick.COLORSPACE_RGB)
 	// if err != nil {
 	// 	return nil, err
 	// }
-	// log.Printf("convert colorspace: %v", time.Since(start))
+	// log.Printf("%s convert colorspace: %v", key, time.Since(start))
 
-	err = im.SetImageFormat(DefaultThumbType)
+	tBody := make([][]byte, len(thumbs))
+	if len(thumbs) == 1 {
+		// start = time.Now()
+		nBody, err := ImEncode(im, thumbs[0].Format)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("%s %s sBody: %d", key, thumbs[0].Name, len(nBody))
+		// log.Printf("%s convert encode %s: %v", key, thumbs[0].Name, time.Since(start))
+		tBody[0] = nBody
+		return tBody, nil
+	}
+
+	longSide = im.GetImageWidth()
+	shortSide = im.GetImageHeight()
+	// log.Printf("%s cols=%d, rows=%d", key, longSide, shortSide)
+	if longSide < shortSide {
+		longSide, shortSide = shortSide, longSide
+	}
+
+	// start := time.Now()
+	err = im.SetImageFormat(MiddleChannelFormat)
+	if err != nil {
+		log.Printf("%s set mid format %s err: %s", key, MiddleChannelFormat, err)
+	}
+	// log.Printf("%s convert format: %v", key, time.Since(start))
+	// start = time.Now()
+	bmp := im.GetImageBlob()
+	log.Printf("%s %s bmp: %d", key, standardThumb.Name, len(bmp))
+	// log.Printf("%s convert get bmp blob: %v", key, time.Since(start))
+
+	var (
+		tlock   sync.Mutex
+		errC    = make(chan error, len(thumbs))
+		saveIds = make([]int, 0, len(thumbs))
+	)
+L1:
+	for i, tb := range thumbs {
+		if tb.Width == 0 && tb.Height == 0 {
+			tlock.Lock()
+			tBody[i] = nil
+			tlock.Unlock()
+			continue L1
+		}
+
+		if (tb.Width == 0 && tb.Height < shortSide) ||
+			(tb.Height == 0 && tb.Width < longSide) ||
+			((tb.Width > 0 && tb.Height > 0) && (tb.Width < longSide || tb.Height < shortSide)) {
+			go func(i int, tb common.Thumb) {
+				// start = time.Now()
+				nBody, err := ImReduce(bmp, tb, key)
+				if err != nil {
+					errC <- err
+					return
+				} else {
+					log.Printf("%s %s nBody: %d", key, tb.Name, len(nBody))
+					// log.Printf("%s convert reduce %s: %v", key, tb.Name, time.Since(start))
+					tlock.Lock()
+					tBody[i] = nBody
+					tlock.Unlock()
+				}
+				errC <- nil
+			}(i, tb)
+		} else {
+			saveIds = append(saveIds, i)
+		}
+	}
+
+	if len(saveIds) > 0 {
+		// start = time.Now()
+		nBody, err := ImEncode(im, DefaultOutputFormat)
+		if err != nil {
+			return nil, err
+		}
+		// log.Printf("%s convert encode %s: %v", key, DefaultOutputFormat, time.Since(start))
+		for _, saveId := range saveIds {
+			tb := thumbs[saveId]
+			log.Printf("%s %s sBody: %d", key, tb.Name, len(nBody))
+			tlock.Lock()
+			tBody[saveId] = nBody
+			tlock.Unlock()
+			errC <- nil
+		}
+	}
+
+	for i := 0; i < len(thumbs); i++ {
+		select {
+		case err := <-errC:
+			if err != nil {
+				log.Printf("%s errC recieved: %s", key, err)
+				return nil, err
+			}
+		}
+	}
+
+	return tBody, nil
+}
+
+func ImEncode(im *imagick.MagickWand, tbFormat string) ([]byte, error) {
+	if tbFormat == "" {
+		tbFormat = DefaultOutputFormat
+	}
+
+	err := im.SetImageFormat(tbFormat)
 	if err != nil {
 		return nil, err
 	}
-	// log.Printf("convert format: %v", time.Since(start))
-	// format2 := im.GetImageFormat()
-	// log.Printf("format2: %s", format2)
+
+	quality := im.GetImageCompressionQuality()
+	if quality > DefaultCompressionQuality || quality == 0 {
+		err = im.SetImageCompressionQuality(DefaultCompressionQuality)
+		if err != nil {
+			log.Printf("set compression quality err: %v", err)
+		}
+		// log.Printf("set image compression quality: %v", time.Since(start))
+	}
 
 	// convert image to progressive jpeg
 	// progressive reduce jpeg size incidentally
 	// but convert elapsed time increase about 10%
 	err = im.SetInterlaceScheme(imagick.INTERLACE_PLANE)
 	if err != nil {
-		return nil, err
+		log.Printf("interlace image err: %s", err)
 	}
 	// log.Printf("convert interlace: %v", time.Since(start))
 
-	mBody := im.GetImageBlob()
-	// log.Printf("%s %s mBody: %d", key, MaxConfThumb.Name, len(mBody))
-	// log.Printf("convert get %s blob: %v", MaxConfThumb.Name, time.Since(start))
-
-	imCols = im.GetImageWidth()
-	imRows = im.GetImageHeight()
-	// log.Printf("cols=%d, rows=%d", imCols, imRows)
-	tBody := make(map[string][]byte)
-L1:
-	for _, tb := range thumbs {
-		if tb.Width == 0 && tb.Height == 0 {
-			continue L1
-		}
-		nKey := fmt.Sprintf("%s,%d", key, tb.ID)
-
-		if tb.Name == MaxConfThumb.Name && tb.ID == MaxConfThumb.ID {
-			tBody[nKey] = mBody
-			log.Printf("%s %s sBody: %d", nKey, tb.Name, len(mBody))
-			continue L1
-		}
-
-		if (tb.Width == 0 && tb.Height < imRows) ||
-			(tb.Height == 0 && tb.Width < imCols) ||
-			((tb.Width > 0 && tb.Height > 0) && (tb.Width < imCols || tb.Height < imRows)) {
-			nBody, err := ImReduce(mBody, tb, nKey)
-			if err != nil {
-				return nil, err
-			}
-			// log.Printf("convert reduce %s: %v", tb.Name, time.Since(start))
-			tBody[nKey] = nBody
-			log.Printf("%s %s nBody: %d", nKey, tb.Name, len(nBody))
-		} else {
-			tBody[nKey] = mBody
-			log.Printf("%s %s sBody: %d", nKey, tb.Name, len(mBody))
-		}
-	}
-
-	return tBody, nil
+	return im.GetImageBlob(), nil
 }
 
 func autoRotate(im *imagick.MagickWand) (err error) {
@@ -266,12 +354,14 @@ func autoRotate(im *imagick.MagickWand) (err error) {
 		defer background.Destroy()
 		err = im.RotateImage(background, 270)
 	default: // 读取 EXIF Orientation 错误
-		err = fmt.Errorf("read exif orientation error")
+		log.Printf("illegal exif orientation err: %v", ot)
 	}
+	// strip image will remove this property, so this code is needn't
+	// err = im.SetImageOrientation(imagick.ORIENTATION_TOP_LEFT)
 	return
 }
 
-func ImReduce(blob []byte, tb Thumb, key string) ([]byte, error) {
+func ImReduce(blob []byte, tb common.Thumb, key string) ([]byte, error) {
 	// start := time.Now()
 	// log.Printf("reduce start: %v", time.Since(start))
 	im := imagick.NewMagickWand()
@@ -289,22 +379,25 @@ func ImReduce(blob []byte, tb Thumb, key string) ([]byte, error) {
 	// }()
 
 	if tb.Width == 0 || tb.Height == 0 {
-		return ImJustResize(im, tb)
+		err = ImJustResize(im, tb)
+	} else {
+		switch tb.Mode {
+		case common.ModeFill:
+			err = ImFillReduce(im, tb, key)
+		case common.ModeFit:
+			err = ImFitReduce(im, tb)
+		default:
+			return nil, fmt.Errorf("unknown convert mode: %+v", tb.Mode)
+		}
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	switch tb.Mode {
-	case ModeFill:
-		return ImFillReduce(im, tb, key)
-	case ModeFit:
-		return ImFitReduce(im, tb)
-	default:
-		return nil, fmt.Errorf("unknown convert mode: %+v", tb.Mode)
-	}
-
-	return nil, fmt.Errorf("uncanny error: it shouldn't happen!")
+	return ImEncode(im, tb.Format)
 }
 
-func ImJustResize(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
+func ImJustResize(im *imagick.MagickWand, tb common.Thumb) error {
 	// log.Printf("just scaling...")
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
@@ -317,52 +410,49 @@ func ImJustResize(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
 		tb.Height = uint(math.Floor(float64(tb.Width) / imRatio))
 	}
 
-	err := im.ResizeImage(tb.Width, tb.Height, imagick.FILTER_LANCZOS, 0.8)
-	if err != nil {
-		return nil, err
+	if imCols*imRows > SamplePixel {
+		log.Printf("%dx%d > sample pixel, sampling...", imCols, imRows)
+		return im.SampleImage(tb.Width, tb.Height)
 	}
-	return im.GetImageBlob(), nil
+	return im.ResizeImage(tb.Width, tb.Height, imagick.FILTER_LANCZOS, 0.8)
 }
 
-func ImFillReduce(im *imagick.MagickWand, tb Thumb, key string) ([]byte, error) {
+func ImFillReduce(im *imagick.MagickWand, tb common.Thumb, key string) error {
 	return imFillResize(im, tb)
 }
 
-func imJustCrop(im *imagick.MagickWand, tb Thumb, x, y uint) ([]byte, error) {
+func imJustCrop(im *imagick.MagickWand, tb common.Thumb, x, y uint) error {
 	// log.Printf("just croping...")
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
 	if outOfImage(imCols, imRows, x, y) {
-		return nil, fmt.Errorf("point1 [%d,%d] is out of image(%d, %d)", x, y, imCols, imRows)
+		return fmt.Errorf("point1 [%d,%d] is out of image(%d, %d)", x, y, imCols, imRows)
 	}
 
 	if outOfImage(imCols, imRows, x+tb.Width, y+tb.Height) {
-		return nil, fmt.Errorf("point2 [%d,%d] is out of image(%d, %d)", x+tb.Width, y+tb.Height, imCols, imRows)
+		return fmt.Errorf("point2 [%d,%d] is out of image(%d, %d)", x+tb.Width, y+tb.Height, imCols, imRows)
 	}
 
-	err := im.CropImage(tb.Width, tb.Height, int(x), int(y))
-	if err != nil {
-		return nil, err
-	}
-	return im.GetImageBlob(), nil
+	return im.CropImage(tb.Width, tb.Height, int(x), int(y))
 }
 
-func imFillResize(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
+func imFillResize(im *imagick.MagickWand, tb common.Thumb) error {
 	// log.Printf("fill resizing...")
 	err := imFillCrop(im, tb)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = im.ResizeImage(tb.Width, tb.Height, imagick.FILTER_LANCZOS, 0.8)
-	if err != nil {
-		return nil, err
+	imCols := im.GetImageWidth()
+	imRows := im.GetImageHeight()
+	if imCols*imRows > SamplePixel {
+		log.Printf("%dx%d > sample pixel, sampling...", imCols, imRows)
+		return im.SampleImage(tb.Width, tb.Height)
 	}
-
-	return im.GetImageBlob(), nil
+	return im.ResizeImage(tb.Width, tb.Height, imagick.FILTER_LANCZOS, 0.8)
 }
 
-func imFillCrop(im *imagick.MagickWand, tb Thumb) error {
+func imFillCrop(im *imagick.MagickWand, tb common.Thumb) error {
 	// log.Printf("fill croping...")
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
@@ -383,31 +473,31 @@ func imFillCrop(im *imagick.MagickWand, tb Thumb) error {
 
 	var x, y uint
 	switch tb.Gravity {
-	case Center:
+	case common.Center:
 		x += (imCols - cols) / 2
 		y += (imRows - rows) / 2
-	case North:
+	case common.North:
 		x += (imCols - cols) / 2
 		y += 0
-	case South:
+	case common.South:
 		x += (imCols - cols) / 2
 		y += imRows - rows
-	case West:
+	case common.West:
 		x += 0
 		y += (imRows - rows) / 2
-	case East:
+	case common.East:
 		x += imCols - cols
 		y += (imRows - rows) / 2
-	case NorthWest:
+	case common.NorthWest:
 		x += 0
 		y += 0
-	case NorthEast:
+	case common.NorthEast:
 		x += imCols - cols
 		y += 0
-	case SouthWest:
+	case common.SouthWest:
 		x += 0
 		y += imRows - rows
-	case SouthEast:
+	case common.SouthEast:
 		x += imCols - cols
 		y += imRows - rows
 	default:
@@ -415,15 +505,10 @@ func imFillCrop(im *imagick.MagickWand, tb Thumb) error {
 	}
 
 	// log.Printf("crop: %d %d %d %d", x, y, cols, rows)
-	err := im.CropImage(cols, rows, int(x), int(y))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return im.CropImage(cols, rows, int(x), int(y))
 }
 
-func ImFitReduce(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
+func ImFitReduce(im *imagick.MagickWand, tb common.Thumb) error {
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
 	// log.Printf("cols=%d, rows=%d", imCols, imRows)
@@ -434,72 +519,50 @@ func ImFitReduce(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
 		imRatio = float64(imRows) / float64(imCols)
 	}
 	if imRatio < NormalRatio {
-		return ImFitSideReduce(im, tb)
+		return ImFitSideResize(im, tb)
 	}
 
 	imPixels := imCols * imRows
 	if imPixels > tb.Pixels {
-		return ImFitPixelReduce(im, tb)
+		return ImFitPixelResize(im, tb)
 	}
-	return im.GetImageBlob(), nil
+	return nil
 }
 
-func ImFitSideReduce(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
-	// log.Printf("fit side resizing...")
-	err := ImFitSideResize(im, tb)
-	if err != nil {
-		return nil, err
-	}
-	// start := time.Now()
-	// defer func() {
-	// 	log.Printf("side reduce get blob: %v", time.Since(start))
-	// }()
-	return im.GetImageBlob(), nil
-}
-
-func ImFitSideResize(im *imagick.MagickWand, tb Thumb) error {
+func ImFitSideResize(im *imagick.MagickWand, tb common.Thumb) error {
 	// log.Printf("fit pixel resizing...")
 	// start := time.Now()
 	imCols := im.GetImageWidth()
 	imRows := im.GetImageHeight()
 
-	xf := float64(tb.Width) / float64(imCols)
-	yf := float64(tb.Height) / float64(imRows)
-
+	tbCols := tb.Width
+	tbRows := tb.Height
+	if imCols < imRows {
+		tbCols = tb.Height
+		tbRows = tb.Width
+	}
+	xf := float64(tbCols) / float64(imCols)
+	yf := float64(tbRows) / float64(imRows)
 	var cols, rows uint
 	if xf < yf {
-		cols = tb.Width
+		cols = tbCols
 		rows = uint(math.Floor(float64(imRows) * xf))
 	} else if yf < xf {
 		cols = uint(math.Floor(float64(imCols) * yf))
-		rows = tb.Height
+		rows = tbRows
 	} else {
-		cols = tb.Width
-		rows = tb.Height
+		cols = tbCols
+		rows = tbRows
 	}
 
-	err := im.ResizeImage(cols, rows, imagick.FILTER_LANCZOS, 0.8)
-	if err != nil {
-		return err
+	if imCols*imRows > SamplePixel {
+		log.Printf("%dx%d > sample pixel, sampling...", imCols, imRows)
+		return im.SampleImage(cols, rows)
 	}
-	// log.Printf("side resize resize image: %v", time.Since(start))
-	return nil
+	return im.ResizeImage(cols, rows, imagick.FILTER_LANCZOS, 0.8)
 }
 
-func ImFitPixelReduce(im *imagick.MagickWand, tb Thumb) ([]byte, error) {
-	// log.Printf("fit pixel resizing...")
-	err := ImFitPixelResize(im, tb)
-	if err != nil {
-		return nil, err
-	}
-	// start := time.Now()
-	// defer func() {
-	// 	log.Printf("pixel reduce get blob: %v", time.Since(start))
-	// }()
-	return im.GetImageBlob(), nil
-}
-
-func ImFitPixelResize(im *imagick.MagickWand, tb Thumb) error {
+func ImFitPixelResize(im *imagick.MagickWand, tb common.Thumb) error {
 	// log.Printf("fit pixel resizing...")
 	// start := time.Now()
 	imCols := im.GetImageWidth()
@@ -508,7 +571,13 @@ func ImFitPixelResize(im *imagick.MagickWand, tb Thumb) error {
 	pf := math.Sqrt(float64(tb.Pixels) / float64(imPixel))
 	cols := uint(math.Floor(float64(imCols) * pf))
 	rows := uint(math.Floor(float64(imRows) * pf))
-	err := im.ResizeImage(cols, rows, imagick.FILTER_LANCZOS, 0.8)
+	var err error
+	if imCols*imRows > SamplePixel {
+		log.Printf("%dx%d > sample pixel, sampling...", imCols, imRows)
+		err = im.SampleImage(cols, rows)
+	} else {
+		err = im.ResizeImage(cols, rows, imagick.FILTER_LANCZOS, 0.8)
+	}
 	if err != nil {
 		return err
 	}

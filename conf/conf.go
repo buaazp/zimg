@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/buaazp/zimg/common"
 	"gopkg.in/yaml.v2"
 )
 
@@ -26,10 +27,10 @@ type ServerConf struct {
 	DisableArgs    bool              `yaml:"disable_args"`
 	DisableType    bool              `yaml:"disable_type"`
 	DisableZoomUp  bool              `yaml:"disable_zoom_up"`
-	ThumbsConf     string            `yaml:"thumbs_conf"`
 	Etag           bool              `yaml:"etag"`
 	MaxAge         int64             `yaml:"max_age"`
 	Headers        map[string]string `yaml:"headers"`
+	Thumbs         []common.Thumb    `yaml:"thumbs"`
 }
 
 var DefaultServerConf = ServerConf{
@@ -51,12 +52,48 @@ var DefaultServerConf = ServerConf{
 	DisableArgs:    false,
 	DisableType:    false,
 	DisableZoomUp:  false,
-	ThumbsConf:     "./conf/thumbs.yaml",
 	Etag:           true,
 	MaxAge:         3600 * 24 * 90, // 90 days
 	Headers: map[string]string{
 		"Server":        "zimg v4.0.0",
 		"Cache-Control": "max-age=7776000",
+	},
+	Thumbs: []common.Thumb{
+		common.Thumb{
+			Name:   "1080p",
+			ID:     1,
+			Mode:   common.ModeFit,
+			Width:  1920,
+			Height: 1080,
+		},
+		common.Thumb{
+			Name:   "720p",
+			ID:     2,
+			Mode:   common.ModeFit,
+			Width:  1280,
+			Height: 720,
+		},
+		common.Thumb{
+			Name:   "480p",
+			ID:     3,
+			Mode:   common.ModeFit,
+			Width:  854,
+			Height: 480,
+		},
+		common.Thumb{
+			Name:   "360p",
+			ID:     4,
+			Mode:   common.ModeFit,
+			Width:  640,
+			Height: 360,
+		},
+		common.Thumb{
+			Name:   "240p",
+			ID:     5,
+			Mode:   common.ModeFit,
+			Width:  427,
+			Height: 240,
+		},
 	},
 }
 

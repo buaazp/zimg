@@ -1,11 +1,12 @@
 package util
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 type APIMessage struct {
@@ -22,14 +23,14 @@ func APIResponse(w http.ResponseWriter, code int, data interface{}) {
 		switch t := data.(type) {
 		case string:
 			m.Message = t
-			response, _ = json.Marshal(m)
+			response, _ = ffjson.Marshal(m)
 		case []byte:
 			response = data.([]byte)
 		case nil:
 			response = []byte{}
 		default:
 			isJSON = true
-			response, err = json.Marshal(data)
+			response, err = ffjson.Marshal(data)
 			if err != nil {
 				code = 500
 				data = err
@@ -40,7 +41,7 @@ func APIResponse(w http.ResponseWriter, code int, data interface{}) {
 	if code >= 400 {
 		isJSON = true
 		m.Message = fmt.Sprintf(`%s`, data)
-		response, _ = json.Marshal(m)
+		response, _ = ffjson.Marshal(m)
 	}
 
 	if isJSON {
@@ -197,7 +198,7 @@ func GetImageType(ext string) string {
 
 func GetFileType(ctype string) string {
 	parts := strings.Split(ctype, "/")
-	if parts[0] == "images" {
+	if parts[0] == "image" {
 		return parts[0]
 	}
 	if len(parts) > 1 {
