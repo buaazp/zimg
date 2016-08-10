@@ -36,8 +36,8 @@
 #include "zlscale.h"
 #include "cjson/cJSON.h"
 
-int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
-int new_img(const char *buff, const size_t len, const char *save_name);
+int save_img(thr_arg_t *thr_arg, const char *origin_file_name, const char *buff, const int len, char *md5);
+int new_img(const char *buff, const size_t len, const char *save_name, const char *origin_file_name);
 int get_img(zimg_req_t *req, evhtp_request_t *request);
 int admin_img(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t);
 int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5);
@@ -53,7 +53,7 @@ int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5);
  *
  * @return 1 for success and -1 for fail
  */
-int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
+int save_img(thr_arg_t *thr_arg, const char *origin_file_name, const char *buff, const int len, char *md5)
 {
     int result = -1;
 
@@ -113,26 +113,21 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     snprintf(save_path, 512, "%s/%d/%d/%s", settings.img_path, lvl1, lvl2, md5sum);
     LOG_PRINT(LOG_DEBUG, "save_path: %s", save_path);
 
-    if(is_dir(save_path) != 1)
-    {
-        if(mk_dirs(save_path) == -1)
-        {
-            LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Failed!", save_path);
-            goto done;
-        }
-        LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Finish.", save_path);
-    }
-
-    snprintf(save_name, 512, "%s/0*0", save_path);
-    LOG_PRINT(LOG_DEBUG, "save_name-->: %s", save_name);
-
-    if(is_file(save_name) == 1)
+    if(is_dir(save_path) == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Check File Exist. Needn't Save.");
         goto cache;
     }
 
-    if(new_img(buff, len, save_name) == -1)
+    if(mk_dirs(save_path) == -1)
+    {
+        LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Failed!", save_path);
+        goto done;
+    }
+    LOG_PRINT(LOG_DEBUG, "save_path[%s] Create Finish.", save_path);
+    snprintf(save_name, 512, "%s/0*0", save_path);
+    LOG_PRINT(LOG_DEBUG, "save_name-->: %s", save_name);
+    if(new_img(buff, len, save_name, origin_file_name) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Save Image[%s] Failed!", save_name);
         goto done;
@@ -158,12 +153,29 @@ done:
  *
  * @return 1 for success and -1 for fail.
  */
-int new_img(const char *buff, const size_t len, const char *save_name)
+int new_img(const char *buff, const size_t len, const char *save_name, const char *origin_file_name)
 {
+    char schema_name[640];
     int result = -1;
     LOG_PRINT(LOG_DEBUG, "Start to Storage the New Image...");
     int fd = -1;
     int wlen = 0;
+
+    snprintf(schema_name,sizeof(schema_name)-1,"%s_schema",save_name);
+    LOG_PRINT(LOG_DEBUG, "schema_name is :%s ", schema_name);
+
+    if ( strlen(origin_file_name) > 0 )
+    {
+        cJSON *j_ret = cJSON_CreateObject();
+        cJSON_AddStringToObject(j_ret, "filename", origin_file_name);
+        char *str_schema = cJSON_PrintUnformatted(j_ret);
+        LOG_PRINT(LOG_DEBUG, "file schema: %s", str_schema);
+        FILE *fp = fopen(schema_name,"w");
+        fprintf(fp,"%s",str_schema);
+        fclose(fp);
+        cJSON_Delete(j_ret);
+        free(str_schema);
+    }
 
     if((fd = open(save_name, O_WRONLY | O_TRUNC | O_CREAT, 00644)) < 0)
     {
@@ -254,6 +266,15 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     char orig_path[512];
     snprintf(orig_path, 512, "%s/0*0", whole_path);
     LOG_PRINT(LOG_DEBUG, "0rig File Path: %s", orig_path);
+    char schema_path[512];
+    snprintf(schema_path, 512, "%s/0*0_schema", whole_path);
+    LOG_PRINT(LOG_DEBUG, "Schema File Path: %s", schema_path);
+    FILE *fp = fopen(schema_path,"r");
+    if ( fp != NULL )
+    {
+        fgets(req->file_schema,1023,fp);
+        fclose(fp);
+    }
 
     char rsp_path[512];
     if(settings.script_on == 1 && req->type != NULL)
@@ -403,7 +424,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     if(save_new == 1)
     {
         LOG_PRINT(LOG_DEBUG, "Image[%s] is Not Existed. Begin to Save it.", rsp_path);
-        if(new_img(buff, len, rsp_path) == -1)
+        if(new_img(buff, len, rsp_path, "") == -1)
         {
             LOG_PRINT(LOG_DEBUG, "New Image[%s] Save Failed!", rsp_path);
             LOG_PRINT(LOG_WARNING, "fail save %s", rsp_path);

@@ -142,6 +142,21 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
 }
 
 /**
+ * @brief zimg_attachment_set set zimg response Content-Disposition
+ *
+ * @param request the request of evhtp
+ *
+ * @return 1 for set true
+ */
+int zimg_attachment_set(evhtp_request_t *request, char* filename)
+{
+    char att[128];
+    snprintf(att,sizeof(att)-1,"attachment;filename=%s",filename);
+    evhtp_headers_add_header(request->headers_out, evhtp_header_new("Content-Disposition", att, 0, 1));
+    evhtp_headers_add_header(request->headers_out, evhtp_header_new("Content-Type", "application/octet-stream", 0, 0));
+    return 1;
+}
+/**
  * @brief conf_get_headers get headers from conf
  *
  * @param hdr_str zimg conf string
@@ -488,7 +503,7 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
         return 0;
     //multipart_parser_set_data(p, mp_arg);
     char md5sum[33];
-    if(save_img(mp_arg->thr_arg, at, length, md5sum) == -1)
+    if(save_img(mp_arg->thr_arg, "", at, length, md5sum) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", mp_arg->address);
@@ -553,10 +568,11 @@ int binary_parse(evhtp_request_t *req, const char *content_type, const char *add
         goto done;
     }
     char md5sum[33];
-    LOG_PRINT(LOG_DEBUG, "Begin to Save Image...");
     evthr_t *thread = get_request_thr(req);
     thr_arg_t *thr_arg = (thr_arg_t *)evthr_get_aux(thread);
-    if(save_img(thr_arg, buff, post_size, md5sum) == -1)
+    const char *filename = evhtp_header_find(req->headers_in, "zimg-filename");
+    LOG_PRINT(LOG_DEBUG, "Begin to Save Image %s...", filename);
+    if(save_img(thr_arg, filename, buff, post_size, md5sum) == -1)
     {
         LOG_PRINT(LOG_DEBUG, "Image Save Failed!");
         LOG_PRINT(LOG_ERROR, "%s fail post save", address);
@@ -693,12 +709,6 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-
-    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
-    if(xff_address)
-    {
-        inet_aton(xff_address, &ss->sin_addr);
-    }
     strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
@@ -764,7 +774,12 @@ void post_request_cb(evhtp_request_t *req, void *arg)
         err_no = 6;
         goto err;
     }
-	evbuf_t *buf;
+    const char *filename = evhtp_header_find(req->headers_in, "zimg-filename");
+    if(!filename)
+    {
+        LOG_PRINT(LOG_DEBUG, "Get zimg-filename not found!");
+    }
+    evbuf_t *buf;
     buf = req->buffer_in;
     buff = (char *)malloc(post_size);
     if(buff == NULL)
@@ -855,12 +870,6 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-
-    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
-    if(xff_address)
-    {
-        inet_aton(xff_address, &ss->sin_addr);
-    }
     strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
@@ -1106,7 +1115,28 @@ void get_request_cb(evhtp_request_t *req, void *arg)
 
     LOG_PRINT(LOG_DEBUG, "Got the File!");
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
-    evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
+    if (proportion == 0)
+    {
+        LOG_PRINT(LOG_DEBUG, "Got the File Schema:%s", zimg_req->file_schema);
+        if(strlen(zimg_req->file_schema)>0)
+        {
+            cJSON * root = cJSON_Parse(zimg_req->file_schema);
+            char *file_name = cJSON_GetObjectItem(root,"filename")->valuestring;
+            LOG_PRINT(LOG_DEBUG, "filename: %s", file_name);
+
+            zimg_attachment_set(req,file_name);
+
+            cJSON_Delete(root);
+        }
+        else
+        {
+            zimg_attachment_set(req,"");
+        }
+    }
+    else
+    {
+        evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "image/jpeg", 0, 0));
+    }
     zimg_headers_add(req, settings.headers);
     evhtp_send_reply(req, EVHTP_RES_OK);
     if(type)
@@ -1155,12 +1185,6 @@ void admin_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-
-    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
-    if(xff_address)
-    {
-        inet_aton(xff_address, &ss->sin_addr);
-    }
     strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);
@@ -1342,12 +1366,6 @@ void info_request_cb(evhtp_request_t *req, void *arg)
     struct sockaddr *saddr = ev_conn->saddr;
     struct sockaddr_in *ss = (struct sockaddr_in *)saddr;
     char address[16];
-
-    const char *xff_address = evhtp_header_find(req->headers_in, "X-Forwarded-For");
-    if(xff_address)
-    {
-        inet_aton(xff_address, &ss->sin_addr);
-    }
     strncpy(address, inet_ntoa(ss->sin_addr), 16);
 
     int req_method = evhtp_request_get_method(req);

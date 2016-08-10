@@ -23,8 +23,8 @@
 
 #include "zcommon.h"
 
-int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5);
-int new_img(const char *buff, const size_t len, const char *save_name);
+int save_img(thr_arg_t *thr_arg, const char *origin_file_name, const char *buff, const int len, char *md5);
+int new_img(const char *buff, const size_t len, const char *save_name, const char *origin_file_name);
 int get_img(zimg_req_t *req, evhtp_request_t *request);
 int admin_img(evhtp_request_t *req, thr_arg_t *thr_arg, char *md5, int t);
 int info_img(evhtp_request_t *request, thr_arg_t *thr_arg, char *md5);
