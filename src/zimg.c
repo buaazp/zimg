@@ -164,7 +164,7 @@ int new_img(const char *buff, const size_t len, const char *save_name, const cha
     snprintf(schema_name,sizeof(schema_name)-1,"%s_schema",save_name);
     LOG_PRINT(LOG_DEBUG, "schema_name is :%s ", schema_name);
 
-    if ( strlen(origin_file_name) > 0 )
+    if ( origin_file_name && strlen(origin_file_name) > 0 )
     {
         cJSON *j_ret = cJSON_CreateObject();
         cJSON_AddStringToObject(j_ret, "filename", origin_file_name);
@@ -269,6 +269,7 @@ int get_img(zimg_req_t *req, evhtp_request_t *request)
     char schema_path[512];
     snprintf(schema_path, 512, "%s/0*0_schema", whole_path);
     LOG_PRINT(LOG_DEBUG, "Schema File Path: %s", schema_path);
+    memset(req->file_schema,0,1024);
     FILE *fp = fopen(schema_path,"r");
     if ( fp != NULL )
     {

@@ -31,6 +31,7 @@
 #include "zdb.h"
 #include "zaccess.h"
 #include "cjson/cJSON.h"
+#include "url.h"
 
 typedef struct {
     evhtp_request_t *req;
@@ -150,8 +151,14 @@ int zimg_etag_set(evhtp_request_t *request, char *buff, size_t len)
  */
 int zimg_attachment_set(evhtp_request_t *request, char* filename)
 {
-    char att[128];
-    snprintf(att,sizeof(att)-1,"attachment;filename=%s",filename);
+    LOG_PRINT(LOG_DEBUG, "origin url: %s", filename);
+    char att[256];
+    if ( strlen(filename)>0 )
+    {
+        zimg_url_decode(filename,strlen(filename));
+        LOG_PRINT(LOG_DEBUG, "decoded url: %s", filename);
+    }
+    snprintf(att,sizeof(att)-1,"attachment;filename=\"%s\"",filename);
     evhtp_headers_add_header(request->headers_out, evhtp_header_new("Content-Disposition", att, 0, 1));
     evhtp_headers_add_header(request->headers_out, evhtp_header_new("Content-Type", "application/octet-stream", 0, 0));
     return 1;
@@ -1117,8 +1124,8 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     evhtp_headers_add_header(req->headers_out, evhtp_header_new("Server", settings.server_name, 0, 1));
     if (proportion == 0)
     {
-        LOG_PRINT(LOG_DEBUG, "Got the File Schema:%s", zimg_req->file_schema);
-        if(strlen(zimg_req->file_schema)>0)
+        LOG_PRINT(LOG_DEBUG, "Got the File Schema:%s, length:%d", zimg_req->file_schema, strlen(zimg_req->file_schema));
+        if( strlen(zimg_req->file_schema)>0 )
         {
             cJSON * root = cJSON_Parse(zimg_req->file_schema);
             char *file_name = cJSON_GetObjectItem(root,"filename")->valuestring;
