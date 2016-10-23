@@ -41,10 +41,10 @@ bin/conf/ssl/
 build/
 
 # 3rd deps build files
-deps/LuaJIT-2.0.3/
-deps/libjpeg-turbo-1.4.2/
-deps/libwebp-0.4.3/
-deps/ImageMagick-6.9.1-10/
+deps/LuaJIT/
+deps/libjpeg-turbo/
+deps/libwebp/
+deps/ImageMagick/
 
 nbproject/
 src/CMakeFiles/
