@@ -66,6 +66,20 @@ evbase_t *evbase;
 extern const struct luaL_reg zimg_lib[];
 extern const struct luaL_Reg loglib[];
 
+const char *conf_file = NULL;
+pthread_key_t gLuaStateKey = 0;
+
+/**
+ * @brief close lua_State in thread local storage.
+ */
+void thread_lua_dtor(void *pt)
+{
+    if(pt != NULL)
+    {
+        lua_close((lua_State *)pt);
+    }
+}
+
 /**
  * @brief usage usage display of zimg
  *
@@ -350,8 +364,8 @@ static int load_conf(const char *conf)
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
-    settings.L = L;
-    //lua_close(L);
+    //settings.L = L;
+    lua_close(L);
 
     return 1;
 }
@@ -452,6 +466,20 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg)
     lua_pcall(thr_args->L, 0, 0, 0);
 
     evthr_set_aux(thread, thr_args);
+
+    lua_State *L = luaL_newstate();
+    if(L != NULL)
+    {
+        luaL_openlibs(L);
+        if (luaL_loadfile(L, conf_file) || lua_pcall(L, 0, 0, 0))
+        {
+            lua_close(L);
+        }
+        else
+        {
+            pthread_setspecific(gLuaStateKey, (void *)L);
+        }
+    }
 }
 
 /**
@@ -482,7 +510,6 @@ int main(int argc, char **argv)
     }
 
     settings_init();
-    const char *conf_file = NULL;
     int i;
     for(i=1; i<argc; i++)
     {
@@ -617,6 +644,12 @@ int main(int argc, char **argv)
     MagickInfo *jpg_info = (MagickInfo *)GetMagickInfo("JPG", exception);
     jpg_info->thread_support = MagickTrue;
     */
+
+    int result = pthread_key_create(&gLuaStateKey, thread_lua_dtor);
+    if(result != 0)  
+    {  
+        LOG_PRINT(LOG_ERROR, "Could not allocate TLS key for lua_State.");  
+    }
 
     //begin to start httpd...
     LOG_PRINT(LOG_DEBUG, "Begin to Start Httpd Server...");

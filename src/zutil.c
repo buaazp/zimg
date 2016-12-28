@@ -30,8 +30,11 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <pthread.h>
 #include "zutil.h"
 #include "zlog.h"
+
+extern pthread_key_t gLuaStateKey;
 
 char * strnchr(const char *p, char c, size_t n);
 char * strnstr(const char *s, const char *find, size_t slen);
@@ -280,15 +283,24 @@ int is_img(const char *filename)
 {
     int isimg = -1;
 
-    lua_getglobal(settings.L, "is_img");
-    lua_pushstring(settings.L, filename);
-    if(lua_pcall(settings.L, 1, 1, 0) != 0)
+    lua_State *L = (lua_State *)pthread_getspecific(gLuaStateKey);
+    if(L == NULL)
     {
-        LOG_PRINT(LOG_WARNING, "lua is_img() failed!");
-        return isimg;
+        int tid = pthread_self();
+        LOG_PRINT(LOG_ERROR, "NULL lua_State pointer in thread %d's TLS.", tid);
     }
-    isimg = (int)lua_tonumber(settings.L, -1);
-    lua_pop(settings.L, 1);
+    else
+    {
+        lua_getglobal(L, "is_img");
+        lua_pushstring(L, filename);
+        if(lua_pcall(L, 1, 1, 0) != 0)
+        {
+            LOG_PRINT(LOG_WARNING, "lua is_img() failed!");
+            return isimg;
+        }
+        isimg = (int)lua_tonumber(L, -1);
+        lua_pop(L, 1);
+    }
 
     /*
     char *imgType[] = {"jpg", "jpeg", "png", "gif", "webp"};
