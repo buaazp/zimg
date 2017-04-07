@@ -1,13 +1,13 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
@@ -44,7 +44,7 @@ int convert(MagickWand *im, zimg_req_t *req);
  */
 static int proportion(MagickWand *im, int p_type, int cols, int rows)
 {
-	int ret = -1;
+    int ret = -1;
     unsigned long im_cols = MagickGetImageWidth(im);
     unsigned long im_rows = MagickGetImageHeight(im);
 
@@ -74,8 +74,8 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
             {
                 cols = (uint32_t)round(((double)rows / im_rows) * im_cols);
             }
-            LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            LOG_PRINT(LOG_DEBUG, "p=1, wi_scale(im, %d, %d) ret = %d", cols, rows, ret);
             //ret = MagickScaleImage(im, cols, rows);
         }
         else
@@ -96,12 +96,12 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
                 s_rows = rows;
                 x = (uint32_t)floor((s_cols - cols) / 2.0);
             }
-            LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d)", s_cols, s_rows);
-            ret = MagickResizeImage(im, s_cols, s_rows, UndefinedFilter, 1.0);
+            ret = MagickResizeImage(im, s_cols, s_rows, LanczosFilter, 1.0);
+            LOG_PRINT(LOG_DEBUG, "p=2, wi_scale(im, %d, %d) ret = %d", s_cols, s_rows, ret);
             //ret = MagickScaleImage(im, s_cols, s_rows);
 
-            LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
             ret = MagickCropImage(im, cols, rows, x, y);
+            LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d) ret = %d", x, y, cols, rows, ret);
         }
     }
     else if (p_type == 2)
@@ -109,8 +109,8 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
         uint32_t x, y;
         x = (uint32_t)floor((im_cols - cols) / 2.0);
         y = (uint32_t)floor((im_rows - rows) / 2.0);
-        LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
         ret = MagickCropImage(im, cols, rows, x, y);
+        LOG_PRINT(LOG_DEBUG, "p=2, wi_crop(im, %d, %d, %d, %d) ret = %d", x, y, cols, rows, ret);
     }
     else if (p_type == 3)
     {
@@ -119,23 +119,23 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
             int rate = cols > 0 ? cols : rows;
             rows = (uint32_t)round(im_rows * (double)rate / 100);
             cols = (uint32_t)round(im_cols * (double)rate / 100);
-            LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d) ret = %d", cols, rows, ret);
             //ret = MagickScaleImage(im, cols, rows);
         }
         else
         {
             rows = (uint32_t)round(im_rows * (double)rows / 100);
             cols = (uint32_t)round(im_cols * (double)cols / 100);
-            LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d)", cols, rows);
-            ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
+            ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+            LOG_PRINT(LOG_DEBUG, "p=3, wi_scale(im, %d, %d) ret = %d", cols, rows, ret);
             //ret = MagickScaleImage(im, cols, rows);
         }
     }
     else if (p_type == 0)
     {
-        LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d)", cols, rows);
-        ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
+        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+        LOG_PRINT(LOG_DEBUG, "p=0, wi_scale(im, %d, %d) ret = %d", cols, rows, ret);
         //ret = MagickScaleImage(im, cols, rows);
     }
     else if (p_type == 4)
@@ -153,11 +153,11 @@ static int proportion(MagickWand *im, int p_type, int cols, int rows)
         }
         cols = (uint32_t)round(im_cols * rate);
         rows = (uint32_t)round(im_rows * rate);
-        LOG_PRINT(LOG_DEBUG, "p=4, wi_scale(im, %d, %d)", cols, rows);
-        ret = MagickResizeImage(im, cols, rows, UndefinedFilter, 1.0);
+        ret = MagickResizeImage(im, cols, rows, LanczosFilter, 1.0);
+        LOG_PRINT(LOG_DEBUG, "p=4, wi_scale(im, %d, %d) ret = %d", cols, rows, ret);
     }
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -181,8 +181,8 @@ static int crop(MagickWand *im, int x, int y, int cols, int rows)
     if (x >= im_cols || y >= im_rows) return -1;
     if (cols == 0 || im_cols < x + cols) cols = im_cols - x;
     if (rows == 0 || im_rows < y + rows) rows = im_rows - y;
-    LOG_PRINT(LOG_DEBUG, "wi_crop(im, %d, %d, %d, %d)", x, y, cols, rows);
     ret = MagickCropImage(im, cols, rows, x, y);
+    LOG_PRINT(LOG_DEBUG, "wi_crop(im, %d, %d, %d, %d) ret = %d", x, y, cols, rows, ret);
     return ret;
 }
 
@@ -199,34 +199,41 @@ int convert(MagickWand *im, zimg_req_t *req)
     int result = 1, ret = -1;
 
     MagickResetIterator(im);
-    MagickSetImageOrientation(im, TopLeftOrientation);
+
+    int orientation = MagickGetImageOrientation(im);
+    if (orientation > 1)
+    {
+        ret = MagickAutoOrientImage(im);
+        LOG_PRINT(LOG_DEBUG, "orientation: %d auto_orientat() ret = %d", orientation, ret);
+        if (ret != MagickTrue) return -1;
+    }
 
     int x = req->x, y = req->y, cols = req->width, rows = req->height;
     if (!(cols == 0 && rows == 0)) {
         /* crop and scale */
         if (x == -1 && y == -1) {
-            LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d)", req->proportion, cols, rows);
             ret = proportion(im, req->proportion, cols, rows);
+            LOG_PRINT(LOG_DEBUG, "proportion(im, %d, %d, %d) ret = %d", req->proportion, cols, rows, ret);
             if (ret != MagickTrue) return -1;
         } else {
-            LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d)", x, y, cols, rows);
             ret = crop(im, x, y, cols, rows);
+            LOG_PRINT(LOG_DEBUG, "crop(im, %d, %d, %d, %d) ret = %d", x, y, cols, rows, ret);
             if (ret != MagickTrue) return -1;
         }
     }
 
     /* rotate image */
     if (req->rotate != 0) {
-        LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d)", req->rotate);
         PixelWand *background = NewPixelWand();
         if (background == NULL) return -1;
         ret = PixelSetColor(background, "white");
+        LOG_PRINT(LOG_DEBUG, "pixelwand setcolor() ret = %d", ret);
         if (ret != MagickTrue) {
             DestroyPixelWand(background);
             return -1;
         }
         ret = MagickRotateImage(im, background, req->rotate);
-        LOG_PRINT(LOG_DEBUG, "rotate() ret = %d", ret);
+        LOG_PRINT(LOG_DEBUG, "wi_rotate(im, %d) ret = %d", req->rotate, ret);
         DestroyPixelWand(background);
         if (ret != MagickTrue) return -1;
     }
@@ -243,26 +250,28 @@ int convert(MagickWand *im, zimg_req_t *req)
         if (ret != MagickTrue) return -1;
     }
 
-	/* set quality */
-    /*
-    int quality = 100;
-    int im_quality = MagickGetImageCompressionQuality(im);
-    im_quality = (im_quality == 0 ? 100 : im_quality);
-    LOG_PRINT(LOG_DEBUG, "wi_quality = %d", im_quality);
-    quality = req->quality < im_quality ? req->quality : im_quality;
-    */
-    LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d)", req->quality);
-    ret = MagickSetImageCompressionQuality(im, req->quality);
-    if (ret != MagickTrue) return -1;
-
-	/* set format */
-    if (strncmp(req->fmt, "none", 4) != 0) {
-        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s)", req->fmt);
-        ret = MagickSetImageFormat(im, req->fmt);
+    /* set quality */
+    int quality = MagickGetImageCompressionQuality(im);
+    if (quality == 0 || quality > req->quality)
+    {
+        ret = MagickSetImageCompressionQuality(im, req->quality);
+        LOG_PRINT(LOG_DEBUG, "wi_set_quality(im, %d) ret = %d", req->quality, ret);
         if (ret != MagickTrue) return -1;
     }
 
+    /* set format */
+    if (strncmp(req->fmt, "none", 4) != 0) {
+        ret = MagickSetImageFormat(im, req->fmt);
+        LOG_PRINT(LOG_DEBUG, "wi_set_format(im, %s) ret = %d", req->fmt, ret);
+        if (ret != MagickTrue) return -1;
+    }
+
+    /* strip image metadata */
+    ret = MagickStripImage(im);
+    LOG_PRINT(LOG_DEBUG, "strip_image() ret = %d", ret);
+    if (ret != MagickTrue) return -1;
+
     LOG_PRINT(LOG_DEBUG, "convert(im, req) %d", result);
-	return result;
+    return result;
 }
 

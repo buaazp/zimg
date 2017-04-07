@@ -1,13 +1,13 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
@@ -34,10 +34,10 @@
 #include "multipart-parser-c/multipart_parser.h"
 
 #ifndef PROJECT_VERSION
-#define PROJECT_VERSION "3.1.0"
+#define PROJECT_VERSION "3.1.1"
 #endif
 
-#define MAX_LINE            1024 
+#define MAX_LINE            1024
 #define CACHE_MAX_SIZE      1048576 //1024*1024
 #define RETRY_TIME_WAIT     1000
 #define CACHE_KEY_SIZE      128
@@ -120,7 +120,7 @@ struct setting{
 #define LOG_INFO        6           /* Information */
 #define LOG_DEBUG       7           /* DEBUG message */
 
-#ifdef DEBUG 
+#ifdef DEBUG
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
         int log_id = log_open(settings.log_name, "a"); \
@@ -128,7 +128,7 @@ struct setting{
         __FILE__, __LINE__, __FUNCTION__, \
         ##__VA_ARGS__); \
         log_close(log_id); \
-    }while(0) 
+    }while(0)
 #else
   #define LOG_PRINT(level, fmt, ...)            \
     do { \
@@ -137,7 +137,7 @@ struct setting{
             log_printf0(log_id, level, fmt, ##__VA_ARGS__) ; \
             log_close(log_id); \
         } \
-    }while(0) 
+    }while(0)
 #endif
- 
+
 #endif
