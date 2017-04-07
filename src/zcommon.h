@@ -65,6 +65,7 @@ typedef struct zimg_req_s {
     char *fmt;
     int sv;
     thr_arg_t *thr_arg;
+    char file_schema[1024];
 } zimg_req_t;
 
 struct setting{
@@ -92,7 +93,6 @@ struct setting{
     char admin_path[512];
     int disable_args;
     int disable_type;
-    int disable_zoom_up;
     int script_on;
     char script_name[512];
     char format[16];
