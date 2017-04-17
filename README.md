@@ -9,6 +9,15 @@ Contact me: zp@buaa.us
 
 [![Build Status](https://travis-ci.org/buaazp/zimg.svg?branch=master)](https://travis-ci.org/buaazp/zimg) [![wercker status](https://app.wercker.com/status/88aead2017ceb80b32fad3dc8997227a/s "wercker status")](https://app.wercker.com/project/bykey/88aead2017ceb80b32fad3dc8997227a) [![Build Status](https://drone.io/github.com/buaazp/zimg/status.png)](https://drone.io/github.com/buaazp/zimg/latest)  
 
+### SSL
+
+zimg.lua增加了对SSL相关配置
+    
+    --SSL
+    pemfile = "server.crt"
+    privfile = "server.key"
+    cafile = "ca.crt"
+
 ### Versions:
 - 09/09/2014 - zimg 3.1.0 Release. New generation.
 - 04/26/2014 - zimg 2.0.0 Release. Supported distributed storage backends.

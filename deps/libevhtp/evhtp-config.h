@@ -8,7 +8,8 @@
 
 /* #undef EVHTP_DISABLE_EVTHR */
 #define EVHTP_DISABLE_REGEX
-#define EVHTP_DISABLE_SSL
+//#define EVHTP_DISABLE_SSL
+
 /* #undef EVHTP_DISABLE_EVTHR */
 
 #endif
