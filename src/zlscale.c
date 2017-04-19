@@ -150,7 +150,7 @@ static int zimg_ret(lua_State *L)
     return 0;
 }
 
-const struct luaL_reg zimg_lib[] = {
+const struct luaL_Reg zimg_lib[] = {
     //{"__gc",                destroy_wi_image    },
     {"cols",                get_wi_cols         },
     {"rows",                get_wi_rows         },
