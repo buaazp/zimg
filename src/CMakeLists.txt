@@ -82,8 +82,7 @@ endif()
 set (DEPS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../deps")
 include_directories(${DEPS_SOURCE_DIR})
 
-set (LUAJIT_INCLUDE_DIR ${DEPS_SOURCE_DIR}/LuaJIT-2.0.3/src)
-set (LUAJIT_LIBRARIES ${DEPS_SOURCE_DIR}/LuaJIT-2.0.3/src/libluajit.a)
+pkg_check_modules (LUAJIT luajit lua REQUIRED)
 
 #set (ImageMagick_INCLUDE_DIRS "/Users/zippo/develop/linuxc/imagemagick-src")
 #set (ImageMagick_MagickCore_LIBRARY "/Users/zippo/develop/linuxc/imagemagick-src/magick/.libs/libMagickCore-Q16.a")
