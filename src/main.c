@@ -63,7 +63,7 @@ int main(int argc, char **argv);
 
 evbase_t *evbase;
 
-extern const struct luaL_reg zimg_lib[];
+extern const struct luaL_Reg zimg_lib[];
 extern const struct luaL_Reg loglib[];
 
 const char *conf_file = NULL;

@@ -8,9 +8,9 @@ if (CMAKE_COMPILER_IS_GNUCC)
 	if(APPLE)
 		# Newer versions of OSX will spew a bunch of warnings about deprecated ssl functions,
 		# this should be addressed at some point in time, but for now, just ignore them.
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_BSD_SOURCE -Wno-deprecated-declarations")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEFAULT_SOURCE -Wno-deprecated-declarations")
 	elseif(UNIX)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200112")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200112")
 	endif(APPLE)
 
 endif(CMAKE_COMPILER_IS_GNUCC)
