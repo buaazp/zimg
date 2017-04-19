@@ -148,7 +148,6 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-unused-function -Wno-deprecat
 message("Build Type: ${CMAKE_BUILD_TYPE}")
 message("Std CFLAGS: ${CMAKE_C_FLAGS}")
 
-link_directories("/usr/lib" "/usr/local/lib")
 add_executable(zimg ${SOURCES})
 target_link_libraries(zimg ${ZIMG_EXTERNAL_LIBS})
 
