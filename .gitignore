@@ -39,6 +39,7 @@ bin/zimg
 bin/conf/debug.lua
 build/
 
-#luaJIT headers
-deps/LuaJIT-2.0.3/
-
+deps/libjpeg-turbo/
+deps/libwebp/
+deps/ImageMagick/
+deps/LuaJIT/

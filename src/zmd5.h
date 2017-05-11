@@ -1,13 +1,13 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
@@ -54,7 +54,7 @@ typedef struct md5_state_s {
 } md5_state_t;
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 

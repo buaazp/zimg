@@ -1,13 +1,13 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
@@ -35,13 +35,12 @@ int del_cache(thr_arg_t *thr_arg, const char *key);
  *
  * @param thr_arg Thread arg.
  */
-void retry_cache(thr_arg_t *thr_arg)
-{
-    if(thr_arg->cache_conn != NULL)
+void retry_cache(thr_arg_t *thr_arg) {
+    if (thr_arg->cache_conn != NULL)
         memcached_free(thr_arg->cache_conn);
 
     memcached_st *memc;
-    memc= memcached_create(NULL);
+    memc = memcached_create(NULL);
 
     char mserver[32];
     snprintf(mserver, 32, "%s:%d", settings.cache_ip, settings.cache_port);
@@ -50,9 +49,9 @@ void retry_cache(thr_arg_t *thr_arg)
     memcached_server_push(memc, servers);
     memcached_server_list_free(servers);
     memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1); 
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1); 
-    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1); 
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NO_BLOCK, 1);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_NOREPLY, 1);
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_TCP_KEEPALIVE, 1);
     thr_arg->cache_conn = memc;
 
     evthr_set_aux(thr_arg->thread, thr_arg);
@@ -66,12 +65,11 @@ void retry_cache(thr_arg_t *thr_arg)
  *
  * @return 1 for yes and -1 for no.
  */
-int exist_cache(thr_arg_t *thr_arg, const char *key)
-{
+int exist_cache(thr_arg_t *thr_arg, const char *key) {
     int rst = -1;
-    if(settings.cache_on == false)
+    if (settings.cache_on == false)
         return rst;
-    if(thr_arg->cache_conn == NULL)
+    if (thr_arg->cache_conn == NULL)
         return rst;
 
     memcached_st *memc = thr_arg->cache_conn;
@@ -82,18 +80,13 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
     char *value = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
     //rc = memcached_exist(memc, key, strlen(key));
 
-    if (rc == MEMCACHED_SUCCESS) 
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Exist.", key);
         rst = 1;
-    }
-    else if(rc == MEMCACHED_CONNECTION_FAILURE)
-    {
+    } else if (rc == MEMCACHED_CONNECTION_FAILURE) {
         LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
         //retry_cache(thr_arg);
-    }
-    else
-    {
+    } else {
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
     }
@@ -111,10 +104,9 @@ int exist_cache(thr_arg_t *thr_arg, const char *key)
  *
  * @return 1 for success and -1 for fail.
  */
-int find_cache(memcached_st *memc, const char *key, char *value)
-{
+int find_cache(memcached_st *memc, const char *key, char *value) {
     int rst = -1;
-    if(memc == NULL)
+    if (memc == NULL)
         return rst;
 
     size_t valueLen;
@@ -123,20 +115,15 @@ int find_cache(memcached_st *memc, const char *key, char *value)
 
     char *pvalue = memcached_get(memc, key, strlen(key), &valueLen, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS) 
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Cache Find Key[%s] Value: %s", key, pvalue);
         str_lcpy(value, pvalue, sizeof(value));
         free(pvalue);
         rst = 1;
-    }
-    else if (rc == MEMCACHED_NOTFOUND)
-    {
+    } else if (rc == MEMCACHED_NOTFOUND) {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Not Find!", key);
         rst = -1;
-    }
-    else
-    {
+    } else {
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
     }
@@ -153,27 +140,21 @@ int find_cache(memcached_st *memc, const char *key, char *value)
  *
  * @return 1 for success and -1 for fail.
  */
-int set_cache(memcached_st *memc, const char *key, const char *value)
-{
+int set_cache(memcached_st *memc, const char *key, const char *value) {
     int rst = -1;
-    if(memc == NULL)
+    if (memc == NULL)
         return rst;
 
     memcached_return rc;
 
     rc = memcached_set(memc, key, strlen(key), value, strlen(value), 0, 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Cache Set Successfully. Key[%s] Value: %s", key, value);
         rst = 1;
-    }
-    else if(rc == MEMCACHED_CONNECTION_FAILURE)
-    {
+    } else if (rc == MEMCACHED_CONNECTION_FAILURE) {
         LOG_PRINT(LOG_DEBUG, "Cache Connection Failed!");
-    }
-    else
-    {
+    } else {
         LOG_PRINT(LOG_DEBUG, "Cache Set(Key: %s Value: %s) Failed!", key, value);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
@@ -193,13 +174,11 @@ int set_cache(memcached_st *memc, const char *key, const char *value)
  *
  * @return 1 for success and -1 for fail.
  */
-int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len)
-{
+int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t *len) {
     int rst = -1;
-    if(settings.cache_on == false)
+    if (settings.cache_on == false)
         return rst;
-    if(thr_arg->cache_conn == NULL)
-    {
+    if (thr_arg->cache_conn == NULL) {
         LOG_PRINT(LOG_DEBUG, "thr_arg->cache_conn nil.");
         return rst;
     }
@@ -210,23 +189,16 @@ int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t
 
     *value_ptr = memcached_get(memc, key, strlen(key), len, &flags, &rc);
 
-    if (rc == MEMCACHED_SUCCESS) 
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Find Key[%s], Len: %d.", key, *len);
         rst = 1;
-    }
-    else if(rc == MEMCACHED_CONNECTION_FAILURE)
-    {
+    } else if (rc == MEMCACHED_CONNECTION_FAILURE) {
         LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
         //retry_cache(thr_arg);
-    }
-    else if (rc == MEMCACHED_NOTFOUND)
-    {
+    } else if (rc == MEMCACHED_NOTFOUND) {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Key[%s] Not Find!", key);
         rst = -1;
-    }
-    else
-    {
+    } else {
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
     }
@@ -245,12 +217,11 @@ int find_cache_bin(thr_arg_t *thr_arg, const char *key, char **value_ptr, size_t
  *
  * @return  1 for success and -1 for fial.
  */
-int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len)
-{
+int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const size_t len) {
     int rst = -1;
-    if(settings.cache_on == false)
+    if (settings.cache_on == false)
         return rst;
-    if(thr_arg->cache_conn == NULL)
+    if (thr_arg->cache_conn == NULL)
         return rst;
 
     memcached_st *memc = thr_arg->cache_conn;
@@ -258,18 +229,13 @@ int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const 
 
     rc = memcached_set(memc, key, strlen(key), value, len, 0, 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Set Successfully. Key[%s] Len: %d.", key, len);
         rst = 1;
-    }
-    else if(rc == MEMCACHED_CONNECTION_FAILURE)
-    {
+    } else if (rc == MEMCACHED_CONNECTION_FAILURE) {
         LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
         //retry_cache(thr_arg);
-    }
-    else
-    {
+    } else {
         LOG_PRINT(LOG_DEBUG, "Binary Cache Set Key[%s] Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);
@@ -288,12 +254,11 @@ int set_cache_bin(thr_arg_t *thr_arg, const char *key, const char *value, const 
  *
  * @return  1 for success and -1 for fail.
  */
-int del_cache(thr_arg_t *thr_arg, const char *key)
-{
+int del_cache(thr_arg_t *thr_arg, const char *key) {
     int rst = -1;
-    if(settings.cache_on == false)
+    if (settings.cache_on == false)
         return rst;
-    if(thr_arg->cache_conn == NULL)
+    if (thr_arg->cache_conn == NULL)
         return rst;
 
     memcached_st *memc = thr_arg->cache_conn;
@@ -301,18 +266,13 @@ int del_cache(thr_arg_t *thr_arg, const char *key)
 
     rc = memcached_delete(memc, key, strlen(key), 0);
 
-    if (rc == MEMCACHED_SUCCESS) 
-    {
+    if (rc == MEMCACHED_SUCCESS) {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Delete Successfully.", key);
         rst = 1;
-    }
-    else if(rc == MEMCACHED_CONNECTION_FAILURE)
-    {
+    } else if (rc == MEMCACHED_CONNECTION_FAILURE) {
         LOG_PRINT(LOG_DEBUG, "Cache Conn Failed!");
         //retry_cache(thr_arg);
-    }
-    else
-    {
+    } else {
         LOG_PRINT(LOG_DEBUG, "Cache Key[%s] Delete Failed!", key);
         const char *str_rc = memcached_strerror(memc, rc);
         LOG_PRINT(LOG_DEBUG, "Cache Result: %s", str_rc);

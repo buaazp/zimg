@@ -1,13 +1,13 @@
-/*   
+/*
  *   zimg - high performance image storage and processing system.
- *       http://zimg.buaa.us 
- *   
+ *       http://zimg.buaa.us
+ *
  *   Copyright (c) 2013-2014, Peter Zhao <zp@buaa.us>.
  *   All rights reserved.
- *   
+ *
  *   Use and distribution licensed under the BSD license.
  *   See the LICENSE file for full text.
- * 
+ *
  */
 
 /**
@@ -26,8 +26,8 @@
 typedef struct {
     volatile long spin_;
     volatile long flag_;
-}spin_lock_t;
- 
+} spin_lock_t;
+
 void spin_init(spin_lock_t* lock, long* flag);
 void spin_lock(spin_lock_t* lock);
 void spin_unlock(spin_lock_t* lock);
