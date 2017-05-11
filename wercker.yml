@@ -30,8 +30,8 @@ build:
     - script:
         name: apt-get install
         code: |
-            sudo apt-get install -y build-essential
-            sudo apt-get install -y nasm openssl cmake libevent-dev libpng-dev libmemcached-dev
+          sudo apt-get install -y build-essential autoconf
+          sudo apt-get install -y nasm openssl cmake libevent-dev libpng-dev libmemcached-dev
 
     # Build the program
     - script:
@@ -53,3 +53,4 @@ build:
           cd bin
           ls -l
           ps aux|grep zimg
+
