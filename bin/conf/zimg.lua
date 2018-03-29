@@ -52,7 +52,7 @@ LOG_INFO 6      Information
 LOG_DEBUG 7     DEBUG message
 ]]
 --输出log级别
-log_level       = 6
+log_level       = 7 
 --输出log路径
 log_name        = pwd .. '/log/zimg.log'
 
@@ -85,7 +85,7 @@ quality         = 75
 --value 2 is for memcached protocol storage like beansdb;
 --value 3 is for redis protocol storage like SSDB.
 --存储后端类型，1为本地存储，2为memcached协议后端如beansdb，3为redis协议后端如SSDB
-mode            = 1
+mode            = 3
 --save_new value: 0.don't save any 1.save all 2.only save types in lua script
 --新文件是否存储，0为不存储，1为全都存储，2为只存储lua脚本产生的新图
 save_new        = 1
@@ -106,9 +106,13 @@ beansdb_port    = 7900
 
 --mode[3]: ssdb mode
 --SSDB服务器IP
-ssdb_ip         = '127.0.0.1'
+ssdb_ip         = 'redis1.5upay.lan'
 --SSDB服务器端口
-ssdb_port       = 8888
+ssdb_port       = 6379
+--
+ssdb_passwd     = 'GOft2zRX6'
+--
+ssdb_index      = 6
 
 --lua conf functions
 --部分与配置有关的函数在lua中实现，对性能影响不大

@@ -60,6 +60,7 @@ static int load_conf(const char *conf);
 static void sighandler(int signal, siginfo_t *siginfo, void *arg);
 void init_thread(evhtp_t *htp, evthr_t *thread, void *arg);
 int main(int argc, char **argv);
+redisContext * createRedisContext();
 
 evbase_t *evbase;
 
@@ -68,6 +69,42 @@ extern const struct luaL_Reg loglib[];
 
 const char *conf_file = NULL;
 pthread_key_t gLuaStateKey = 0;
+
+/**
+ * @brief support redis auth and select index
+ */
+
+redisContext * createRedisContext(){
+        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+        if (c->err) {
+            redisFree(c);
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
+        } else {
+            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
+            if (strcmp(settings.ssdb_passwd,"") > 0) {
+                redisReply *reply;
+                reply = redisCommand(c, "AUTH %s", settings.ssdb_passwd);
+                if (reply->type == REDIS_REPLY_ERROR) {
+		   LOG_PRINT(LOG_ERROR, "ssdb auth faile");
+                }
+                else {
+		   LOG_PRINT(LOG_DEBUG, "ssdb auth Success");
+                   if (settings.ssdb_index > 0) {
+                        reply = redisCommand(c, "SELECT %d", settings.ssdb_index);
+                        if (reply->type == REDIS_REPLY_ERROR) {
+			   LOG_PRINT(LOG_DEBUG, "ssdb select faile");
+                        }
+                        else {
+			   LOG_PRINT(LOG_DEBUG, "ssdb select %d",settings.ssdb_index);
+                        }
+                   }
+                }
+            }
+        }
+        return c;
+}
+
+
 
 /**
  * @brief close lua_State in thread local storage.
@@ -132,6 +169,8 @@ static void settings_init(void) {
     settings.beansdb_port = 7905;
     str_lcpy(settings.ssdb_ip, "127.0.0.1", sizeof(settings.ssdb_ip));
     settings.ssdb_port = 6379;
+    memset(settings.ssdb_passwd,'\0',sizeof(settings.ssdb_passwd));
+    settings.ssdb_index=0;
     multipart_parser_settings *callbacks = (multipart_parser_settings *)malloc(sizeof(multipart_parser_settings));
     memset(callbacks, 0, sizeof(multipart_parser_settings));
     //callbacks->on_header_field = on_header_field;
@@ -349,6 +388,16 @@ static int load_conf(const char *conf) {
         settings.ssdb_port = (int)lua_tonumber(L, -1);
     lua_pop(L, 1);
 
+    lua_getglobal(L, "ssdb_passwd");
+    if (lua_isstring(L, -1))
+        str_lcpy(settings.ssdb_passwd, lua_tostring(L, -1), sizeof(settings.ssdb_passwd));
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "ssdb_index");
+    if (lua_isnumber(L, -1))
+        settings.ssdb_index = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     //settings.L = L;
     lua_close(L);
 
@@ -419,7 +468,8 @@ void init_thread(evhtp_t *htp, evthr_t *thread, void *arg) {
         memcached_server_list_free(servers);
     } else if (settings.mode == 3) {
         thr_args->beansdb_conn = NULL;
-        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+        redisContext* c = createRedisContext();
+	//redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
         if (c->err) {
             redisFree(c);
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
@@ -565,15 +615,20 @@ int main(int argc, char **argv) {
         }
         memcached_free(beans);
     } else if (settings.mode == 3) {
-        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
-        if (c->err) {
-            redisFree(c);
-            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
-            fprintf(stderr, "SSDB[%s:%d] Connect Failed!\n", settings.ssdb_ip, settings.ssdb_port);
-            return -1;
-        } else {
-            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
-        }
+
+	redisContext* c = createRedisContext();
+        if (c == NULL || c->err) {
+	   return -1;
+	}
+//        redisContext* c = redisConnect(settings.ssdb_ip, settings.ssdb_port);
+//        if (c->err) {
+//            redisFree(c);
+//            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server faile");
+//            fprintf(stderr, "SSDB[%s:%d] Connect Failed!\n", settings.ssdb_ip, settings.ssdb_port);
+//            return -1;
+//        } else {
+//            LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
+//        }
     }
 
     //init magickwand

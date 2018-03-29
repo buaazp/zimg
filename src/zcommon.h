@@ -105,6 +105,8 @@ struct setting {
     int beansdb_port;
     char ssdb_ip[128];
     int ssdb_port;
+    char ssdb_passwd[256];
+    int ssdb_index;
     multipart_parser_settings *mp_set;
     int (*get_img)(zimg_req_t *, evhtp_request_t *);
     int (*info_img)(evhtp_request_t *, thr_arg_t *, char *);
