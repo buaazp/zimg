@@ -52,7 +52,7 @@ LOG_INFO 6      Information
 LOG_DEBUG 7     DEBUG message
 ]]
 --输出log级别
-log_level       = 6 
+log_level       = 6
 --输出log路径
 log_name        = pwd .. '/log/zimg.log'
 
