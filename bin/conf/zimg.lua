@@ -109,9 +109,9 @@ beansdb_port    = 7900
 ssdb_ip         = '127.0.0.1'
 --SSDB服务器端口
 ssdb_port       = 8888
---
+--授权密码
 ssdb_passwd     = ''
---
+--数据库索引
 ssdb_index      = 0
 
 --lua conf functions
