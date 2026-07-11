@@ -462,6 +462,7 @@ int delete_file(const char *path) {
             if (ret == -1)
                 break;
         }
+        closedir(dir);
         if (ret == 1)
             ret = rmdir(path);
     }
